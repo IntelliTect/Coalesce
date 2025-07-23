@@ -1,4 +1,5 @@
 using IntelliTect.Coalesce.Analyzer.Analyzers;
+using Microsoft.CodeAnalysis.Testing;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
@@ -33,10 +34,17 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
     [Fact]
     public async Task InjectAttributeOnMethodWithoutCoalesceAttribute_ReportsWarning()
     {
-        await VerifyAnalyzerAsync("""
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0002_InvalidInjectAttributeUsageCodeFixProvider>("""
             public class TestService
             {
                 public void TestMethod([{|COALESCE0002:Inject|}] IServiceProvider serviceProvider)
+                {
+                }
+            }
+            """, """
+            public class TestService
+            {
+                public void TestMethod(IServiceProvider serviceProvider)
                 {
                 }
             }
@@ -46,10 +54,15 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
     [Fact]
     public async Task InjectAttributeOnRegularInterfaceMethod_ReportsWarning()
     {
-        await VerifyAnalyzerAsync("""
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0002_InvalidInjectAttributeUsageCodeFixProvider>("""
             public interface ITestInterface
             {
                 void TestMethod([{|COALESCE0002:Inject|}] IServiceProvider serviceProvider);
+            }
+            """, """
+            public interface ITestInterface
+            {
+                void TestMethod(IServiceProvider serviceProvider);
             }
             """);
     }
@@ -57,11 +70,19 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
     [Fact]
     public async Task InjectAttributeOnServiceClassMethod_ReportsWarning()
     {
-        await VerifyAnalyzerAsync("""
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0002_InvalidInjectAttributeUsageCodeFixProvider>("""
             [Coalesce, Service]
             public class TestService
             {
                 public void TestMethod([{|COALESCE0002:Inject|}] IServiceProvider serviceProvider)
+                {
+                }
+            }
+            """, """
+            [Coalesce, Service]
+            public class TestService
+            {
+                public void TestMethod(IServiceProvider serviceProvider)
                 {
                 }
             }
@@ -134,6 +155,30 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
                 {
                 }
             }
+            """);
+    }
+
+    [Fact]
+    public async Task InjectAttributeCodeFix_RemovesAttributeFromList()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0002_InvalidInjectAttributeUsageCodeFixProvider>("""
+            public class TestService
+            {
+                public void TestMethod([SomeOtherAttribute, {|COALESCE0002:Inject|}] IServiceProvider serviceProvider)
+                {
+                }
+            }
+
+            public class SomeOtherAttribute : Attribute { }
+            """, """
+            public class TestService
+            {
+                public void TestMethod([SomeOtherAttribute] IServiceProvider serviceProvider)
+                {
+                }
+            }
+
+            public class SomeOtherAttribute : Attribute { }
             """);
     }
 }

@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ImplicitUsings>true</ImplicitUsings>
+    <Nullable>enable</Nullable>
 
     <!-- RS2008: Enable analyzer release tracking (don't really care) -->
     <NoWarn>$(NoWarn);RS2008</NoWarn>

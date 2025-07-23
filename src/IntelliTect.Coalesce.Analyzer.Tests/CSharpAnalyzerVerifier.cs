@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
@@ -11,24 +12,17 @@ namespace IntelliTect.Coalesce.Analyzer.Tests;
 public abstract class CSharpAnalyzerVerifier<TAnalyzer>
     where TAnalyzer : DiagnosticAnalyzer, new()
 {
-    protected static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
+    private static void SetupSolutionState(SolutionState solutionState)
     {
-        var test = new CSharpAnalyzerTest<TAnalyzer, DefaultVerifier>
-        {
-            TestCode = source,
-        };
-
 #if NET8_0
-        test.TestState.ReferenceAssemblies = ReferenceAssemblies.Net.Net80;
+        solutionState.ReferenceAssemblies = ReferenceAssemblies.Net.Net80;
 #elif NET9_0
-        test.TestState.ReferenceAssemblies = ReferenceAssemblies.Net.Net90;
+        solutionState.ReferenceAssemblies = ReferenceAssemblies.Net.Net90;
 #else
 #error "Add reference assemblies for new target framework.
 #endif
 
-        test.TestState.Sources.Add(("/GlobalUsings.cs",
-            // Standard global usings from the template
-            """
+        var globalUsings = """
             global using System;
             global using System.Collections.Generic;
             global using System.IO;
@@ -42,13 +36,48 @@ public abstract class CSharpAnalyzerVerifier<TAnalyzer>
             global using System.ComponentModel.DataAnnotations;
             global using System.ComponentModel.DataAnnotations.Schema;
             global using System.Security.Claims;
-            """));
+            """;
+
+        solutionState.Sources.Add(("/GlobalUsings.cs", globalUsings));
 
         // Add reference to the real Coalesce assembly
-        test.TestState.AdditionalReferences.Add(typeof(ReflectionRepository).Assembly);
-        test.TestState.AdditionalReferences.Add(typeof(DbContext).Assembly);
+        solutionState.AdditionalReferences.Add(typeof(ReflectionRepository).Assembly);
+        solutionState.AdditionalReferences.Add(typeof(DbContext).Assembly);
+    }
+
+    protected static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
+    {
+        var test = new CSharpAnalyzerTest<TAnalyzer, DefaultVerifier>
+        {
+            TestCode = source,
+        };
+
+        SetupSolutionState(test.TestState);
 
         test.ExpectedDiagnostics.AddRange(expected);
         await test.RunAsync();
+    }
+
+    protected static async Task VerifyCodeFixAsync<TCodeFixProvider>(string source, string fixedSource, params DiagnosticResult[] expected)
+        where TCodeFixProvider : CodeFixProvider, new()
+    {
+        var test = new CSharpCodeFixTest<TAnalyzer, TCodeFixProvider, DefaultVerifier>
+        {
+            TestCode = source,
+            FixedCode = fixedSource,
+        };
+
+        SetupSolutionState(test.TestState);
+        SetupSolutionState(test.FixedState);
+
+        test.ExpectedDiagnostics.AddRange(expected);
+        await test.RunAsync();
+    }
+
+    protected static async Task VerifyAnalyzerAndCodeFixAsync<TCodeFixProvider>(string source, string fixedSource, params DiagnosticResult[] expected)
+        where TCodeFixProvider : CodeFixProvider, new()
+    {
+        await VerifyAnalyzerAsync(source, expected);
+        await VerifyCodeFixAsync<TCodeFixProvider>(source, fixedSource, expected);
     }
 }

@@ -120,18 +120,18 @@ public static class NamedTypeSymbolExtensions
         if (typeSymbol?.ContainingNamespace == null)
             return false;
 
-        var typeName = typeSymbol.MetadataName;
+        var typeName = typeSymbol.MetadataName.AsSpan();
 
         for (int i = 0; i < typesToCheck.Length; i++)
         {
-            var typeToCheck = typesToCheck[i];
+            var typeToCheck = typesToCheck[i].AsSpan();
 
             // Quick check: if the type name doesn't end with our MetadataName, skip
-            if (!typeToCheck.EndsWith(typeName))
+            if (!typeToCheck.EndsWith(typeName, StringComparison.Ordinal))
                 continue;
 
             // If it's just the type name without namespace
-            if (typeToCheck == typeName)
+            if (typeToCheck.SequenceEqual(typeName))
                 return true;
 
             // Check if it matches namespace.typename pattern
@@ -150,10 +150,10 @@ public static class NamedTypeSymbolExtensions
     /// Checks if a namespace matches the beginning portion of a full type name.
     /// </summary>
     /// <param name="namespaceSymbol">The namespace symbol to check.</param>
-    /// <param name="fullTypeName">The full type name to match against.</param>
+    /// <param name="fullTypeName">The full type name span to match against.</param>
     /// <param name="namespaceEndIndex">The index where the namespace portion ends in fullTypeName.</param>
     /// <returns>True if the namespace matches.</returns>
-    private static bool NamespaceMatches(INamespaceSymbol namespaceSymbol, string fullTypeName, int namespaceEndIndex)
+    private static bool NamespaceMatches(INamespaceSymbol namespaceSymbol, ReadOnlySpan<char> fullTypeName, int namespaceEndIndex)
     {
         if (namespaceSymbol.IsGlobalNamespace)
             return namespaceEndIndex == 0;
@@ -164,7 +164,7 @@ public static class NamedTypeSymbolExtensions
 
         while (current != null && !current.IsGlobalNamespace)
         {
-            var currentName = current.Name;
+            var currentName = current.Name.AsSpan();
             var nameLength = currentName.Length;
 
             // Check if we have enough characters left
@@ -174,12 +174,9 @@ public static class NamedTypeSymbolExtensions
             // Move back by the length of this part
             currentIndex -= nameLength;
 
-            // Check if the part matches
-            for (int i = 0; i < nameLength; i++)
-            {
-                if (fullTypeName[currentIndex + i] != currentName[i])
-                    return false;
-            }
+            // Check if the part matches using span comparison
+            if (!fullTypeName.Slice(currentIndex, nameLength).SequenceEqual(currentName))
+                return false;
 
             // Move to the containing namespace
             current = current.ContainingNamespace;

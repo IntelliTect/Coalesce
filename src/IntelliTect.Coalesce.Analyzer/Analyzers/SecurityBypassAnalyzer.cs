@@ -1,10 +1,5 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 
@@ -14,7 +9,7 @@ public class SecurityBypassAnalyzer : DiagnosticAnalyzer
     public static readonly DiagnosticDescriptor SecurityBypassRule = new(
         id: "COA2001",
         title: "Authorization logic in data source without default data source",
-        messageFormat: "Data source appears to contains authorization logic but '{0}' has no explicit default data source. Security checks may be bypassed by a client who uses the type's default data source.",
+        messageFormat: "{0} appears to contains authorization logic but '{1}' has no explicit default data source. Security checks may be bypassed by a client who uses the type's implicit default data source. Declare an explicit data source annotated with [DefaultDataSource] so the intent can be clearly expressed in code.",
         category: "Security",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
@@ -63,7 +58,7 @@ public class SecurityBypassAnalyzer : DiagnosticAnalyzer
 
         // Report the diagnostic at the class location
         var classLocation = dataSourceType.Locations.FirstOrDefault();
-        var diagnostic = Diagnostic.Create(SecurityBypassRule, classLocation, servedType.Name);
+        var diagnostic = Diagnostic.Create(SecurityBypassRule, classLocation, dataSourceType.Name, servedType.Name);
         context.ReportDiagnostic(diagnostic);
     }
 

@@ -79,7 +79,7 @@ public static partial class CoalesceApplicationBuilderExtensions
             var file = new System.IO.FileInfo(thisSourceFilePath).Directory?.EnumerateFiles("SecurityOverview.html").FirstOrDefault();
             using var content = file?.OpenRead() ?? throw new Exception("SecurityOverview.html not found on disk.");
 #else
-            var content = Assembly
+            var content = System.Reflection.Assembly
                 .GetExecutingAssembly()
                 .GetManifestResourceStream("IntelliTect.Coalesce.Application.SecurityOverview.html")!;
 #endif

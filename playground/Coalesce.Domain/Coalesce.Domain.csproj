@@ -22,10 +22,6 @@
 
     <PackageReference Include="GenFu" />
     <PackageReference Include="Bogus" />
-
-    <!-- Necessary because GenFu has a hard dep against NETStandard.Library 1.6, which screws up a
-    lot of things. -->
-    <PackageReference Include="NETStandard.Library" />
   </ItemGroup>
 
 </Project>

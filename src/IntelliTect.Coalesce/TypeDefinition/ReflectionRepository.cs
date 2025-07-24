@@ -48,7 +48,7 @@ public class ReflectionRepository
         .ToLookup(m => m.Name);
 
     private ReadOnlyDictionary<string, ClassViewModel>? _clientTypes;
-    public ReadOnlyDictionary<string, ClassViewModel> ClientTypesLookup 
+    public ReadOnlyDictionary<string, ClassViewModel> ClientTypesLookup
         => _clientTypes ??= new(ClientClasses.Union(Services).ToDictionary(c => c.ClientTypeName, StringComparer.OrdinalIgnoreCase));
 
     public ReadOnlyHashSet<ClassViewModel> Entities => new(_entities);
@@ -106,7 +106,7 @@ public class ReflectionRepository
                 // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
                 // Really not sure why, but lets parallelize to minimize that impact.
                 .AsParallel()
-                .Where(type => 
+                .Where(type =>
                     !type.IsInternalUse &&
                     (type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(IGeneratedParameterDto<>)))
                 )
@@ -136,7 +136,7 @@ public class ReflectionRepository
         return GetOrAddType(localType, () => new ReflectionTypeViewModel(localThis, localType));
     }
 
-    public TypeViewModel GetOrAddType(TypeViewModel type) => 
+    public TypeViewModel GetOrAddType(TypeViewModel type) =>
         GetOrAddType(GetCacheKey(type), () => type);
 
     private T GetOrAddType<T>(object key, Func<T> factory)

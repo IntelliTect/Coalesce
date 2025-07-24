@@ -1,9 +1,3 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Immutable;
-using System.Linq;
-using IntelliTect.Coalesce.Core.Extensions;
-
 namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -39,7 +33,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
     public static readonly DiagnosticDescriptor UnexposedSecondaryAttributeForTypesRule = new(
         id: "COALESCE0005",
         title: "Unexposed secondary attribute",
-        messageFormat: "{0} attribute must be accompanied by [Coalesce] to be exposed by the Coalesce framework",
+        messageFormat: "{0} must be accompanied by [Coalesce] to be exposed by the Coalesce framework",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
@@ -105,25 +99,20 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 
             if (isService || isBehavior)
             {
-                if (semanticKernelAttr.GetLocation() is Location location)
-                {
-                    var typeDescription = isService ? "services" : "behaviors";
-                    context.ReportDiagnostic(Diagnostic.Create(InvalidSemanticKernelAttributeUsageRule, location, typeDescription));
-                }
+                var typeDescription = isService ? "services" : "behaviors";
+                context.ReportDiagnostic(Diagnostic.Create(InvalidSemanticKernelAttributeUsageRule, semanticKernelAttr.GetLocation(), typeDescription));
             }
         }
 
         if (coalesceAttr is null)
         {
             // COALESCE0005: Check for StandaloneEntity or Service attributes without Coalesce
-            var standaloneEntityAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.StandaloneEntityAttribute");
-            var serviceAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute");
-
-            var targetAttr = standaloneEntityAttr ?? serviceAttr;
-            if (targetAttr?.GetLocation() is Location attrLocation)
+            foreach (var attr in typeSymbol.GetAttributesByName(
+                "IntelliTect.Coalesce.StandaloneEntityAttribute",
+                "IntelliTect.Coalesce.ServiceAttribute"
+            ))
             {
-                var attributeName = targetAttr.AttributeClass?.Name?.Replace("Attribute", "") ?? "Unknown";
-                context.ReportDiagnostic(Diagnostic.Create(UnexposedSecondaryAttributeForTypesRule, attrLocation, $"[{attributeName}]"));
+                context.ReportDiagnostic(Diagnostic.Create(UnexposedSecondaryAttributeForTypesRule, attr.GetLocation(), attr.AttributeClass!.Name!));
             }
         }
         else if (!coalesceAttr.ConstructorArguments.Any() && !coalesceAttr.NamedArguments.Any())
@@ -131,45 +120,30 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
             // If there are no ctor args and no named args, it isn't being used to configure ClientTypeName
 
             // COALESCE0004: Check for CoalesceAttribute on types that aren't valid targets for CoalesceAttribute.
-            if (!IsValidCoalesceType(typeSymbol))
+            if (
+                !typeSymbol.InheritsFromOrImplements(
+                    "Microsoft.EntityFrameworkCore.DbContext",
+                    "IntelliTect.Coalesce.IDataSource`1",
+                    "IntelliTect.Coalesce.IBehaviors`1",
+                    "IntelliTect.Coalesce.IClassDto`1") &&
+                !typeSymbol.GetAttributesByName(
+                    "IntelliTect.Coalesce.ServiceAttribute",
+                    "IntelliTect.Coalesce.StandaloneEntityAttribute").Any()
+            )
             {
-                if (coalesceAttr.GetLocation() is Location location)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(InvalidCoalesceUsageRule, location));
-                }
+                context.ReportDiagnostic(Diagnostic.Create(InvalidCoalesceUsageRule, coalesceAttr.GetLocation()));
             }
 
-            // COALESCE0003: Check for invalid CoalesceAttribute usage on nested types
+            // COALESCE0003: Check for useless CoalesceAttribute usage on nested crud strategies
             if (typeSymbol.ContainingType is not null &&
                 typeSymbol.InheritsFromOrImplements(
                     "IntelliTect.Coalesce.IBehaviors`1",
                     "IntelliTect.Coalesce.IDataSource`1"
             ))
             {
-                if (coalesceAttr.GetLocation() is Location location)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(InvalidCoalesceUsageOnNestedTypesRule, location));
-                }
+                context.ReportDiagnostic(Diagnostic.Create(InvalidCoalesceUsageOnNestedTypesRule, coalesceAttr.GetLocation()));
             }
         }
-    }
-
-    private static bool IsValidCoalesceType(INamedTypeSymbol typeSymbol)
-    {
-        // Check if inherits from DbContext or implements required interfaces
-        if (typeSymbol.InheritsFromOrImplements(
-            "Microsoft.EntityFrameworkCore.DbContext",
-            "IntelliTect.Coalesce.IDataSource`1",
-            "IntelliTect.Coalesce.IBehaviors`1",
-            "IntelliTect.Coalesce.IClassDto`1"))
-        {
-            return true;
-        }
-
-        // Check if has required attributes
-        return typeSymbol.GetAttributesByName(
-            "IntelliTect.Coalesce.ServiceAttribute",
-            "IntelliTect.Coalesce.StandaloneEntityAttribute").Any();
     }
 
     private static void AnalyzeMethod(SymbolAnalysisContext context)
@@ -188,7 +162,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
                 "IntelliTect.Coalesce.DataAnnotations.HiddenAttribute",
                 "IntelliTect.Coalesce.DataAnnotations.InternalUseAttribute",
                 "IntelliTect.Coalesce.DataAnnotations.LoadFromDataSourceAttribute"
-            ).FirstOrDefault() is var badAttrInsideCrudStrategy &&
+            ).FirstOrDefault() is { } badAttrInsideCrudStrategy &&
             methodSymbol.ContainingType.InheritsFromOrImplements(
                 "IntelliTect.Coalesce.IDataSource`1",
                 "IntelliTect.Coalesce.IBehaviors`1"
@@ -201,7 +175,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 
         if (IsValidCoalesceMethod(methodSymbol))
         {
-            // Check for IFile parameters without FileType attribute
+            // COALESCE0201 Check for IFile parameters without FileType attribute
             foreach (var parameter in methodSymbol.Parameters)
             {
                 if (parameter.Type is INamedTypeSymbol namedType &&

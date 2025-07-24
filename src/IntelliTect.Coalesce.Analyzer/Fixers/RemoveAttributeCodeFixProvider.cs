@@ -53,6 +53,37 @@ public class RemoveAttributeCodeFixProvider : CodeFixProvider
         return name;
     }
 
+    private static bool IsAttributeListOnOwnLine(AttributeListSyntax attributeList)
+    {
+        var attributeLineSpan = attributeList.GetLocation().GetLineSpan();
+        var attributeStartLine = attributeLineSpan.StartLinePosition.Line;
+        var attributeEndLine = attributeLineSpan.EndLinePosition.Line;
+
+        // Check if there's a preceding token on the same line
+        var precedingToken = attributeList.GetFirstToken().GetPreviousToken();
+        if (precedingToken != default)
+        {
+            var precedingLineSpan = precedingToken.GetLocation().GetLineSpan();
+            if (precedingLineSpan.EndLinePosition.Line == attributeStartLine)
+            {
+                return false; // Something else is on the same line before the attribute
+            }
+        }
+
+        // Check if there's a following token on the same line
+        var followingToken = attributeList.GetLastToken().GetNextToken();
+        if (followingToken != default)
+        {
+            var followingLineSpan = followingToken.GetLocation().GetLineSpan();
+            if (followingLineSpan.StartLinePosition.Line == attributeEndLine)
+            {
+                return false; // Something else is on the same line after the attribute
+            }
+        }
+
+        return true; // Attribute is on its own line
+    }
+
     private static async Task<Document> RemoveAttributeAsync(
         Document document,
         AttributeSyntax attribute,
@@ -67,25 +98,35 @@ public class RemoveAttributeCodeFixProvider : CodeFixProvider
 
         if (attributeList.Attributes.Count == 1)
         {
-            // Remove the entire attribute list - always use advanced trivia handling
-            var nextToken = attributeList.GetLastToken().GetNextToken();
-            if (!nextToken.IsKind(SyntaxKind.None))
+            // Remove the entire attribute list.
+            if (IsAttributeListOnOwnLine(attributeList))
             {
-                // Extract any blank lines (EndOfLineTrivia) from the attribute's leading trivia
-                var attributeLeadingTrivia = attributeList.GetLeadingTrivia();
-                var blankLineTrivia = attributeLeadingTrivia.Where(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+                newRoot = root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepExteriorTrivia)!;
 
-                // Combine blank lines with the next token's existing leading trivia
-                var newLeadingTrivia = nextToken.LeadingTrivia.InsertRange(0, blankLineTrivia);
-                var newNextToken = nextToken.WithLeadingTrivia(newLeadingTrivia);
+                // Find the trivia that now represents the blank line that was left by removing the attribute list.
+                var trivia = newRoot.FindTrivia(attributeList.SpanStart);
 
-                // Replace the next token and then remove the attribute with no trivia
-                var tempRoot = root.ReplaceToken(nextToken, newNextToken);
-                newRoot = tempRoot.RemoveNode(tempRoot.FindNode(attributeList.Span), SyntaxRemoveOptions.KeepNoTrivia);
+                IEnumerable<SyntaxTrivia> newTrivia = trivia.Token.LeadingTrivia;
+                newTrivia = newTrivia
+                    // Reverse so we can iterate leftwards in the document
+                    .Reverse()
+                    // Skip whitespace that trails the newline.
+                    .SkipWhile(t => t.IsKind(SyntaxKind.WhitespaceTrivia));
+
+                // If we've reached a newline, remove it. We will then have successfully removed the blank line where the attribute used to be.
+                if (newTrivia.FirstOrDefault().IsKind(SyntaxKind.EndOfLineTrivia))
+                {
+                    newTrivia = newTrivia.Skip(1);
+                }
+
+                // Un-reverse back to normal left-to-right order
+                newTrivia = newTrivia.Reverse();
+
+                newRoot = newRoot.ReplaceToken(trivia.Token, trivia.Token.WithLeadingTrivia(newTrivia));
             }
             else
             {
-                // Fallback if no next token found
+                // For attributes not on their own line, keep leading trivia
                 newRoot = root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepLeadingTrivia);
             }
         }

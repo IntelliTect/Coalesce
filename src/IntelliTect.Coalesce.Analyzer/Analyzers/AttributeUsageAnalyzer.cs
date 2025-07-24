@@ -4,7 +4,7 @@ namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 {
     public static readonly DiagnosticDescriptor InvalidInjectAttributeUsageRule = new(
-        id: "COALESCE0002",
+        id: "COA0002",
         title: "Invalid InjectAttribute usage",
         messageFormat: "InjectAttribute is only valid on parameters of Coalesce client methods",
         category: "Usage",
@@ -13,16 +13,16 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         description: "InjectAttribute can only be used on parameters of methods that are exposed by the Coalesce framework.");
 
     public static readonly DiagnosticDescriptor InvalidCoalesceUsageOnNestedTypesRule = new(
-        id: "COALESCE0003",
+        id: "COA0003",
         title: "Invalid CoalesceAttribute usage on nested data source or behavior",
-        messageFormat: "Parameterless CoalesceAttribute has no effect on nested data sources or behaviors - they are automatically discovered by their containing type",
+        messageFormat: "CoalesceAttribute is not needed to expose nested data sources or behaviors - they are automatically discovered by their containing type",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Nested data sources and behaviors are automatically associated with their containing type and do not need the [Coalesce] attribute.");
 
     public static readonly DiagnosticDescriptor InvalidCoalesceUsageRule = new(
-        id: "COALESCE0004",
+        id: "COA0004",
         title: "Invalid CoalesceAttribute usage on unsupported type",
         messageFormat: "CoalesceAttribute can only expose types that inherit from DbContext, implement IDataSource<T>, IBehaviors<T>, IClassDto<T>, or are marked with [Service] or [StandaloneEntity]",
         category: "Usage",
@@ -31,7 +31,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         description: "The [Coalesce] attribute should only be applied to types that are supported by the Coalesce framework.");
 
     public static readonly DiagnosticDescriptor UnexposedSecondaryAttributeForTypesRule = new(
-        id: "COALESCE0005",
+        id: "COA0005",
         title: "Unexposed secondary attribute",
         messageFormat: "{0} must be accompanied by [Coalesce] to be exposed by the Coalesce framework",
         category: "Usage",
@@ -40,16 +40,16 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         description: "Types marked with [Service] or [StandaloneEntity] require [Coalesce] attribute to be properly processed by the Coalesce framework.");
 
     public static readonly DiagnosticDescriptor UnexposedSecondaryAttributeForMethodsRule = new(
-        id: "COALESCE0006",
+        id: "COA0006",
         title: "Unexposed secondary attribute",
-        messageFormat: "{0} attribute must be accompanied by either [Coalesce] or [SemanticKernel] to be exposed by the Coalesce framework",
+        messageFormat: "{0} attribute does not function on a method that is not exposed by Coalesce",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Methods marked with [Execute] require either [Coalesce] or [SemanticKernel] attribute to be properly processed by the Coalesce framework.");
 
     public static readonly DiagnosticDescriptor MissingFileTypeAttributeRule = new(
-        id: "COALESCE0201",
+        id: "COA0201",
         title: "Consider adding FileTypeAttribute to IFile parameter",
         messageFormat: "Consider adding [FileType] attribute to specify allowed file types for this IFile parameter",
         category: "Usage",
@@ -58,7 +58,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         description: "IFile parameters on Coalesce-exposed methods should specify allowed file types using the [FileType] attribute to improve default user experience.");
 
     public static readonly DiagnosticDescriptor InvalidSemanticKernelAttributeUsageRule = new(
-        id: "COALESCE0007",
+        id: "COA0007",
         title: "Invalid SemanticKernelAttribute usage on service or behavior type",
         messageFormat: "SemanticKernelAttribute is not valid on {0}",
         category: "Usage",
@@ -67,7 +67,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         description: "SemanticKernelAttribute should not be used on service types or behavior types.");
 
     public static readonly DiagnosticDescriptor GenericInvalidAttributeUsageRule = new(
-        id: "COALESCE0008",
+        id: "COA0008",
         title: "Invalid attribute usage",
         messageFormat: "{0} has no effect in this location",
         category: "Usage",
@@ -91,7 +91,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         var coalesceAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.CoalesceAttribute");
         var semanticKernelAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.SemanticKernelAttribute");
 
-        // COALESCE0007: Check for SemanticKernelAttribute on services or IBehaviors
+        // COA0007: Check for SemanticKernelAttribute on services or IBehaviors
         if (semanticKernelAttr is not null)
         {
             var isService = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") is not null;
@@ -106,7 +106,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 
         if (coalesceAttr is null)
         {
-            // COALESCE0005: Check for StandaloneEntity or Service attributes without Coalesce
+            // COA0005: Check for StandaloneEntity or Service attributes without Coalesce
             foreach (var attr in typeSymbol.GetAttributesByName(
                 "IntelliTect.Coalesce.StandaloneEntityAttribute",
                 "IntelliTect.Coalesce.ServiceAttribute"
@@ -119,7 +119,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         {
             // If there are no ctor args and no named args, it isn't being used to configure ClientTypeName
 
-            // COALESCE0004: Check for CoalesceAttribute on types that aren't valid targets for CoalesceAttribute.
+            // COA0004: Check for CoalesceAttribute on types that aren't valid targets for CoalesceAttribute.
             if (
                 !typeSymbol.InheritsFromOrImplements(
                     "Microsoft.EntityFrameworkCore.DbContext",
@@ -134,7 +134,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
                 context.ReportDiagnostic(Diagnostic.Create(InvalidCoalesceUsageRule, coalesceAttr.GetLocation()));
             }
 
-            // COALESCE0003: Check for useless CoalesceAttribute usage on nested crud strategies
+            // COA0003: Check for useless CoalesceAttribute usage on nested crud strategies
             if (typeSymbol.ContainingType is not null &&
                 typeSymbol.InheritsFromOrImplements(
                     "IntelliTect.Coalesce.IBehaviors`1",
@@ -154,7 +154,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         if (methodSymbol.MethodKind is not (MethodKind.Ordinary or MethodKind.Constructor))
             return;
 
-        // COALESCE0008: Check for general useless attributes inside crud strategies
+        // COA0008: Check for general useless attributes inside crud strategies
         if (methodSymbol.GetAttributesByName(
                 "IntelliTect.Coalesce.CoalesceAttribute",
                 "IntelliTect.Coalesce.SemanticKernelAttribute",
@@ -175,7 +175,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 
         if (IsValidCoalesceMethod(methodSymbol))
         {
-            // COALESCE0201 Check for IFile parameters without FileType attribute
+            // COA0201 Check for IFile parameters without FileType attribute
             foreach (var parameter in methodSymbol.Parameters)
             {
                 if (parameter.Type is INamedTypeSymbol namedType &&

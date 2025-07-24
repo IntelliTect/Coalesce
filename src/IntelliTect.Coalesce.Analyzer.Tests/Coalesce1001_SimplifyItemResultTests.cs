@@ -10,7 +10,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult(true)|};
+                    return {|COA1001:new ItemResult(true)|};
                 }
             }
             """, """
@@ -32,7 +32,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new(true)|};
+                    return {|COA1001:new(true)|};
                 }
             }
             """, """
@@ -54,7 +54,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult { WasSuccessful = true }|};
+                    return {|COA1001:new ItemResult { WasSuccessful = true }|};
                 }
             }
             """, """
@@ -76,7 +76,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult(false)|};
+                    return {|COA1001:new ItemResult(false)|};
                 }
             }
             """, """
@@ -98,7 +98,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult { WasSuccessful = false }|};
+                    return {|COA1001:new ItemResult { WasSuccessful = false }|};
                 }
             }
             """, """
@@ -120,7 +120,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult("Error message")|};
+                    return {|COA1001:new ItemResult("Error message")|};
                 }
             }
             """, """
@@ -142,7 +142,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult { WasSuccessful = false, Message = $"Error message: {42}" }|};
+                    return {|COA1001:new ItemResult { WasSuccessful = false, Message = $"Error message: {42}" }|};
                 }
             }
             """, """
@@ -164,7 +164,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult<int> GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult<int>("Error message")|};
+                    return {|COA1001:new ItemResult<int>("Error message")|};
                 }
             }
             """, """
@@ -186,7 +186,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult<int> GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult<int> { WasSuccessful = false, Message = "Error message" }|};
+                    return {|COA1001:new ItemResult<int> { WasSuccessful = false, Message = "Error message" }|};
                 }
             }
             """, """
@@ -208,7 +208,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult<int> GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult<int>(42)|};
+                    return {|COA1001:new ItemResult<int>(42)|};
                 }
             }
             """, """
@@ -230,7 +230,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult<int> GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult<int> { Object = 42 }|};
+                    return {|COA1001:new ItemResult<int> { Object = 42 }|};
                 }
             }
             """, """
@@ -253,7 +253,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
                 public ItemResult<int> GetResult()
                 {
                     var value = 42;
-                    return {|COALESCE1001:new ItemResult<int>(value)|};
+                    return {|COA1001:new ItemResult<int>(value)|};
                 }
             }
             """, """
@@ -277,7 +277,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
                 public ItemResult<int> GetResult()
                 {
                     var value = 42;
-                    return {|COALESCE1001:new ItemResult<int> { Object = value }|};
+                    return {|COA1001:new ItemResult<int> { Object = value }|};
                 }
             }
             """, """
@@ -300,7 +300,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult<int> GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult<int>(true, null, 42)|};
+                    return {|COA1001:new ItemResult<int>(true, null, 42)|};
                 }
             }
             """, """
@@ -322,7 +322,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult<int> GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult<int> { WasSuccessful = true, Object = 42 }|};
+                    return {|COA1001:new ItemResult<int> { WasSuccessful = true, Object = 42 }|};
                 }
             }
             """, """
@@ -364,7 +364,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult(true, message: null)|};
+                    return {|COA1001:new ItemResult(true, message: null)|};
                 }
             }
             """, """
@@ -386,7 +386,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult { WasSuccessful = true, Message = null }|};
+                    return {|COA1001:new ItemResult { WasSuccessful = true, Message = null }|};
                 }
             }
             """, """
@@ -408,7 +408,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult(false, "Error message")|};
+                    return {|COA1001:new ItemResult(false, "Error message")|};
                 }
             }
             """, """
@@ -430,7 +430,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult { WasSuccessful = false, Message = "Error message" }|};
+                    return {|COA1001:new ItemResult { WasSuccessful = false, Message = "Error message" }|};
                 }
             }
             """, """
@@ -486,7 +486,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
                 public ItemResult GetResult()
                 {
                     bool success = true;
-                    return {|COALESCE1001:new ItemResult(success)|};
+                    return {|COA1001:new ItemResult(success)|};
                 }
             }
             """, """
@@ -510,7 +510,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
                 public ItemResult GetResult()
                 {
                     string message = "Error";
-                    return {|COALESCE1001:new ItemResult(message)|};
+                    return {|COA1001:new ItemResult(message)|};
                 }
             }
             """, """
@@ -580,7 +580,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult<string> GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult<string>(true)|};
+                    return {|COA1001:new ItemResult<string>(true)|};
                 }
             }
             """, """
@@ -602,7 +602,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult<string> GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult<string> { WasSuccessful = true }|};
+                    return {|COA1001:new ItemResult<string> { WasSuccessful = true }|};
                 }
             }
             """, """

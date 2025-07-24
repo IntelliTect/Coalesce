@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 public class Coalesce1001_SimplifyItemResultCodeFixProvider : CodeFixProvider
 {
     public sealed override ImmutableArray<string> FixableDiagnosticIds =>
-        ImmutableArray.Create("COALESCE1001");
+        ImmutableArray.Create("COA1001");
 
     public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

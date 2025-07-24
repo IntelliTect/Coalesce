@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 public class Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider : CodeFixProvider
 {
     public sealed override ImmutableArray<string> FixableDiagnosticIds =>
-        ImmutableArray.Create("COALESCE0005", "COALESCE0006");
+        ImmutableArray.Create("COA0005", "COA0006");
 
     public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

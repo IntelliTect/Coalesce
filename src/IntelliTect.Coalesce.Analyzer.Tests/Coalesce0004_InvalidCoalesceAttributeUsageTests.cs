@@ -81,8 +81,8 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
     [Fact]
     public async Task CoalesceAttributeOnRegularClass_ReportsError()
     {
-        await VerifyAnalyzerAndCodeFixAsync<RemoveCoalesceAttributeCodeFixProvider>("""
-            [{|COALESCE0004:Coalesce|}]
+        await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
+            [{|COA0004:Coalesce|}]
             public class RegularClass
             {
             }
@@ -96,8 +96,8 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
     [Fact]
     public async Task CoalesceAttributeOnInterface_ReportsError()
     {
-        await VerifyAnalyzerAndCodeFixAsync<RemoveCoalesceAttributeCodeFixProvider>("""
-            [{|COALESCE0004:Coalesce|}]
+        await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
+            [{|COA0004:Coalesce|}]
             public interface IRegularInterface
             {
             }
@@ -111,8 +111,8 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
     [Fact]
     public async Task CoalesceAttributeWithMultipleAttributes_RemovesOnlyCoalesce()
     {
-        await VerifyAnalyzerAndCodeFixAsync<RemoveCoalesceAttributeCodeFixProvider>("""
-            [{|COALESCE0004:Coalesce|}, Obsolete]
+        await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
+            [{|COA0004:Coalesce|}, Obsolete]
             public class RegularClass
             {
             }
@@ -127,9 +127,9 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
     [Fact]
     public async Task CoalesceAttributeOnSeparateAttributeList_RemovesEntireList()
     {
-        await VerifyAnalyzerAndCodeFixAsync<RemoveCoalesceAttributeCodeFixProvider>("""
+        await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
             [Obsolete]
-            [{|COALESCE0004:Coalesce|}]
+            [{|COA0004:Coalesce|}]
             public class RegularClass
             {
             }

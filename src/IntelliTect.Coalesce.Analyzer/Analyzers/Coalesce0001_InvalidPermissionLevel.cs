@@ -8,7 +8,7 @@ using IntelliTect.Coalesce.Core.Extensions;
 public class Coalesce0001_InvalidPermissionLevel : DiagnosticAnalyzer
 {
     private static readonly DiagnosticDescriptor _Rule = new(
-        id: "COALESCE0001",
+        id: "COA0001",
         title: "Invalid PermissionLevel usage on property security attributes",
         messageFormat: "Property-level {0} does not support PermissionLevel",
         category: "Usage",

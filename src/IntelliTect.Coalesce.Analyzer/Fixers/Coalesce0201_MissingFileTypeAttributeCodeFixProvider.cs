@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 public class Coalesce0201_MissingFileTypeAttributeCodeFixProvider : CodeFixProvider
 {
     public sealed override ImmutableArray<string> FixableDiagnosticIds =>
-        ImmutableArray.Create("COALESCE0201");
+        ImmutableArray.Create("COA0201");
 
     public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 

@@ -10,7 +10,7 @@ public class Coalesce0001_InvalidPermissionLevelTests : CSharpAnalyzerVerifier<C
 
             public class TestClass
             {
-                [{|COALESCE0001:Read(PermissionLevel = SecurityPermissionLevels.DenyAll)|}]
+                [{|COA0001:Read(PermissionLevel = SecurityPermissionLevels.DenyAll)|}]
                 public string TestProperty { get; set; }
             }
             """);
@@ -24,7 +24,7 @@ public class Coalesce0001_InvalidPermissionLevelTests : CSharpAnalyzerVerifier<C
 
             public class TestClass
             {
-                [{|COALESCE0001:Edit(SecurityPermissionLevels.AllowAll)|}]
+                [{|COA0001:Edit(SecurityPermissionLevels.AllowAll)|}]
                 public string TestProperty { get; set; }
             }
             """);

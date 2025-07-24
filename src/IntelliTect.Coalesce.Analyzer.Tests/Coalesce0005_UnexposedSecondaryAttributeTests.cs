@@ -58,7 +58,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             [Coalesce, Service]
             public class PersonService
             {
-                [{|COALESCE0006:Execute|}]
+                [{|COA0006:Execute|}]
                 public void DoSomething() { }
             }
             """, """
@@ -75,7 +75,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
     public async Task ServiceClassAlone_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
-            [{|COALESCE0005:Service|}]
+            [{|COA0005:Service|}]
             public class PersonService
             {
             }
@@ -91,7 +91,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
     public async Task StandaloneEntityWithoutCoalesceOrSemanticKernel_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
-            [{|COALESCE0005:StandaloneEntity|}]
+            [{|COA0005:StandaloneEntity|}]
             public class Person
             {
                 public int Id { get; set; }
@@ -111,7 +111,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
             public class TestService
             {
-                [{|COALESCE0006:Execute|}]
+                [{|COA0006:Execute|}]
                 public void DoSomething() { }
             }
             """, """
@@ -128,7 +128,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
             [Obsolete]
-            [{|COALESCE0005:StandaloneEntity|}]
+            [{|COA0005:StandaloneEntity|}]
             public class PersonService
             {
             }

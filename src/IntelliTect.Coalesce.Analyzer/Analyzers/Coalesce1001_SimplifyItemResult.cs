@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
 {
     private static readonly DiagnosticDescriptor _Rule = new(
-        id: "COALESCE1001",
+        id: "COA1001",
         title: "ItemResult instantiation can be simplified using implicit conversion",
         messageFormat: "ItemResult instantiation can be simplified to '{0}'",
         category: "Style",

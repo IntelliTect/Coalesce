@@ -31,7 +31,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             public class TestService
             {
                 [Coalesce]
-                public void TestMethod(IFile {|COALESCE0201:file|})
+                public void TestMethod(IFile {|COA0201:file|})
                 {
                 }
             }
@@ -47,7 +47,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             public class TestService
             {
                 [SemanticKernel]
-                public void TestMethod(IFile {|COALESCE0201:file|})
+                public void TestMethod(IFile {|COA0201:file|})
                 {
                 }
             }
@@ -78,7 +78,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             public class TestService
             {
                 [Coalesce]
-                public void TestMethod(FileParameter {|COALESCE0201:file1|}, [FileType("image/*")] IFile file2, IFile {|COALESCE0201:file3|})
+                public void TestMethod(FileParameter {|COA0201:file1|}, [FileType("image/*")] IFile file2, IFile {|COA0201:file3|})
                 {
                 }
             }
@@ -94,7 +94,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             public class TestService
             {
                 [Coalesce]
-                public void TestMethod(IFile {|COALESCE0201:file|})
+                public void TestMethod(IFile {|COA0201:file|})
                 {
                 }
             }
@@ -120,7 +120,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             public class TestService
             {
                 [Coalesce]
-                public void TestMethod(IFile {|COALESCE0201:file1|}, IFile {|COALESCE0201:file2|})
+                public void TestMethod(IFile {|COA0201:file1|}, IFile {|COA0201:file2|})
                 {
                 }
             }
@@ -147,7 +147,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             {
                 [Coalesce]
                 public void TestMethod(
-                    IFile {|COALESCE0201:file|})
+                    IFile {|COA0201:file|})
                 {
                 }
             }

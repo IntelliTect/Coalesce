@@ -10,6 +10,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
+        customTags: [WellKnownDiagnosticTags.Unnecessary],
         description: "InjectAttribute can only be used on parameters of methods that are exposed by the Coalesce framework.");
 
     public static readonly DiagnosticDescriptor InvalidCoalesceUsageOnNestedTypesRule = new(
@@ -19,6 +20,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
+        customTags: [WellKnownDiagnosticTags.Unnecessary],
         description: "Nested data sources and behaviors are automatically associated with their containing type and do not need the [Coalesce] attribute.");
 
     public static readonly DiagnosticDescriptor InvalidCoalesceUsageRule = new(

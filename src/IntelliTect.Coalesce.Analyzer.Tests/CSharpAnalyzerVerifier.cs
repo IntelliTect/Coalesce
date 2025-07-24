@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.CodeAnalysis;
@@ -45,12 +46,15 @@ public abstract class CSharpAnalyzerVerifier<TAnalyzer>
         solutionState.AdditionalReferences.Add(typeof(DbContext).Assembly);
     }
 
-    protected static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
+    protected List<string> DisabledDiagnostics { get; set; } = [];
+
+    protected async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
     {
         var test = new CSharpAnalyzerTest<TAnalyzer, DefaultVerifier>
         {
             TestCode = source,
         };
+        test.DisabledDiagnostics.AddRange(DisabledDiagnostics);
 
         SetupSolutionState(test.TestState);
 
@@ -58,23 +62,24 @@ public abstract class CSharpAnalyzerVerifier<TAnalyzer>
         await test.RunAsync();
     }
 
-    protected static async Task VerifyCodeFixAsync<TCodeFixProvider>(string source, string fixedSource, params DiagnosticResult[] expected)
+    protected async Task VerifyCodeFixAsync<TCodeFixProvider>(string source, string fixedSource, params DiagnosticResult[] expected)
         where TCodeFixProvider : CodeFixProvider, new()
     {
         var test = new CSharpCodeFixTest<TAnalyzer, TCodeFixProvider, DefaultVerifier>
         {
             TestCode = source,
-            FixedCode = fixedSource,
+            FixedCode = fixedSource
         };
+        test.DisabledDiagnostics.AddRange(DisabledDiagnostics);
 
         SetupSolutionState(test.TestState);
         SetupSolutionState(test.FixedState);
 
-        test.ExpectedDiagnostics.AddRange(expected);
+        test.TestState.ExpectedDiagnostics.AddRange(expected);
         await test.RunAsync();
     }
 
-    protected static async Task VerifyAnalyzerAndCodeFixAsync<TCodeFixProvider>(string source, string fixedSource, params DiagnosticResult[] expected)
+    protected async Task VerifyAnalyzerAndCodeFixAsync<TCodeFixProvider>(string source, string fixedSource, params DiagnosticResult[] expected)
         where TCodeFixProvider : CodeFixProvider, new()
     {
         await VerifyAnalyzerAsync(source, expected);

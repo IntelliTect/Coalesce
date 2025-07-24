@@ -1,7 +1,14 @@
+using Microsoft.CodeAnalysis.Testing;
+
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coalesce1001_SimplifyItemResult>
 {
+    public Coalesce1001_SimplifyItemResultTests()
+    {
+        DisabledDiagnostics = ["COA1002"];
+    }
+
     [Fact]
     public async Task ItemResult_BooleanConstructor_True_ReportsInfo()
     {
@@ -653,6 +660,37 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
                 public Task GetResult()
                 {
                     return Task.FromResult(new ItemResult<int>(42));
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ItemResultGeneric_PropertyInitializer_ErrorMessageWithObjectNull_ReportsInfo()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
+            using System.Net.Mail;
+            public class TestClass
+            {
+                public ItemResult<MailAddress> GetResult()
+                {
+                    var to = "user@example.com";
+                    return {|COA1001:new ItemResult<MailAddress>()
+                    {
+                        WasSuccessful = false,
+                        Message = $"Unable to send email to {to}.",
+                        Object = null
+                    }|};
+                }
+            }
+            """, """
+            using System.Net.Mail;
+            public class TestClass
+            {
+                public ItemResult<MailAddress> GetResult()
+                {
+                    var to = "user@example.com";
+                    return $"Unable to send email to {to}.";
                 }
             }
             """);

@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
 {
-    private static readonly DiagnosticDescriptor _Rule = new(
+    public static readonly DiagnosticDescriptor _Rule = new(
         id: "COA1001",
         title: "ItemResult instantiation can be simplified using implicit conversion",
         messageFormat: "ItemResult instantiation can be simplified to '{0}'",
@@ -16,8 +16,18 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: "ItemResult and ItemResult<T> have implicit conversions from boolean, string, and object values. Use the implicit conversion for cleaner, more readable code.");
 
+    public static readonly DiagnosticDescriptor _UnnecessaryRule = new(
+        id: "COA1002",
+        title: "ItemResult instantiation can be simplified using implicit conversion",
+        messageFormat: "ItemResult instantiation can be simplified to '{0}'",
+        category: "Style",
+        defaultSeverity: DiagnosticSeverity.Hidden,
+        isEnabledByDefault: true,
+        customTags: [WellKnownDiagnosticTags.Unnecessary],
+        description: "ItemResult and ItemResult<T> have implicit conversions from boolean, string, and object values. Use the implicit conversion for cleaner, more readable code.");
+
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(_Rule);
+        ImmutableArray.Create(_Rule, _UnnecessaryRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -130,12 +140,11 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         if (!virtualResult.HasOnlyRelevantProperties) return;
 
         // Case 1: Can simplify to boolean (true or false)
-        if (virtualResult.ObjectExpression == null &&
+        if ((virtualResult.ObjectExpression == null || IsNullLiteral(virtualResult.ObjectExpression)) &&
             virtualResult.WasSuccessfulExpression is not null &&
             (virtualResult.MessageExpression == null || IsNullLiteral(virtualResult.MessageExpression)))
         {
-            var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, virtualResult.WasSuccessfulExpression);
-            context.ReportDiagnostic(diagnostic);
+            ReportSimplificationDiagnostics(context, objectCreation, virtualResult.WasSuccessfulExpression);
             return;
         }
 
@@ -143,14 +152,13 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         var wasSuccessfulValue = GetBooleanValueFromExpression(virtualResult.WasSuccessfulExpression);
         if (
             (virtualResult.WasSuccessfulExpression == null || (wasSuccessfulValue is false)) &&
-            virtualResult.ObjectExpression == null &&
+            (virtualResult.ObjectExpression == null || IsNullLiteral(virtualResult.ObjectExpression)) &&
             !IsItemResultOfString(type))
         {
             if (virtualResult.MessageExpression != null && !IsNullLiteral(virtualResult.MessageExpression))
             {
                 // Expression message (e.g., literal string, interpolated string, variable)
-                var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, virtualResult.MessageExpression);
-                context.ReportDiagnostic(diagnostic);
+                ReportSimplificationDiagnostics(context, objectCreation, virtualResult.MessageExpression);
                 return;
             }
         }
@@ -173,8 +181,7 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
             // Check type compatibility
             if (context.Compilation.HasImplicitConversion(virtualResult.ObjectType, typeArgument))
             {
-                var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, virtualResult.ObjectExpression);
-                context.ReportDiagnostic(diagnostic);
+                ReportSimplificationDiagnostics(context, objectCreation, virtualResult.ObjectExpression);
             }
         }
     }
@@ -183,6 +190,48 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
     {
         return type.Name == "ItemResult" &&
             type.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce.Models";
+    }
+
+    private static void ReportSimplificationDiagnostics(
+        OperationAnalysisContext context,
+        BaseObjectCreationExpressionSyntax objectCreation,
+        ExpressionSyntax simplifiedExpression)
+    {
+        var simplifiedText = simplifiedExpression.ToString();
+        var properties = ImmutableDictionary.CreateBuilder<string, string?>();
+        properties.Add("SimplifiedExpression", simplifiedText);
+        var immutableProperties = properties.ToImmutable();
+
+        // Report the main diagnostic with information
+        var mainDiagnostic = Diagnostic.Create(
+            _Rule,
+            objectCreation.GetLocation(),
+            immutableProperties,
+            simplifiedText);
+        context.ReportDiagnostic(mainDiagnostic);
+
+        // Report unnecessary diagnostic for parts that will be removed
+        var syntaxTree = objectCreation.SyntaxTree;
+        var keepStart = simplifiedExpression.SpanStart;
+        var keepEnd = simplifiedExpression.Span.End;
+
+        // Report unnecessary parts before the kept expression
+        if (keepStart > objectCreation.SpanStart)
+        {
+            var beforeSpan = Microsoft.CodeAnalysis.Text.TextSpan.FromBounds(objectCreation.SpanStart, keepStart);
+            var beforeLocation = Location.Create(syntaxTree, beforeSpan);
+            var beforeDiagnostic = Diagnostic.Create(_UnnecessaryRule, beforeLocation, immutableProperties, simplifiedText);
+            context.ReportDiagnostic(beforeDiagnostic);
+        }
+
+        // Report unnecessary parts after the kept expression
+        if (keepEnd < objectCreation.Span.End)
+        {
+            var afterSpan = Microsoft.CodeAnalysis.Text.TextSpan.FromBounds(keepEnd, objectCreation.Span.End);
+            var afterLocation = Location.Create(syntaxTree, afterSpan);
+            var afterDiagnostic = Diagnostic.Create(_UnnecessaryRule, afterLocation, immutableProperties, simplifiedText);
+            context.ReportDiagnostic(afterDiagnostic);
+        }
     }
 
     private static Diagnostic CreateDiagnosticWithSimplifiedExpression(

@@ -24,6 +24,7 @@
         :clearable="isInteractive && isClearable"
         :active="!!selectedKeysSet.size || focused || !!placeholder"
         :dirty="!!selectedKeysSet.size"
+        :disabled="isDisabled"
         :focused="focused"
         @click:clear.stop.prevent="onInput(null, true)"
         @keydown="onInputKey($event)"

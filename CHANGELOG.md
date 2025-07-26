@@ -30,6 +30,7 @@
 
 ## Fixes
 - Fix error in codegen when using JS reserved keywords or C# contextual keywords as parameter names.
+- Fix c-select not receiving proper disabled styling
 
 # 5.3.8
 

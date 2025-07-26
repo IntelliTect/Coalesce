@@ -54,6 +54,27 @@
     variant="outlined"
   >
   </c-select>
+
+  <h1>disabled</h1>
+  <v-row>
+    <v-col cols="6">
+      <h2>c-select</h2>
+      <c-select :model="caseVm" for="assignedTo" disabled variant="outlined" />
+    </v-col>
+    <v-col cols="6">
+      <h2>v-select</h2>
+      <v-select :model="caseVm" for="assignedTo" disabled variant="outlined" />
+    </v-col>
+  </v-row>
+  <h1>readonly</h1>
+  <v-row>
+    <v-col cols="6">
+      <c-select :model="caseVm" for="assignedTo" readonly variant="outlined" />
+    </v-col>
+    <v-col cols="6">
+      <v-select :model="caseVm" for="assignedTo" readonly variant="outlined" />
+    </v-col>
+  </v-row>
 </template>
 
 <script setup lang="ts">

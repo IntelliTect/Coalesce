@@ -9,7 +9,7 @@ public class SecurityBypassAnalyzer : DiagnosticAnalyzer
     public static readonly DiagnosticDescriptor SecurityBypassRule = new(
         id: "COA2001",
         title: "Authorization logic in data source without default data source",
-        messageFormat: "{0} appears to contains authorization logic but '{1}' has no explicit default data source. Security checks may be bypassed by a client who uses the type's implicit default data source. Declare an explicit data source annotated with [DefaultDataSource] so the intent can be clearly expressed in code.",
+        messageFormat: "{0} appears to contains authorization logic, but '{1}' has no explicit default data source. Security checks may be bypassed by a client who uses the type's implicit default data source. Declare an explicit data source annotated with [DefaultDataSource] so the intent can be clearly expressed in code.",
         category: "Security",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,

@@ -6,7 +6,7 @@
     <ImplicitUsings>true</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <!-- Disable symbols because this project doesn't produce any for some reason -->
+    <!-- Disable symbols because this project doesn't produce any since IncludeBuildOutput is false -->
     <IncludeSymbols>false</IncludeSymbols>
 
     <NoPackageAnalysis>true</NoPackageAnalysis>
@@ -14,10 +14,8 @@
   </PropertyGroup>
 
   <!-- 
-
   FOR IMMEDIATE TESTING OF THE ANALYZER IN OTHER PROJECTS, ADD THE FOLLOWING:
     <ItemGroup>
-      <Analyzer Include="D:\Coalesce\src\IntelliTect.Coalesce.Analyzer\bin\Release\netstandard2.0\IntelliTect.Coalesce.Core.dll" />
       <Analyzer Include="D:\Coalesce\src\IntelliTect.Coalesce.Analyzer\bin\Release\netstandard2.0\IntelliTect.Coalesce.Analyzer.dll" />
     </ItemGroup>
   -->
@@ -28,9 +26,17 @@
     <Using Include="IntelliTect.Coalesce.Core.Extensions" />
   </ItemGroup>
 
+  <!-- Can't ProjectReference in an analyzer apparently. -->
+  <!-- https://github.com/dotnet/roslyn/issues/67548 -->
+  <!-- https://github.com/dotnet/roslyn/issues/79272 -->
+  <!-- 
   <ItemGroup>
-    <ProjectReference
-      Include="..\IntelliTect.Coalesce.Core\IntelliTect.Coalesce.Core.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.Core\IntelliTect.Coalesce.Core.csproj" />
+  </ItemGroup> -->
+
+  <!-- So instead, just pull in the Core files as source. -->
+  <ItemGroup>
+    <Compile Include="..\IntelliTect.Coalesce.Core\**\*.cs" Exclude="**\bin\**;**\obj\**" />
   </ItemGroup>
 
   <ItemGroup>

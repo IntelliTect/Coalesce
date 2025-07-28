@@ -42,7 +42,7 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
 </tr>
 <tr>
   <td><a href="https://learn.microsoft.com/en-us/ef/core/"><img class=ext-logo src=/ef-logo.svg></a></td>
-  <td>Entity Framework provides the interface between your database and C# code. Coalesce will use your EF data model to generate an extensible, customizable CRUD API that will drive both your custom pages and the out-of-the-box admin pages.</td>
+  <td>Entity Framework provides the interface between your database and C# code. Coalesce will use your EF data model to generate an extensible, customizable CRUD API that will drive both your custom pages and the out-of-the-box <a href="./stacks/vue/admin-pages.html">admin pages</a>.</td>
 </tr>
 <tr>
   <td><a href="https://www.typescriptlang.org/"><img class=ext-logo src=/ts-logo-512.svg></a></td>
@@ -78,7 +78,7 @@ monotonous to build:
 - Client side [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md) that mirror your data model for both lists and individual objects. Utilize these to rapidly build out your application's various pages.
 - APIs to interact with your models via endpoints like List, Get, Save, and more.
 - Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via drop downs, enums, etc. Dropdowns support searching and paging automatically.
-- A complete set of admin pages are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.
+- A complete set of [Admin Pages](/stacks/vue/admin-pages.md) are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.
 - <Beta/> [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) that enable interaction with your application through an AI chat assistant or other LLM-based tool.
 
 ## Getting Started

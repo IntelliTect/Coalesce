@@ -6,6 +6,8 @@ A full-featured page for interacting with a [ListViewModel](/stacks/vue/layers/v
 
 <!-- MARKER:summary-end -->
 
+Check out [Admin Pages](/stacks/vue/admin-pages.md) for a full overview of the admin pages in Coalesce.
+
 ## Examples
 
 ``` ts

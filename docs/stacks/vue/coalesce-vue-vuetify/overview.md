@@ -144,6 +144,8 @@ If for whatever reason you find yourself adding Coalesce to an existing project,
 
 ## Admin Components
 
+These components are used to construct the [Admin Pages](/stacks/vue/admin-pages.md). However, you're free to use them in your own custom pages if you find a suitable need.
+
 <table>
 <thead><tr><th width="170px">Component</th><th>Description</th></tr></thead><tbody>
 <tr><td>

@@ -158,6 +158,7 @@ export default defineConfig({
           { text: "Models", link: "/stacks/vue/layers/models" },
           { text: "API Clients", link: "/stacks/vue/layers/api-clients" },
           { text: "View Models", link: "/stacks/vue/layers/viewmodels" },
+          { text: "Admin Pages", link: "/stacks/vue/admin-pages" },
         ],
       },
       {

@@ -10,6 +10,8 @@ Links for collections are resolved from [vue-router](https://router.vuejs.org/) 
 
 Links for single models are resolved from [vue-router](https://router.vuejs.org/) with a route name of ``coalesce-admin-item``, a ``type`` route param containing the name of the model's type, and a ``id`` route param containing the object's primary key. This route is expected to resolve to a [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md), which is setup by default by the [Coalesce project template](/stacks/vue/getting-started.md).
 
+For more information about configuring and customizing these admin page routes, see [Admin Pages](/stacks/vue/admin-pages.md).
+
 
 ## Examples
 

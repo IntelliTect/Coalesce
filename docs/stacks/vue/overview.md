@@ -62,3 +62,5 @@ The Vue.js stack for Coalesce provides some high level components that provide f
 
 The [Coalesce project template](/stacks/vue/getting-started.md) comes with routes already in place for these page-level components. For example, ``/admin/Person`` for a table, ``/admin/Person/edit`` to create a new ``Person``, and ``/admin/Person/edit/:id`` to edit a ``Person``.
 
+For comprehensive information about the admin pages, see [Admin Pages](/stacks/vue/admin-pages.md).
+

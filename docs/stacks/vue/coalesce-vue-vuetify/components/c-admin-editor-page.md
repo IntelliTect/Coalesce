@@ -6,6 +6,8 @@ A page for a creating/editing single [ViewModel](/stacks/vue/layers/viewmodels.m
 
 <!-- MARKER:summary-end -->
 
+Check out [Admin Pages](/stacks/vue/admin-pages.md) for a full overview of the admin pages in Coalesce.
+
 ## Examples
 
 ``` ts
@@ -37,6 +39,6 @@ The primary key of the item being edited. If null or not provided, the page will
 
 <Prop def="autoSave?: 'auto' | boolean = 'auto'" lang="ts" />
 
-Controls whether auto-save is used for the item. If `auto` (the default), auto-saves are used as long as the type has no unsaved [init-only properties](/modeling/model-components/properties.md#init-only-properties).
+Controls whether auto-save is used for the item. If `auto` (the default), auto-saves are used as long as the type has no [init-only properties](/modeling/model-components/properties.md#init-only-properties).
 
 

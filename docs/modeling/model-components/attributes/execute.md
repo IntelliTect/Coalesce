@@ -42,7 +42,7 @@ Enum values are:
 
 <Prop def="public bool AutoClear { get; set; }" />
 
-If true, the method's arguments will be cleared after a successful invocation on admin pages.
+If true, the method's arguments will be cleared after a successful invocation on [admin pages](/stacks/vue/admin-pages.md).
 
 <Prop def="public bool? ValidateAttributes { get; set; }" />
 

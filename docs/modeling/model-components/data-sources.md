@@ -97,7 +97,7 @@ An additional parameter on `DataSourceParameters` is available on the client onl
 
 ## Custom Parameters
 
-On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters can be any type supported by Coalesce, including primitives, dates, [Entity Models](/modeling/model-types/entities.md), [External Types](/modeling/model-types/external-types.md), or collections of these types.
+On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters can be any type supported by Coalesce, including primitives, dates, [Entity Models](/modeling/model-types/entities.md), [Simple Models](/modeling/model-types/simple-models.md), or collections of these types.
 
 ```c#
 [Coalesce]

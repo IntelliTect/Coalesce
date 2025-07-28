@@ -191,10 +191,10 @@ public class Employee
 ```
 
 
-### External Type Caveats
+### Simple Model Caveats
 
-One important point remains regarding `IncludeTree` - it is not used to control the serialization of [External Types](/modeling/model-types/external-types.md) - it only affects [EF Models](/modeling/model-types/crud.md) (Entities and entity-backed Custom DTOs). External Types are **always** mapped to DTOs when encountered (unless otherwise prevented by [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) or [Security Attributes](/modeling/model-components/attributes/security-attribute.md)), with the assumption that because these objects are created by you (as opposed to Entity Framework), you are responsible for preventing any undesired circular references.
+One important point remains regarding `IncludeTree` - it is not used to control the serialization of [Simple Models](/modeling/model-types/simple-models.md) - it only affects [CRUD Models](/modeling/model-types/crud.md). Simple Models are **always** mapped to DTOs when encountered (unless otherwise prevented by [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) or [Security Attributes](/modeling/model-components/attributes/security-attribute.md)), with the assumption that because these objects are created by you (as opposed to Entity Framework), you are responsible for preventing any undesired circular references.
 
-By not filtering External Types, you as the developer don't need to account for them in every place throughout your application where they appear - instead, they 'just work' and show up on the client as expected.
+By not filtering Simple Models, you as the developer don't need to account for them in every place throughout your application where they appear - instead, they 'just work' and show up on the client as expected.
 
-Note also that this statement does not apply to EF Models that hang off of External Types - any place a EF Models appears, it will be controlled by your include tree. If no include tree is present (because nothing was specified for the External Type member), these EF Models hanging off of External Types will be serialized freely and with all circular references, unless you include some calls to `.IncludedSeparately(m => m.MyExternalType.MyEfEntity)` to limit those objects down.
+Note also that this statement does not apply to EF Models that hang off of Simple Models - any place a EF Models appears, it will be controlled by your include tree. If no include tree is present (because nothing was specified for the Simple Model member), these EF Models hanging off of Simple Models will be serialized freely and with all circular references, unless you include some calls to `.IncludedSeparately(m => m.MySimpleModel.MyEfEntity)` to limit those objects down.

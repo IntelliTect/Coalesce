@@ -1,16 +1,19 @@
-# External Types
+# Simple Models
 
-In Coalesce, any data class exposed by Coalesce that isn't a [CRUD Model](/modeling/model-types/crud.md) is considered to be an "external type".
+In Coalesce, any data class exposed by Coalesce that is **not** a [CRUD Model](/modeling/model-types/crud.md) is considered to be a "simple model". Simple models are just plain data objects and do not have any API endpoints or other advanced functionality.
 
-The collection of external types for a data model looks like this:
+::: info
+Simple Models used to be called External Types prior to Coalesce v6. Their functionality did not change.
+:::
+
+The set of simple models in a Coalesce application looks like this:
     
 1. Take all of the exposed property types, method parameters, and method return types of your [CRUD Models](/modeling/model-types/crud.md), as well as method parameters and returns from [Services](/modeling/model-types/services.md).
-2. Any of these types which are not built-in scalar types and not one of the aforementioned CRUD models are external types.
-3. For any external type discovered, any of the property types which qualify under the above rules are also external types.
-
+2. Any of these types which are not built-in scalar types and not one of the aforementioned CRUD models are simple models.
+3. For any simple model discovered, any of the property types which qualify under the above rules are also simple models.
 
 ::: warning
-Be careful when using types that you do not own for properties and method returns in your data model. When Coalesce generates external type ViewModels and DTOs, it will not stop until it has exhausted all paths that can be reached by following public property types and method returns.
+Be careful when using types that you do not own for properties and method returns in your data model. When Coalesce generates simple model ViewModels and DTOs, it will not stop until it has exhausted all paths that can be reached by following public property types and method returns.
 
 In general, you should only expose types that you have created so that you will always have full control over them. Mark any properties you don't wish to expose with [[InternalUse]](/modeling/model-components/attributes/internal-use.md), or make those members non-public.
 :::
@@ -18,7 +21,7 @@ In general, you should only expose types that you have created so that you will 
 
 ## Generated Code
 
-For each external type found in your application's model, Coalesce will generate:
+For each simple model found in your application's model, Coalesce will generate:
 
 * A [Generated DTO](/stacks/agnostic/dtos.md)
 * A [TypeScript Model](/stacks/vue/layers/models.md)
@@ -26,12 +29,12 @@ For each external type found in your application's model, Coalesce will generate
 
 ## Example Data Model
 
-For example, in the following scenario, the following classes are considered as external types:
+For example, in the following scenario, the following classes are considered as simple models:
 
 * `PluginMetadata`, exposed through a getter-only property on `ApplicationPlugin`.
 * `PluginResult`, exposed through a method return on `ApplicationPlugin`. 
 
-`PluginHandler` is not because it not exposed by the model, neither directly nor through any of the other external types.
+`PluginHandler` is not because it not exposed by the model, neither directly nor through any of the other simple models.
 
 
 ``` c#
@@ -53,12 +56,13 @@ public class ApplicationPlugin {
 
     public string TypeName { get; set; }
 
-    private PluginHandler GetInstance() => 
-        ((PluginHandler)Activator.CreateInstance(Type.GetType(TypeName)));
+    private PluginHandler GetInstance() 
+      => ((PluginHandler)Activator.CreateInstance(Type.GetType(TypeName)));
 
     public PluginMetadata Metadata => GetInstance().GetMetadata();
 
-    public PluginResult Invoke(string action, string data) => GetInstance().Invoke(Application, action, data);
+    public PluginResult Invoke(string action, string data) 
+      => GetInstance().Invoke(Application, action, data);
 }
 
 public abstract class PluginHandler { 
@@ -80,4 +84,4 @@ public abstract class PluginResult {
 
 ## Loading & Serialization
 
-External types have slightly different behavior when undergoing serialization to be sent to the client. Unlike CRUD Models types which are subject to the rules of [Include Tree](/concepts/include-tree.md), external types ignore the Include Tree when being mapped to DTOs for serialization. Read [External Type Caveats](/concepts/include-tree.md#external-type-caveats) for a more detailed explanation of this exception.
+Simple Models have slightly different behavior when undergoing serialization to be sent to the client. Unlike CRUD Models types which are subject to the rules of [Include Tree](/concepts/include-tree.md), simple models ignore the Include Tree when being mapped to DTOs for serialization. Read [Simple Model Caveats](/concepts/include-tree.md#simple-model-caveats) for a more detailed explanation of this exception.

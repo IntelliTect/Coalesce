@@ -9,6 +9,11 @@ import Prop from "../components/Prop.vue";
 import SiteFooter from "../components/SiteFooter.vue";
 import Beta from "../components/Beta.vue";
 
+const redirects = {
+  "/Coalesce/modeling/model-types/external-types":
+    "/Coalesce/modeling/model-types/simple-models",
+};
+
 export default {
   extends: DefaultTheme,
   Layout: () => {
@@ -23,5 +28,19 @@ export default {
     app.component("Prop", Prop);
     app.component("SiteFooter", SiteFooter);
     app.component("Beta", Beta);
+
+    router.onBeforeRouteChange = (to: string) => {
+      const path = to.replace(/\.html$/i, ""),
+        toPath = redirects[path];
+
+      if (toPath) {
+        setTimeout(() => {
+          router.go(toPath);
+        });
+        return false;
+      } else {
+        return true;
+      }
+    };
   },
 } satisfies Theme;

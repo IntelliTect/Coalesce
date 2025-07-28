@@ -16,7 +16,7 @@ All objects in the metadata layer that represent any kind of metadata have, at t
 
 ### Type
 
-All custom types exposed by your application's data model will have a Type metadata object generated. This includes both C# classes, and C# enums. Class types include `model` (for [CRUD Models](/modeling/model-types/crud.md)) and `object` (for [External Types](/modeling/model-types/external-types.md)).
+All custom types exposed by your application's data model will have a Type metadata object generated. This includes both C# classes, and C# enums. Class types include `model` (for [CRUD Models](/modeling/model-types/crud.md)) and `object` (for [Simple Models](/modeling/model-types/simple-models.md)).
 
 ### Value
 

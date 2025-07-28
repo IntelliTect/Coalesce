@@ -97,8 +97,6 @@ To add support for creates or deletes, implement the additional necessary action
 
 ``` c#
 [Coalesce, StandaloneEntity]
-[Create(DenyAll)]
-[Delete(DenyAll)]
 public class PageListing
 {
     // properties and data source same as previous example.

@@ -16,7 +16,7 @@ Most common built-in primitive (numerics, strings, booleans) and other scalar da
 
 Properties of a type that are not on your `DbContext` will also have corresponding properties generated on the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#generated-members) typed as [Plain Models](/stacks/vue/layers/models.md), and the values of such properties will be sent with the object to the client when requested. Properties of this type will also be sent back to the server by the client when they are encountered.
 
-See [External Types](/modeling/model-types/external-types.md) for more information.
+See [Simple Models](/modeling/model-types/simple-models.md) for more information.
 
 ### Getter-only Properties
 

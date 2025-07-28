@@ -136,21 +136,21 @@ Most common built-in primitive (numerics, strings, booleans) and other scalar da
 
 <tr><td>
 
-[Entity Models](/modeling/model-types/entities.md)
+[CRUD Models](/modeling/model-types/crud.md)
 
 </td><td>
 
-When invoking the method on the client, the object's properties will only be serialized one level deep. If an entity model parameter has additional child object properties, they will not be included in the invocation of the method - only the object's primitive & date properties will be deserialized from the client.
+When invoking the method on the client, the object's properties will only be serialized one level deep. If an CRUD model parameter has additional child object properties, they will not be included in the invocation of the method - only the object's primitive & date properties will be deserialized from the client.
 
 </td></tr>
 
 <tr><td>
 
-[External Types](/modeling/model-types/external-types.md)
+[Simple Models](/modeling/model-types/simple-models.md)
 
 </td><td>
 
-Unlike entity model parameters, external type parameters will be serialized and sent by the client to an arbitrarily deep level, excluding any entity model properties that may be nested inside an external type.
+Unlike CRUD model parameters, simple model parameters will be serialized and sent by the client to an arbitrarily deep level, excluding any CRUD model properties that may be nested inside a simple model.
 
 </td></tr>
 
@@ -243,7 +243,7 @@ Most common built-in primitive and scalar data types (numerics, strings, boolean
 
 <tr><td>
 
-[Entity Models](/modeling/model-types/entities.md)
+[CRUD Models](/modeling/model-types/crud.md)
 
 </td><td>
 
@@ -253,13 +253,13 @@ Any of the types of your models may be returned.
 
 <tr><td>
 
-[External Types](/modeling/model-types/external-types.md)
+[Simple Models](/modeling/model-types/simple-models.md)
 
 </td><td>
 
-Any [External Types](/modeling/model-types/external-types.md) you define may also be returned from a method.
+Any [Simple Models](/modeling/model-types/simple-models.md) you define may also be returned from a method.
 
-When returning custom types from methods, be careful of the types of their properties. Coalesce will **recursively** discover and generate code for all public properties of your [External Types](/modeling/model-types/external-types.md). If you accidentally include a type that you do not own, these generated types could get out of hand extremely quickly.
+When returning custom types from methods, be careful of the types of their properties. Coalesce will **recursively** discover and generate code for all public properties of your [Simple Models](/modeling/model-types/simple-models.md). If you accidentally include a type that you do not own, these generated types could get out of hand extremely quickly.
 
 Mark any properties you don't want generated with the [[InternalUse]](/modeling/model-components/attributes/internal-use.md) attribute, or give them a non-public access modifier. Whenever possible, don't return types that you don't own or control.
 

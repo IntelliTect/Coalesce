@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -108,12 +108,14 @@
             </span>
             <a href="#top">Top</a>
 
-            <template v-for="set in [
+            <template
+              v-for="set in [
               {heading: 'Entities', types: crudTypes.filter(t => !t.dtoBaseType)},
               {heading: 'Custom DTOs', types: crudTypes.filter(t => t.dtoBaseType), hideEmpty: true},
               {heading: 'Services', types: serviceTypes},
-              {heading: 'External Types', types: externalTypes}
-            ].filter(s => s.types.length || !s.hideEmpty)">
+              {heading: 'Simple Models', types: externalTypes}
+            ].filter(s => s.types.length || !s.hideEmpty)"
+            >
               <h6 class="mt-4">{{set.heading}}</h6>
               <div v-if="!set.types.length" class="text-muted">None</div>
               <div v-for="t in set.types">
@@ -580,22 +582,20 @@
               (action.isUnused ? '\n\nAnalyzed as unused by any API endpoint.' : '')
             "
         >
-            <template v-if="action.isUnused">
-              Unused
-            </template>
-            <template v-else>
-              Allow {{(action.allowAnonymous === false ? ' Authenticated' :
-              action.allowAnonymous === true ? ' Anonymous' : '')}}
-            </template>
-            <div v-if="action.roleLists.length" class="fw-normal text-start">
-              <div v-for="rl in action.roleLists">{{rl.join(', ')}}</div>
+          <template v-if="action.isUnused"> Unused </template>
+          <template v-else>
+            Allow {{(action.allowAnonymous === false ? ' Authenticated' :
+            action.allowAnonymous === true ? ' Anonymous' : '')}}
+          </template>
+          <div v-if="action.roleLists.length" class="fw-normal text-start">
+            <div v-for="rl in action.roleLists">{{rl.join(', ')}}</div>
+          </div>
+          <div v-if="restrict?.length" class="fw-normal text-start">
+            <div v-for="restriction in restrict">
+              <span class="badge bg-custom-code mt-1" style="font-size: 0.8em"
+                >{{restriction}}</span
+              >
             </div>
-            <div v-if="restrict?.length" class="fw-normal text-start">
-              <div v-for="restriction in restrict">
-                <span class="badge bg-custom-code mt-1" style="font-size: 0.8em"
-                  >{{restriction}}</span
-                >
-              </div>
           </div>
         </span>
       </span>

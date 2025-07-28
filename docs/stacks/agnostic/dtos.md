@@ -4,7 +4,7 @@ Data Transfer Objects, or DTOs, allow for transformations of data from the data 
 
 Coalesce supports two types of DTOs:
 
-- [Generated DTOs](#automatically-generated-dtos), created by Coalesce's code generator for each [entity model](/modeling/model-types/entities.md), [standalone entity](/modeling/model-types/standalone-entities.md), and [external type](/modeling/model-types/external-types.md).
+- [Generated DTOs](#automatically-generated-dtos), created by Coalesce's code generator for each [entity model](/modeling/model-types/entities.md), [standalone entity](/modeling/model-types/standalone-entities.md), and [simple model](/modeling/model-types/simple-models.md).
 - [Custom DTOs](/modeling/model-types/dtos.md), which are created manually by you, the developer.
 
 ## Automatically Generated DTOs

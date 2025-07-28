@@ -257,7 +257,7 @@ Coalesce generates API endpoints by traversing your data model's classes, starti
 
 Classes can be hidden from Coalesce entirely by annotating them with `[InternalUse]`, preventing generation of API endpoints for that class, as well as preventing properties of that type from being exposed.
 
-`DbSet<>` properties on your `DbContext` class can also be annotated with `[InternalUse]`, causing that type to be treated by Coalesce like an [External Type](/modeling/model-types/external-types.md) rather than an [Entity](/modeling/model-types/entities.md), once again preventing generation of API endpoints but _without_ preventing properties of that type from being exposed.
+`DbSet<>` properties on your `DbContext` class can also be annotated with `[InternalUse]`, causing that type to be treated by Coalesce like an [Simple Model](/modeling/model-types/simple-models.md) rather than an [Entity](/modeling/model-types/entities.md), once again preventing generation of API endpoints but _without_ preventing properties of that type from being exposed.
 
 ### Class Security Attributes
 
@@ -385,7 +385,7 @@ public class Employee
 
 ## Property/Column Security
 
-Security applied to properties with attributes in Coalesce affects all usages of that property across all Coalesce-generated APIs. This includes usages of that property on types that occur as children of other types, which is a spot where class-level or endpoint-level security generally does not apply. [These attributes](/modeling/model-components/attributes/security-attribute.md) can be placed on the properties on your [Entities](/modeling/model-types/entities.md) and [External Types](/modeling/model-types/external-types.md) to apply role-based restrictions to that property.
+Security applied to properties with attributes in Coalesce affects all usages of that property across all Coalesce-generated APIs. This includes usages of that property on types that occur as children of other types, which is a spot where class-level or endpoint-level security generally does not apply. [These attributes](/modeling/model-components/attributes/security-attribute.md) can be placed on the properties on your [Entities](/modeling/model-types/entities.md) and [Simple Models](/modeling/model-types/simple-models.md) to apply role-based restrictions to that property.
 
 - `ReadAttribute` limits the roles that can read values from that property in responses from the server.
 - `EditAttribute` limits the roles that can write values to that property in requests made to the server.
@@ -614,7 +614,7 @@ public class DepartmentMember
 
 There exists a fourth technique in Data Sources for applying filtered includes: the [TransformResultsAsync](/modeling/model-components/data-sources.md#member-transformresults) method. Unlike the other techniques above that are performed in the `GetQuery` method and applied at the beginning of the data source query pipeline, `TransformResults` is applied at the very end of the process against the materialized results. It also only affects the responses from the generated `/get`, `/list`, `/save`, `/bulkSave`, and `/delete` endpoints - it has no bearing on the invocation target of [instance methods](/modeling/model-components/methods.md#instance-methods).
 
-The primary purpose of `TransformResults` is to conditionally load navigation properties. This was very useful before EF Core introduced native [filtered includes](#filtered-includes) for collection navigation properties, and is still useful for applying filtered includes to _reference_ navigation properties since EF [does not support this](https://github.com/dotnet/efcore/issues/24422). It can also be used for any kind of filtered includes if native EF filtered includes get translated into poorly-performant SQL, or it can be used to populate [external type](/modeling/model-types/external-types.md) or other non-database-mapped properties on your entities.
+The primary purpose of `TransformResults` is to conditionally load navigation properties. This was very useful before EF Core introduced native [filtered includes](#filtered-includes) for collection navigation properties, and is still useful for applying filtered includes to _reference_ navigation properties since EF [does not support this](https://github.com/dotnet/efcore/issues/24422). It can also be used for any kind of filtered includes if native EF filtered includes get translated into poorly-performant SQL, or it can be used to populate [simple model](/modeling/model-types/simple-models.md) or other non-database-mapped properties on your entities.
 
 The general technique for using `TransformResults` involves using [EF Core Explicit Loading](https://learn.microsoft.com/en-us/ef/core/querying/related-data/explicit#explicit-loading) to attach additional navigation properties to the result set, and then using Coalesce's `.IncludedSeparately()` method in the data source's `GetQuery` so that Coalesce can still build the correct [Include Tree](/concepts/include-tree.md) to shape the serialization of your results.
 

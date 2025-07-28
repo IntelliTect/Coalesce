@@ -3,7 +3,7 @@
 <!-- MARKER:summary -->
 In addition to the generated [Generated C# DTOs](/stacks/agnostic/dtos.md) that Coalesce will create for you for [EF Entity Models](/modeling/model-types/entities.md) and [Standalone Entities](/modeling/model-types/standalone-entities.md), you may also create your own implementation of an `IClassDto` with customized properties and expose it as if it was a first-class CRUD Model type. These are known as Custom DTOs and support all the standard features of [CRUD Models](/modeling/model-types/crud.md).
 
-::: tip Note
+::: warning Note
 Custom DTOs are an advanced feature of Coalesce and are not needed by most applications. In almost all cases, [EF Entity Models](/modeling/model-types/entities.md) can be customized to handle any needs that you might want to use a Custom DTO for, or [Standalone Entities](/modeling/model-types/standalone-entities.md) can be used to serve an alternate projection of an EF Entity Model.
 :::
 <!-- MARKER:summary-end -->

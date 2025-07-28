@@ -121,7 +121,7 @@ export default defineConfig({
             ],
           },
           autoTitle("/modeling/model-types/services"),
-          autoTitle("/modeling/model-types/external-types"),
+          autoTitle("/modeling/model-types/simple-models"),
         ],
       },
       {

@@ -3,7 +3,7 @@
 ## Breaking Changes
 
 - Vue 2 support has been dropped.
-- The types generated for inheritance hierarchies has changed significantly. If two or more models in a type hierarchy (i.e. a base type and a derived type) are both exposed by Coalesce, that relationship is now reflected throughout the generated DTOs, generated TypeScript, and admin pages. The generated ViewModels classes for abstract classes are now just proxies intended to be used only for loading one of the concrete implementation types.
+- The types generated for inheritance hierarchies have changed significantly. If two or more models in a type hierarchy (i.e. a base type and a derived type) are both exposed by Coalesce, that relationship is now reflected throughout the generated DTOs, generated TypeScript, and admin pages. The generated ViewModels classes for abstract classes are now just proxies intended to be used only for loading one of the concrete implementation types.
 - `StandardBehaviors.AfterDelete` is now `AfterDeleteAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
 - `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
 - The CommonJS build of coalesce-vue has been dropped - only the ESM build remains. Most projects should be unaffected.
@@ -12,10 +12,10 @@
 
 - Added support for generating Semantic Kernel plugins from CRUD models and custom methods via the new `[SemanticKernel]` attribute. Semantic Kernel is a Microsoft framework that allows you to create AI Agents that can call tool functions provided by your application. This feature is in beta and may undergo breaking changes in non-major releases.
 - Added a set of Roslyn analyzers to help avoid common issues and suggest improvements. These analyzers are included and enabled by default.
-- All endpoints with bodies are now send as JSON instead of form data, with the exception of endpoints that have file parameter(s) and no other non-scalar parameters.
+- All endpoints with bodies are now sent as JSON instead of form data, with the exception of endpoints that have file parameter(s) and no other non-scalar parameters.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
-- `System.Uri` is now support as a type, mapping to a `string` in TypeScript.
+- `System.Uri` is now supported as a type, mapping to a `string` in TypeScript.
 - Interfaces used as parameters in Coalesce-exposed methods are now automatically injected from services, without the need to specify `[InjectAttribute]`. This does not include known data-like interfaces including `IEnumerable`, `ICollection`, and `IFile`.
 - `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
 - `ListViewModel` now has shorthand properties for `$search`, `$filter`, and `$orderBy`.
@@ -23,7 +23,7 @@
 - Added `FileTypeAttribute` to control allowed file types for custom method file parameters.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
 - `c-datetime-picker`: Added prop `showTodayButton`
-- `c-input`: Added a `filter` prop to for enum inputs to restrict the values available for selection.
+- `c-input`: Added a `filter` prop for enum inputs to restrict the values available for selection.
 - `c-select`: When bound to a `ViewModel` or `ViewModelCollection`, selected items are converted to `ViewModel` instances before being emitted so that event handlers will receive the final object instance, rather than the intermediate plain model instance.
 - `c-select`: Now supports binding to a non-many-to-many collection navigation property. Selecting an item will populate the foreign key of the dependent item, and deselecting an item will clear the foreign key. This mechanism is only available when using c-select directly - it is not delegated by c-input.
 - `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
@@ -382,7 +382,7 @@ Notice: Coalesce versions prior to v5 did not use a typical release cadence. The
 - feat: support named options instances with `UseViteDevelopmentServer`.
 - feat: support net8.0 (#317)
 - fix: always allow generator tools to roll forward to latest SDK
-- fix: don't raise a generation error if the only exposed types are services (no models or external types)
+- fix: don't raise a generation error if the only exposed types are services (no models or simple models)
 - fix: #315 improper concatenation to null and other UX issues with c-select
 
 # 4.0.0 2023-08

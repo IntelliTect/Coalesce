@@ -6,6 +6,9 @@
     <ImplicitUsings>true</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <!-- Disable symbols because this project doesn't produce any for some reason -->
+    <IncludeSymbols>false</IncludeSymbols>
+
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>

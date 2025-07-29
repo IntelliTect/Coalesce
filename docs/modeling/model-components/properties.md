@@ -10,7 +10,7 @@ The following kinds of properties may be declared on your models.
 
 ### Primitives, Scalars, & Dates
 
-Most common built-in primitive (numerics, strings, booleans) and other scalar data types (enums, `DateTime`, `DateTimeOffset`, `Guid`, `Uri`), and their nullable variants, are all supported as model properties. Collections of these types are also supported.
+Most common built-in primitive (numerics, strings, booleans) and other scalar data types (enums, [date types](/topics/working-with-dates.md), `Guid`, `Uri`), and their nullable variants, are all supported as model properties. Collections of these types are also supported.
 
 ### Non-mapped POCOs
 

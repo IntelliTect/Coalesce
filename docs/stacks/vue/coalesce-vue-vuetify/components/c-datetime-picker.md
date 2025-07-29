@@ -6,6 +6,8 @@ A general, all-purpose date/time input component that can be used either with [m
 
 <!-- MARKER:summary-end -->
 
+For comprehensive information about working with dates in Coalesce, see [Working with Dates](/topics/working-with-dates.md).
+
 
 ## Examples
 

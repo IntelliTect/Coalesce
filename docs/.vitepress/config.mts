@@ -212,6 +212,7 @@ export default defineConfig({
           autoTitle("/topics/coalesce-swashbuckle"),
           autoTitle("/topics/template-features"),
           autoTitle("/topics/vite-integration"),
+          autoTitle("/topics/working-with-dates"),
 
           autoTitle("/stacks/vue/vue2-to-vue3"),
           {

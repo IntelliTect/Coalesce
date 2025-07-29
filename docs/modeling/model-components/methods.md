@@ -8,7 +8,7 @@ These custom methods allow you to implement any custom server-side functionality
 
 ### Instance Methods
 
-Instance Methods can be declared on your [Entity classes](/modeling/model-types/entities.md). For example:
+Instance Methods can be declared on your [CRUD Models](/modeling/model-types/entities.md). For example:
 
 ```c#
 public class User
@@ -130,7 +130,7 @@ Primitives, Dates, and other Scalars
 
 </td><td>
 
-Most common built-in primitive (numerics, strings, booleans) and other scalar data types (enums, `DateTime`, `DateTimeOffset`, `Guid`, `Uri`), and their nullable variants, are accepted as parameters to be passed from the client to the method call.
+Most common built-in primitive (numerics, strings, booleans) and other scalar data types (enums, [date types](/topics/working-with-dates.md), `Guid`, `Uri`), and their nullable variants, are accepted as parameters to be passed from the client to the method call.
 
 </td></tr>
 
@@ -237,7 +237,7 @@ Primitives, Dates, and other Scalars
 
 </td><td>
 
-Most common built-in primitive and scalar data types (numerics, strings, booleans, enums, `DateTime`, `DateTimeOffset`), and their nullable variants, may be returned from methods.
+Most common built-in primitive and scalar data types (numerics, strings, booleans, enums, [date types](/topics/working-with-dates.md)), and their nullable variants, may be returned from methods.
 
 </td></tr>
 

@@ -234,6 +234,8 @@ In Coalesce Vue, all `DateTimeOffset`-based properties, for both inputs and disp
 
 Fields with a type of `DateTime` are agnostic to time zone and UTC offset and so are not subject to any of the following rules.
 
+For comprehensive information about working with dates and timezones, see [Working with Dates](/topics/working-with-dates.md).
+
 <Prop def="setDefaultTimeZone(timeZoneName: string | null): void" lang="ts" />
 
 Gets or sets the default time zone used by Coalesce. The time zone should be an [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) name, e.g. `"America/Los_Angeles"`.

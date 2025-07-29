@@ -7,7 +7,7 @@ deprecated: true
 `IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute`
 
 ::: warning
-This attribute is deprecated and not recommended for use in new development. Instead, use the native .NET types [`System.DateOnly`](https://learn.microsoft.com/en-us/dotnet/api/system.dateonly) and [`System.TimeOnly`](https://learn.microsoft.com/en-us/dotnet/api/system.timeonly).
+This attribute is deprecated and not recommended for use in new development. Instead, use the native .NET types [`System.DateOnly`](https://learn.microsoft.com/en-us/dotnet/api/system.dateonly) and [`System.TimeOnly`](https://learn.microsoft.com/en-us/dotnet/api/system.timeonly). See [Working with Dates](/topics/working-with-dates.md) for more information.
 :::
 
 Specifies whether a DateTime type will have a date and a time, or only a date.

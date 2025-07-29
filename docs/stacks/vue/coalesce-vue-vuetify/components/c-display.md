@@ -36,6 +36,8 @@ Displaying a standalone date value without a model or other source of metadata:
 <c-display :value="dateProp" format="M/d/yyyy" />
 ```
 
+For comprehensive information about working with and displaying dates in Coalesce, see [Working with Dates](/topics/working-with-dates.md).
+
 ## Props
 
 <Prop def="for: string | Property | Value" lang="ts" />

@@ -145,17 +145,17 @@ The standard data sources, `IntelliTect.Coalesce.StandardDataSource<T>` and its 
 
 ### Default Loading Behavior
 
-When an object or list of objects is requested, the default behavior of the the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of [many-to-many](attributes/many-to-many.md) relationships. This is performed in `StandardDataSource.GetQuery()`, so in order to suppress this behavior in a custom data source, don't build you query off of `base.GetQuery()`, but instead start directly from the `DbSet` for your entity when building your custom query.
+When an object or list of objects is requested, the default behavior of the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of [many-to-many](attributes/many-to-many.md) relationships. This is performed in `StandardDataSource.GetQuery()`, so in order to suppress this behavior in a custom data source, don't build your query off of `base.GetQuery()`, but instead start directly from the `DbSet` for your entity when building your custom query.
 
 Clients can suppress this per-request by setting `.$includes = "none"` on your TypeScript [ViewModel](/stacks/vue/layers/viewmodels.md#viewmodels) or [ListViewModel](/stacks/vue/layers/viewmodels.md#listviewmodels), but note this is not a security mechanism and should only be used to reduce payload size or improve response time.
 
-On the server, you can suppress this behavior by placing `[Read(NoAutoInclude = true)]` on either an entire class (affecting all navigation properties of that type), or on specific navigation properties. When placed on a entity class that holds sensitive data, this can help ensure you don't accidentally leak records due to forgetting to customize the data sources of the types whose navigation properties reference your sensitive entity.
+On the server, you can suppress this behavior by placing `[Read(NoAutoInclude = true)]` on either an entire class (affecting all navigation properties of that type), or on specific navigation properties. When placed on an entity class that holds sensitive data, this can help ensure that you don't accidentally leak records due to forgetting to customize the data sources of the types whose navigation properties reference your sensitive entity.
 
 You can also suppress this for your entire application by placing `[assembly: CoalesceConfiguration(NoAutoInclude = true)]` on the assembly that holds your models.
 
 ### Properties
 
-The following properties are available for use on the `StandardDataSource` any any derived instances.
+The following properties are available for use on the `StandardDataSource` and any derived instances.
 
 <Prop def="CrudContext<TContext> Context" />
 
@@ -229,7 +229,7 @@ All of the methods outlined above can be overridden. A description of each of th
 <Prop def="IQueryable<T> GetQuery(IDataSourceParameters parameters);
 Task<IQueryable<T>> GetQueryAsync(IDataSourceParameters parameters);" />
 
-The method is the one that you will most commonly be override in order to implement custom query logic. The default implementation of GetQueryAsync simply calls GetQuery - be aware of this in cases of complex overrides/inheritance. From this method, you could:
+The method is the one that you will most commonly override in order to implement custom query logic. The default implementation of GetQueryAsync simply calls GetQuery - be aware of this in cases of complex overrides/inheritance. From this method, you could:
 
 - Specify additional query filtering such as row-level security or soft-delete logic. Or, restrict the data source entirely for users or whole roles by returning an empty query.
 - Include additional data using EF's `.Include()` and `.ThenInclude()`.

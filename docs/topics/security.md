@@ -265,7 +265,7 @@ For each of your [CRUD Models](/modeling/model-types/crud.md), Coalesce generate
 
 The default behavior is that all endpoints require an authenticated user (anonymous users are rejected).
 
-These endpoints can be secured by placing any or all of the [[Read], [Create], [Edit], and [Delete] attributes](/modeling/model-components/attributes/security-attribute.md) on the the class. Each attribute can specify required roles for that action, or open that action to anonymous, unauthenticated users, or disable the endpoint entirely.
+These endpoints can be secured by placing any or all of the [[Read], [Create], [Edit], and [Delete] attributes](/modeling/model-components/attributes/security-attribute.md) on the class. Each attribute can specify required roles for that action, or open that action to anonymous, unauthenticated users, or disable the endpoint entirely.
 
 This security is applied to the generated [controllers](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/actions). The `[Read]` attribute on a class **_does not_** affect instances of that class when those instances are present as child properties of other types, since in those scenarios the data will be coming from a different endpoint on a different controller.
 
@@ -690,9 +690,9 @@ Global Query Filters are also the only way to implement database-executed [filte
 
 When a user is saving a model with Coalesce, they can provide values for the model's foreign key properties. When this interaction takes place through a user interface, the user is not likely to produce a foreign key referencing an object that the user is not allowed to view.
 
-A malicious user, however, is a different story. Imagine a user who is brute-forcing the `/save` endpoint on one of your entities, enumerating values of a foreign key. The may be trying to leak data through navigation property values returned by the response from the save, or they may be trying to inject their data into an object graph that they do not otherwise have access to.
+A malicious user, however, is a different story. Imagine a user who is brute-forcing the `/save` endpoint on one of your entities, enumerating values of a foreign key. They may be trying to leak data through navigation property values returned by the response from the save, or they may be trying to inject their data into an object graph that they do not otherwise have access to.
 
-If this scenario sounds like a plausible threat vector your application, be sure to perform sufficient [validation](#server-side-data-validation) of incoming foreign keys to ensure that the user is allowed to use a particular foreign key value before saving it to your database.
+If this scenario sounds like a plausible threat vector for your application, be sure to perform sufficient [validation](#server-side-data-validation) of incoming foreign keys to ensure that the user is allowed to use a particular foreign key value before saving it to your database.
 
 Also consider making any required foreign keys that should not change for the lifetime of an entity into init-only properties (i.e. use the `init` accessor in C# instead of the `set` accessor). While this does not entirely solve the foreign key injection issue, it eliminates the need to validate that a user is not changing the parent of an object if such an operation is not desirable.
 
@@ -706,12 +706,12 @@ For any custom validation that cannot be implemented by attributes, you must imp
 
 ### Attribute Validation
 
-Historically, Coalesce did not provide any automatic, attribute-based validation of incoming data. As of Coalesce 4.0, automatic server side validation using [ValidationAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.validationattribute)-derived attributes on your models is enabled by default.
+Historically, Coalesce did not provide any automatic, attribute-based validation of incoming data. As of Coalesce 4.0, automatic server-side validation using [ValidationAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.validationattribute)-derived attributes on your models is enabled by default.
 
 In addition to any validation attributes present on your model properties and method parameters, there are some other rules that work similarly to the default validation in ASP.NET Core:
 
 - The C# 11 `required` keyword also acts like a `RequiredAttribute`
-- If C# nullable reference types are enabled, non-nullable reference types are required required.
+- If C# nullable reference types are enabled, non-nullable reference types are required.
 - Non-nullable value types are implicitly optional, with the exception of non-nullable foreign keys, which are required.
 
 To disable this functionality for your entire application, disable the corresponding configuration options on `CoalesceOptions`. For example, in Startup.cs or Program.cs:

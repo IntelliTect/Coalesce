@@ -29,56 +29,32 @@ For each simple model found in your application's model, Coalesce will generate:
 
 ## Example Data Model
 
-For example, in the following scenario, the following classes are considered as simple models:
+For example, in the following scenario, these classes are considered simple models:
 
-* `PluginMetadata`, exposed through a getter-only property on `ApplicationPlugin`.
-* `PluginResult`, exposed through a method return on `ApplicationPlugin`. 
-
-`PluginHandler` is not because it not exposed by the model, neither directly nor through any of the other simple models.
-
+* `ReportParameters`, exposed through a method parameter on `ReportService`.
+* `ReportResponse`, exposed through a method return on `ReportService`.
+* `ReportSummary`, exposed through a property on `ReportResponse`.
 
 ``` c#
-public class AppDbContext : DbContext {
-    public DbSet<Application> Applications { get; set; }
-    public DbSet<ApplicationPlugin> ApplicationPlugins { get; set; }
+[Coalesce, Service]
+public class IReportService {
+    public SalesReport GenerateSalesReport(ReportParameters parameters);
 }
 
-public class Application {
-    public int ApplicationId { get; set; }
-    public string Name { get; set; }
-    public ICollection<ApplicationPlugin> Plugins { get; set; }
+public class ReportParameters { 
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public string Category { get; set; }
 }
 
-public class ApplicationPlugin {
-    public int ApplicationPluginId { get; set; }
-    public int ApplicationId { get; set; }
-    public Application Application { get; set; }
-
-    public string TypeName { get; set; }
-
-    private PluginHandler GetInstance() 
-      => ((PluginHandler)Activator.CreateInstance(Type.GetType(TypeName)));
-
-    public PluginMetadata Metadata => GetInstance().GetMetadata();
-
-    public PluginResult Invoke(string action, string data) 
-      => GetInstance().Invoke(Application, action, data);
+public class SalesReport { 
+    public ReportSummary Summary { get; set; }
+    public string[] Data { get; set; }
 }
 
-public abstract class PluginHandler { 
-    public abstract PluginMetadata GetMetadata();
-    public abstract PluginResult Invoke(Application app, string action, string data);
-}
-
-public abstract class PluginMetadata { 
-    public bool Name { get; set; }
-    public string Version { get; set; }
-    public ICollection<string> Actions { get; set; }
-}
-
-public abstract class PluginResult { 
-    public bool Success { get; set; }
-    public string Message { get; set; }
+public class ReportSummary { 
+    public int TotalRecords { get; set; }
+    public DateTime GeneratedAt { get; set; }
 }
 ```
 

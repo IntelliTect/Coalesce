@@ -174,7 +174,7 @@ By default, only dirty properties (and always the primary key) are sent to the s
 
 This improves the handling of concurrent changes being made by multiple users against different fields of the same entity at the same time - specifically, it prevents a user with a stale value of some field X from overwriting a more recent value of X in the database when the user is only making changes to some other property Y and has no intention of changing X. 
 
-Save mode `"surgical"` doesn't help when multiple users are editing field X at the same time - if such a scenario is applicable to your application, you must implement [more advanced handling of concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).
+Save mode `"surgical"` doesn't help when multiple users are editing the same field at the same time - if such a scenario is applicable to your application, you must implement [more advanced handling of concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).
 
 ::: warning
 @[import-md "after":"MARKER:surgical-saves-warning", "before":"MARKER:end-surgical-saves-warning"](../../../modeling/model-types/dtos.md)
@@ -256,6 +256,8 @@ $bulkSave(options: BulkSaveOptions) => ItemResultPromise<TModel>;" lang="ts" />
 Bulk saves save all changes to an object graph in one API call and one database transaction. This includes creation, updates, and deletions of entities.
 
 To use bulk saves, you can work with your ViewModel instances on the client much in the same way you would on the server with Entity Framework. Assign objects to reference navigation properties and modify scalar values to perform creates and updates. To perform deletions, you must call `model.$remove()` on the ViewModel you want to remove, similar how you would call `DbSet<>.Remove(model)` on the server.
+
+When `$bulkSave()` is called, Coalesce will recursively traverse through all reachable navigation properties (and all models that were `$remove()`d) to determine which models will be saved. You can filter this by providing a `predicate` to the `options` parameter.
 
 If the client-side [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors for any of the models being saved in the operation, an error will be thrown.
 
@@ -475,7 +477,7 @@ Enables auto-save for the items in the list, propagating to new items as they're
 
 <Prop def="$stopAutoSave(): void" lang="ts" />
 
-Turns off auto-saving of the items in the list, and turns of propagation of auto-save to any future items if auto-save was previously turned on for the list. Only affects items that are currently in the list's `$items`.
+Turns off auto-saving of the items in the list, and turns off propagation of auto-save to any future items if auto-save was previously turned on for the list. Only affects items that are currently in the list's `$items`.
 
 <Prop def="readonly $isAutoSaveEnabled: boolean" lang="ts" />
 

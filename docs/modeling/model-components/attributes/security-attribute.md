@@ -49,7 +49,7 @@ public class Employee
 
 For **class-level** security, controls saving of existing instances of the type through the generated `/save` and `/bulkSave` endpoints.
 
-For **property-level** security, controls access to the property any time it accepted as input by any Coalesce built-in or custom endpoint. If a `[Read]` attribute is present, one of its roles must be fulfilled in addition to the roles specified (if any) for the `[Edit]` attribute.
+For **property-level** security, controls access to the property any time it is accepted as input by any Coalesce built-in or custom endpoint. If a `[Read]` attribute is present, one of its roles must be fulfilled in addition to the roles specified (if any) for the `[Edit]` attribute.
 
 #### Example Usage
 ``` c#

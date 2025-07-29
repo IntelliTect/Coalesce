@@ -10,7 +10,7 @@ It is highly recommended that all [API Callers](/stacks/vue/layers/api-clients.m
 
 <!-- MARKER:summary-end -->
 
-Progress is indicated with a [Vuetify](https://vuetifyjs.com/) [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) component, and errors are displayed in a [v-alert](https://vuetifyjs.com/en/components/alerts/). [Transitions](https://vuetifyjs.com/en/styles/transitions/) are applied to smoothly fade between the different states the the caller can be in.
+Progress is indicated with a [Vuetify](https://vuetifyjs.com/) [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) component, and errors are displayed in a [v-alert](https://vuetifyjs.com/en/components/alerts/). [Transitions](https://vuetifyjs.com/en/styles/transitions/) are applied to smoothly fade between the different states the caller can be in.
 
 
 ## Examples

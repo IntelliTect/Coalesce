@@ -295,7 +295,7 @@ export default class MyComponent extends Vue {
 <script lang="ts" setup>
 import { PersonViewModel } from "@/viewmodels.g";
 
-// Properties on coalesce-generated ViewModels have built in reactivity 
+// Properties on coalesce-generated ViewModels have built-in reactivity 
 // and don't need to be wrapped ref/reactive unless you're going to replace 
 // the entire top level object with a different instance.
 const person = new PersonViewModel();

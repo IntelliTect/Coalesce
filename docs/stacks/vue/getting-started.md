@@ -106,7 +106,7 @@ During development, no special effort is required to build your frontend code. C
 
 ## Building Pages & Features
 
-Lets say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, and we've ran code generation with `dotnet coalesce`:
+Let's say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, and we've ran code generation with `dotnet coalesce`:
 
 ```c#
 namespace MyApplication.Data.Models
@@ -153,7 +153,7 @@ In the code above, [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-dis
 For simple property types like `string` and `number` you can always use simple template interpolation syntax, but for more complex properties like dates, [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) is handy to use because it includes features like built-in date formatting.
 :::
 
-We then need to add route to this new view. In `MyApplication.Web/src/router.ts`, add a new item to the `routes` array:
+We then need to add a route to this new view. In `MyApplication.Web/src/router.ts`, add a new item to the `routes` array:
 
 ```ts
 // In the `routes` array, add the following item:

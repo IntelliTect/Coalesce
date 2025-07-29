@@ -6,7 +6,7 @@ Models are the core business objects of your application - they serve as the fun
 
 To start building your data model that Coalesce will generate code for, follow the best practices for [EF Core](https://docs.microsoft.com/en-us/ef/core/). Guidance on this topic is available in abundance in the [Entity Framework Core documentation](https://docs.microsoft.com/en-us/ef/core/).
 
-Don't worry about querying or saving data when you're just getting started - Coalesce will provide a lot of that functionality for you, and it is very easy to customize what Coalesce offers later. To get started, just build your entity classes and `DbContext` class. Annotate your `DbContext` class with `[Coalesce]` so that Coalesce will discover it and generate code based off of your context for you. Also ensure that each entity model has a `DbSet` property on the context - this is how Coalesce discovers your entity model types.
+Don't worry about querying or saving data when you're just getting started - Coalesce will provide a lot of that functionality for you, and it is very easy to customize what Coalesce offers later. To get started, just build your entity classes and `DbContext` class. Annotate your `DbContext` class with `[Coalesce]` so that Coalesce will discover it and generate code based on your context for you. Also ensure that each entity model has a `DbSet` property on the context - this is how Coalesce discovers your entity model types.
 
 As you start building, you are highly encouraged to read the sections below. The linked pages explain in greater detail what Coalesce will build for you for each part of your data model.
 
@@ -47,7 +47,7 @@ public class OneToOneChild
 }
 ```
 
-Alternatively, you could also implement a one-to-one like a normal many-to-many relationship, where both sides of the relationship have their own distinct PK, and just never add more than one child to any particular principal entity. A unique constraint on the foreign key column can enforce the singularity of this relationship.
+Alternatively, you could also implement a one-to-one like a normal one-to-many relationship, where both sides of the relationship have their own distinct PK, and just never add more than one child to any particular principal entity. A unique constraint on the foreign key column can enforce the singularity of this relationship.
 
 ### Inheritance (TPH and TPT)
 
@@ -77,7 +77,7 @@ You can place both static and interface methods on your model classes. Any publi
 
 ## Customizing CRUD Operations
 
-Once you've got a solid data model in place, its time to start customizing the way that Coalesce will _read_ your data, as well as the way that it will handle your data when processing _creates_, _updates_, and _deletes_.
+Once you've got a solid data model in place, it's time to start customizing the way that Coalesce will _read_ your data, as well as the way that it will handle your data when processing _creates_, _updates_, and _deletes_.
 
 ### Data Sources
 

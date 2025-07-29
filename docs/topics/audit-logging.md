@@ -2,7 +2,7 @@
 
 Keeping a history of all (or most) of the changes that are made to records in your database can be invaluable, both for [non-repudiation](https://csrc.nist.gov/glossary/term/non_repudiation) (i.e. proving what happened and who did it), and for troubleshooting or debugging.
 
-Coalesce provides a package `IntelliTect.Coalesce.AuditLogging` that adds an easy way to inject this kind of audit logging into your EF Core `DbContext`. It also includes an out-of-the-box view [`c-admin-audit-log-page`](/stacks/vue/coalesce-vue-vuetify/components/c-admin-audit-log-page.md) that enables  browsing of this data on the frontend.
+Coalesce provides a package `IntelliTect.Coalesce.AuditLogging` that adds an easy way to inject this kind of audit logging into your EF Core `DbContext`. It also includes an out-of-the-box view [`c-admin-audit-log-page`](/stacks/vue/coalesce-vue-vuetify/components/c-admin-audit-log-page.md) that enables browsing of this data on the frontend.
 
 ## Setup
 
@@ -36,7 +36,7 @@ public class AuditLog : DefaultAuditLog
 }
 ```
 
-This entity only needs to implement `IAuditLog`, but a default implementation of this interface  `DefaultAuditLog` is provided for your convenience. `DefaultAuditLog` contains additional properties `ClientIp`, `Referrer`, and `Endpoint` for recording information about the HTTP request (if available), and also comes pre-configured for security with Create, Edit, and Delete APIs disabled.
+This entity only needs to implement `IAuditLog`, but a default implementation of this interface `DefaultAuditLog` is provided for your convenience. `DefaultAuditLog` contains additional properties `ClientIp`, `Referrer`, and `Endpoint` for recording information about the HTTP request (if available), and also comes pre-configured for security with Create, Edit, and Delete APIs disabled.
 
 You should further augment this type with any additional properties that you would like to track on each change record. A property to track the user who performed the change should be added, since it is not provided by the default implementation so that you can declare it yourself with the correct type for the foreign key and navigation property.
 
@@ -143,7 +143,7 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 
 The `AuditLogProperty` children of your `IAuditLog` implementation have two properties `OldValueDescription` and `NewValueDescription` that can be used to hold a description of the old and new values. By default, Coalesce will populate the descriptions of foreign key properties with the [List Text](/modeling/model-components/attributes/list-text.md) of the referenced principal entity. This greatly improves the usability of the audit logs, which would otherwise only show meaningless numbers or GUIDs for foreign keys that changed.
 
-This feature will load principal entities into the `DbContext` if they are not already loaded, which could inflict subtle differences in application functionality in rare edge cases if your application is making assumptions about navigation properties not being loaded. Typically though, this will not be an issue and will not lead unintentional information disclosure to clients as long as [IncludeTree](/concepts/include-tree.md)s are used correctly.
+This feature will load principal entities into the `DbContext` if they are not already loaded, which could inflict subtle differences in application functionality in rare edge cases if your application is making assumptions about navigation properties not being loaded. Typically though, this will not be an issue and will not lead to unintentional information disclosure to clients as long as [IncludeTree](/concepts/include-tree.md)s are used correctly.
 
 This feature may be disabled by calling `.WithPropertyDescriptions(PropertyDescriptionMode.None)` inside your call to `.UseCoalesceAuditLogging(...)` in your DbContext configuration. You may also populate these descriptions in your `IAuditOperationContext` implementation that was provided to `.WithAugmentation<T>()`.
 
@@ -165,7 +165,7 @@ Only changes that are tracked by the `DbContext`'s `ChangeTracker` can be audite
 
 A lightweight alternative or addition to full audit logging is audit stamping - the process of setting fields like `CreatedBy` or `ModifiedOn` on each changed entity. This cannot record a history of exact changes, but can at least record the age of an entity and how recently it changed.
 
-Coalesce offers a simple mechanism to register an Entity Framework save interceptor to perform this kind of action (this **does NOT** require the `IntelliTect.Coalesce.AuditLogging` package). This mechanism operations on all saves that go through Entity Framework, eliminating the need to perform this manually in individual Behaviors, Services, and Custom Methods:
+Coalesce offers a simple mechanism to register an Entity Framework save interceptor to perform this kind of action (this **does NOT** require the `IntelliTect.Coalesce.AuditLogging` package). This mechanism operates on all saves that go through Entity Framework, eliminating the need to perform this manually in individual Behaviors, Services, and Custom Methods:
 
 ``` c#
 services.AddDbContext<AppDbContext>(options => options
@@ -216,4 +216,4 @@ public abstract class TrackingBase
 }
 ```
 
-The overload `UseStamping<TStampable>` will provide the `ClaimsPrincipal` from the current HTTP request if present, defaulting to `null` if an operation occurs outside an HTTP request (e.g. a background job). The overloads `UseStamping<TStampable, TService>` and `UseStamping<TStampable, TService1, TService2>` can be used to inject services into the operation. If more than two services are needed, you should wrap those dependencies up into an additional service that takes them as dependencies.
+The overload `UseStamping<TStampable>` will provide the `ClaimsPrincipal` from the current HTTP request if present, defaulting to `null` if an operation occurs outside an HTTP request (e.g. a background job). The overloads `UseStamping<TStampable, TService>` and `UseStamping<TStampable, TService1, TService2>` can be used to inject services into the operation. If more than two services are needed, you should wrap those dependencies into an additional service that takes them as dependencies.

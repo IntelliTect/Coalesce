@@ -138,7 +138,7 @@ If provided and non-false, enables [response caching](/stacks/vue/layers/api-cli
   getItem: (search: string, label: string) => Promise<TModel>
 }" lang="ts" />
 
-A object containing a pair of methods that allowing users to create new items from directly within the c-select if a matching object is not found. 
+An object containing a pair of methods that allow users to create new items from directly within the c-select if a matching object is not found. 
 
 The object must contain the following two methods. You should define these in your component's ``script`` section - don't try to define them inline in your component.
 

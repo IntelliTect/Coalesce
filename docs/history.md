@@ -1,7 +1,7 @@
 
 # Welcome to Coalesce's documentation!
 
-Coalesce is a framework based on ASP.NET Core that makes rapidly building awesome websites much easier. A project that would take a 3 months to complete now takes 1 month. We built this because we got tired of writing all the boiler plate code that is necessary to make amazing sites. 
+Coalesce is a framework based on ASP.NET Core that makes rapidly building awesome web applications much easier. A project that would take 3 months to complete now takes 1 month. We built this because we got tired of writing all the boiler plate code that is necessary to make amazing applications. 
 
 It does this by allowing developers to focus on the creative aspects of the solution. The more mundane parts are generated automatically. This means that you get to focus on data modeling, business logic and front-end development. Coalesce does the plumbing.
 
@@ -55,11 +55,11 @@ Coalesce is specifically designed to meet the needs of web developers. However, 
 
 After you create your classes and the EF data context, Coalesce uses this information to generate code. When the Coalesce CLI (command line interface) is run, the following things happen:
 
-   1. The model is validated to ensure that all the Coalesce specific requirements are met. This includes things like ensuring that all classes have a primary key assigned, validating that linked child objects have a key to their parent, etc. If issues are found, generation stops and the errors are displayed with advise to fix the issues.
-   2. The core files needed for Coalesce are copied to the target project. This includes TypeScript base classes, customizable templates, and other files for extension points. Each file is copied twice, once as a file that can be modified in the project and once as an original file. This ensures that if any changes are made by the user these files Coalesce will not overwrite the your changes.
+   1. The model is validated to ensure that all the Coalesce specific requirements are met. This includes things like ensuring that all classes have a primary key assigned, validating that linked child objects have a key to their parent, etc. If issues are found, generation stops and the errors are displayed with advice to fix the issues.
+   2. The core files needed for Coalesce are copied to the target project. This includes TypeScript base classes, customizable templates, and other files for extension points. Each file is copied twice, once as a file that can be modified in the project and once as an original file. This ensures that if any changes are made by the user these files Coalesce will not overwrite your changes.
    3. The API controllers are generated. One is generated for each object. This includes methods that get a list of items, get a specific item, save an item, etc. 
-   4. The TypeScript view models are created. There are two view models for each object. One is a list view model which allows for getting an displaying lists of a type of object. This includes full functionality to sort, filter, search, page, etc. Additionally, a view model that represents the individual object is also created. This has all the properties and methods of the server side object. This is basically a client-side proxy object for representing and manipulating the object on the server side. These objects seamlessly use the API controllers to interact with the server. 
-   5. Next, the View controller are created. One is create for each model class and provide a tabular view, a card view (for mobile), an editor, and documentation.
+   4. The TypeScript view models are created. There are two view models for each object. One is a list view model which allows for getting and displaying lists of a type of object. This includes full functionality to sort, filter, search, page, etc. Additionally, a view model that represents the individual object is also created. This has all the properties and methods of the server side object. This is basically a client-side proxy object for representing and manipulating the object on the server side. These objects seamlessly use the API controllers to interact with the server. 
+   5. Next, the View controllers are created. One is created for each model class and provides a tabular view, a card view (for mobile), an editor, and documentation.
    6. Finally, the CSHTML views for the controller are created. These are the actual CSHTML for the above controllers. These not only provide administrative view and editing features, but also serve as an example of how to use the framework
 
 
@@ -82,7 +82,7 @@ In 2014 several developers from IntelliTect got together to talk about our craft
 
 ## The Problem
 
-For example, writing AJAX drop down lists with type ahead takes quite a bit of plumbing. Layer onto this the need for view models that allow for validation and saving as the user moves from field to field. We absolutely want want to deliver visually pleasing sites with complex UI paradigms. However, all this excellence adds up: complex view models, complex APIs, data binding, ugh. 
+For example, writing AJAX drop down lists with type ahead takes quite a bit of plumbing. Layer onto this the need for view models that allow for validation and saving as the user moves from field to field. We absolutely want to deliver visually pleasing sites with complex UI paradigms. However, all this excellence adds up: complex view models, complex APIs, data binding, ugh. 
 
 Then there is that sinking feeling when you have to add another class to the project knowing that you are going to need to create all this yet again and you consider taking short cuts. Will there really be more than about 20 items in this table, maybe we don't need paging. Inevitably, the customer asks for admin screens. We consider giving them SQL Server Management Console and then consider using the built in ASP.NET list and editor pages. Better sense wins out and we end up spending two weeks building slick admin pages with paging, searching, sorting, etc. 
 
@@ -107,7 +107,7 @@ Over the next few months we talked about this issue, but couldn't find the right
 
 ## Our Solution
 
-What if we could build the models and business logic and have a tool build everything except the UI? There are great tools like Entity Framework for modeling and good tooling for minimizing duplicate code in user interfaces. And so Coalesce was born, a tool that would bring together the backend and front end development. '
+What if we could build the models and business logic and have a tool build everything except the UI? There are great tools like Entity Framework for modeling and good tooling for minimizing duplicate code in user interfaces. And so Coalesce was born, a tool that would bring together the back-end and front-end development.
 
 Coalesce takes Entity Framework Core models and builds controllers, TypeScript view models, and admin pages automatically. These are built in a general way so that they can be applied to many different scenarios. There will always be pages that need to be written by hand and we intentionally don't support many edge cases in order to keep things simple. There is nothing wrong with building something by hand. 
 

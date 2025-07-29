@@ -3,7 +3,7 @@
 
 `IntelliTect.Coalesce.DataAnnotations.HiddenAttribute`
 
-Mark an property as hidden from the edit, List or All areas.
+Mark a property as hidden from the edit, List or All areas.
 
 ::: danger
 This attribute is **not a security attribute** - it only affects the rendering of the admin pages. It has no impact on data visibility in the API.

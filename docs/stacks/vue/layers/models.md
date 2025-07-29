@@ -109,7 +109,7 @@ bindKeyToRouteOnCreate(vue: Vue, model: Model<ModelType>, routeParamName: string
 &nbsp;
 useBindKeyToRouteOnCreate(model: Model<ModelType>, routeParamName: string = 'id', keepQuery: boolean = false)" lang="ts" idPrefix="member-bindKey" />
 
-When `model` is created (i.e. its primary key becomes non-null), replace the current URL with one that includes uses primary key for the route parameter named by `routeParamName`.
+When `model` is created (i.e. its primary key becomes non-null), replace the current URL with one that includes the primary key for the route parameter named by `routeParamName`.
 
 The query string will not be kept when the route is changed unless `true` is given to `keepQuery`.
 

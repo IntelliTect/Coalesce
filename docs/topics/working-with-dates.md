@@ -85,7 +85,7 @@ You can also use directly with a JavaScript `Date` object:
 
 ### Display Functions
 
-The [modelDisplay](/stacks/vue/layers/models.md#member-modeldisplay), [propDisplay](/stacks/vue/layers/models.md#member-propdisplay), and [valueDisplay](/stacks/vue/layers/models.md#member-valuedisplay) function from the model layer also support the same date handling options as the `c-display` component if you need to format a date on a model programmatically.
+The [modelDisplay](/stacks/vue/layers/models.md#member-modeldisplay), [propDisplay](/stacks/vue/layers/models.md#member-propdisplay), and [valueDisplay](/stacks/vue/layers/models.md#member-valuedisplay) functions from the model layer also support the same date handling options as the `c-display` component if you need to format a date on a model programmatically.
 
 You can also use [date-fns `format` function](https://date-fns.org/docs/format) directly.
 
@@ -188,7 +188,7 @@ services.AddCoalesce(builder => builder
 
 You can configure a default timezone for your client application to control how `DateTimeOffset` values are displayed in the UI. By default, this uses the client computer's timezone and does not need to be configured unless you want to override this. See [Time Zones](/modeling/model-types/models.md#time-zones) for more details.
 
-You can override this on per-component or per-operation basis using the `timeZone` format option described above.
+You can override this on a per-component or per-operation basis using the `timeZone` format option described above.
 
 ```typescript
 // In your main.ts file

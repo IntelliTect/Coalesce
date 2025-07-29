@@ -12,7 +12,7 @@ Check out the [Coalesce project template](/stacks/vue/getting-started.md) to lea
 [![](https://img.shields.io/npm/v/coalesce-vue/latest?color=0176b5&label=coalesce-vue%40latest&logo=npm)](https://www.npmjs.com/package/coalesce-vue)
 
 
-The generated code for the Vue stack all builds on the [coalesce-vue](https://www.npmjs.com/package/coalesce-vue) NPM package which contains most of the core functionality of the Vue stack.  Its version should generally be kept in sync with the [IntelliTect.Coalesce NuGet packages](https://www.nuget.org/packages/IntelliTect.Coalesce/) in your project.
+The generated code for the Vue stack all builds on the [coalesce-vue](https://www.npmjs.com/package/coalesce-vue) NPM package which contains most of the core functionality of the Vue stack. Its version should generally be kept in sync with the [IntelliTect.Coalesce NuGet packages](https://www.nuget.org/packages/IntelliTect.Coalesce/) in your project.
 
 Both the generated code and [coalesce-vue](https://www.npmjs.com/package/coalesce-vue) are split into four layers, with each layer building on the layers underneath. From the bottom, these layers are:
 
@@ -58,7 +58,7 @@ Both the generated code and [coalesce-vue](https://www.npmjs.com/package/coalesc
 
 ## Admin Views
 
-The Vue.js stack for Coalesce provides some high level components that provide functionality of whole pages like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md). 
+The Vue.js stack for Coalesce provides high-level components that provide functionality of whole pages like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md). 
 
 The [Coalesce project template](/stacks/vue/getting-started.md) comes with routes already in place for these page-level components. For example, ``/admin/Person`` for a table, ``/admin/Person/edit`` to create a new ``Person``, and ``/admin/Person/edit/:id`` to edit a ``Person``.
 

@@ -72,10 +72,9 @@ You are responsible for the interesting parts of your application:
 
 ## What is done for me?
 
-Coalesce builds the part of your application that are mundane and
-monotonous to build:
+Coalesce builds the parts of your application that are mundane and monotonous to build:
 
-- Client side [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md) that mirror your data model for both lists and individual objects. Utilize these to rapidly build out your application's various pages.
+- Client-side [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md) that mirror your data model for both lists and individual objects. Utilize these to rapidly build out your application's various pages.
 - APIs to interact with your models via endpoints like List, Get, Save, and more.
 - Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via drop downs, enums, etc. Dropdowns support searching and paging automatically.
 - A complete set of [Admin Pages](/stacks/vue/admin-pages.md) are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.

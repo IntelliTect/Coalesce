@@ -211,6 +211,7 @@ export default defineConfig({
           autoTitle("/topics/upgrading"),
           autoTitle("/topics/coalesce-swashbuckle"),
           autoTitle("/topics/template-features"),
+          autoTitle("/topics/vite-integration"),
 
           autoTitle("/stacks/vue/vue2-to-vue3"),
           {

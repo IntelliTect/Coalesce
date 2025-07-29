@@ -132,7 +132,7 @@ export function createAspNetCoreHmrPlugin({
             // report that as a separate problem.
             if ((ex as any).code === "EPERM") {
               throw new Error(
-                `Attempted to check whether process ${parentPid} was running, but got a permissions error.`
+                `Attempted to check whether process ${parentPid} was running, but got a permissions error.`,
               );
             }
             parentExists = false;
@@ -160,7 +160,7 @@ export function createAspNetCoreHmrPlugin({
           certsExportPromise?.then((certsWereRegenerated) => {
             if (certsWereRegenerated) {
               console.log(
-                "dotnet dev-certs produced a different cert than the previous cached cert. Restarting the vite server..."
+                "dotnet dev-certs produced a different cert than the previous cached cert. Restarting the vite server...",
               );
               setTimeout(() => {
                 // Wait a bit of time because things explode if we do this too soon after listening starts.
@@ -190,7 +190,7 @@ export function createAspNetCoreHmrPlugin({
           })().then((data) => {
             for (const results of data) {
               const packageProblems = Object.entries(
-                results.results?.dependencies ?? {}
+                results.results?.dependencies ?? {},
               )
                 .map(([packageName, data]) => {
                   if (!data.invalid) return;
@@ -199,7 +199,7 @@ export function createAspNetCoreHmrPlugin({
                     <td>${escapeHTML(packageName)}</td>
                     <td>${data.invalid.replace(
                       " from the root project",
-                      ""
+                      "",
                     )}</td>
                     <td>${escapeHTML(data.version)}</td></tr>`;
                 })
@@ -252,7 +252,10 @@ export function createAspNetCoreHmrPlugin({
 
   if (assetBypass) {
     plugins.push(
-      ...createAssetBypassPlugins(configuredHost, offerConfigurationSuggestions)
+      ...createAssetBypassPlugins(
+        configuredHost,
+        offerConfigurationSuggestions,
+      ),
     );
   }
 
@@ -261,7 +264,7 @@ export function createAspNetCoreHmrPlugin({
 
 function createAssetBypassPlugins(
   configuredHost: string | undefined,
-  offerConfigurationSuggestions: boolean
+  offerConfigurationSuggestions: boolean,
 ) {
   let port: number | undefined;
   let base: string;
@@ -279,7 +282,7 @@ function createAssetBypassPlugins(
           // @ts-ignore Node < v18
           ((typeof detail.family === "string" && detail.family === "IPv4") ||
             // @ts-ignore Node >= v18
-            (typeof detail.family === "number" && detail.family === 4))
+            (typeof detail.family === "number" && detail.family === 4)),
       )
       .map((detail) => detail.address)
       .filter((host) => !host.includes("127.0.0.1"));
@@ -338,7 +341,7 @@ function createAssetBypassPlugins(
             ? getConfigurationSuggestionTag(
                 getViteOrigin(),
                 base,
-                path.join(getHtmlTargetDir(resolvedConfig), "index.html")
+                path.join(getHtmlTargetDir(resolvedConfig), "index.html"),
               )
             : []),
         ],
@@ -376,11 +379,11 @@ function createAssetBypassPlugins(
         // where the URL is the vite server
         new RegExp(
           `(new\\s+(?:Shared)?Worker\\s*\\(\\s*(?:new\\s+URL\\s*\\(\\s*(?:/\\* @vite-ignore \\*/)?\\s+)?)(?:''\\s*\\+\\s*)?(["'])https?://[^:]+:${port}${escapeRegex(
-            base
+            base,
           )}`,
-          "g"
+          "g",
         ),
-        "$1window.location.origin + $2" + base
+        "$1window.location.origin + $2" + base,
       );
     },
   });
@@ -425,10 +428,11 @@ function getPackageCheckTag(): HtmlTagDescriptor[] {
     },
   ];
 }
+
 function getConfigurationSuggestionTag(
   viteOrigin: string,
   base: string,
-  indexHtmlPath: string
+  indexHtmlPath: string,
 ) {
   return [
     {
@@ -468,7 +472,7 @@ function getConfigurationSuggestionTag(
       messages[!isSameHostname ? 'unshift' : 'push'](\`If the dev server is not routable from this browser using URL <code>${viteOrigin}</code>, pass either: <ul><li>  <code>{host: 'network-hostname-or-ip-of-dev-server'}</code> (better)</li> <li> <code>{assetBypass: false}</code> (slower)</li></ul> to <code>createAspNetCoreHmrPlugin()</code> in vite.config.ts. Don't commit this change because it will break other developers.\`)
 
       messages.push("You launched locally without <code>UseViteDevelopmentServer()</code>, or didn't build for production before deploying, and are therefore operating off a stale <code>${escapeHTML(
-        indexHtmlPath
+        indexHtmlPath,
       )}</code> file. Or, the vite server crashed.")
 
       document.body.insertAdjacentHTML("beforeend", \`
@@ -530,7 +534,7 @@ async function writeHtml(server: ViteDevServer) {
     outputHtml = await server.transformIndexHtml(
       "/index.html",
       outputHtml,
-      "/"
+      "/",
     );
 
     try {
@@ -538,7 +542,7 @@ async function writeHtml(server: ViteDevServer) {
       config.logger.info(`  Coalesce: Wrote index.html to ${targetDir}`);
     } catch (e) {
       config.logger.error(
-        `  Coalesce: Error writing index.html to ${targetDir}: ${e}`
+        `  Coalesce: Error writing index.html to ${targetDir}: ${e}`,
       );
     }
   }
@@ -577,7 +581,7 @@ function escapeHTML(str: string) {
         '"': "&quot;",
         "\\": "&#92;",
         "/": "&#47;",
-      }[tag]!)
+      })[tag]!,
   );
 }
 
@@ -608,7 +612,7 @@ export async function getCertPaths(certName?: string) {
 
   if (!certificateName) {
     console.error(
-      "getCertPaths: Invalid certificate name. Run this script in the context of an npm/yarn script or pass --name=<<app>> explicitly."
+      "getCertPaths: Invalid certificate name. Run this script in the context of an npm/yarn script or pass --name=<<app>> explicitly.",
     );
     process.exit(-1);
   }
@@ -640,7 +644,7 @@ export async function getCertPaths(certName?: string) {
         (new Date(cert.valid_to).valueOf() - new Date().valueOf()) / 36e5 < 4
       ) {
         console.log(
-          "Local certs are expired, or almost expired. Will regenerate."
+          "Local certs are expired, or almost expired. Will regenerate.",
         );
         valid = false;
       }
@@ -667,7 +671,7 @@ export async function getCertPaths(certName?: string) {
           "Pem",
           "--no-password",
         ],
-        { stdio: "inherit" }
+        { stdio: "inherit" },
       );
 
       proc.on("exit", (code) => {
@@ -739,7 +743,7 @@ async function getNpmDependencies(args: string): Promise<
       {
         maxBuffer: 1024 * 1000,
         cwd: path.dirname(packageJson),
-      }
+      },
     );
     return JSON.parse(stdout);
   } catch (e: any) {

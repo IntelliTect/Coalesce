@@ -100,7 +100,7 @@ The structure of the Web project follows the conventions of both ASP.NET Core an
 The frontend build system uses [Vite](https://vitejs.dev/). You are strongly encouraged to read through at least the first few pages of the [Vite Documentation](https://vitejs.dev/guide/) before getting started on any development.
 :::
 
-During development, no special effort is required to build your frontend code. Coalesce's `UseViteDevelopmentServer` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).
+During development, no special effort is required to build your frontend code. Coalesce's `UseViteDevelopmentServer` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`). For more details on how the Vite integration works, see [Vite Integration](/topics/vite-integration.md).
 
 @[import-md "after":"MARKER:data-modeling", "before":"MARKER:data-modeling-end"](../agnostic/getting-started-modeling.md)
 

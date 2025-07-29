@@ -54,7 +54,7 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
 </tr>
 <tr>
   <td><a href="https://vitejs.dev/"><img class=ext-logo src=/vite-logo.svg></a></td>
-  <td>Vite is the development and build tooling for your frontend Vue code, enabling lightning-fast single-page application development. Coalesce integrates ASP.NET Core and Vite together, streamlining local development to require nothing more than a <code>dotnet run</code> or a single-click launch in your IDE.</td>
+  <td>Vite is the development and build tooling for your frontend Vue code, enabling lightning-fast single-page application development. <a href="./topics/vite-integration">Coalesce integrates Vite</a> with ASP.NET Core, streamlining local development to require nothing more than a <code>dotnet run</code> or a single-click launch in your IDE.</td>
 </tr>
 </tbody>
 </table>

@@ -358,6 +358,10 @@ public class Employee
 }
 ```
 
+::: tip Multiple Roles
+When multiple roles are specified for a security attribute (either as separate parameters like `[Create("Admin", "HR")]` or as a comma-separated string like `[Edit("Admin,HR")]`), they are evaluated with **OR** logic. This means the user only needs to be in **any one** of the specified roles to be granted access - they do not need to be in all roles.
+:::
+
 ### Method Security Attributes
 
 To secure the endpoints generated for your [Custom Methods](/modeling/model-components/methods.md) and [Services](/modeling/model-types/services.md), the [[Execute] attribute](/modeling/model-components/attributes/execute.md) can be used to specify a set of required roles for that endpoint, or to open that endpoint to anonymous users.

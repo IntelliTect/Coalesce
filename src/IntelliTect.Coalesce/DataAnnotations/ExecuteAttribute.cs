@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations;
 namespace IntelliTect.Coalesce.DataAnnotations;
 
 /// <summary>
-/// The method can be excuted by the specified role.
+/// Controls the permissions and other behaviors for executing a custom method.
+/// When multiple roles are specified, they are evaluated with OR logic - the user only needs to be in any one of the specified roles.
 /// </summary>
 [System.AttributeUsage(System.AttributeTargets.Method)]
 public class ExecuteAttribute : SecurityAttribute

@@ -12,6 +12,7 @@ namespace IntelliTect.Coalesce.DataAnnotations;
 /// to send data from the client to the server for that property for any purpose,
 /// including the /save and /bulkSave APIs, and method parameters. 
 /// </para>
+/// <para>When multiple roles are specified, they are evaluated with OR logic - the user only needs to be in any one of the specified roles.</para>
 /// </summary>    
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
 public class EditAttribute : SecurityAttribute

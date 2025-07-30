@@ -15,6 +15,7 @@ namespace IntelliTect.Coalesce.DataAnnotations;
 /// including when the model is a custom method result or a nested child of another model.
 /// </para>
 /// <para>If specified on a property with no <see cref="EditAttribute"/>, the property is read-only.</para>
+/// <para>When multiple roles are specified, they are evaluated with OR logic - the user only needs to be in any one of the specified roles.</para>
 /// </summary>
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
 public class ReadAttribute : SecurityAttribute

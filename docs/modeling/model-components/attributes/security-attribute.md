@@ -112,7 +112,7 @@ For property security, [`[Read]`](#read) and [`[Edit]`](#edit) can be used to ap
 
 <Prop def="public string Roles { get; set; }" ctor=1 /> 
 
-A comma-delimited list of roles that are authorized to take perform the action represented by the attribute. If the current user belongs to any of the listed roles, the action will be allowed.
+A comma-delimited list of roles that are authorized to take perform the action represented by the attribute. If the current user belongs to **any** of the listed roles, the action will be allowed (roles are evaluated with OR logic, not AND).
 
 <Prop def="public SecurityPermissionLevels PermissionLevel { get; set; }" ctor=1 /> 
 

@@ -1779,37 +1779,39 @@ export abstract class ListViewModel<
             if (model) model.$primaryKey = refMap[ref];
           }
 
-          // For ListViewModel, we don't load a specific result object since there's no meaningful root.
-          // Individual ViewModels will be updated via their own mechanisms based on the refMap.
+          const age = performance.now();
+
+          // Since the bulk save response only contains one result object (the primary root),
+          // we need to reload all items in the list to ensure they have the latest server state.
+          const itemsToReload = this.$items.filter(item => 
+            item.$primaryKey != null && item.$primaryKey !== ""
+          );
+
+          if (itemsToReload.length > 0) {
+            // Reload all saved items in parallel to get their latest server state
+            const reloadPromises = itemsToReload.map(async item => {
+              try {
+                await item.$load();
+                // Ensure consistent data age for all reloaded items
+                item._dataAge = age;
+              } catch (error) {
+                console.warn(
+                  `Failed to reload ${item.$metadata.name} with key ${item.$primaryKey} after bulk save:`, 
+                  error
+                );
+              }
+            });
+
+            await Promise.allSettled(reloadPromises);
+          }
+
+          // Still load the primary result if available (for consistency with single ViewModel behavior)
           const result = ret.data.object;
           if (result) {
-            const age = performance.now();
-
-            // Find the first item in the list to load the result into
             const firstItem = this.$items[0];
             if (firstItem) {
               // `purgeUnsaved = true` here (arg3) since the bulk save should have covered the entire object graph.
               firstItem.$loadFromModel(result, age, true);
-            }
-
-            const unloadedTypes = new Set(
-              dataToSend
-                .filter(
-                  (d) =>
-                    d.action == "save" &&
-                    d.model._dataAge != age &&
-                    // We currently don't have a good way to reload additionalRoots items.
-                    !options?.additionalRoots?.includes(d.model)
-                )
-                .map((d) => d.model.$metadata.name)
-            );
-
-            if (unloadedTypes.size > 0) {
-              console.warn(
-                `One or more ${[...unloadedTypes.values()].join(
-                  " and "
-                )} items were saved by a bulk save, but were not returned by the response. The Data Source of the bulk save target may not be returning all entities.`
-              );
             }
           }
         }

@@ -3786,5 +3786,120 @@ describe("ListViewModel", () => {
       expect(titles).toContain("In list");
       expect(titles).toContain("Additional");
     });
+
+    test("reloads all items after successful bulk save", async () => {
+      const list = new CaseListViewModel();
+      
+      // Set up mock endpoints
+      const bulkSaveEndpoint = mockEndpoint(
+        "/Case/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          refMap: { "1": 1, "2": 2 } as any,
+          object: {
+            caseKey: 1,
+            title: "Case 1 Server Updated",
+          },
+        }))
+      );
+
+      const getEndpoint = mockEndpoint(
+        "/Case/get",
+        vitest.fn((req) => {
+          const id = req.url?.split("/").pop();
+          return {
+            wasSuccessful: true,
+            object: {
+              caseKey: parseInt(id || "0"),
+              title: `Case ${id} Server Updated`,
+            },
+          };
+        })
+      );
+
+      // Create items with primary keys so they can be reloaded
+      const item1 = new CaseViewModel({ caseKey: 1, title: "Case 1 Original" });
+      const item2 = new CaseViewModel({ caseKey: 2, title: "Case 2 Original" });
+      list.$items.push(item1, item2);
+
+      // Perform bulk save
+      await list.$bulkSave();
+
+      // Verify bulk save was called
+      expect(bulkSaveEndpoint).toBeCalledTimes(1);
+      
+      // Verify individual items were reloaded (get endpoint called for each item)
+      expect(getEndpoint).toBeCalledTimes(2);
+      
+      // Verify items have the updated data from server
+      expect(item1.title).toBe("Case 1 Server Updated");
+      expect(item2.title).toBe("Case 2 Server Updated");
+
+      bulkSaveEndpoint.destroy();
+      getEndpoint.destroy();
+    });
+
+    test("handles reload failures gracefully", async () => {
+      const list = new CaseListViewModel();
+      
+      // Set up mock endpoints - bulk save succeeds but reload fails
+      const bulkSaveEndpoint = mockEndpoint(
+        "/Case/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          refMap: { "1": 1, "2": 2 } as any,
+          object: {
+            caseKey: 1,
+            title: "Case 1 From Bulk Save",
+          },
+        }))
+      );
+
+      const getEndpoint = mockEndpoint(
+        "/Case/get",
+        vitest.fn((req) => {
+          throw new Error("Reload failed");
+        })
+      );
+
+      // Mock console.warn to verify warning is logged
+      const originalWarn = console.warn;
+      const warnMock = vitest.fn();
+      console.warn = warnMock;
+
+      try {
+        const item1 = new CaseViewModel({ caseKey: 1, title: "Case 1 Original" });
+        const item2 = new CaseViewModel({ caseKey: 2, title: "Case 2 Original" });
+        list.$items.push(item1, item2);
+
+        // Perform bulk save - should not throw even though reload fails
+        await list.$bulkSave();
+
+        // Verify bulk save succeeded
+        expect(bulkSaveEndpoint).toBeCalledTimes(1);
+        
+        // Verify reload was attempted for both items
+        expect(getEndpoint).toBeCalledTimes(2);
+        
+        // Verify warnings were logged for reload failures
+        expect(warnMock).toHaveBeenCalledWith(
+          expect.stringContaining("Failed to reload Case with key 1 after bulk save:"),
+          expect.any(Error)
+        );
+        expect(warnMock).toHaveBeenCalledWith(
+          expect.stringContaining("Failed to reload Case with key 2 after bulk save:"),
+          expect.any(Error)
+        );
+
+        // First item should have data from the bulk save response object
+        expect(item1.title).toBe("Case 1 From Bulk Save");
+        // Second item should still have original data since reload failed and it wasn't the primary object
+        expect(item2.title).toBe("Case 2 Original");
+      } finally {
+        console.warn = originalWarn;
+        bulkSaveEndpoint.destroy();
+        getEndpoint.destroy();
+      }
+    });
   });
 });

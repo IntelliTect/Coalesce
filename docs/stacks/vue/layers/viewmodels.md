@@ -474,6 +474,8 @@ Bulk saves all items in the list and their reachable relationships in one API ca
 
 The implementation uses the first item in `$items` as the primary root and treats all other items as additional roots for the bulk save operation. If the list is empty, an error will be thrown.
 
+After a successful bulk save, all items in the list that have primary keys are automatically reloaded from the server to ensure they have the latest server state, including any server-generated values (computed fields, timestamps, etc.).
+
 Cannot be used when `$modelOnlyMode` is enabled.
 
 <Prop def="$bulkSavePreview(options?: BulkSaveOptions) => {

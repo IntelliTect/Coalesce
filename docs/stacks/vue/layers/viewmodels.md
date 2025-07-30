@@ -137,7 +137,7 @@ This caller is used for both manually-triggered saves in custom code and for aut
 
 When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
 
-When a save is in progress, the names of properties being saved are in contained in `$savingProps`.
+When a save is in progress, the names of properties being saved are contained in `$savingProps`.
 
 Saving behavior can be further customized with `$loadResponseFromSaves` and `$saveMode`, listed below.
 
@@ -326,7 +326,7 @@ Indicates if any properties have validation errors.
 
 ## ListViewModels
 
-The following members can be found on the generated ListViewModels, exported from `viewmodels.g.ts` as `*TypeName*ListViewModel`.
+The following members can be found on the generated ListViewModels, exported from `viewmodels.g.ts` as `<TypeName>ListViewModel`.
 
 ### Data Properties
 
@@ -416,9 +416,25 @@ Getter/setter wrapper for `$params.filter`. Controls the filters that will be se
 <br>
 
 
-<Prop def="$orderBy: number" lang="ts" />
+<Prop def="$orderBy: string | null" lang="ts" />
 
-Getter/setter wrapper for `$params.orderBy`. Controls the sorting that will be requested for invocations of `$load`.
+Getter/setter wrapper for `$params.orderBy`. Controls the ascending sort field that will be requested for invocations of `$load`.
+
+
+<Prop def="$orderByDescending: string | null" lang="ts" />
+
+Getter/setter wrapper for `$params.orderByDescending`. Controls the descending sort field that will be requested for invocations of `$load`.
+
+
+<Prop def="$orderByToggle(field: string): void" lang="ts" />
+
+Toggles the ordering for the specified field through three states: ascending, descending, and none.
+
+- If the field is not currently the orderBy field, it becomes the ascending orderBy field.
+- If the field is the ascending orderBy field, it becomes the descending orderBy field.  
+- If the field is the descending orderBy field, orderBy is cleared (no sorting).
+
+This is particularly useful for implementing sortable table headers that cycle through sort states on click.
 
 
 <Prop def="readonly $pageCount: number" lang="ts" />

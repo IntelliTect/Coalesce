@@ -80,7 +80,7 @@ type DataFreshness = boolean | number;
 export abstract class ViewModel<
   TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = any,
-  TPrimaryKey extends string | number = any
+  TPrimaryKey extends string | number = any,
 > implements Model<TModel["$metadata"]>
 {
   /** See comments on ReactiveFlags_SKIP for explanation.
@@ -164,7 +164,7 @@ export abstract class ViewModel<
   public $setPropDirty(
     propName: PropNames<TModel["$metadata"]>,
     dirty = true,
-    triggerAutosave = true
+    triggerAutosave = true,
   ) {
     const propMeta = this.$metadata.props[propName];
     if (propMeta.dontSerialize) {
@@ -308,7 +308,7 @@ export abstract class ViewModel<
   public $addRule(
     prop: string | Property,
     identifier: string,
-    rule: (val: any) => true | string
+    rule: (val: any) => true | string,
   ) {
     const propName = typeof prop == "string" ? prop : prop.name;
 
@@ -527,7 +527,7 @@ export abstract class ViewModel<
               // the save will keep triggering as fast as possible.
               // Note that this could be a candidate for a user-customizable option
               // in the future.
-              false
+              false,
             );
           }
           this.$savingProps = emptySet;
@@ -586,7 +586,7 @@ export abstract class ViewModel<
 
         const ret = await c.bulkSave(
           { items: itemsToSend },
-          { ...this.$params }
+          { ...this.$params },
         );
 
         if (ret.data?.wasSuccessful) {
@@ -616,23 +616,23 @@ export abstract class ViewModel<
                     d.action == "save" &&
                     d.model._dataAge != age &&
                     // We currently don't have a good way to reload additionalRoots items.
-                    !options?.additionalRoots?.includes(d.model)
+                    !options?.additionalRoots?.includes(d.model),
                 )
-                .map((d) => d.model.$metadata.name)
+                .map((d) => d.model.$metadata.name),
             );
 
             if (unloadedTypes.size > 0) {
               console.warn(
                 `One or more ${[...unloadedTypes.values()].join(
-                  " and "
-                )} items were saved by a bulk save, but were not returned by the response. The Data Source of the bulk save target may not be returning all entities.`
+                  " and ",
+                )} items were saved by a bulk save, but were not returned by the response. The Data Source of the bulk save target may not be returning all entities.`,
               );
             }
           }
         }
 
         return ret;
-      }
+      },
     );
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
@@ -678,7 +678,7 @@ export abstract class ViewModel<
               // the $stableId of the principal end of the relationship
               // The server will use these values to link these two objects together.
             },
-          })
+          }),
         );
       return ret;
     };
@@ -740,7 +740,7 @@ export abstract class ViewModel<
                 // of the reference navigation (`collection.$parent`) is a derived type of the declared type.
                 (collection.$metadata.name == prop.inverseNavigation?.name &&
                   prop.typeDef.derivedTypes?.includes(
-                    collection.$parent.$metadata
+                    collection.$parent.$metadata,
                   ) &&
                   //@ts-expect-error
                   collection.$metadata.foreignKey?.name ==
@@ -869,11 +869,11 @@ export abstract class ViewModel<
             ? // "none" and "delete" items only need their PK:
               mapToDtoFiltered(model, [metadata.keyProp.name])!
             : model.$saveMode == "surgical"
-            ? mapToDtoFiltered(model, [
-                ...model._dirtyProps,
-                metadata.keyProp.name,
-              ])!
-            : mapToDto(model)!,
+              ? mapToDtoFiltered(model, [
+                  ...model._dirtyProps,
+                  metadata.keyProp.name,
+                ])!
+              : mapToDto(model)!,
       });
     }
 
@@ -940,7 +940,7 @@ export abstract class ViewModel<
   public $loadFromModel(
     source: DeepPartial<TModel>,
     isCleanData: DataFreshness = true,
-    purgeUnsaved: boolean = false
+    purgeUnsaved: boolean = false,
   ) {
     if (this.$isDirty && this._autoSaveState?.value?.active) {
       updateViewModelFromModel(
@@ -949,7 +949,7 @@ export abstract class ViewModel<
         true,
         isCleanData,
         false,
-        true
+        true,
       );
     } else {
       updateViewModelFromModel(
@@ -958,7 +958,7 @@ export abstract class ViewModel<
         false,
         isCleanData,
         purgeUnsaved,
-        true
+        true,
       );
       if (isCleanData) {
         this.$isDirty = false;
@@ -1058,7 +1058,7 @@ export abstract class ViewModel<
   public $remove() {
     if (!this.$parent) {
       throw new Error(
-        `Unable to remove ${this.$metadata.name}: item has no parent to be removed from.`
+        `Unable to remove ${this.$metadata.name}: item has no parent to be removed from.`,
       );
     }
 
@@ -1083,7 +1083,7 @@ export abstract class ViewModel<
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
       throw new Error(
-        "$useAutoSave can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API."
+        "$useAutoSave can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API.",
       );
     return this.$startAutoSave(vue, options);
   }
@@ -1170,7 +1170,7 @@ export abstract class ViewModel<
         }
       },
       Math.max(1, wait),
-      debounceOptions
+      debounceOptions,
     );
 
     let isPending = false;
@@ -1227,7 +1227,7 @@ export abstract class ViewModel<
    */
   public $display(
     prop?: PropertyOrName<TModel["$metadata"]>,
-    options?: DisplayOptions
+    options?: DisplayOptions,
   ) {
     if (!prop) return modelDisplay(this, options);
     return propDisplay(this, prop, options);
@@ -1242,11 +1242,11 @@ export abstract class ViewModel<
     prop:
       | ModelCollectionNavigationProperty
       | PropNames<TModel["$metadata"], ModelCollectionNavigationProperty>,
-    initialDirtyData?: any
+    initialDirtyData?: any,
   ) {
     const propMeta = resolvePropMeta<ModelCollectionNavigationProperty>(
       this.$metadata,
-      prop
+      prop,
     );
     var collection: Array<any> | undefined = (this as any as Indexable<TModel>)[
       propMeta.name
@@ -1284,7 +1284,7 @@ export abstract class ViewModel<
   }
 
   /** The metadata representing the type of data that this ViewModel handles. */
-  public declare readonly $metadata: TModel["$metadata"];
+  declare public readonly $metadata: TModel["$metadata"];
 
   constructor(
     // Metadata is set on the prototype by `defineProps`.
@@ -1294,7 +1294,7 @@ export abstract class ViewModel<
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */
     public readonly $apiClient: TApi,
 
-    initialDirtyData?: DeepPartial<TModel> | null
+    initialDirtyData?: DeepPartial<TModel> | null,
   ) {
     this.$data = reactive(convertToModel({}, $metadata)) as any;
 
@@ -1318,7 +1318,7 @@ export abstract class ViewModel<
           if (ctor.collectionProps === undefined) {
             ctor.collectionProps = Object.values($metadata.props).filter(
               (prop) =>
-                prop.type == "collection" && prop.itemType.type == "model"
+                prop.type == "collection" && prop.itemType.type == "model",
             );
           }
           for (const prop of ctor.collectionProps) {
@@ -1359,10 +1359,10 @@ const $protoVersion = Symbol("$protoVersion");
  */
 export function createAbstractProxyViewModelType<
   TModel extends Model<ModelType>,
-  TViewModel extends ViewModel
+  TViewModel extends ViewModel,
 >(
   metadata: ModelType,
-  apiClientCtor: { new (): ModelApiClient<any> }
+  apiClientCtor: { new (): ModelApiClient<any> },
 ): {
   new (initialData?: DeepPartial<TModel> | null): TViewModel;
 } {
@@ -1409,7 +1409,7 @@ export function createAbstractProxyViewModelType<
         return ViewModelFactory.get(
           initialDirtyData.$metadata.name,
           initialDirtyData,
-          false
+          false,
         ) as any;
       }
 
@@ -1439,7 +1439,7 @@ export function createAbstractProxyViewModelType<
           // Convert the ApiClient instance to the target type:
           Object.setPrototypeOf(
             vm.$apiClient,
-            Object.getPrototypeOf($apiClient)
+            Object.getPrototypeOf($apiClient),
           );
           vm.$apiClient.$metadata = $metadata;
 
@@ -1493,7 +1493,7 @@ export interface BulkSaveRequestRawItem {
 export abstract class ListViewModel<
   TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
-  TItem extends ViewModel = ViewModel<TModel, TApi>
+  TItem extends ViewModel = ViewModel<TModel, TApi>,
 > {
   /** Make nonreactive with Vue, preventing ViewModel instance from being wrapped with a Proxy.
    * Instead, we make individual members reactive with `reactive`/`ref`.
@@ -1572,6 +1572,35 @@ export abstract class ListViewModel<
     this.$params.orderBy = val;
   }
 
+  /** Wrapper for `$params.orderByDescending` */
+  public get $orderByDescending() {
+    return this.$params.orderByDescending;
+  }
+  public set $orderByDescending(val) {
+    this.$params.orderByDescending = val;
+  }
+
+  /**
+   * Toggles the orderBy field through three states: ascending, descending, and none.
+   * - If the field is not currently the orderBy field, it becomes the ascending orderBy field.
+   * - If the field is the ascending orderBy field, it becomes the descending orderBy field.
+   * - If the field is the descending orderBy field, orderBy is cleared.
+   */
+  public $orderByToggle(field: PropNames<TModel["$metadata"]>) {
+    const params = this.$params;
+
+    if (params.orderBy == field && !params.orderByDescending) {
+      params.orderBy = null;
+      params.orderByDescending = field;
+    } else if (!params.orderBy && params.orderByDescending == field) {
+      params.orderBy = null;
+      params.orderByDescending = null;
+    } else {
+      params.orderBy = field;
+      params.orderByDescending = null;
+    }
+  }
+
   /**
    * @internal
    */
@@ -1614,7 +1643,7 @@ export abstract class ListViewModel<
     if (!value) {
       if (this._lightweight) {
         throw new Error(
-          "The ListViewModel instance is in model-only mode. Items may only be retrieved from `.$modelItems`, not `.$items`."
+          "The ListViewModel instance is in model-only mode. Items may only be retrieved from `.$modelItems`, not `.$items`.",
         );
       }
       value = new ViewModelCollection(this.$metadata, this);
@@ -1629,7 +1658,7 @@ export abstract class ListViewModel<
   public set $items(val: TItem[]) {
     if (this._lightweight) {
       throw new Error(
-        "The ListViewModel instance is in model-only mode. `.$items` must not be populated."
+        "The ListViewModel instance is in model-only mode. `.$items` must not be populated.",
       );
     }
 
@@ -1725,7 +1754,7 @@ export abstract class ListViewModel<
    */
   get $count() {
     const $count = this.$apiClient.$makeCaller("item", (c) =>
-      c.count(this.$params)
+      c.count(this.$params),
     );
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
@@ -1747,7 +1776,7 @@ export abstract class ListViewModel<
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
       throw new Error(
-        "$useAutoLoad can only be used inside setup(). Consider using $startAutoLoad if you're not using Vue composition API."
+        "$useAutoLoad can only be used inside setup(). Consider using $startAutoLoad if you're not using Vue composition API.",
       );
     return this.$startAutoLoad(vue, options);
   }
@@ -1785,7 +1814,7 @@ export abstract class ListViewModel<
         }
       },
       wait,
-      debounceOptions
+      debounceOptions,
     );
 
     const onChange = () => {
@@ -1800,7 +1829,7 @@ export abstract class ListViewModel<
       // insignificant changes will incorrectly trigger reloads,
       // e.g. when c-admin-table remaps params from the querystring.
       () => JSON.stringify(mapParamsToDto(this.$params)),
-      onChange
+      onChange,
     );
     startAutoCall(this._autoLoadState, vue, watcher, enqueueLoad);
 
@@ -1827,7 +1856,7 @@ export abstract class ListViewModel<
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
       throw new Error(
-        "$useAutoSave can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API."
+        "$useAutoSave can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API.",
       );
     return this.$startAutoSave(vue, options);
   }
@@ -1864,7 +1893,7 @@ export abstract class ListViewModel<
           item.$startAutoSave(state.vue!, state.options);
         }
       },
-      { immediate: true, deep: true }
+      { immediate: true, deep: true },
     );
 
     startAutoCall(state, vue, watcher);
@@ -1890,7 +1919,7 @@ export abstract class ListViewModel<
     public readonly $metadata: TModel["$metadata"],
 
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */
-    public readonly $apiClient: TApi
+    public readonly $apiClient: TApi,
   ) {
     markRaw(this);
   }
@@ -1898,7 +1927,7 @@ export abstract class ListViewModel<
 
 export class ServiceViewModel<
   TMeta extends Service = Service,
-  TApi extends ServiceApiClient<TMeta> = ServiceApiClient<TMeta>
+  TApi extends ServiceApiClient<TMeta> = ServiceApiClient<TMeta>,
 > {
   /** Make nonreactive with Vue, preventing ViewModel instance from being wrapped with a Proxy.
    * Instead, we make individual members reactive with `reactive`/`ref`.
@@ -1920,7 +1949,7 @@ export class ServiceViewModel<
     public readonly $metadata: TMeta,
 
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */
-    public readonly $apiClient: TApi
+    public readonly $apiClient: TApi,
   ) {
     markRaw(this);
   }
@@ -1958,7 +1987,7 @@ export class ViewModelFactory {
 
     if (ViewModel.typeLookup === null) {
       throw Error(
-        "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
+        "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts.",
       );
     }
 
@@ -1972,7 +2001,7 @@ export class ViewModelFactory {
 
     if (!vmCtor) {
       throw Error(
-        `Type ${typeName} does not have a generated ViewModel class. If this is an abstract type, use one of the type's concrete implementations instead.`
+        `Type ${typeName} does not have a generated ViewModel class. If this is an abstract type, use one of the type's concrete implementations instead.`,
       );
     }
 
@@ -2005,7 +2034,7 @@ export class ViewModelFactory {
 
   public static scope<TRet>(
     action: (factory: ViewModelFactory) => TRet,
-    isCleanData: DataFreshness
+    isCleanData: DataFreshness,
   ) {
     if (!ViewModelFactory.current) {
       // There is no current factory. Make a new one.
@@ -2025,7 +2054,7 @@ export class ViewModelFactory {
   public static get(
     typeName: string,
     initialData: any,
-    isCleanData: DataFreshness
+    isCleanData: DataFreshness,
   ) {
     return ViewModelFactory.scope(function (factory) {
       return factory.get(typeName, initialData);
@@ -2048,7 +2077,7 @@ function viewModelCollectionName($metadata: ModelCollectionValue | ModelType) {
 function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
   items: (T | Partial<TModel>)[],
   vmc: ViewModelCollection<ViewModel, TModel>,
-  isCleanData: boolean
+  isCleanData: boolean,
 ) {
   const collectedTypeMeta =
     vmc.$metadata.type == "model"
@@ -2062,7 +2091,7 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
 
     if (typeof val !== "object") {
       throw Error(
-        `Cannot push a non-object to ${viewModelCollectionName(vmc.$metadata)}`
+        `Cannot push a non-object to ${viewModelCollectionName(vmc.$metadata)}`,
       );
     }
     // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
@@ -2074,7 +2103,7 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
       throw Error(
         `Type mismatch - attempted to assign a ${
           val.$metadata.name
-        } to ${viewModelCollectionName(vmc.$metadata)}`
+        } to ${viewModelCollectionName(vmc.$metadata)}`,
       );
     }
 
@@ -2087,7 +2116,7 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
       viewModel = val = ViewModelFactory.get(
         collectedTypeMeta.name,
         val,
-        isCleanData
+        isCleanData,
       ) as unknown as T & ViewModel;
     }
 
@@ -2125,7 +2154,7 @@ function resolveProto(obj: ViewModelCollection<any, any>): Array<any> {
 
 export class ViewModelCollection<
   T extends ViewModel,
-  TModel extends Model
+  TModel extends Model,
 > extends Array<T> {
   readonly $metadata!:
     | ModelCollectionValue
@@ -2139,7 +2168,7 @@ export class ViewModelCollection<
     const viewModelItems = viewModelCollectionMapItems<T, TModel>(
       items,
       this,
-      true
+      true,
     );
 
     return super.push(...viewModelItems);
@@ -2155,7 +2184,7 @@ export class ViewModelCollection<
 
   constructor(
     $metadata: ModelCollectionValue | ModelType,
-    $parent: ViewModel | ListViewModel
+    $parent: ViewModel | ListViewModel,
   ) {
     super();
     Object.defineProperties(this, {
@@ -2257,7 +2286,7 @@ export interface BulkSaveOptions {
  */
 export function defineProps<T extends new () => ViewModel>(
   ctor: T,
-  metadata: ModelType
+  metadata: ModelType,
 ) {
   const props = Object.values(metadata.props);
   const descriptors = {} as PropertyDescriptorMap;
@@ -2298,17 +2327,17 @@ export function defineProps<T extends new () => ViewModel>(
               if (incomingValue != null) {
                 if (typeof incomingValue !== "object") {
                   throw Error(
-                    `Cannot assign a non-object to ${metadata.name}.${propName}`
+                    `Cannot assign a non-object to ${metadata.name}.${propName}`,
                   );
                 } else if ("$metadata" in incomingValue) {
                   if (
                     incomingValue.$metadata.name != prop.typeDef.name &&
                     !prop.typeDef.derivedTypes?.includes(
-                      incomingValue.$metadata
+                      incomingValue.$metadata,
                     )
                   ) {
                     throw Error(
-                      `Type mismatch - attempted to assign a ${incomingValue.$metadata.name} to ${metadata.name}.${propName}`
+                      `Type mismatch - attempted to assign a ${incomingValue.$metadata.name} to ${metadata.name}.${propName}`,
                     );
                   }
                 }
@@ -2321,7 +2350,7 @@ export function defineProps<T extends new () => ViewModel>(
                   incomingValue = ViewModelFactory.get(
                     prop.typeDef.name,
                     incomingValue,
-                    !!incomingValue[prop.typeDef.keyProp.name] // Assume the data is clean if it has a PK
+                    !!incomingValue[prop.typeDef.keyProp.name], // Assume the data is clean if it has a PK
                   );
                 }
 
@@ -2330,7 +2359,7 @@ export function defineProps<T extends new () => ViewModel>(
                 if (autoSaveState?.active && autoSaveState.options?.deep) {
                   incomingValue.$startAutoSave(
                     autoSaveState.vue!,
-                    autoSaveState.options
+                    autoSaveState.options,
                   );
                 }
 
@@ -2363,132 +2392,132 @@ export function defineProps<T extends new () => ViewModel>(
               }
             }
           : prop.type == "collection" && prop.itemType.type == "model"
-          ? function (this: InstanceType<T>, incomingValue: any) {
-              let hasLoaded = false;
-              if (incomingValue == null) {
-                // Usability niceness - make an empty array if the incoming is null.
-                // This shouldn't have any adverse effects that I can think of.
-                // This will cause the viewmodel collections to always be initialized with empty arrays
-                incomingValue = [];
-              } else if (!Array.isArray(incomingValue)) {
-                throw Error(
-                  `Cannot assign a non-array to ${metadata.name}.${propName}`
-                );
-              } else {
-                hasLoaded = true;
-              }
-
-              const $data = (this as any).$data;
-              const old = $data[propName];
-
-              if (old === incomingValue) {
-                // Setting same value. Do nothing.
-                return;
-              }
-
-              const vmc = new ViewModelCollection(
-                prop as ModelCollectionValue,
-                this
-              );
-              // Mark the collection so that we can determine that it has been loaded,
-              // versus a collection that was never loaded because the server never populated it.
-              // This lets us tell if the collection is truly empty, or empty because it isn't loaded.
-              vmc.$hasLoaded = hasLoaded;
-              vmc.push(...incomingValue);
-              $data[propName] = vmc;
-            }
-          : function (this: InstanceType<T>, incomingValue: any) {
-              const $data = (this as any).$data;
-
-              // Optimization: read old data from raw,
-              // because we're just using it to avoid a set if we don't need to,
-              // so we don't want to be wasting time on dependency tracking.
-              const $dataRaw = toRaw($data);
-              const old = $dataRaw[propName];
-
-              // First, check strict equality. This will handle the 90% most common case.
-              if (old === incomingValue) {
-                return;
-              }
-
-              if (
-                prop.type == "object" &&
-                incomingValue != null &&
-                !("$metadata" in incomingValue)
-              ) {
-                convertToModel(incomingValue, prop.typeDef);
-              }
-
-              // If strict equality fails, try to use valueOf() to compare.
-              // valueOf() helps with Date instances that represent the same time value.
-              // If either side is null, it is ok to set $isDirty, since we
-              // know that if we got this far, BOTH sides aren't both null.
-              if (old?.valueOf() !== incomingValue?.valueOf()) {
-                $data[propName] = incomingValue;
-
-                this.$setPropDirty(propName);
-
-                // For collections of primitives,
-                // we need to setup a watcher on the prop so that direct collection
-                // mutations will also trigger the dirty flag.
-                // Its OK that we only set this up in the setter
-                // since there's no point in watching an empty collection.
-                if (
-                  prop.role == "value" &&
-                  prop.type == "collection" &&
-                  !prop.dontSerialize &&
-                  !(this as any)[hasWatcherFlag]
-                ) {
-                  (this as any)[hasWatcherFlag] = true;
-                  if (!watcherFinalizationRegistry) {
-                    //@ts-expect-error
-                    if (!window.__coalesce_warned_collection_watcher) {
-                      //@ts-expect-error
-                      window.__coalesce_warned_collection_watcher = true;
-                      console.warn(
-                        "Unable to setup dirty watcher for collection prop mutations because FinalizationRegistry is not available."
-                      );
-                    }
-                  } else {
-                    // NB: At the time of writing this code this does work to dispose the watcher
-                    // when the VM instance is GC'd. HOWEVER, vue seems to currently be bad
-                    // at removing refs to `script setup` data and is retaining references.
-
-                    // Must capture a weak ref to `this` so that the effect of the watcher
-                    // isn't preventing the viewmodel from being disposed.
-                    const weakThis = new WeakRef(this);
-                    watcherFinalizationRegistry.register(
-                      this,
-                      watch(
-                        () => $data[propName],
-                        () => weakThis.deref()?.$setPropDirty(propName),
-                        { deep: true, flush: "sync" }
-                      )
-                    );
-                  }
+            ? function (this: InstanceType<T>, incomingValue: any) {
+                let hasLoaded = false;
+                if (incomingValue == null) {
+                  // Usability niceness - make an empty array if the incoming is null.
+                  // This shouldn't have any adverse effects that I can think of.
+                  // This will cause the viewmodel collections to always be initialized with empty arrays
+                  incomingValue = [];
+                } else if (!Array.isArray(incomingValue)) {
+                  throw Error(
+                    `Cannot assign a non-array to ${metadata.name}.${propName}`,
+                  );
+                } else {
+                  hasLoaded = true;
                 }
 
-                if (prop.role == "foreignKey" && prop.navigationProp) {
-                  /*
+                const $data = (this as any).$data;
+                const old = $data[propName];
+
+                if (old === incomingValue) {
+                  // Setting same value. Do nothing.
+                  return;
+                }
+
+                const vmc = new ViewModelCollection(
+                  prop as ModelCollectionValue,
+                  this,
+                );
+                // Mark the collection so that we can determine that it has been loaded,
+                // versus a collection that was never loaded because the server never populated it.
+                // This lets us tell if the collection is truly empty, or empty because it isn't loaded.
+                vmc.$hasLoaded = hasLoaded;
+                vmc.push(...incomingValue);
+                $data[propName] = vmc;
+              }
+            : function (this: InstanceType<T>, incomingValue: any) {
+                const $data = (this as any).$data;
+
+                // Optimization: read old data from raw,
+                // because we're just using it to avoid a set if we don't need to,
+                // so we don't want to be wasting time on dependency tracking.
+                const $dataRaw = toRaw($data);
+                const old = $dataRaw[propName];
+
+                // First, check strict equality. This will handle the 90% most common case.
+                if (old === incomingValue) {
+                  return;
+                }
+
+                if (
+                  prop.type == "object" &&
+                  incomingValue != null &&
+                  !("$metadata" in incomingValue)
+                ) {
+                  convertToModel(incomingValue, prop.typeDef);
+                }
+
+                // If strict equality fails, try to use valueOf() to compare.
+                // valueOf() helps with Date instances that represent the same time value.
+                // If either side is null, it is ok to set $isDirty, since we
+                // know that if we got this far, BOTH sides aren't both null.
+                if (old?.valueOf() !== incomingValue?.valueOf()) {
+                  $data[propName] = incomingValue;
+
+                  this.$setPropDirty(propName);
+
+                  // For collections of primitives,
+                  // we need to setup a watcher on the prop so that direct collection
+                  // mutations will also trigger the dirty flag.
+                  // Its OK that we only set this up in the setter
+                  // since there's no point in watching an empty collection.
+                  if (
+                    prop.role == "value" &&
+                    prop.type == "collection" &&
+                    !prop.dontSerialize &&
+                    !(this as any)[hasWatcherFlag]
+                  ) {
+                    (this as any)[hasWatcherFlag] = true;
+                    if (!watcherFinalizationRegistry) {
+                      //@ts-expect-error
+                      if (!window.__coalesce_warned_collection_watcher) {
+                        //@ts-expect-error
+                        window.__coalesce_warned_collection_watcher = true;
+                        console.warn(
+                          "Unable to setup dirty watcher for collection prop mutations because FinalizationRegistry is not available.",
+                        );
+                      }
+                    } else {
+                      // NB: At the time of writing this code this does work to dispose the watcher
+                      // when the VM instance is GC'd. HOWEVER, vue seems to currently be bad
+                      // at removing refs to `script setup` data and is retaining references.
+
+                      // Must capture a weak ref to `this` so that the effect of the watcher
+                      // isn't preventing the viewmodel from being disposed.
+                      const weakThis = new WeakRef(this);
+                      watcherFinalizationRegistry.register(
+                        this,
+                        watch(
+                          () => $data[propName],
+                          () => weakThis.deref()?.$setPropDirty(propName),
+                          { deep: true, flush: "sync" },
+                        ),
+                      );
+                    }
+                  }
+
+                  if (prop.role == "foreignKey" && prop.navigationProp) {
+                    /*
                   If there's a navigation property for this FK,
                   we need to null it out if the current value of the 
                   navigation prop is non-null and the incoming value of the FK does not agree with the  PK on the value of the navigation prop.
                 */
-                  const currentObject = $dataRaw[prop.navigationProp.name];
-                  if (
-                    currentObject != null &&
-                    incomingValue != currentObject[prop.principalKey.name]
-                  ) {
-                    // Set on `$data`, not `this`.
-                    // We don't want to trigger the "model" setter
-                    // since it basically does nothing when the value is null,
-                    // and it would also attempt to perform fixup of the FK prop,
-                    // but we're already doing just that.
-                    $data[prop.navigationProp.name] = null;
+                    const currentObject = $dataRaw[prop.navigationProp.name];
+                    if (
+                      currentObject != null &&
+                      incomingValue != currentObject[prop.principalKey.name]
+                    ) {
+                      // Set on `$data`, not `this`.
+                      // We don't want to trigger the "model" setter
+                      // since it basically does nothing when the value is null,
+                      // and it would also attempt to perform fixup of the FK prop,
+                      // but we're already doing just that.
+                      $data[prop.navigationProp.name] = null;
+                    }
                   }
                 }
-              }
-            },
+              },
     };
   }
 
@@ -2514,13 +2543,13 @@ export type ModelOf<T> = T extends ViewModel<infer TModel> ? TModel : never;
  */
 function rebuildModelCollectionForViewModelCollection<
   TModel extends Model<ModelType> = any,
-  TItem extends ViewModel<TModel, any, any> = any
+  TItem extends ViewModel<TModel, any, any> = any,
 >(
   type: ModelType,
   currentValue: Array<TItem>,
   incomingValue: Array<any>,
   isCleanData: DataFreshness,
-  purgeUnsaved: boolean
+  purgeUnsaved: boolean,
 ) {
   ViewModelFactory.scope((factory) => {
     if (!Array.isArray(currentValue)) {
@@ -2625,14 +2654,14 @@ function rebuildModelCollectionForViewModelCollection<
  * Basic properties on target that are currently being saved will be skipped.
  */
 export function updateViewModelFromModel<
-  TViewModel extends ViewModel<Model<ModelType>>
+  TViewModel extends ViewModel<Model<ModelType>>,
 >(
   target: TViewModel,
   source: Indexable<{}>,
   skipDirty = false,
   isCleanData: DataFreshness = true,
   purgeUnsaved = false,
-  skipStale = false
+  skipStale = false,
 ) {
   ViewModelFactory.scope(function (factory) {
     // Skip if we already applied this source to the target.
@@ -2654,7 +2683,7 @@ export function updateViewModelFromModel<
     // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
     if ("$metadata" in source && source.$metadata != metadata) {
       throw Error(
-        `Attempted to load a ${metadata.name} ViewModel with a ${source.$metadata.name} object.`
+        `Attempted to load a ${metadata.name} ViewModel with a ${source.$metadata.name} object.`,
       );
     }
 
@@ -2683,8 +2712,8 @@ export function updateViewModelFromModel<
           `Skipped loading ${metadata.name} ${
             target.$primaryKey
           }: incoming data is ${(target._dataAge - isCleanData).toFixed(
-            3
-          )}ms older than the last known clean data.`
+            3,
+          )}ms older than the last known clean data.`,
         );
         incomingIsStale = true;
       }
@@ -2718,7 +2747,7 @@ export function updateViewModelFromModel<
               if (skipStale && target.$savingProps.has(prop.foreignKey.name)) {
                 // This is a pretty rare condition and might be unintuitive as to what happened, so log this.
                 console.log(
-                  `Skipped loading '${propName}' on ${metadata.name} ${target.$primaryKey}: property is actively saving.`
+                  `Skipped loading '${propName}' on ${metadata.name} ${target.$primaryKey}: property is actively saving.`,
                 );
               } else if (!incomingIsStale) {
                 // The setter on the viewmodel will handle the conversion to a ViewModel.
@@ -2730,7 +2759,7 @@ export function updateViewModelFromModel<
               currentValue.$loadFromModel(
                 incomingValue,
                 isCleanData,
-                purgeUnsaved
+                purgeUnsaved,
               );
             }
 
@@ -2785,7 +2814,7 @@ export function updateViewModelFromModel<
             currentValue,
             incomingValue,
             isCleanData,
-            purgeUnsaved
+            purgeUnsaved,
           ) as any;
 
           if (currentValue !== newCollection) {
@@ -2826,7 +2855,7 @@ export function updateViewModelFromModel<
           if (skipStale && target.$savingProps.has(propName)) {
             // This is a pretty rare condition and might be unintuitive as to what happened, so log this.
             console.log(
-              `Skipped loading '${propName}' on ${metadata.name} ${target.$primaryKey}: property is actively saving.`
+              `Skipped loading '${propName}' on ${metadata.name} ${target.$primaryKey}: property is actively saving.`,
             );
           } else if (skipDirty && target.$getPropDirty(propName)) {
             // Do nothing. We've historically never logged here, so we'll continue not logging for now.
@@ -2863,7 +2892,7 @@ function startAutoCall(
   state: AutoCallState,
   vue: VueInstance,
   watcher?: () => void,
-  debouncer?: { cancel(): void; }
+  debouncer?: { cancel(): void },
 ) {
   if (!state.hooked.has(vue)) {
     state.hooked.add(vue);
@@ -2872,7 +2901,7 @@ function startAutoCall(
       // Since we can't cleanup hooks in vue3, this hook may be firing for a component
       // that no longer owns this autocall state, in which case it should be ignored.
       () => state.vue === vue && state.cleanup?.(),
-      getInternalInstance(vue)
+      getInternalInstance(vue),
     );
   }
 

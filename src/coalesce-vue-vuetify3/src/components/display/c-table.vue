@@ -17,7 +17,7 @@
                 ['prop-' + header.prop]: !!header.prop,
                 ['th-' + header.value]: !header.prop,
               }"
-              @click="header.sortable ? orderByToggle(header.value) : undefined"
+              @click="header.sortable && listVm.$orderByToggle(header.value)"
             >
               {{ header.text }}
               <v-icon v-if="listVm.$params.orderBy == header.value">
@@ -189,23 +189,6 @@ const headers = computed(() => {
     }),
   ];
 });
-
-// TODO: put orderByToggle on ListViewModel.
-function orderByToggle(field: string) {
-  const list = props.list;
-  const params = list.$params;
-
-  if (params.orderBy == field && !params.orderByDescending) {
-    params.orderBy = null;
-    params.orderByDescending = field;
-  } else if (!params.orderBy && params.orderByDescending == field) {
-    params.orderBy = null;
-    params.orderByDescending = null;
-  } else {
-    params.orderBy = field;
-    params.orderByDescending = null;
-  }
-}
 
 function onRowClick(event: MouseEvent, item: ViewModelType) {
   if (props.editable) return;

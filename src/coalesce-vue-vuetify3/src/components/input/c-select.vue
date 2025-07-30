@@ -104,12 +104,15 @@
           ref="menuContentRef"
           @keydown.capture.down.stop.prevent="
             pendingSelection = Math.min(
-              listItems.length - 1,
+              totalSelectableItems - 1,
               pendingSelection + 1,
             )
           "
           @keydown.capture.up.stop.prevent="
-            pendingSelection = Math.max(0, pendingSelection - 1)
+            pendingSelection = Math.max(
+              createItemIndex == -1 ? -1 : 0,
+              pendingSelection - 1,
+            )
           "
           @keydown.capture.enter.stop.prevent="confirmPendingSelection"
           @keydown.capture.tab.stop.prevent="confirmPendingSelection"
@@ -147,7 +150,7 @@
           <!-- This height shows 7 full items, with a final item partially out 
         of the scroll area to improve visual hints to the user that the can scroll the list. -->
           <v-list
-            class="py-0"
+            class="py-0 d-flex flex-column"
             max-height="302"
             density="compact"
             :aria-multiselectable="effectiveMultiple"
@@ -156,6 +159,10 @@
             <v-list-item
               v-if="createItemLabel"
               class="c-select__create-item"
+              :class="{
+                'c-select__create-item--end': props.create?.position === 'end',
+                'pending-selection': pendingSelection === createItemIndex,
+              }"
               @click="createItem"
               :loading="createItemLoading"
             >
@@ -183,7 +190,9 @@
               :key="item.key"
               @click="onInput(item.model)"
               :value="i"
-              :class="{ 'pending-selection': pendingSelection == i }"
+              :class="{
+                'pending-selection': pendingSelection === i,
+              }"
               :active="item.selected"
               role="option"
               :aria-selected="item.selected"
@@ -278,6 +287,12 @@
 .c-select__create-item {
   .v-list-item__prepend {
     width: 40px;
+  }
+
+  order: -1; // Default: position at start
+
+  &.c-select__create-item--end {
+    order: 999999; // Position at end
   }
 }
 </style>
@@ -525,6 +540,8 @@ const props = withDefaults(
           search: string,
           label: string,
         ) => Promise<SelectedModelTypeSingle>;
+        /** Position of the create item in the list. Defaults to 'start'. */
+        position?: "start" | "end";
       };
     } & /* @vue-ignore */ InheritedProps
   >(),
@@ -857,6 +874,17 @@ const listItems = computed(() => {
   }));
 });
 
+const totalSelectableItems = computed(() => {
+  let count = listItems.value.length;
+  if (createItemLabel.value) count += 1;
+  return count;
+});
+
+const createItemIndex = computed(() => {
+  if (!createItemLabel.value) return -2;
+  return props.create?.position === "end" ? listItems.value.length : -1;
+});
+
 const createItemLabel = computed((): string | null => {
   if (!props.create || !search.value) return null;
 
@@ -1130,6 +1158,16 @@ function onInputKey(event: KeyboardEvent): void {
 }
 
 function confirmPendingSelection(): void {
+  // Check if the pending selection is the create item
+  if (
+    createItemLabel.value &&
+    pendingSelection.value === createItemIndex.value
+  ) {
+    createItem();
+    return;
+  }
+
+  // For regular items, pendingSelection directly corresponds to the item index
   var item = items.value[pendingSelection.value];
   if (!item) return;
   onInput(item);

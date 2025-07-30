@@ -65,10 +65,43 @@
       {{ selectedPlain }}
     </v-col>
   </v-row>
+
+  <h1>c-select with create (start position)</h1>
+  <v-row>
+    <v-col>
+      <c-select
+        for="Person"
+        v-model:objectValue="selectedWithCreate"
+        clearable
+        :create="createConfig"
+      ></c-select>
+    </v-col>
+    <v-col>
+      <div>{{ selectedWithCreate?.name }}</div>
+      <div>ID: {{ selectedWithCreate?.personId }}</div>
+    </v-col>
+  </v-row>
+
+  <h1>c-select with create (end position)</h1>
+  <v-row>
+    <v-col>
+      <c-select
+        for="Person"
+        v-model:objectValue="selectedWithCreateEnd"
+        clearable
+        :create="{ ...createConfig, position: 'end' }"
+      ></c-select>
+    </v-col>
+    <v-col>
+      <div>{{ selectedWithCreateEnd?.name }}</div>
+      <div>ID: {{ selectedWithCreateEnd?.personId }}</div>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup lang="ts">
 import { Person } from "@/models.g";
+import { PersonViewModel } from "@/viewmodels.g";
 import { modelDisplay, useBindToQueryString } from "coalesce-vue";
 import { ref } from "vue";
 
@@ -85,4 +118,21 @@ const selectedModel2 = ref<Person>();
 
 const selectedModel3 = ref<Person>();
 const selectedPlain = ref<string>();
+const selectedWithCreate = ref<Person>();
+const selectedWithCreateEnd = ref<Person>();
+
+const createConfig = {
+  getLabel: (search: string, items: Person[]) =>
+    search ? `Create person '${search}'` : null,
+  getItem: async (search: string, label: string) => {
+    // Simulate API call delay
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+    const person = new PersonViewModel({
+      firstName: search,
+      companyId: 1,
+    });
+    await person.$save();
+    return person;
+  },
+};
 </script>

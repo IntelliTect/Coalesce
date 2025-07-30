@@ -141,7 +141,7 @@ const endpoint = service[props.endpoint];
 const input = ref("");
 const messages = ref<{ role: "user" | "ai"; content: string }[]>([]);
 const history = ref<string>("");
-const minimized = ref(false);
+const minimized = ref(true);
 const inputRef = useTemplateRef("inputRef");
 const historyRef = useTemplateRef("historyRef");
 

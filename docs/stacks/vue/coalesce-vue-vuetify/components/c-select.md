@@ -135,7 +135,8 @@ If provided and non-false, enables [response caching](/stacks/vue/layers/api-cli
 
 <Prop def="create?: {
   getLabel: (search: string, items: TModel[]) => string | false,
-  getItem: (search: string, label: string) => Promise<TModel>
+  getItem: (search: string, label: string) => Promise<TModel>,
+  position?: 'start' | 'end'
 }" lang="ts" />
 
 An object containing a pair of methods that allow users to create new items from directly within the c-select if a matching object is not found. 
@@ -154,6 +155,10 @@ It should return either a `string` that will be presented to the user as an opti
 
 A function that will be invoked when the user clicks the option in the dropdown list described by `getLabel`. It will be given the user's current search term as well as the value of the label returned from `getLabel` as parameters. It must perform the necessary operations to create the new object on the server and then return a reference to that object.
 
+<Prop def="create.position?: 'start' | 'end' = 'start'" lang="ts" id="member-create-position" />
+
+Optional. Controls where the create item appears in the dropdown list. When set to `'start'` (default), the create item appears at the beginning of the list. When set to `'end'`, the create item appears at the end of the list.
+
 </div>
 
 For example:
@@ -170,7 +175,8 @@ createMethods = {
   async getItem(search: string, label: string) {
     const client = new PersonApiClient();
     return (await client.addPersonByName(label)).data.object!;
-  }
+  },
+  position: 'end' // Optional: show create option at end of list
 }
 ```
 

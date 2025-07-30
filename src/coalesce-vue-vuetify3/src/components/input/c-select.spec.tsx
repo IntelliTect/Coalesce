@@ -870,6 +870,64 @@ describe("CSelect", () => {
       expect(model.singleTestId).toBeNull();
     });
 
+    test.each([
+      {
+        position: "start",
+        navKey: "up",
+        description: "at start of list",
+      },
+      {
+        position: "end",
+        navKey: "down",
+        description: "at end of list",
+      },
+    ] as const)(
+      "create item is keyboard navigable when $description",
+      async ({ position, navKey }) => {
+        const wrapper = mountApp(() => (
+          <CSelect
+            model={model}
+            for="singleTest"
+            create={{
+              getLabel(search: string) {
+                if (search == "f") return "Create new item";
+                else return false;
+              },
+              async getItem(search: string, label: string) {
+                return new Test({ testName: label });
+              },
+              position,
+            }}
+          ></CSelect>
+        )).findComponent(CSelect<ComplexModel>);
+
+        const mainInput = wrapper.find("input");
+
+        // Open the menu and set search to show create item
+        await mainInput.trigger("keydown.enter");
+        expect(wrapper.vm.menuOpen).toBeTruthy();
+
+        await flushPromises();
+        const menuWrapper = menuContents();
+        const menuInput = menuWrapper.find("input");
+
+        await menuInput.setValue("f");
+        await flushPromises();
+
+        // Create item should be present
+        const createItem = menuWrapper.find(".c-select__create-item");
+        expect(createItem.text()).toContain("Create new item");
+
+        // Navigate to select the create item
+        await menuInput.trigger(`keydown.${navKey}`);
+        // Select it with Enter
+        await menuInput.trigger("keydown.enter");
+
+        expect(model.singleTest?.testName).toBe("Create new item");
+        expect(wrapper.vm.menuOpen).toBeFalsy();
+      }
+    );
+
     describe.each(["disabled", "readonly"])("%s", (prop) => {
       async function assertNonInteractive(
         wrapper: VueWrapper<

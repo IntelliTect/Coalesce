@@ -3670,4 +3670,236 @@ describe("ListViewModel", () => {
       expect(item2.$isAutoSaveEnabled).toBeFalsy();
     });
   });
+
+  describe("$bulkSave", () => {
+    test("saves all items in the list", async () => {
+      const list = new CaseListViewModel();
+      
+      const bulkSaveEndpoint = mockEndpoint(
+        "/Case/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          refMap: {} as any,
+          object: {
+            caseKey: 1,
+            title: "Case 1 Updated",
+          },
+        }))
+      );
+
+      const item1 = new CaseViewModel({ title: "Case 1" });
+      const item2 = new CaseViewModel({ title: "Case 2" });
+      list.$items.push(item1, item2);
+
+      await list.$bulkSave();
+
+      expect(bulkSaveEndpoint).toBeCalledTimes(1);
+      
+      // Verify that the bulk save includes both items
+      const requestData = JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data);
+      expect(requestData.items).toHaveLength(2);
+      expect(requestData.items[0].data.title).toBe("Case 1");
+      expect(requestData.items[1].data.title).toBe("Case 2");
+
+      bulkSaveEndpoint.destroy();
+    });
+
+    test("throws error when list is empty", async () => {
+      const list = new CaseListViewModel();
+
+      await expect(list.$bulkSave()).rejects.toThrowError(
+        "Cannot perform bulk save on an empty list. Add items to $items before calling $bulkSave."
+      );
+    });
+
+    test("throws error when in model-only mode", () => {
+      const list = new CaseListViewModel();
+      list.$modelOnlyMode = true;
+
+      expect(() => list.$bulkSave()).toThrowError(
+        "Bulk save cannot be used with $modelOnlyMode enabled."
+      );
+    });
+
+    test("$bulkSavePreview returns empty result for empty list", () => {
+      const list = new CaseListViewModel();
+
+      const preview = list.$bulkSavePreview();
+
+      expect(preview.isDirty).toBe(false);
+      expect(preview.errors).toHaveLength(0);
+      expect(preview.items).toHaveLength(0);
+      expect(preview.rawItems).toHaveLength(0);
+    });
+
+    test("$bulkSavePreview throws error when in model-only mode", () => {
+      const list = new CaseListViewModel();
+      list.$modelOnlyMode = true;
+
+      expect(() => list.$bulkSavePreview()).toThrowError(
+        "Bulk save preview cannot be used with $modelOnlyMode enabled."
+      );
+    });
+
+    test("$bulkSavePreview includes all items", () => {
+      const list = new CaseListViewModel();
+      
+      const item1 = new CaseViewModel({ title: "Case 1" });
+      const item2 = new CaseViewModel({ title: "Case 2" });
+      list.$items.push(item1, item2);
+
+      const preview = list.$bulkSavePreview();
+
+      expect(preview.items).toHaveLength(2);
+      expect(preview.rawItems).toHaveLength(2);
+    });
+
+    test("respects BulkSaveOptions predicate", () => {
+      const list = new CaseListViewModel();
+      
+      const item1 = new CaseViewModel({ title: "Include me" });
+      const item2 = new CaseViewModel({ title: "Exclude me" });
+      list.$items.push(item1, item2);
+
+      const preview = list.$bulkSavePreview({
+        predicate: (vm, action) => (vm as any).title !== "Exclude me"
+      });
+
+      expect(preview.items).toHaveLength(1);
+      expect(preview.items[0].data.title).toBe("Include me");
+    });
+
+    test("merges additionalRoots from options", () => {
+      const list = new CaseListViewModel();
+      
+      const item1 = new CaseViewModel({ title: "In list" });
+      list.$items.push(item1);
+
+      const additionalItem = new CaseViewModel({ title: "Additional" });
+
+      const preview = list.$bulkSavePreview({
+        additionalRoots: [additionalItem]
+      });
+
+      expect(preview.items).toHaveLength(2);
+      const titles = preview.items.map(item => item.data.title);
+      expect(titles).toContain("In list");
+      expect(titles).toContain("Additional");
+    });
+
+    test("reloads all items after successful bulk save", async () => {
+      const list = new CaseListViewModel();
+      
+      // Set up mock endpoints
+      const bulkSaveEndpoint = mockEndpoint(
+        "/Case/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          refMap: { "1": 1, "2": 2 } as any,
+          object: {
+            caseKey: 1,
+            title: "Case 1 Server Updated",
+          },
+        }))
+      );
+
+      const getEndpoint = mockEndpoint(
+        "/Case/get",
+        vitest.fn((req) => {
+          const id = req.url?.split("/").pop();
+          return {
+            wasSuccessful: true,
+            object: {
+              caseKey: parseInt(id || "0"),
+              title: `Case ${id} Server Updated`,
+            },
+          };
+        })
+      );
+
+      // Create items with primary keys so they can be reloaded
+      const item1 = new CaseViewModel({ caseKey: 1, title: "Case 1 Original" });
+      const item2 = new CaseViewModel({ caseKey: 2, title: "Case 2 Original" });
+      list.$items.push(item1, item2);
+
+      // Perform bulk save
+      await list.$bulkSave();
+
+      // Verify bulk save was called
+      expect(bulkSaveEndpoint).toBeCalledTimes(1);
+      
+      // Verify individual items were reloaded (get endpoint called for each item)
+      expect(getEndpoint).toBeCalledTimes(2);
+      
+      // Verify items have the updated data from server
+      expect(item1.title).toBe("Case 1 Server Updated");
+      expect(item2.title).toBe("Case 2 Server Updated");
+
+      bulkSaveEndpoint.destroy();
+      getEndpoint.destroy();
+    });
+
+    test("handles reload failures gracefully", async () => {
+      const list = new CaseListViewModel();
+      
+      // Set up mock endpoints - bulk save succeeds but reload fails
+      const bulkSaveEndpoint = mockEndpoint(
+        "/Case/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          refMap: { "1": 1, "2": 2 } as any,
+          object: {
+            caseKey: 1,
+            title: "Case 1 From Bulk Save",
+          },
+        }))
+      );
+
+      const getEndpoint = mockEndpoint(
+        "/Case/get",
+        vitest.fn((req) => {
+          throw new Error("Reload failed");
+        })
+      );
+
+      // Mock console.warn to verify warning is logged
+      const originalWarn = console.warn;
+      const warnMock = vitest.fn();
+      console.warn = warnMock;
+
+      try {
+        const item1 = new CaseViewModel({ caseKey: 1, title: "Case 1 Original" });
+        const item2 = new CaseViewModel({ caseKey: 2, title: "Case 2 Original" });
+        list.$items.push(item1, item2);
+
+        // Perform bulk save - should not throw even though reload fails
+        await list.$bulkSave();
+
+        // Verify bulk save succeeded
+        expect(bulkSaveEndpoint).toBeCalledTimes(1);
+        
+        // Verify reload was attempted for both items
+        expect(getEndpoint).toBeCalledTimes(2);
+        
+        // Verify warnings were logged for reload failures
+        expect(warnMock).toHaveBeenCalledWith(
+          expect.stringContaining("Failed to reload Case with key 1 after bulk save:"),
+          expect.any(Error)
+        );
+        expect(warnMock).toHaveBeenCalledWith(
+          expect.stringContaining("Failed to reload Case with key 2 after bulk save:"),
+          expect.any(Error)
+        );
+
+        // First item should have data from the bulk save response object
+        expect(item1.title).toBe("Case 1 From Bulk Save");
+        // Second item should still have original data since reload failed and it wasn't the primary object
+        expect(item2.title).toBe("Case 2 Original");
+      } finally {
+        console.warn = originalWarn;
+        bulkSaveEndpoint.destroy();
+        getEndpoint.destroy();
+      }
+    });
+  });
 });

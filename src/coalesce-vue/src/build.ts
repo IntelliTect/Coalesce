@@ -223,16 +223,16 @@ export function createAspNetCoreHmrPlugin({
                   message:
                     `<p>NPM packages in <b>${results.description}</b> don't match the versions in <b>package.json</b>.</p>
 
-                    <div class="cta-box">
-                      Please stop the application and run <code>${results.resolution}</code>
-                    </div>
-                    
-                    <table class=packages-table>
-                      <thead><tr>
-                        <td>Package</td>
-                        <td>package.json</td>
-                        <td>${results.description}</td>
-                      </tr></thead>` +
+                  <div class="cta-box">
+                    Stop the application and run <code>${results.resolution}</code> in <strong>${path.basename(path.dirname(process.env.npm_package_json!))}</strong>
+                  </div>
+                  
+                  <table class=packages-table>
+                    <thead><tr>
+                    <td>Package</td>
+                    <td>package.json</td>
+                    <td>${results.description}</td>
+                    </tr></thead>` +
                     packageProblems.join("") +
                     " </table>",
                 };

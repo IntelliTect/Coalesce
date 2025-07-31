@@ -6,6 +6,11 @@
     <ImplicitUsings>true</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <!-- RS1038: This compiler extension should not be implemented in an assembly containing a
+    reference to Microsoft.CodeAnalysis.Workspaces -->
+    <!-- (don't have the time to fix this right now) -->
+    <NoWarn>$(NoWarn);RS1038</NoWarn>
+
     <!-- Disable symbols because this project doesn't produce any since IncludeBuildOutput is false -->
     <IncludeSymbols>false</IncludeSymbols>
 
@@ -16,7 +21,9 @@
   <!-- 
   FOR IMMEDIATE TESTING OF THE ANALYZER IN OTHER PROJECTS, ADD THE FOLLOWING:
     <ItemGroup>
-      <Analyzer Include="D:\Coalesce\src\IntelliTect.Coalesce.Analyzer\bin\Release\netstandard2.0\IntelliTect.Coalesce.Analyzer.dll" />
+      <Analyzer
+  Include="D:\Coalesce\src\IntelliTect.Coalesce.Analyzer\bin\Release\netstandard2.0\IntelliTect.Coalesce.Analyzer.dll"
+  />
     </ItemGroup>
   -->
   <ItemGroup>

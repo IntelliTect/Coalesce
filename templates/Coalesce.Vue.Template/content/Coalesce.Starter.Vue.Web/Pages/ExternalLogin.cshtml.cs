@@ -261,7 +261,7 @@ public class ExternalLoginModel(
 
 
 #if TenantCreateExternal
-    private async Task<Tenant> GetAndAssignUserExternalTenant(
+    private async Task GetAndAssignUserExternalTenant(
         User user,
         UserLoginInfo userLoginInfo,
         string externalTenantId
@@ -290,12 +290,12 @@ public class ExternalLoginModel(
             membership = new() { TenantId = tenant.TenantId, UserId = user.Id };
             db.Add(membership);
 
-            logger.LogInformation($"Automatically granting membership for user {user.Id} into tenant {tenant.TenantId} based on external tenant {externalId}");
+            logger.LogInformation(
+                "Automatically granting membership for user {UserId} into tenant {TenantId} based on external tenant {ExternalId}",
+                user.Id, tenant.TenantId, externalId);
 
             await db.SaveChangesAsync();
         }
-
-        return tenant;
     }
 #endif
 

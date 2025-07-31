@@ -59,8 +59,8 @@ public class ClaimsPrincipalFactory(
         }
 
         identity.AddClaim(new Claim(AppClaimTypes.TenantId, tenantId));
+        
 #endif
-
         // Store all the permissions in a dedicated identity
         // whose RoleClaimType is Permission so that they can still be treated like roles
         // (and so they work with IsInRole and coalesce attribute-based security).
@@ -78,16 +78,17 @@ public class ClaimsPrincipalFactory(
             Options.ClaimsIdentity.UserNameClaimType,
             AppClaimTypes.Permission);
 
-        ClaimsPrincipal result = new([identity, permissionIdentity]);
+        ClaimsPrincipal principal = new([identity, permissionIdentity]);
 
 #if Tenancy
-        if (!user.IsGlobalAdmin && result.IsInRole(AppClaimValues.GlobalAdminRole))
+        if (!user.IsGlobalAdmin && principal.IsInRole(AppClaimValues.GlobalAdminRole))
         {
             // Safety/sanity check that the user hasn't been able to elevate to global admin
             // by some unexpected claim or permission fulfilling the global admin role check:
             throw new SecurityException($"User ${user.Id} unexpectedly appears to be a global admin.");
         }
+
 #endif
-        return result;
+        return principal;
     }
 }

@@ -30,7 +30,7 @@ public class InvitationService(
             Email = email,
             Issued = DateTimeOffset.Now,
             Roles = roles.Select(r => r.Id).ToArray(),
-            TenantId = db.TenantIdOrThrow
+            TenantId = tenantId
         };
 
         var user = await db.Users
@@ -45,7 +45,7 @@ public class InvitationService(
 
         var link = CreateInvitationLink(invitation);
 
-        return await emailService.SendEmailAsync(email, $"Invitation to {tenant.Name}", 
+        return await emailService.SendEmailAsync(email, $"Invitation to {tenant.Name}",
             $"""
             You have been invited to join the <b>{HtmlEncoder.Default.Encode(tenant.Name)}</b> organization.
             Please <a href="{HtmlEncoder.Default.Encode(link)}">click here</a> to accept the invitation.

@@ -94,6 +94,9 @@ public class User : IdentityUser
     public IEnumerable<string>? RoleNames => UserRoles?.Where(ur => ur.Role != null).Select(r => r.Role!.Name!);
 
 #if Tenancy
+    /// <summary>
+    /// Global admins can perform some administrative actions against ALL tenants.
+    /// </summary>
     [Read(AppClaimValues.GlobalAdminRole)]
     [Edit(AppClaimValues.GlobalAdminRole)]
     [Hidden]

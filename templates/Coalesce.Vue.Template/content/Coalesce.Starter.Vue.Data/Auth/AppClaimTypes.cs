@@ -16,7 +16,12 @@ public static class AppClaimTypes
 #if Tenancy
 public static class AppClaimValues
 {
+    /// <summary>
+    /// Global admins can perform some administrative actions against ALL tenants.
+    /// This role is a special role granted by <see cref="User.IsGlobalAdmin" />.
+    /// </summary>
     public const string GlobalAdminRole = "GlobalAdmin";
+    
     public const string NullTenantId = "00000000-0000-0000-0000-000000000000";
 }
 #endif

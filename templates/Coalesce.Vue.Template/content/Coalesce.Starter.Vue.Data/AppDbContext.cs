@@ -212,8 +212,8 @@ public class AppDbContext
 
             // Put the tenantID as the first part of each tenanted entity's PK.
 
-            // This is done in a way that is transparent to Coalesce since Coalesce
-            // and APIs are essentially unconcerned with tenancy - the tenant is always derived
+            // This is done in a way that is transparent to Coalesce so that Coalesce
+            // and its APIs are essentially unconcerned with tenancy - the tenant is always derived
             // from the logged in user. Also because Coalesce doesn't support composite keys.
 
             // Doing this lets us include tenantIDs as part of foreign keys,

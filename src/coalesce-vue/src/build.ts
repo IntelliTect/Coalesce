@@ -172,8 +172,8 @@ export function createAspNetCoreHmrPlugin({
 
         if (checkPackageVersions) {
           const packageVersions = (async () => {
-            const nodeModules = getNpmDependencies("");
             const packageLock = getNpmDependencies("--package-lock-only");
+            const nodeModules = getNpmDependencies("");
 
             return [
               {
@@ -193,15 +193,27 @@ export function createAspNetCoreHmrPlugin({
                 results.results?.dependencies ?? {},
               )
                 .map(([packageName, data]) => {
-                  if (!data.invalid) return;
+                  if (data.invalid) {
+                    return `<tr>
+                      <td>${escapeHTML(packageName)}</td>
+                      <td>${data.invalid
+                        .replace(" from the root project", "")
+                        .replace(/"/g, "")}</td>
+                      <td>${escapeHTML(data.version)}</td></tr>`;
+                  }
 
-                  return `<tr>
-                    <td>${escapeHTML(packageName)}</td>
-                    <td>${data.invalid.replace(
-                      " from the root project",
-                      "",
-                    )}</td>
-                    <td>${escapeHTML(data.version)}</td></tr>`;
+                  if (data.missing) {
+                    const missingVersion =
+                      data.required ||
+                      data.problems
+                        ?.find((p: string) => p.startsWith("missing"))
+                        ?.match(/@([^\s,]+)/)?.[1] ||
+                      "";
+                    return `<tr>
+                      <td>${escapeHTML(packageName)}</td>
+                      <td>${missingVersion}</td>
+                      <td>missing</td></tr>`;
+                  }
                 })
                 .filter((x) => x);
 
@@ -209,10 +221,18 @@ export function createAspNetCoreHmrPlugin({
                 return {
                   wasSuccessful: false,
                   message:
-                    `NPM packages in <b>${results.description}</b> don't match the versions in <b>package.json</b>. Stop the application and run <code>${results.resolution}</code>.<table class=packages-table><thead><tr>
-                    <td>Package</td>
-                    <td>package.json</td>
-                    <td>${results.description}</td></tr></thead>` +
+                    `<p>NPM packages in <b>${results.description}</b> don't match the versions in <b>package.json</b>.</p>
+
+                    <div class="cta-box">
+                      Please stop the application and run <code>${results.resolution}</code>
+                    </div>
+                    
+                    <table class=packages-table>
+                      <thead><tr>
+                        <td>Package</td>
+                        <td>package.json</td>
+                        <td>${results.description}</td>
+                      </tr></thead>` +
                     packageProblems.join("") +
                     " </table>",
                 };
@@ -726,7 +746,9 @@ async function getNpmDependencies(args: string): Promise<
         [packageName: string]: {
           version: string;
           invalid?: string;
-          problem?: string[];
+          problems?: string[];
+          required?: string;
+          missing?: boolean;
         };
       };
     }

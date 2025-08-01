@@ -283,7 +283,7 @@ export function objectToFormData(a: Array<any> | { [s: string]: any } | null) {
   const add = function (key: string, value: any) {
     if (value instanceof Uint8Array) {
       // Add raw binary as blobs
-      value = new Blob([value as Uint8Array<ArrayBuffer>]);
+      value = new Blob([value as any]);
     }
 
     items.append(key, value == null ? "" : value);

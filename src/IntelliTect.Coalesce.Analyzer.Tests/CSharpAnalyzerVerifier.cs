@@ -65,10 +65,17 @@ public abstract class CSharpAnalyzerVerifier<TAnalyzer>
     protected async Task VerifyCodeFixAsync<TCodeFixProvider>(string source, string fixedSource, params DiagnosticResult[] expected)
         where TCodeFixProvider : CodeFixProvider, new()
     {
+        await VerifyCodeFixAsync<TCodeFixProvider>(source, fixedSource, 0, expected);
+    }
+
+    protected async Task VerifyCodeFixAsync<TCodeFixProvider>(string source, string fixedSource, int codeActionIndex, params DiagnosticResult[] expected)
+        where TCodeFixProvider : CodeFixProvider, new()
+    {
         var test = new CSharpCodeFixTest<TAnalyzer, TCodeFixProvider, DefaultVerifier>
         {
             TestCode = source,
-            FixedCode = fixedSource
+            FixedCode = fixedSource,
+            CodeActionIndex = codeActionIndex
         };
         test.DisabledDiagnostics.AddRange(DisabledDiagnostics);
 

@@ -6,5 +6,6 @@
   "[markdown]": {
     // The markdown formatter flat out ruins some of our docs
     "editor.formatOnSave": false
-  }
+  },
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }

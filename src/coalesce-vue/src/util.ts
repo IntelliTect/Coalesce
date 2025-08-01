@@ -19,8 +19,8 @@ export type DeepPartial<T> =
       [P in keyof T]?: T[P] extends Array<infer U>
         ? Array<DeepPartial<U>>
         : T[P] extends ReadonlyArray<infer U>
-        ? ReadonlyArray<DeepPartial<U>>
-        : DeepPartial<T[P]>;
+          ? ReadonlyArray<DeepPartial<U>>
+          : DeepPartial<T[P]>;
     };
 
 export function isNullOrWhitespace(value: string | null | undefined) {
@@ -84,7 +84,7 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
         +timeParts[1], // h
         +timeParts[2], // m
         +timeParts[3], // s
-        +((timeParts[4] || "0") + "00").substring(0, 3) // ms (maybe never used?)
+        +((timeParts[4] || "0") + "00").substring(0, 3), // ms (maybe never used?)
       );
     }
   }
@@ -103,8 +103,8 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
         +parts[4] - (+partTzOffset || 0) * (parts[9] == "-" ? -1 : 1),
         +parts[5] - (+parts[11] || 0) * (parts[9] == "-" ? -1 : 1),
         +parts[6],
-        +((parts[7] || "0") + "00").substring(0, 3)
-      )
+        +((parts[7] || "0") + "00").substring(0, 3),
+      ),
     );
   } else if (parts[4] !== undefined) {
     // Date+Time, without offset specifier
@@ -115,7 +115,7 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
       +parts[4],
       +parts[5],
       +parts[6],
-      +((parts[7] || "0") + "00").substring(0, 3)
+      +((parts[7] || "0") + "00").substring(0, 3),
     );
   } else {
     // Date only, without a time portion:
@@ -126,7 +126,7 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
 export function parseDateUserInput(
   input: string,
   defaultDate: Date,
-  dateKind: DateKind
+  dateKind: DateKind,
 ) {
   // DO NOT do this if the input doesn't have a date part.
   // Behavior of new Date() is generally always Invalid Date if you just give it a time,
@@ -152,7 +152,7 @@ export function parseDateUserInput(
           defaultDate.getHours(),
           defaultDate.getMinutes(),
           defaultDate.getSeconds(),
-          defaultDate.getMilliseconds()
+          defaultDate.getMilliseconds(),
         );
 
         // Find the closest occurrence of the given mm/dd to the defaultDate.
@@ -181,7 +181,7 @@ export function parseDateUserInput(
             mmddyy[0].trim().replace(sep, "/") +
               "/" +
               bestMatch.getFullYear() +
-              " "
+              " ",
           )
           .trim();
       } else {
@@ -193,8 +193,8 @@ export function parseDateUserInput(
               .trim()
               .replace(
                 new RegExp(sep.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "g"),
-                "/"
-              )
+                "/",
+              ),
           )
           .trim();
       }
@@ -211,7 +211,7 @@ export function parseDateUserInput(
     // If the time is all mashed together without a separator, fix it
     input = input.replace(
       /((?:^|\s+)\d{1,2})(\d{2})((?:\s+am|\s+pm)|$)/i,
-      "$1:$2$3"
+      "$1:$2$3",
     );
 
     // If it looks like there's hours but no minutes, fix it:
@@ -254,7 +254,7 @@ export function parseDateUserInput(
  */
 export function objectToQueryString(
   a: Array<any> | { [s: string]: any } | null,
-  includeNull = true
+  includeNull = true,
 ) {
   var items: Array<any> = [];
   const add = function (key: string, value: any) {
@@ -269,7 +269,7 @@ export function objectToQueryString(
         // Other characters here are JSON characters.
         // Asp.net core seems to have no trouble at all taking these in un-encoded.
         .replace(/%(2C|5B|5D|22|7B|7D|3A|20)/g, (str, hex) =>
-          String.fromCharCode(parseInt(hex, 16))
+          String.fromCharCode(parseInt(hex, 16)),
         );
   };
 
@@ -283,7 +283,7 @@ export function objectToFormData(a: Array<any> | { [s: string]: any } | null) {
   const add = function (key: string, value: any) {
     if (value instanceof Uint8Array) {
       // Add raw binary as blobs
-      value = new Blob([value]);
+      value = new Blob([value as Uint8Array<ArrayBuffer>]);
     }
 
     items.append(key, value == null ? "" : value);
@@ -303,7 +303,7 @@ function isScalarFormValue(obj: any) {
 function buildParams(
   prefix: string,
   obj: any,
-  add: (key: string, value: any) => void
+  add: (key: string, value: any) => void,
 ) {
   var name;
 
@@ -318,7 +318,7 @@ function buildParams(
       JSON.stringify(obj, (key, value) => {
         if (value == null) return undefined;
         return value;
-      })
+      }),
     );
   } else if (obj instanceof Array) {
     var isScalarArray = obj.every(isScalarFormValue);
@@ -381,7 +381,7 @@ export const ReactiveFlags_SKIP = "__v_skip" as ReactiveFlags.SKIP;
 export type VueInstance = ComponentPublicInstance | ComponentInternalInstance;
 
 export function getInternalInstance(
-  vue: VueInstance
+  vue: VueInstance,
 ): ComponentInternalInstance {
   return "$" in vue ? vue.$ : vue;
 }

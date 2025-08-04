@@ -54,7 +54,8 @@ public class InvitationService(
 
     public async Task<ItemResult> AcceptInvitation(
         UserInvitation invitation,
-        User acceptingUser
+        User acceptingUser,
+        bool confirmEmail = false
     )
     {
         var tenant = await db.Tenants.FindAsync(invitation.TenantId);
@@ -74,9 +75,10 @@ public class InvitationService(
             return $"{acceptingUser.UserName ?? acceptingUser.Email} is already a member of {tenant.Name}.";
         }
 
-        // Since invitations are emailed to users, they also act as an email confirmation.
-        // If this is not true for your application, delete this line.
-        acceptingUser.EmailConfirmed = true;
+        if (confirmEmail)
+        {
+            acceptingUser.EmailConfirmed = true;
+        }
 
         db.TenantMemberships.Add(new() { UserId = acceptingUser.Id });
         db.UserRoles.AddRange(invitation.Roles.Select(rid => new UserRole { RoleId = rid, UserId = acceptingUser.Id }));

@@ -39,7 +39,10 @@ public class InvitationModel(
         db.ForceSetTenant(Invitation.TenantId);
 
         var user = await db.Users.FindAsync(User.GetUserId());
-        var result = await invitationService.AcceptInvitation(Invitation, user!);
+
+        // Since invitations are emailed to users, they also act as an email confirmation.
+        var result = await invitationService.AcceptInvitation(Invitation, user!, confirmEmail: true);
+
         if (!result.WasSuccessful)
         {
             ModelState.AddModelError(nameof(Code), result.Message);

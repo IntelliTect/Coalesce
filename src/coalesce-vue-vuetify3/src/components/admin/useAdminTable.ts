@@ -62,19 +62,25 @@ export function useAdminTable(list: MaybeRef<ListViewModel>) {
     // If we just gave a named raw location, it would always use the coalesce admin route
     // instead of the user-overridden one (that the user overrides by declaring another
     // route with the same path).
-    return router.resolve({
-      name: "coalesce-admin-item",
-      params: {
-        type: (item?.$metadata ?? meta ?? metadata.value).name,
-        id: item?.$primaryKey,
-      },
-      query: Object.fromEntries(
-        Object.entries(mapParamsToDto(unref(list).$params) || {}).filter(
-          (entry) =>
-            entry[0].startsWith("filter.") || entry[0].startsWith("dataSource")
-        )
-      ),
-    }).fullPath;
+    try {
+      // Will throw if coalesce-admin-item is not a mapped route.
+      return router.resolve({
+        name: "coalesce-admin-item",
+        params: {
+          type: (item?.$metadata ?? meta ?? metadata.value).name,
+          id: item?.$primaryKey,
+        },
+        query: Object.fromEntries(
+          Object.entries(mapParamsToDto(unref(list).$params) || {}).filter(
+            (entry) =>
+              entry[0].startsWith("filter.") ||
+              entry[0].startsWith("dataSource"),
+          ),
+        ),
+      }).fullPath;
+    } catch {
+      return undefined;
+    }
   }
 
   return {

@@ -1,4 +1,7 @@
 <template>
+  <template v-if="creatableTypes.every((t) => !t.route)">
+    <!-- do nothing - no create route -->
+  </template>
   <v-menu v-if="creatableTypes.length > 1">
     <template #activator="{ props }">
       <v-btn
@@ -13,7 +16,7 @@
       <v-list-item
         v-for="item in creatableTypes"
         :key="item.metadata.name"
-        @click="emit('add', item.metadata, item.route)"
+        @click="emit('add', item.metadata, item.route!)"
         :title="item.metadata.displayName"
       ></v-list-item>
     </v-list>
@@ -22,7 +25,7 @@
     v-else-if="creatableTypes.length == 1"
     v-bind="$attrs"
     class="c-admin-table-toolbar--button-create"
-    @click="emit('add', creatableTypes[0].metadata, creatableTypes[0].route)"
+    @click="emit('add', creatableTypes[0].metadata, creatableTypes[0].route!)"
   >
     <v-icon :start="$vuetify.display.mdAndUp">$plus</v-icon>
     <span class="hidden-sm-and-down">{{ label }}</span>

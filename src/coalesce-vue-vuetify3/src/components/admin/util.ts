@@ -10,7 +10,7 @@ import { Router } from "vue-router";
 export function getRefNavRoute(
   router: Router,
   owner: Model,
-  prop: ModelReferenceNavigationProperty
+  prop: ModelReferenceNavigationProperty,
 ) {
   const item = (owner as any)[prop.name];
   const fk = (owner as any)[prop.foreignKey.name] ?? item?.$primaryKey;
@@ -21,18 +21,22 @@ export function getRefNavRoute(
   // If we just gave a named raw location, it would always use the coalesce admin route
   // instead of the user-overridden one (that the user overrides by declaring another
   // route with the same path).
-  return router.resolve({
-    name: "coalesce-admin-item",
-    params: {
-      type: item?.$metadata.name ?? prop.typeDef.name,
-      id: fk,
-    },
-  }).fullPath;
+  try {
+    return router.resolve({
+      name: "coalesce-admin-item",
+      params: {
+        type: item?.$metadata.name ?? prop.typeDef.name,
+        id: fk,
+      },
+    }).fullPath;
+  } catch {
+    return undefined;
+  }
 }
 
 export function copyParamsToNewViewModel(
   vm: ViewModel,
-  params: ListParameters
+  params: ListParameters,
 ) {
   vm.$params.dataSource = params.dataSource;
   if (params.filter) {

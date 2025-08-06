@@ -29,7 +29,15 @@
                   : viewModel.$items.flatMap((i) => [i.$save, i.$bulkSave])),
               ],
         }"
-        @click:item="(item) => $router.push(getItemRoute(item))"
+        @click:item="
+          (item) =>
+            $router.push(
+              getItemRoute(item) ??
+                (() => {
+                  throw new Error('Unable to get admin route for item');
+                })(),
+            )
+        "
       >
         <template #item-append="{ item, isHorizontalScrollbarVisible }">
           <td

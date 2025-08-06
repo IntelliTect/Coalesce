@@ -163,8 +163,14 @@ public class AppDbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        builder.Entity<User>(e => 
+        {
+            e.Property(e => e.Id).HasMaxLength(36);
+        });
+
         builder.Entity<Role>(e =>
         {
+            e.Property(e => e.Id).HasMaxLength(36);
             e.PrimitiveCollection(e => e.Permissions).ElementType().HasConversion<string>();
 
 #if Tenancy

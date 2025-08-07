@@ -237,11 +237,17 @@ public class AppDbContext
                 var pkProp = key.Properties.Single();
                 var oldPkGenerated = pkProp.ValueGenerated;
 
-                if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+                if (
+                    Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite" && 
+                    new ReflectionTypeViewModel(pkProp.ClrType).PureType.IsNumber && 
+                    pkProp.ValueGenerated is ValueGenerated.OnAdd &&
+                    pkProp.GetValueGeneratorFactory() is null
+                )
                 {
-                    // Unfortunately for Sqlite and unit testing, we can't make the tenant part of the PK.
+                    
+                    // Unfortunately for Sqlite and unit testing, we can't have composite keys where part of the key is autoincrement.
                     // See https://stackoverflow.com/questions/49592274/how-to-create-autoincrement-column-in-sqlite-using-ef-core
-                    // So, do the next best thing and add a second FK to all relationships that includes the tenantID.
+                    // So, do the next best thing and add a second FK that includes the tenantID.
 
                     var tenantedAk = model.AddKey([tenantIdProp, pkProp])!;
 
@@ -260,9 +266,8 @@ public class AppDbContext
                 }
                 else
                 {
-                    // SQL Server:
+                    // Ideal scenario: Add the TenantId as the first column in a composite PK for the table:
 
-                    // TenantID goes first, for clustering.
                     var newPk = model.BaseType != null
                         // A non-null `BaseType` indicates a concrete type in a TPH or TPT setup,
                         // which can only inherit the PK from their base type.
@@ -288,6 +293,7 @@ public class AppDbContext
     class TenantIdValueGenerator : ValueGenerator<string>
     {
         public override bool GeneratesTemporaryValues => false;
+        public override bool GeneratesStableValues => true;
 
         public override string Next(EntityEntry entry) => ((AppDbContext)entry.Context).TenantIdOrThrow;
     }

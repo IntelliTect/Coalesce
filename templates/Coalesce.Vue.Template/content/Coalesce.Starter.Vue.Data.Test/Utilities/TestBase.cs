@@ -11,7 +11,7 @@ namespace Coalesce.Starter.Vue.Data.Test;
 
 public class TestBase : IDisposable
 {
-    private SqliteDatabaseFixture DbFixture { get; }
+    private SqliteDatabaseFixture DbFixture { get; } = new();
 
     private MockerScope? _CurrentMocker;
     private readonly List<Action<MockerScope>> _persistentSetups = [];
@@ -22,12 +22,13 @@ public class TestBase : IDisposable
 
     protected ClaimsPrincipal CurrentUser { get; set; } = new();
 
-    public TestBase()
+    static TestBase()
     {
         ReflectionRepository.Global.AddAssembly<AppDbContext>();
+    }
 
-        DbFixture = new SqliteDatabaseFixture();
-
+    public TestBase()
+    {
         _CurrentMocker = BeginMockScope(standalone: false);
     }
 

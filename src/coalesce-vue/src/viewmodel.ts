@@ -2228,7 +2228,7 @@ export class ViewModelCollection<
 }
 
 type DebounceOptions = {
-  /** Time, in milliseconds, to delay. Passed as the second parameter to lodash's `debounce` function. */
+  /** Milliseconds to delay after a change is detected. Passed as the second parameter to lodash's `debounce` function. */
   wait?: number;
   /** Additional options to pass to the third parameter of lodash's `debounce` function. */
   debounce?: Parameters<typeof debounce>[2];

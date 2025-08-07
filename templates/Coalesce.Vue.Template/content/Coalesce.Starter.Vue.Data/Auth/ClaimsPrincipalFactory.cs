@@ -20,6 +20,7 @@ public class ClaimsPrincipalFactory(
             // User doesn't have a selected tenant. Pick one for them.
             var membership = await db.TenantMemberships
                 .IgnoreTenancy()
+                .AsNoTracking()
 #if TrackingBase
                 .OrderBy(m => m.CreatedOn) // Prefer oldest membership
 #endif
@@ -67,6 +68,7 @@ public class ClaimsPrincipalFactory(
         var permissions = (await db.Entry(user)
             .Collection(u => u.UserRoles!)
             .Query()
+            .AsNoTracking()
             .Select(r => r.Role!)
             .ToListAsync())
             .SelectMany(role => role.Permissions!)

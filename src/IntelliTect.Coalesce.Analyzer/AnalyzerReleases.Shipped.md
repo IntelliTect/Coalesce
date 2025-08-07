@@ -15,6 +15,9 @@ COA0005 | Usage | Warning | AttributeUsageAnalyzer
 COA0006 | Usage | Warning | AttributeUsageAnalyzer
 COA0007 | Usage | Warning | AttributeUsageAnalyzer
 COA0008 | Usage | Warning | AttributeUsageAnalyzer
+COA0009 | Usage | Error | InvalidBehaviorsOverrideWithDenyAllAnalyzer
+COA0010 | Usage | Error | InvalidBehaviorsOverrideWithDenyAllAnalyzer
+COA0011 | Usage | Error | InvalidBehaviorsOverrideWithDenyAllAnalyzer
 COA0201 | Usage | Info | AttributeUsageAnalyzer
 COA1001 | Style | Info | Coalesce1001_SimplifyItemResult
 COA1002 | Style | Hidden | Tags unnecessary parts for COA1001

@@ -1,4 +1,5 @@
 using Coalesce.Starter.Vue.Data.Coalesce;
+using IntelliTect.Coalesce.TypeDefinition;
 #if AuditLogs
 using IntelliTect.Coalesce.AuditLogging;
 #endif
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using System.Linq.Expressions;
 using System.Security.Cryptography;

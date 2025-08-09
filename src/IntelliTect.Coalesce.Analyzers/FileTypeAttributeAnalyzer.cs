@@ -63,19 +63,23 @@ namespace IntelliTect.Coalesce.Analyzers
         private static bool IsFileParameter(IParameterSymbol parameter)
         {
             var typeName = parameter.Type.ToDisplayString();
+            var paramName = parameter.Name;
             
-            // Check for common file-related types
-            return typeName.Contains("IFormFile") ||
-                   typeName.Contains("Stream") ||
-                   typeName.Contains("byte[]") ||
-                   (parameter.Name.Contains("file", StringComparison.OrdinalIgnoreCase) && 
-                    (typeName.Contains("string") || typeName.Contains("byte")));
+            // Check for common file-related types more explicitly
+            var isFormFile = typeName.Contains("IFormFile") || typeName.EndsWith("IFormFile");
+            var isStream = typeName.Contains("Stream");
+            var isByteArray = typeName.Contains("byte[]");
+            var isFileParam = paramName.Contains("file", StringComparison.OrdinalIgnoreCase) && 
+                             (typeName.Contains("string") || typeName.Contains("byte"));
+            
+            return isFormFile || isStream || isByteArray || isFileParam;
         }
 
         private static bool HasFileTypeAttribute(IParameterSymbol parameter)
         {
             return parameter.GetAttributes()
-                .Any(attr => attr.AttributeClass?.Name == "FileTypeAttribute");
+                .Any(attr => attr.AttributeClass?.Name == "FileTypeAttribute" ||
+                           attr.AttributeClass?.ToDisplayString() == "IntelliTect.Coalesce.DataAnnotations.FileTypeAttribute");
         }
 
         private static bool IsServiceMethodExposedByInterface(ISymbol? containingMethod)

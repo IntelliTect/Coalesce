@@ -93,7 +93,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         b.Line("try");
                         using (b.Block())
                         {
-                            b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
+                            // Use appropriate parsing method based on the date type
+                            if (Model.PrimaryKey.Type.IsDateTime)
+                            {
+                                b.Line($"var parsedId = DateTime.Parse(id);");
+                            }
+                            else if (Model.PrimaryKey.Type.NullableValueUnderlyingType.IsA<DateOnly>())
+                            {
+                                b.Line($"var parsedId = DateOnly.Parse(id);");
+                            }
+                            else if (Model.PrimaryKey.Type.IsDateTimeOffset)
+                            {
+                                b.Line($"var parsedId = DateTimeOffset.Parse(id);");
+                            }
+                            else
+                            {
+                                // Fallback to Convert.ChangeType for other date types
+                                b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
+                            }
                             b.Line("return GetImplementation(parsedId, parameters, dataSource);");
                         }
                         b.Line("catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException)");
@@ -192,7 +209,24 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         b.Line("try");
                         using (b.Block())
                         {
-                            b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
+                            // Use appropriate parsing method based on the date type
+                            if (Model.PrimaryKey.Type.IsDateTime)
+                            {
+                                b.Line($"var parsedId = DateTime.Parse(id);");
+                            }
+                            else if (Model.PrimaryKey.Type.NullableValueUnderlyingType.IsA<DateOnly>())
+                            {
+                                b.Line($"var parsedId = DateOnly.Parse(id);");
+                            }
+                            else if (Model.PrimaryKey.Type.IsDateTimeOffset)
+                            {
+                                b.Line($"var parsedId = DateTimeOffset.Parse(id);");
+                            }
+                            else
+                            {
+                                // Fallback to Convert.ChangeType for other date types
+                                b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
+                            }
                             b.Line("return DeleteImplementation(parsedId, new DataSourceParameters(), dataSource, behaviors);");
                         }
                         b.Line("catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException)");

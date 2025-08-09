@@ -46,9 +46,56 @@ public class Role
             }
 #endif
 
+            // Prevent removing UserAdmin permission if it would leave no user admins
+            if (kind == SaveKind.Update && oldItem != null)
+            {
+                var oldHadUserAdmin = oldItem.Permissions?.Contains(Permission.UserAdmin) == true;
+                var newHasUserAdmin = item.Permissions?.Contains(Permission.UserAdmin) == true;
+                
+                if (oldHadUserAdmin && !newHasUserAdmin)
+                {
+                    var result = CheckWouldLeaveNoUserAdmins(item.Id);
+                    if (!result.WasSuccessful) return result;
+                }
+            }
+
             item.NormalizedName = roleManager.NormalizeKey(item.Name);
 
             return base.BeforeSave(kind, oldItem, item);
+        }
+
+        public override ItemResult BeforeDelete(Role item)
+        {
+            // Prevent deleting role with UserAdmin permission if it would leave no user admins
+            if (item.Permissions?.Contains(Permission.UserAdmin) == true)
+            {
+                var result = CheckWouldLeaveNoUserAdmins(item.Id);
+                if (!result.WasSuccessful) return result;
+            }
+
+            return base.BeforeDelete(item);
+        }
+
+        private ItemResult CheckWouldLeaveNoUserAdmins(string roleIdToExclude)
+        {
+            // Count users who have UserAdmin permission through roles other than the one being modified/deleted
+            var adminUserCount = Db.Users
+                .Where(u => u.UserRoles!.Any(ur => 
+                    ur.RoleId != roleIdToExclude && 
+                    ur.Role!.Permissions!.Contains(Permission.UserAdmin)))
+                .Count();
+
+#if Tenancy
+            // In tenancy mode, also check for global admins
+            adminUserCount += Db.Users.Count(u => u.IsGlobalAdmin);
+#endif
+
+            if (adminUserCount == 0)
+            {
+                return "This action would leave the system with no user administrators. At least one user admin must remain.";
+            }
+
+            return true;
         }
     }
 }

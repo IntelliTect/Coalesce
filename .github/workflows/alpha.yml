@@ -2,11 +2,9 @@ name: build-alpha
 
 on:
   pull_request:
-    branches: [dev, next]
-    paths-ignore: ['docs/**']
+    branches: [main, release/*]
   push:
-    branches: [dev, next]
-    paths-ignore: ['docs/**']
+    branches: [main, release/*]
   workflow_dispatch:
 
 jobs:

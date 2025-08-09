@@ -123,6 +123,30 @@ jobs:
           name: coalesce-vue-vuetify3
           path: src/coalesce-vue-vuetify3/*.tgz
 
+  build-docs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: docs
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # fetch all commits to get last updated time or other git log info
+          fetch-depth: 0
+
+      - run: npm ci
+        working-directory: ${{ github.workspace }}
+
+      - run: npm run build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: docs/.vitepress/dist/Coalesce
+
   validate-template:
     runs-on: ubuntu-latest
     name: "test template: ${{matrix.testCase}}"

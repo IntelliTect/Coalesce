@@ -10,30 +10,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download all workflow run artifacts
-      uses: actions/download-artifact@v4
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
 
-    - uses: actions/setup-node@v4
-      with:
-        registry-url: 'https://registry.npmjs.org'
+      - uses: actions/setup-node@v4
+        with:
+          registry-url: "https://registry.npmjs.org"
 
-    - name: npm publish coalesce-vue
-      run: npm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: npm publish coalesce-vue
+        run: npm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-    - name: npm publish coalesce-vue-vuetify
-      run: for f in ./coalesce-vue-vuetify*/*.tgz; do npm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public; done 
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+      - name: npm publish coalesce-vue-vuetify
+        run: for f in ./coalesce-vue-vuetify*/*.tgz; do npm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public; done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   nuget:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download all workflow run artifacts
-      uses: actions/download-artifact@v4
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
 
-    - name: dotnet nuget push
-      run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}
+      - name: dotnet nuget push
+        run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}
+
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+
+      # @see https://github.com/crazy-max/ghaction-github-pages
+      - name: Deploy to GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v4
+        if: ${{ inputs.prereleaseSlug == '' }}
+        with:
+          # deploy to gh-pages branch
+          target_branch: gh-pages
+          build_dir: docs
+          jekyll: false
+        env:
+          # @see https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

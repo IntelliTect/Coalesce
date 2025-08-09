@@ -30,10 +30,12 @@ namespace IntelliTect.Coalesce.Tests
             Assert.Contains(@"[HttpGet(""get/{id}"")]", generatedCode);
             Assert.Contains(@"[HttpPost(""delete/{id}"")]", generatedCode);
             
-            // Should contain conversion logic
+            // Should contain conversion logic with error handling
             Assert.Contains($"var parsedId = ({expectedTypeName})Convert.ChangeType(id, typeof({expectedTypeName}));", generatedCode);
             Assert.Contains("return GetImplementation(parsedId, parameters, dataSource);", generatedCode);
             Assert.Contains("return DeleteImplementation(parsedId, new DataSourceParameters(), dataSource, behaviors);", generatedCode);
+            Assert.Contains("catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException)", generatedCode);
+            Assert.Contains("Invalid date format for id parameter:", generatedCode);
         }
 
         [Fact]

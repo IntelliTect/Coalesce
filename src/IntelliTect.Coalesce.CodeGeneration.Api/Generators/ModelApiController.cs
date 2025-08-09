@@ -90,8 +90,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 {
                     using (b.Block())
                     {
-                        b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
-                        b.Line("return GetImplementation(parsedId, parameters, dataSource);");
+                        b.Line("try");
+                        using (b.Block())
+                        {
+                            b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
+                            b.Line("return GetImplementation(parsedId, parameters, dataSource);");
+                        }
+                        b.Line("catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException)");
+                        using (b.Block())
+                        {
+                            b.Line("""return Task.FromResult(new ItemResult<""" + Model.ResponseDtoTypeName + """>(false, $"Invalid date format for id parameter: {id}"));""");
+                        }
                     }
                 }
                 else
@@ -180,8 +189,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 {
                     using (b.Block())
                     {
-                        b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
-                        b.Line("return DeleteImplementation(parsedId, new DataSourceParameters(), dataSource, behaviors);");
+                        b.Line("try");
+                        using (b.Block())
+                        {
+                            b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
+                            b.Line("return DeleteImplementation(parsedId, new DataSourceParameters(), dataSource, behaviors);");
+                        }
+                        b.Line("catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException)");
+                        using (b.Block())
+                        {
+                            b.Line("""return Task.FromResult(new ItemResult<""" + Model.ResponseDtoTypeName + """>(false, $"Invalid date format for id parameter: {id}"));""");
+                        }
                     }
                 }
                 else

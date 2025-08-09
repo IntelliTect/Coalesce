@@ -120,6 +120,15 @@ type CamelFlags =
   | "noInitialContent"
   | "noShowSuccess";
 
+type CamelYesFlags =
+  | "progress"
+  | "initialProgress" 
+  | "secondaryProgress"
+  | "loadingContent"
+  | "errorContent"
+  | "initialContent"
+  | "showSuccess";
+
 type YesFlags = keyof Flags;
 type NoFlags = `no-${YesFlags}`;
 
@@ -163,7 +172,7 @@ const props = withDefaults(
       height?: number;
       /** The color of the progress bar */
       color?: string;
-    } & { [K in CamelFlags]?: boolean }
+    } & { [K in CamelFlags]?: boolean } & { [K in CamelYesFlags]?: boolean }
   >(),
   {
     progressPlaceholder: true,
@@ -173,7 +182,7 @@ const props = withDefaults(
     // so we can detect if they were specified at all.
     ...Object.fromEntries(
       Object.entries(new Flags()).flatMap((f) => [
-        // [camelize(f[0]), undefined],
+        [camelize(f[0]), undefined],
         [camelize("no-" + f[0]), undefined],
       ])
     ),
@@ -184,9 +193,16 @@ const baselineFlags = computed(() => {
   const flags = new Flags();
   for (const key in flags) {
     const noFlag = camelize(("no-" + key) as NoFlags) as Camelize<NoFlags>;
+    const yesFlag = camelize(key as YesFlags) as Camelize<YesFlags>;
 
-    const flagValue = props[noFlag];
-    if (flagValue != null) flags[key as YesFlags] = !flagValue;
+    const noFlagValue = props[noFlag];
+    const yesFlagValue = props[yesFlag];
+    
+    if (noFlagValue != null) {
+      flags[key as YesFlags] = !noFlagValue;
+    } else if (yesFlagValue != null) {
+      flags[key as YesFlags] = yesFlagValue;
+    }
   }
 
   return Object.freeze(flags);

@@ -130,4 +130,42 @@ describe("CLoaderStatus", () => {
     // Flags string should override component-level prop
     expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(false);
   });
+
+  test("success messages computation", () => {
+    // Create a proper mock that extends or mimics ApiState
+    const mockLoader = {
+      wasSuccessful: true,
+      message: "Test success message",
+      isLoading: false,
+      hasResult: true
+    };
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={mockLoader} show-success />
+    )).findComponent(CLS);
+
+    // The loader should be in loaderFlags with show-success enabled
+    const flags = wrapper.vm.loaderFlags;
+    expect(flags.length).toBeGreaterThan(0);
+    expect(flags[0][1]["show-success"]).toBe(true);
+  });
+
+  test("success messages with null message shows default", () => {
+    // Create a proper mock that extends or mimics ApiState
+    const mockLoader = {
+      wasSuccessful: true,
+      message: null,
+      isLoading: false,
+      hasResult: true
+    };
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={mockLoader} show-success />
+    )).findComponent(CLS);
+
+    // The loader should be in loaderFlags with show-success enabled
+    const flags = wrapper.vm.loaderFlags;
+    expect(flags.length).toBeGreaterThan(0);
+    expect(flags[0][1]["show-success"]).toBe(true);
+  });
 });

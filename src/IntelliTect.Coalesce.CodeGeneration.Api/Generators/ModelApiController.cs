@@ -50,7 +50,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         private void WriteClassContents(CSharpCodeBuilder b, ClassSecurityInfo securityInfo)
         {
-            var primaryKeyParameter = $"{Model.PrimaryKey.Type.FullyQualifiedName} id";
+            var isPrimaryKeyDate = Model.PrimaryKey.Type.IsDate || Model.PrimaryKey.Type.IsDateOrTime;
+            var primaryKeyParameter = isPrimaryKeyDate 
+                ? "string id" 
+                : $"{Model.PrimaryKey.Type.FullyQualifiedName} id";
             var dataSourceParameter = $"IDataSource<{Model.BaseViewModel.FullyQualifiedName}> dataSource";
             var behaviorsParameter = $"IBehaviors<{Model.BaseViewModel.FullyQualifiedName}> behaviors";
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -82,7 +85,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"{primaryKeyParameter},");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
-                b.Indented($"=> GetImplementation(id, parameters, dataSource);");
+                
+                if (isPrimaryKeyDate)
+                {
+                    using (b.Block())
+                    {
+                        b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
+                        b.Line("return GetImplementation(parsedId, parameters, dataSource);");
+                    }
+                }
+                else
+                {
+                    b.Indented($"=> GetImplementation(id, parameters, dataSource);");
+                }
 
                 // ENDPOINT: /list
                 b.Line();
@@ -160,7 +175,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"{primaryKeyParameter},");
                 b.Indented($"{behaviorsParameter},");
                 b.Indented($"{dataSourceParameter})");
-                b.Indented($"=> DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);");
+                
+                if (isPrimaryKeyDate)
+                {
+                    using (b.Block())
+                    {
+                        b.Line($"var parsedId = ({Model.PrimaryKey.Type.FullyQualifiedName})Convert.ChangeType(id, typeof({Model.PrimaryKey.Type.FullyQualifiedName}));");
+                        b.Line("return DeleteImplementation(parsedId, new DataSourceParameters(), dataSource, behaviors);");
+                    }
+                }
+                else
+                {
+                    b.Indented($"=> DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);");
+                }
             }
 
             if (Model.ClientMethods.Any())

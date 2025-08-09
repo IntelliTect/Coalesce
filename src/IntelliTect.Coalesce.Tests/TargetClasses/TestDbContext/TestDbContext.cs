@@ -47,6 +47,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<Parent1> Parent1s { get; set; }
         public DbSet<Parent2> Parent2s { get; set; }
 
+        public DbSet<DateTimeEntity> DateTimeEntities { get; set; }
+        public DbSet<DateOnlyEntity> DateOnlyEntities { get; set; }
+        public DbSet<DateTimeOffsetEntity> DateTimeOffsetEntities { get; set; }
+
 
         public AppDbContext() : this(Guid.NewGuid().ToString()) { }
 

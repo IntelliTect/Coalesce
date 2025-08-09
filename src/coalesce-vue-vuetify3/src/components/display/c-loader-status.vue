@@ -31,6 +31,29 @@
       </v-expand-transition>
     </div>
 
+    <!-- Success alert section -->
+    <div key="success">
+      <v-expand-transition>
+        <!-- This div is to reduce jank caused by padding/margins on v-alert -->
+        <div v-if="successMessages.length">
+          <v-alert
+            :modelValue="true"
+            type="success"
+            class="c-loader-status--success"
+          >
+            <ul>
+              <li
+                v-for="(message, i) in successMessages"
+                :key="'success-message-' + i"
+                class="c-loader-status--success-message"
+                v-text="message"
+              ></li>
+            </ul>
+          </v-alert>
+        </div>
+      </v-expand-transition>
+    </div>
+
     <!-- This nested transition allows us to transition between 
         the progress loader and the placeholder independent of the 
         main outer transition between content/error/loaders -->
@@ -135,12 +158,16 @@ const props = withDefaults(
       height?: number;
       /** The color of the progress bar */
       color?: string;
+
+      /** Show a success alert with message for successful calls. Defaults to false. */
+      showSuccess?: boolean;
     } & { [K in CamelFlags]?: boolean }
   >(),
   {
     progressPlaceholder: true,
     height: 10,
     color: "primary",
+    showSuccess: false,
     // Prevent our flags from defaulting to `false`. We need them to default to `undefined`
     // so we can detect if they were specified at all.
     ...Object.fromEntries(
@@ -218,6 +245,13 @@ const errorMessages = computed(() => {
     .map((f) => f[0].message);
 });
 
+const successMessages = computed(() => {
+  if (!props.showSuccess) return [];
+  return loaderFlags.value
+    .filter((f) => f[0].wasSuccessful === true && f[0].message)
+    .map((f) => f[0].message);
+});
+
 const showLoading = computed(() => {
   return loaderFlags.value.some((f) => {
     const [loader, flags] = f;
@@ -276,7 +310,7 @@ const showContent = computed(() => {
 });
 
 // For testing:
-defineExpose({ loaderFlags });
+defineExpose({ loaderFlags, successMessages });
 </script>
 
 <style lang="scss">
@@ -375,6 +409,21 @@ defineExpose({ loaderFlags });
     white-space: pre-wrap;
 
     // Remove bulleting when there's only one error.
+    &:only-child {
+      list-style: none;
+      margin-left: -20px;
+    }
+  }
+
+  .c-loader-status--success {
+    ul {
+      padding-left: 24px;
+    }
+  }
+  .c-loader-status--success-message {
+    white-space: pre-wrap;
+
+    // Remove bulleting when there's only one success message.
     &:only-child {
       list-style: none;
       margin-left: -20px;

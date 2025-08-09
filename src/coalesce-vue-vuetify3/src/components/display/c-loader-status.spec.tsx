@@ -79,4 +79,68 @@ describe("CLoaderStatus", () => {
 
     expect(wrapper.vm.loaderFlags[0][1]["initial-content"]).toBe(false);
   });
+
+  test("show-success prop defaults to false", () => {
+    const wrapper = mountApp(() => (
+      <CLS loaders={vm.$load} />
+    )).findComponent(CLS);
+
+    expect(wrapper.props("showSuccess")).toBe(false);
+  });
+
+  test("show-success prop can be set to true", () => {
+    const wrapper = mountApp(() => (
+      <CLS loaders={vm.$load} show-success />
+    )).findComponent(CLS);
+
+    expect(wrapper.props("showSuccess")).toBe(true);
+  });
+
+  test("success messages are empty when show-success is false", () => {
+    // Mock a successful loader with a message
+    const mockLoader = {
+      wasSuccessful: true,
+      message: "Operation completed successfully",
+      isLoading: false,
+      hasResult: true
+    };
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={[mockLoader as any]} show-success={false} />
+    )).findComponent(CLS);
+
+    expect(wrapper.vm.successMessages).toEqual([]);
+  });
+
+  test("success messages are shown when show-success is true and loader is successful", () => {
+    // Mock a successful loader with a message
+    const mockLoader = {
+      wasSuccessful: true,
+      message: "Operation completed successfully",
+      isLoading: false,
+      hasResult: true
+    };
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={[mockLoader as any]} show-success />
+    )).findComponent(CLS);
+
+    expect(wrapper.vm.successMessages).toEqual(["Operation completed successfully"]);
+  });
+
+  test("success messages are empty when loader is successful but has no message", () => {
+    // Mock a successful loader without a message
+    const mockLoader = {
+      wasSuccessful: true,
+      message: null,
+      isLoading: false,
+      hasResult: true
+    };
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={[mockLoader as any]} show-success />
+    )).findComponent(CLS);
+
+    expect(wrapper.vm.successMessages).toEqual([]);
+  });
 });

@@ -25,6 +25,23 @@
       </ul>
     </v-alert>
 
+    <v-alert
+      v-if="successMessages.length"
+      key="success"
+      :value="true"
+      type="success"
+      class="c-loader-status--success"
+    >
+      <ul>
+        <li
+          v-for="(message, i) in successMessages"
+          :key="'success-message-' + i"
+          class="c-loader-status--success-message"
+          v-text="message"
+        ></li>
+      </ul>
+    </v-alert>
+
     <!-- This nested transition allows us to transition between 
         the progress loader and the placeholder independent of the 
         main outer transition between content/error/loaders -->
@@ -127,6 +144,9 @@ export default defineComponent({
 
     height: { required: false, type: [Number, String], default: 10 },
 
+    /** Show a success alert with message for successful calls. Defaults to false. */
+    showSuccess: { required: false, type: Boolean, default: false },
+
     noProgress: { required: false, type: Boolean, default: null },
     noInitialProgress: { required: false, type: Boolean, default: null },
     noSecondaryProgress: { required: false, type: Boolean, default: null },
@@ -203,6 +223,13 @@ export default defineComponent({
     errorMessages() {
       return this.loaderFlags
         .filter((f) => f[0].wasSuccessful === false)
+        .map((f) => f[0].message);
+    },
+
+    successMessages() {
+      if (!this.showSuccess) return [];
+      return this.loaderFlags
+        .filter((f) => f[0].wasSuccessful === true && f[0].message)
         .map((f) => f[0].message);
     },
 
@@ -314,6 +341,16 @@ export default defineComponent({
     white-space: pre-wrap;
 
     // Remove bulleting when there's only one error.
+    &:only-child {
+      list-style: none;
+      margin-left: -20px;
+    }
+  }
+
+  .c-loader-status--success-message {
+    white-space: pre-wrap;
+
+    // Remove bulleting when there's only one success message.
     &:only-child {
       list-style: none;
       margin-left: -20px;

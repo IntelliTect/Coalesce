@@ -37,6 +37,12 @@ Use ``c-loader-status`` to render a progress bar and any error messages, but don
 <c-loader-status :loaders="list.$load" />
 ```
 
+Show success messages when an operation completes successfully:
+``` vue-html
+<c-loader-status :loaders="person.$save" show-success>
+    <button> Save </button>
+</c-loader-status>
+```
 
 Wrap a save/submit button:
 ``` vue-html
@@ -112,6 +118,10 @@ Positions the progress bar absolutely. This can be useful in compact interfaces 
 <Prop def="height: number = 10" lang="ts" />
 
 Specifies the height in pixels of the [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) used to indicate progress.
+
+<Prop def="showSuccess: boolean = false" lang="ts" />
+
+Show a success alert with message for successful calls. Unlike most other flags, this one defaults to false.
 
 <Prop def="
 no-loading-content?: boolean;

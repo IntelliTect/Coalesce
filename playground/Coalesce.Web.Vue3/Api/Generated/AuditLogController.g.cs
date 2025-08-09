@@ -19,48 +19,49 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue3.Api;
-
-[Route("api/AuditLog")]
-[Authorize]
-[ServiceFilter(typeof(IApiActionFilter))]
-public partial class AuditLogController
-    : BaseApiController<Coalesce.Domain.AuditLog, AuditLogParameter, AuditLogResponse, Coalesce.Domain.AppDbContext>
+namespace Coalesce.Web.Vue3.Api
 {
-    public AuditLogController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
+    [Route("api/AuditLog")]
+    [Authorize]
+    [ServiceFilter(typeof(IApiActionFilter))]
+    public partial class AuditLogController
+        : BaseApiController<Coalesce.Domain.AuditLog, AuditLogParameter, AuditLogResponse, Coalesce.Domain.AppDbContext>
     {
-        GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.AuditLog>();
+        public AuditLogController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
+        {
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.AuditLog>();
+        }
+
+        [HttpGet("get/{id}")]
+        [Authorize]
+        public virtual Task<ItemResult<AuditLogResponse>> Get(
+            long id,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.AuditLog> dataSource)
+            => GetImplementation(id, parameters, dataSource);
+
+        [HttpGet("list")]
+        [Authorize]
+        public virtual Task<ListResult<AuditLogResponse>> List(
+            [FromQuery] ListParameters parameters,
+            IDataSource<Coalesce.Domain.AuditLog> dataSource)
+            => ListImplementation(parameters, dataSource);
+
+        [HttpGet("count")]
+        [Authorize]
+        public virtual Task<ItemResult<int>> Count(
+            [FromQuery] FilterParameters parameters,
+            IDataSource<Coalesce.Domain.AuditLog> dataSource)
+            => CountImplementation(parameters, dataSource);
+
+        [HttpPost("bulkSave")]
+        [Authorize]
+        public virtual Task<ItemResult<AuditLogResponse>> BulkSave(
+            [FromBody] BulkSaveRequest dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.AuditLog> dataSource,
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] IBehaviorsFactory behaviorsFactory)
+            => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);
     }
-
-    [HttpGet("get/{id}")]
-    [Authorize]
-    public virtual Task<ItemResult<AuditLogResponse>> Get(
-        long id,
-        [FromQuery] DataSourceParameters parameters,
-        IDataSource<Coalesce.Domain.AuditLog> dataSource)
-        => GetImplementation(id, parameters, dataSource);
-
-    [HttpGet("list")]
-    [Authorize]
-    public virtual Task<ListResult<AuditLogResponse>> List(
-        [FromQuery] ListParameters parameters,
-        IDataSource<Coalesce.Domain.AuditLog> dataSource)
-        => ListImplementation(parameters, dataSource);
-
-    [HttpGet("count")]
-    [Authorize]
-    public virtual Task<ItemResult<int>> Count(
-        [FromQuery] FilterParameters parameters,
-        IDataSource<Coalesce.Domain.AuditLog> dataSource)
-        => CountImplementation(parameters, dataSource);
-
-    [HttpPost("bulkSave")]
-    [Authorize]
-    public virtual Task<ItemResult<AuditLogResponse>> BulkSave(
-        [FromBody] BulkSaveRequest dto,
-        [FromQuery] DataSourceParameters parameters,
-        IDataSource<Coalesce.Domain.AuditLog> dataSource,
-        [FromServices] IDataSourceFactory dataSourceFactory,
-        [FromServices] IBehaviorsFactory behaviorsFactory)
-        => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);
 }

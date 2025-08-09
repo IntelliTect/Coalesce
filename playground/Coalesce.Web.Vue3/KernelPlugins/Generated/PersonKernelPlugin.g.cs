@@ -105,7 +105,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
             if (ItemResult.FromValidation(_dataSource) is { WasSuccessful: false } _validationResult)
                 return new ListResult<PersonResponse>(_validationResult);
 
-            var _listParams = new ListParameters { DataSource = "NamesStartingWithAWithCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
+            var _listParams = new ListParameters { DataSource = "NamesStartingWithAWithCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 25 };
             if (countOnly)
             {
                 var result = await _dataSource.GetCountAsync(_listParams);
@@ -159,7 +159,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
             if (ItemResult.FromValidation(_dataSource) is { WasSuccessful: false } _validationResult)
                 return new ListResult<PersonResponse>(_validationResult);
 
-            var _listParams = new ListParameters { DataSource = "WithoutCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
+            var _listParams = new ListParameters { DataSource = "WithoutCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 25 };
             if (countOnly)
             {
                 var result = await _dataSource.GetCountAsync(_listParams);

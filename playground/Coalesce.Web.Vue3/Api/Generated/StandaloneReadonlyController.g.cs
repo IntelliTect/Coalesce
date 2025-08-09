@@ -19,38 +19,39 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue3.Api;
-
-[Route("api/StandaloneReadonly")]
-[Authorize]
-[ServiceFilter(typeof(IApiActionFilter))]
-public partial class StandaloneReadonlyController
-    : BaseApiController<Coalesce.Domain.StandaloneReadonly, StandaloneReadonlyParameter, StandaloneReadonlyResponse>
+namespace Coalesce.Web.Vue3.Api
 {
-    public StandaloneReadonlyController(CrudContext context) : base(context)
+    [Route("api/StandaloneReadonly")]
+    [Authorize]
+    [ServiceFilter(typeof(IApiActionFilter))]
+    public partial class StandaloneReadonlyController
+        : BaseApiController<Coalesce.Domain.StandaloneReadonly, StandaloneReadonlyParameter, StandaloneReadonlyResponse>
     {
-        GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.StandaloneReadonly>();
+        public StandaloneReadonlyController(CrudContext context) : base(context)
+        {
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.StandaloneReadonly>();
+        }
+
+        [HttpGet("get/{id}")]
+        [Authorize]
+        public virtual Task<ItemResult<StandaloneReadonlyResponse>> Get(
+            int id,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
+            => GetImplementation(id, parameters, dataSource);
+
+        [HttpGet("list")]
+        [Authorize]
+        public virtual Task<ListResult<StandaloneReadonlyResponse>> List(
+            [FromQuery] ListParameters parameters,
+            IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
+            => ListImplementation(parameters, dataSource);
+
+        [HttpGet("count")]
+        [Authorize]
+        public virtual Task<ItemResult<int>> Count(
+            [FromQuery] FilterParameters parameters,
+            IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
+            => CountImplementation(parameters, dataSource);
     }
-
-    [HttpGet("get/{id}")]
-    [Authorize]
-    public virtual Task<ItemResult<StandaloneReadonlyResponse>> Get(
-        int id,
-        [FromQuery] DataSourceParameters parameters,
-        IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
-        => GetImplementation(id, parameters, dataSource);
-
-    [HttpGet("list")]
-    [Authorize]
-    public virtual Task<ListResult<StandaloneReadonlyResponse>> List(
-        [FromQuery] ListParameters parameters,
-        IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
-        => ListImplementation(parameters, dataSource);
-
-    [HttpGet("count")]
-    [Authorize]
-    public virtual Task<ItemResult<int>> Count(
-        [FromQuery] FilterParameters parameters,
-        IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
-        => CountImplementation(parameters, dataSource);
 }

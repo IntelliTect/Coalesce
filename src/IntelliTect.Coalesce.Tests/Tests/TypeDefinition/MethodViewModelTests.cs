@@ -35,5 +35,25 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             Assert.True(param.HasDefaultValue);
             Assert.Equal(expected, param.CsDefaultValue);
         }
+
+        [Theory]
+        [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.DownloadAttachment_VaryString), null)]
+        [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.DownloadAttachment_CustomCache), 3600)]
+        public void ClientCacheDuration_ReturnsCorrectValue(
+            ClassViewModelData data, string methodName, int? expectedSeconds)
+        {
+            var method = data.ClassViewModel.MethodByName(methodName);
+            var duration = method.ClientCacheDuration;
+            
+            if (expectedSeconds.HasValue)
+            {
+                Assert.NotNull(duration);
+                Assert.Equal(TimeSpan.FromSeconds(expectedSeconds.Value), duration);
+            }
+            else
+            {
+                Assert.Null(duration);
+            }
+        }
     }
 }

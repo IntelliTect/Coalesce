@@ -147,6 +147,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
 #pragma warning restore CS0618 // Type or member is obsolete
             Parent.PropertyByName(this.GetAttributeValue<ExecuteAttribute>(a => a.VaryByProperty));
 
+        public TimeSpan? ClientCacheDuration
+        {
+            get
+            {
+                var attr = this.GetAttribute<ExecuteAttribute>();
+                var seconds = attr?.GetValue(nameof(ExecuteAttribute.ClientCacheDurationSeconds)) as int?;
+                return seconds.HasValue && seconds.Value > 0 ? TimeSpan.FromSeconds(seconds.Value) : null;
+            }
+        }
+
         /// <summary>
         /// Return type of the controller action for the method.
         /// If the method is async, this will not include the Task that wraps the result.

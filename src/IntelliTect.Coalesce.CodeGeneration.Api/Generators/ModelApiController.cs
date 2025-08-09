@@ -285,7 +285,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         // the etag is still valid, but including the correct hash
                         // in the querystring this means the client has prior knowledge
                         // about the current version via the VaryByProperty's value).
-                        b.Line("_cacheControlHeader.MaxAge = TimeSpan.FromDays(30);");
+                        var cacheDuration = method.ClientCacheDuration ?? TimeSpan.FromDays(30);
+                        b.Line($"_cacheControlHeader.MaxAge = TimeSpan.FromTicks({cacheDuration.Ticks});");
                     }
 
                     b.Line("Response.GetTypedHeaders().CacheControl = _cacheControlHeader;");

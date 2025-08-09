@@ -68,6 +68,13 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// By default, the model type's default data source is used.
         /// </summary>
         public Type? DataSource { get; set; }
+
+        /// <summary>
+        /// For HTTP GET methods with <see cref="VaryByProperty"/>, specifies the cache duration in seconds
+        /// that will be set in the Cache-Control header when the client provides the correct ETag value.
+        /// If not set (0), defaults to 30 days.
+        /// </summary>
+        public int ClientCacheDurationSeconds { get; set; }
     }
 
     public enum HttpMethod

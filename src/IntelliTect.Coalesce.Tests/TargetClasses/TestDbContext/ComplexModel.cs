@@ -294,6 +294,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public IFile DownloadAttachment_VaryString() => new File(ByteArrayProp) { Name = Name };
 
         [Coalesce]
+        [Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(Name), ClientCacheDurationSeconds = 3600)] // 1 hour
+        public IFile DownloadAttachment_CustomCache() => new File(ByteArrayProp) { Name = Name };
+
+        [Coalesce]
         [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(Int))]
         public IFile DownloadAttachment_VaryInt() => new File(ByteArrayProp) { Name = Name };
 

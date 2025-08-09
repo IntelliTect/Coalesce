@@ -58,6 +58,20 @@ public class UserRole : IdentityUserRole<string>
         SignInManager<User> signInManager
     ) : AppBehaviors<UserRole>(context)
     {
+        public override ItemResult BeforeDelete(UserRole item)
+        {
+            // Check if deleting this UserRole would leave no admin users
+            if (item.Role?.Permissions?.Contains(Permission.UserAdmin) == true)
+            {
+                if (WouldLeaveNoAdmins(excludeUserRoleId: item.Id))
+                {
+                    return "You cannot remove this user from the admin role as it would leave no remaining user admins.";
+                }
+            }
+
+            return base.BeforeDelete(item);
+        }
+
         public override async Task<ItemResult<UserRole>> AfterSaveAsync(SaveKind kind, UserRole? oldItem, UserRole item)
         {
             if (User.GetUserId() == item.Id)
@@ -68,6 +82,27 @@ public class UserRole : IdentityUserRole<string>
             }
 
             return true;
+        }
+
+        private bool WouldLeaveNoAdmins(string excludeUserRoleId)
+        {
+            // Parse the composite ID to get UserId and RoleId
+            var idParts = excludeUserRoleId.Split(';');
+            if (idParts.Length != 2) return false;
+            
+            var excludeUserId = idParts[0];
+            var excludeRoleId = idParts[1];
+
+            var query = Db.Users.Where(u => u.UserRoles!.Any(ur => 
+                !(ur.UserId == excludeUserId && ur.RoleId == excludeRoleId) && 
+                ur.Role!.Permissions!.Contains(Permission.UserAdmin)));
+
+#if Tenancy
+            // In tenancy mode, only consider users in the current tenant
+            query = query.Where(u => Db.TenantMemberships.Any(tm => tm.UserId == u.Id && tm.TenantId == User.GetTenantId()));
+#endif
+
+            return !query.Any();
         }
     }
 }

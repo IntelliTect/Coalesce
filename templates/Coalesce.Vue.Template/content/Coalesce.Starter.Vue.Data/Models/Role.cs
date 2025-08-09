@@ -47,9 +47,53 @@ public class Role
             }
 #endif
 
+            // Check if removing UserAdmin permission would leave no admins
+            if (kind == SaveKind.Update && oldItem != null)
+            {
+                var oldHasUserAdmin = oldItem.Permissions?.Contains(Permission.UserAdmin) == true;
+                var newHasUserAdmin = item.Permissions?.Contains(Permission.UserAdmin) == true;
+                
+                if (oldHasUserAdmin && !newHasUserAdmin)
+                {
+                    // Check if this would leave no admin users
+                    if (WouldLeaveNoAdmins(excludeRoleId: item.Id))
+                    {
+                        return "You cannot remove UserAdmin permission from this role as it would leave no remaining user admins.";
+                    }
+                }
+            }
+
             item.NormalizedName = roleManager.NormalizeKey(item.Name);
 
             return base.BeforeSave(kind, oldItem, item);
+        }
+
+        public override ItemResult BeforeDelete(Role item)
+        {
+            // Check if deleting this role would leave no admin users
+            if (item.Permissions?.Contains(Permission.UserAdmin) == true)
+            {
+                if (WouldLeaveNoAdmins(excludeRoleId: item.Id))
+                {
+                    return "You cannot delete this role as it would leave no remaining user admins.";
+                }
+            }
+
+            return base.BeforeDelete(item);
+        }
+
+        private bool WouldLeaveNoAdmins(string excludeRoleId)
+        {
+            var query = Db.Users.Where(u => u.UserRoles!.Any(ur => 
+                ur.RoleId != excludeRoleId && 
+                ur.Role!.Permissions!.Contains(Permission.UserAdmin)));
+
+#if Tenancy
+            // In tenancy mode, only consider users in the current tenant
+            query = query.Where(u => Db.TenantMemberships.Any(tm => tm.UserId == u.Id && tm.TenantId == User.GetTenantId()));
+#endif
+
+            return !query.Any();
         }
     }
 }

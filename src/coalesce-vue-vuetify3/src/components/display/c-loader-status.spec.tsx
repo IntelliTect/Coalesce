@@ -94,4 +94,40 @@ describe("CLoaderStatus", () => {
 
     expect(wrapper.vm.loaderFlags[0][1]["initial-content"]).toBe(false);
   });
+
+  test("show-success flag defaults to false", () => {
+    const wrapper = mountApp(() => (
+      <CLS loaders={vm.$load} />
+    )).findComponent(CLS);
+
+    expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(false);
+  });
+
+  test("show-success flag can be enabled", () => {
+    const wrapper = mountApp(() => (
+      <CLS loaders={vm.$load} no-show-success={false} />
+    )).findComponent(CLS);
+
+    expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(true);
+  });
+
+  test("show-success in flags string", () => {
+    const wrapper = mountApp(() => (
+      <CLS loaders={{ "show-success": [vm.$load] }} />
+    )).findComponent(CLS);
+
+    expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(true);
+  });
+
+  test("show-success flag precedence", () => {
+    const wrapper = mountApp(() => (
+      <CLS
+        loaders={{ "no-show-success": [vm.$load] }}
+        no-show-success={false}
+      />
+    )).findComponent(CLS);
+
+    // Flags string should override component-level prop
+    expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(false);
+  });
 });

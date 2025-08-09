@@ -31,6 +31,29 @@
       </v-expand-transition>
     </div>
 
+    <!-- Success messages -->
+    <div key="success">
+      <v-expand-transition>
+        <!-- This div is to reduce jank caused by padding/margins on v-alert -->
+        <div v-if="successMessages.length">
+          <v-alert
+            :modelValue="true"
+            type="success"
+            class="c-loader-status--success"
+          >
+            <ul>
+              <li
+                v-for="(message, i) in successMessages"
+                :key="'success-message-' + i"
+                class="c-loader-status--success-message"
+                v-text="message"
+              ></li>
+            </ul>
+          </v-alert>
+        </div>
+      </v-expand-transition>
+    </div>
+
     <!-- This nested transition allows us to transition between 
         the progress loader and the placeholder independent of the 
         main outer transition between content/error/loaders -->
@@ -71,6 +94,7 @@ class Flags {
   "loading-content" = true;
   "error-content" = true;
   "initial-content" = true;
+  "show-success" = false;
 }
 </script>
 
@@ -93,7 +117,8 @@ type CamelFlags =
   | "noSecondaryProgress"
   | "noLoadingContent"
   | "noErrorContent"
-  | "noInitialContent";
+  | "noInitialContent"
+  | "noShowSuccess";
 
 type YesFlags = keyof Flags;
 type NoFlags = `no-${YesFlags}`;
@@ -219,6 +244,12 @@ const errorMessages = computed(() => {
   return loaderFlags.value
     .filter((f) => f[0].wasSuccessful === false)
     .map((f) => f[0].message);
+});
+
+const successMessages = computed(() => {
+  return loaderFlags.value
+    .filter((f) => f[0].wasSuccessful === true && f[1]["show-success"])
+    .map((f) => f[0].message || "Success");
 });
 
 const showLoading = computed(() => {
@@ -378,6 +409,20 @@ defineExpose({ loaderFlags });
     white-space: pre-wrap;
 
     // Remove bulleting when there's only one error.
+    &:only-child {
+      list-style: none;
+      margin-left: -20px;
+    }
+  }
+  .c-loader-status--success {
+    ul {
+      padding-left: 24px;
+    }
+  }
+  .c-loader-status--success-message {
+    white-space: pre-wrap;
+
+    // Remove bulleting when there's only one success message.
     &:only-child {
       list-style: none;
       margin-left: -20px;

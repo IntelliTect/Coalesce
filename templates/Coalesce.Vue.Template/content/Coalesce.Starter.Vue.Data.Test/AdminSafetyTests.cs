@@ -481,4 +481,181 @@ public class AdminSafetyTests : TestBase
         // Assert
         Assert.True(result.WasSuccessful);
     }
+
+    [Fact]
+    public void Role_BeforeSave_AllowsAddingUserAdminPermission()
+    {
+        // Arrange - Role without UserAdmin permission
+        var regularRole = new Role
+        {
+            Id = "regular-role-id",
+            Name = "Regular",
+            NormalizedName = "REGULAR",
+            Permissions = [Permission.ViewAuditLogs]
+        };
+
+        Db.Roles.Add(regularRole);
+        Db.SaveChanges();
+
+        RefreshServices();
+
+        var roleManager = Mocker.Get<RoleManager<Role>>();
+        var crudContext = Mocker.Get<CrudContext<AppDbContext>>();
+        var roleBehaviors = new Role.Behaviors(roleManager, crudContext);
+
+        // Create updated role with UserAdmin permission added
+        var updatedRole = new Role
+        {
+            Id = regularRole.Id,
+            Name = regularRole.Name,
+            NormalizedName = regularRole.NormalizedName,
+            Permissions = [Permission.ViewAuditLogs, Permission.UserAdmin] // Added UserAdmin
+        };
+
+        // Act
+        var result = roleBehaviors.BeforeSave(SaveKind.Update, regularRole, updatedRole);
+        
+        // Assert - Should allow adding UserAdmin permission
+        Assert.True(result.WasSuccessful);
+    }
+
+    [Fact]
+    public void Role_BeforeSave_AllowsCreateOperations()
+    {
+        // Arrange - New role with UserAdmin permission
+        var newRole = new Role
+        {
+            Id = "new-role-id",
+            Name = "NewAdmin",
+            NormalizedName = "NEWADMIN",
+            Permissions = [Permission.UserAdmin]
+        };
+
+        RefreshServices();
+
+        var roleManager = Mocker.Get<RoleManager<Role>>();
+        var crudContext = Mocker.Get<CrudContext<AppDbContext>>();
+        var roleBehaviors = new Role.Behaviors(roleManager, crudContext);
+
+        // Act
+        var result = roleBehaviors.BeforeSave(SaveKind.Create, null, newRole);
+        
+        // Assert - Should allow creating new roles
+        Assert.True(result.WasSuccessful);
+    }
+
+    [Fact]
+    public void UserRole_BeforeDelete_HandlesInvalidCompositeId()
+    {
+        // Arrange
+        var adminRole = new Role
+        {
+            Id = "admin-role-id",
+            Name = "Admin",
+            NormalizedName = "ADMIN",
+            Permissions = [Permission.UserAdmin]
+        };
+
+        var user = new User
+        {
+            Id = "user-id",
+            UserName = "admin@test.com",
+            NormalizedUserName = "ADMIN@TEST.COM"
+        };
+
+        var userRole = new UserRole
+        {
+            UserId = user.Id,
+            RoleId = adminRole.Id,
+            User = user,
+            Role = adminRole
+        };
+
+        Db.Roles.Add(adminRole);
+        Db.Users.Add(user);
+        Db.UserRoles.Add(userRole);
+        Db.SaveChanges();
+
+        RefreshServices();
+
+        // Create a UserRole with malformed ID for testing edge case
+        var userRoleWithInvalidId = new UserRole
+        {
+            UserId = "user-id",
+            RoleId = "role-id",
+            User = user,
+            Role = new Role { Permissions = [Permission.ViewAuditLogs] } // Non-admin role
+        };
+        userRoleWithInvalidId.Id = "invalid-format"; // This will cause Split to return incorrect parts
+
+        var crudContext = Mocker.Get<CrudContext<AppDbContext>>();
+        var signInManager = Mocker.Get<SignInManager<User>>();
+        var userRoleBehaviors = new UserRole.Behaviors(crudContext, signInManager);
+
+        // Act
+        var result = userRoleBehaviors.BeforeDelete(userRoleWithInvalidId);
+        
+        // Assert - Should allow deletion when ID parsing fails (graceful degradation)
+        Assert.True(result.WasSuccessful);
+    }
+
+    [Fact]
+    public void Role_WouldLeaveNoAdmins_ReturnsFalseWhenMultipleUsersHaveSameAdminRole()
+    {
+        // Arrange - Multiple users with the same admin role
+        var adminRole = new Role
+        {
+            Id = "admin-role-id",
+            Name = "Admin",
+            NormalizedName = "ADMIN",
+            Permissions = [Permission.UserAdmin]
+        };
+
+        var user1 = new User
+        {
+            Id = "user-1",
+            UserName = "admin1@test.com",
+            NormalizedUserName = "ADMIN1@TEST.COM"
+        };
+
+        var user2 = new User
+        {
+            Id = "user-2",
+            UserName = "admin2@test.com",
+            NormalizedUserName = "ADMIN2@TEST.COM"
+        };
+
+        var userRole1 = new UserRole
+        {
+            UserId = user1.Id,
+            RoleId = adminRole.Id,
+            User = user1,
+            Role = adminRole
+        };
+
+        var userRole2 = new UserRole
+        {
+            UserId = user2.Id,
+            RoleId = adminRole.Id,
+            User = user2,
+            Role = adminRole
+        };
+
+        Db.Roles.Add(adminRole);
+        Db.Users.AddRange(user1, user2);
+        Db.UserRoles.AddRange(userRole1, userRole2);
+        Db.SaveChanges();
+
+        RefreshServices();
+
+        var crudContext = Mocker.Get<CrudContext<AppDbContext>>();
+        var signInManager = Mocker.Get<SignInManager<User>>();
+        var userRoleBehaviors = new UserRole.Behaviors(crudContext, signInManager);
+
+        // Act - Try to remove one user from the admin role
+        var result = userRoleBehaviors.BeforeDelete(userRole1);
+        
+        // Assert - Should allow removal since other user still has admin role
+        Assert.True(result.WasSuccessful);
+    }
 }

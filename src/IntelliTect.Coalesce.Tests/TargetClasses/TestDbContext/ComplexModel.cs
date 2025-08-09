@@ -312,6 +312,10 @@ public class ComplexModel
     public IFile DownloadAttachment_VaryString() => new File(ByteArrayProp) { Name = Name };
 
     [Coalesce]
+    [Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(Name), ClientCacheDurationSeconds = 300)]
+    public IFile DownloadAttachment_VaryStringCustomCache() => new File(ByteArrayProp) { Name = Name };
+
+    [Coalesce]
     [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(Int))]
     public IFile DownloadAttachment_VaryInt() => new File(ByteArrayProp) { Name = Name };
 

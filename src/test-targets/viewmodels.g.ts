@@ -561,6 +561,17 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return downloadAttachment_VaryString
   }
   
+  public get downloadAttachment_CustomCache() {
+    const downloadAttachment_CustomCache = this.$apiClient.$makeCaller(
+      this.$metadata.methods.downloadAttachment_CustomCache,
+      (c) => c.downloadAttachment_CustomCache(this.$primaryKey, this.name),
+      () => ({}),
+      (c, args) => c.downloadAttachment_CustomCache(this.$primaryKey, this.name))
+    
+    Object.defineProperty(this, 'downloadAttachment_CustomCache', {value: downloadAttachment_CustomCache});
+    return downloadAttachment_CustomCache
+  }
+  
   public get downloadAttachment_VaryInt() {
     const downloadAttachment_VaryInt = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryInt,

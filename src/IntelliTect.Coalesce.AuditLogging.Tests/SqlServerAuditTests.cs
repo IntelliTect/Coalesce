@@ -186,10 +186,10 @@ public class SqlServerAuditTests
     {
         // This test verifies that different entity models result in different stored procedures
         // due to the hash-based naming scheme
-        
+
         // Arrange - Create two different contexts that would generate different SQL
         using TestDbContext db1 = BuildDbContextWithStoredProcedures();
-        
+
         var user1 = new AppUser { Name = "Bob" };
         db1.Add(user1);
         await db1.SaveChangesAsync();
@@ -210,7 +210,7 @@ public class SqlServerAuditTests
 
         // The same model should reuse the same stored procedure
         using TestDbContext db2 = BuildDbContextWithStoredProcedures();
-        
+
         var user2 = new AppUser { Name = "Alice" };
         db2.Add(user2);
         await db2.SaveChangesAsync();
@@ -227,7 +227,7 @@ public class SqlServerAuditTests
             var result = await command.ExecuteScalarAsync();
             finalCount = Convert.ToInt32(result);
         }
-        
+
         // Should be the same count since the same model is used
         Assert.Equal(initialCount, finalCount);
     }

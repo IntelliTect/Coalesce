@@ -243,6 +243,12 @@ internal static class ValidateContext
                         $"and must reference a property on the parent instance."
                     );
 
+                    assert.IsFalse(
+                        method.GetAttributeValue<ExecuteAttribute>(a => a.ClientCacheDurationSeconds) != null &&
+                        method.GetAttributeValue<ExecuteAttribute>(a => a.VaryByProperty) == null,
+                        $"{nameof(ExecuteAttribute.ClientCacheDurationSeconds)} can only be specified when {nameof(ExecuteAttribute.VaryByProperty)} is also specified."
+                    );
+
                     assert.IsFalse(method.ResultType.IsInternalUse, "Method return types cannot be internal use.");
 
                     // TODO: Assert that the method name isn't a reserved endpoint name:

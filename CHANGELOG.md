@@ -22,6 +22,7 @@
 - `ListViewModel.$orderByToggle()` method added to cycle through ascending, descending, and no ordering for a field.
 - Custom methods now support descriptions via `DescriptionAttribute`. These are displayed in the admin pages. 
 - Added `FileTypeAttribute` to control allowed file types for custom method file parameters.
+- Added `ClientCacheDurationSeconds` property to `ExecuteAttribute` to customize client-side cache duration for GET custom methods with `VaryByProperty`.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
 - `c-datetime-picker`: Added prop `showTodayButton`
 - `c-input`: Added a `filter` prop for enum inputs to restrict the values available for selection.

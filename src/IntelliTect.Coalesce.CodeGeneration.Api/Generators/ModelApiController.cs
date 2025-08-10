@@ -2,6 +2,7 @@
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
+using IntelliTect.Coalesce.DataAnnotations;
 using System.Linq;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -258,7 +259,16 @@ public class ModelApiController : ApiController
                     // the etag is still valid, but including the correct hash
                     // in the querystring this means the client has prior knowledge
                     // about the current version via the VaryByProperty's value).
-                    b.Line("_cacheControlHeader.MaxAge = TimeSpan.FromDays(30);");
+                    
+                    var clientCacheDurationSeconds = method.GetAttributeValue<ExecuteAttribute>(a => a.ClientCacheDurationSeconds);
+                    if (clientCacheDurationSeconds != null)
+                    {
+                        b.Line($"_cacheControlHeader.MaxAge = TimeSpan.FromSeconds({clientCacheDurationSeconds.Value});");
+                    }
+                    else
+                    {
+                        b.Line("_cacheControlHeader.MaxAge = TimeSpan.FromDays(30);");
+                    }
                 }
 
                 b.Line("Response.GetTypedHeaders().CacheControl = _cacheControlHeader;");

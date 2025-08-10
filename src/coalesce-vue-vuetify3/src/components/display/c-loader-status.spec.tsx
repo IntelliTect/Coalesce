@@ -96,9 +96,9 @@ describe("CLoaderStatus", () => {
   });
 
   test("show-success flag defaults to false", () => {
-    const wrapper = mountApp(() => (
-      <CLS loaders={vm.$load} />
-    )).findComponent(CLS);
+    const wrapper = mountApp(() => <CLS loaders={vm.$load} />).findComponent(
+      CLS,
+    );
 
     expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(false);
   });
@@ -120,40 +120,28 @@ describe("CLoaderStatus", () => {
   });
 
   test("success messages computation", () => {
-    // Create a proper mock that extends or mimics ApiState
-    const mockLoader = {
-      wasSuccessful: true,
-      message: "Test success message",
-      isLoading: false,
-      hasResult: true
-    };
+    // Set up the loader in a successful state with a custom message
+    vm.$load.wasSuccessful = true;
+    vm.$load.message = "Test success message";
 
     const wrapper = mountApp(() => (
-      <CLS loaders={mockLoader} show-success />
+      <CLS loaders={vm.$load} show-success />
     )).findComponent(CLS);
 
-    // The loader should be in loaderFlags with show-success enabled
-    const flags = wrapper.vm.loaderFlags;
-    expect(flags.length).toBeGreaterThan(0);
-    expect(flags[0][1]["show-success"]).toBe(true);
+    // Verify the success message is displayed in the rendered text
+    expect(wrapper.text()).toContain("Test success message");
   });
 
   test("success messages with null message shows default", () => {
-    // Create a proper mock that extends or mimics ApiState
-    const mockLoader = {
-      wasSuccessful: true,
-      message: null,
-      isLoading: false,
-      hasResult: true
-    };
+    // Set up the loader in a successful state with null message
+    vm.$save.wasSuccessful = true;
+    vm.$save.message = null;
 
     const wrapper = mountApp(() => (
-      <CLS loaders={mockLoader} show-success />
+      <CLS loaders={vm.$save} show-success />
     )).findComponent(CLS);
 
-    // The loader should be in loaderFlags with show-success enabled
-    const flags = wrapper.vm.loaderFlags;
-    expect(flags.length).toBeGreaterThan(0);
-    expect(flags[0][1]["show-success"]).toBe(true);
+    // Verify the default "Success" message is displayed
+    expect(wrapper.text()).toContain("Success");
   });
 });

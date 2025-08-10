@@ -76,14 +76,12 @@ public class ExecuteAttribute : SecurityAttribute
     /// Defaults to 30 days (2,592,000 seconds) if not specified.
     /// </para>
     /// </summary>
-    public int? ClientCacheDurationSeconds { get; set; }
+    public int ClientCacheDurationSeconds { get; set; }
 
     /// <summary>
     /// Gets the ClientCacheDuration as a TimeSpan based on ClientCacheDurationSeconds.
     /// </summary>
-    public TimeSpan? ClientCacheDuration => ClientCacheDurationSeconds.HasValue 
-        ? TimeSpan.FromSeconds(ClientCacheDurationSeconds.Value) 
-        : null;
+    public TimeSpan? ClientCacheDuration => TimeSpan.FromSeconds(ClientCacheDurationSeconds);
 }
 
 public enum HttpMethod

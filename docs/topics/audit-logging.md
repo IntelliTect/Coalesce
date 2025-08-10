@@ -141,7 +141,7 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 
 ### Stored Procedures
 
-For SQL Server databases, you can optionally configure audit logging to use stored procedures instead of executing the merge SQL directly. This can provide better performance through compiled execution plans and easier monitoring/troubleshooting:
+For SQL Server databases, audit logging uses stored procedures by default instead of executing the merge SQL directly. This provides better performance through compiled execution plans and easier monitoring/troubleshooting:
 
 ``` c#
 public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
@@ -150,7 +150,8 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
     {
         optionsBuilder.UseCoalesceAuditLogging<AuditLog>(x => x
             .WithAugmentation<OperationContext>()
-            .WithStoredProcedures() // Enable stored procedure mode
+            // Stored procedures are enabled by default for SQL Server
+            // .WithStoredProcedures(false) // Disable if you prefer raw SQL
         );
     }
 }

@@ -322,48 +322,18 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         var procedureName = GetStoredProcedureName(sql);
         
         // Check if we've already verified this procedure exists for this model
-        var cacheKey = (db.Model, procedureName);
-        if (_storedProcedureCache.TryGetValue(cacheKey, out _))
+        // Use the same cache key as raw SQL cache (just the model)
+        if (_storedProcedureCache.TryGetValue(db.Model, out var cachedName) && cachedName is string cached && cached == procedureName)
         {
             return procedureName;
         }
 
-        // Check if the procedure exists in the database
-        var checkSql = "SELECT COUNT(*) FROM sys.procedures WHERE name = @procedureName";
-        int exists;
-        
-        if (async)
-        {
-            using var command = db.Database.GetDbConnection().CreateCommand();
-            command.CommandText = checkSql;
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = "@procedureName";
-            parameter.Value = procedureName;
-            command.Parameters.Add(parameter);
-            
-            if (db.Database.GetDbConnection().State != ConnectionState.Open)
-                await db.Database.GetDbConnection().OpenAsync();
-            var result = await command.ExecuteScalarAsync();
-            exists = Convert.ToInt32(result);
-        }
-        else
-        {
-            using var command = db.Database.GetDbConnection().CreateCommand();
-            command.CommandText = checkSql;
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = "@procedureName";
-            parameter.Value = procedureName;
-            command.Parameters.Add(parameter);
-            
-            if (db.Database.GetDbConnection().State != ConnectionState.Open)
-                db.Database.GetDbConnection().Open();
-            var result = command.ExecuteScalar();
-            exists = Convert.ToInt32(result);
-        }
+        // Check if the procedure exists and has the correct content
+        var needsCreation = await CheckProcedureNeedsCreation(db, procedureName, sql, async);
 
-        if (exists == 0)
+        if (needsCreation)
         {
-            // Create the stored procedure
+            // Create or update the stored procedure
             var ddl = GetStoredProcedureDdl(procedureName, sql);
             
             if (async)
@@ -376,14 +346,107 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
             }
         }
 
-        // Cache that we've verified this procedure exists
-        _storedProcedureCache.Set(cacheKey, true, new MemoryCacheEntryOptions
+        // Cache that we've verified this procedure exists with the correct content
+        _storedProcedureCache.Set(db.Model, procedureName, new MemoryCacheEntryOptions
         {
-            Size = 1,
+            Size = procedureName.Length,
             SlidingExpiration = TimeSpan.FromHours(1) // Re-verify after an hour
         });
 
         return procedureName;
+    }
+
+    /// <summary>
+    /// Checks if a stored procedure needs to be created or updated.
+    /// </summary>
+    private async ValueTask<bool> CheckProcedureNeedsCreation(DbContext db, string procedureName, string expectedSql, bool async)
+    {
+        // Check if the procedure exists and get its definition
+        var checkSql = """
+            SELECT OBJECT_DEFINITION(OBJECT_ID(@procedureName, 'P'))
+            """;
+        
+        await EnsureConnectionOpen(db, async);
+        
+        using var command = db.Database.GetDbConnection().CreateCommand();
+        command.CommandText = checkSql;
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = "@procedureName";
+        parameter.Value = procedureName;
+        command.Parameters.Add(parameter);
+        
+        object? result;
+        if (async)
+        {
+            result = await command.ExecuteScalarAsync();
+        }
+        else
+        {
+            result = command.ExecuteScalar();
+        }
+
+        if (result == null || result == DBNull.Value)
+        {
+            // Procedure doesn't exist
+            return true;
+        }
+
+        // Procedure exists, check if content matches
+        var existingDefinition = result.ToString()!;
+        
+        // Extract the SQL from the stored procedure definition to compare with expected SQL
+        // The existing definition includes the CREATE PROCEDURE wrapper, so we need to extract just the body
+        var bodyStart = existingDefinition.IndexOf("BEGIN", StringComparison.OrdinalIgnoreCase);
+        var bodyEnd = existingDefinition.LastIndexOf("END", StringComparison.OrdinalIgnoreCase);
+        
+        if (bodyStart >= 0 && bodyEnd > bodyStart)
+        {
+            var existingBody = existingDefinition.Substring(bodyStart + 5, bodyEnd - bodyStart - 5).Trim();
+            var expectedBody = expectedSql.Trim();
+            
+            // Compare the SQL content (normalize whitespace for comparison)
+            var normalizedExisting = NormalizeSql(existingBody);
+            var normalizedExpected = NormalizeSql(expectedBody);
+            
+            if (normalizedExisting != normalizedExpected)
+            {
+                // Content doesn't match, needs update
+                return true;
+            }
+        }
+        else
+        {
+            // Couldn't parse the procedure body, safer to recreate
+            return true;
+        }
+
+        return false; // Procedure exists and content matches
+    }
+
+    /// <summary>
+    /// Ensures the database connection is open.
+    /// </summary>
+    private static async ValueTask EnsureConnectionOpen(DbContext db, bool async)
+    {
+        if (db.Database.GetDbConnection().State != ConnectionState.Open)
+        {
+            if (async)
+            {
+                await db.Database.GetDbConnection().OpenAsync();
+            }
+            else
+            {
+                db.Database.GetDbConnection().Open();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Normalizes SQL text for comparison by removing extra whitespace and standardizing formatting.
+    /// </summary>
+    private static string NormalizeSql(string sql)
+    {
+        return System.Text.RegularExpressions.Regex.Replace(sql.Trim(), @"\s+", " ", System.Text.RegularExpressions.RegexOptions.Multiline);
     }
 
     private async ValueTask SaveAudit(DbContext db, CoalesceAudit audit, bool async)

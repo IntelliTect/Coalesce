@@ -65,10 +65,10 @@ public class AuditOptions
     /// easier monitoring/troubleshooting. Currently only supported for SQL Server.
     /// </para>
     /// <para>
-    /// The default is false.
+    /// The default is true.
     /// </para>
     /// </summary>
-    public bool UseStoredProcedures { get; internal set; } = false;
+    public bool UseStoredProcedures { get; internal set; } = true;
 
     /// <summary>
     /// Internal so that it cannot be modified in a way that breaks the caching assumptions

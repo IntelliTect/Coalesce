@@ -236,7 +236,7 @@ public class SqlServerAuditTests
     {
         var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
                     .UseSqlServer(SqlServerConnString)
-                    .UseCoalesceAuditLogging<TestAuditLog>()
+                    .UseCoalesceAuditLogging<TestAuditLog>(x => x.WithStoredProcedures(false))
                     .Options);
 
         try

@@ -1198,7 +1198,7 @@ export const ComplexModel = domain.types.ComplexModel = {
     restrictedString: {
       name: "restrictedString",
       displayName: "Restricted String",
-      description: "This is a multiline string in an attribute.\r\nThis is a second line in the string.",
+      description: "This is a multiline string in an attribute.\nThis is a second line in the string.",
       type: "string",
       role: "value",
     },
@@ -2349,6 +2349,68 @@ export const ComplexModel = domain.types.ComplexModel = {
     downloadAttachment_VaryString: {
       name: "downloadAttachment_VaryString",
       displayName: "Download Attachment _ Vary String",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.name },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+    downloadAttachment_VaryStringCustomCache: {
+      name: "downloadAttachment_VaryStringCustomCache",
+      displayName: "Download Attachment _ Vary String Custom Cache",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.name },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+    downloadAttachment_VaryStringNoCache: {
+      name: "downloadAttachment_VaryStringNoCache",
+      displayName: "Download Attachment _ Vary String No Cache",
       transportType: "item",
       httpMethod: "GET",
       params: {

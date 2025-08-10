@@ -369,6 +369,26 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
   }
   
   
+  public downloadAttachment_VaryStringCustomCache(id: number | null, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+    const $method = this.$metadata.methods.downloadAttachment_VaryStringCustomCache
+    const $params =  {
+      id,
+      etag,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public downloadAttachment_VaryStringNoCache(id: number | null, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+    const $method = this.$metadata.methods.downloadAttachment_VaryStringNoCache
+    const $params =  {
+      id,
+      etag,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
   public downloadAttachment_VaryInt(id: number | null, etag?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
     const $method = this.$metadata.methods.downloadAttachment_VaryInt
     const $params =  {

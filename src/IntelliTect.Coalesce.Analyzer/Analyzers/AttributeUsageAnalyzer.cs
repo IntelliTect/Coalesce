@@ -53,11 +53,11 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
     public static readonly DiagnosticDescriptor MissingFileTypeAttributeRule = new(
         id: "COA0201",
         title: "Consider adding FileTypeAttribute to IFile parameter",
-        messageFormat: "Consider adding [FileType] attribute to specify allowed file types for this IFile parameter",
+        messageFormat: "Consider adding [FileType] attribute to specify suggested file types in the browser for this IFile parameter",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Info,
         isEnabledByDefault: true,
-        description: "IFile parameters on Coalesce-exposed methods should specify allowed file types using the [FileType] attribute to improve default user experience.");
+        description: "IFile parameters on Coalesce-exposed methods should specify suggested file types using the [FileType] attribute to improve default user experience.");
 
     public static readonly DiagnosticDescriptor InvalidSemanticKernelAttributeUsageRule = new(
         id: "COA0007",

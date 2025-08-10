@@ -164,4 +164,59 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             }
             """);
     }
+
+    [Fact]
+    public async Task IFileParameterOnServiceInterfaceMethod_ReportsHint()
+    {
+        await VerifyAnalyzerAsync("""
+            using IntelliTect.Coalesce.Models;
+
+            [Coalesce, Service]
+            public interface ITestService
+            {
+                void TestMethod(IFile {|COA0201:file|});
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task IFileParameterOnServiceClassImplementation_NoHint()
+    {
+        // Should not suggest FileType on implementation methods when service is exposed via interface
+        // but SHOULD suggest on the interface method
+        await VerifyAnalyzerAsync("""
+            using IntelliTect.Coalesce.Models;
+
+            [Coalesce, Service]
+            public interface ITestService
+            {
+                void TestMethod(IFile {|COA0201:file|});
+            }
+
+            public class TestService : ITestService
+            {
+                public void TestMethod(IFile file)
+                {
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task IFileParameterOnServiceClass_ReportsHint()
+    {
+        // Should suggest FileType on service class methods when class is directly exposed (no interface) and method has [Coalesce]
+        await VerifyAnalyzerAsync("""
+            using IntelliTect.Coalesce.Models;
+
+            [Coalesce, Service]
+            public class TestService
+            {
+                [Coalesce]
+                public void TestMethod(IFile {|COA0201:file|})
+                {
+                }
+            }
+            """);
+    }
 }

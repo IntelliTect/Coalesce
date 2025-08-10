@@ -177,16 +177,20 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 
         if (IsValidCoalesceMethod(methodSymbol))
         {
-            // COA0201 Check for IFile parameters without FileType attribute
-            foreach (var parameter in methodSymbol.Parameters)
+            // Only suggest FileType on directly exposed methods (not implementations)
+            if (IsDirectlyExposedCoalesceMethod(methodSymbol))
             {
-                if (parameter.Type is INamedTypeSymbol namedType &&
-                    namedType.InheritsFromOrImplements("IntelliTect.Coalesce.Models.IFile") &&
-                    parameter.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.FileTypeAttribute") is null &&
-                    parameter.Locations.FirstOrDefault() is Location paramLocation
-                )
+                // COA0201 Check for IFile parameters without FileType attribute
+                foreach (var parameter in methodSymbol.Parameters)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(MissingFileTypeAttributeRule, paramLocation));
+                    if (parameter.Type is INamedTypeSymbol namedType &&
+                        namedType.InheritsFromOrImplements("IntelliTect.Coalesce.Models.IFile") &&
+                        parameter.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.FileTypeAttribute") is null &&
+                        parameter.Locations.FirstOrDefault() is Location paramLocation
+                    )
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(MissingFileTypeAttributeRule, paramLocation));
+                    }
                 }
             }
             return;
@@ -209,6 +213,47 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
             }
         }
 
+    }
+
+    private static bool IsDirectlyExposedCoalesceMethod(IMethodSymbol methodSymbol)
+    {
+        // Check if method has [Coalesce] or [SemanticKernel] attribute
+        if (methodSymbol.GetAttributesByName(
+            "IntelliTect.Coalesce.CoalesceAttribute",
+            "IntelliTect.Coalesce.SemanticKernelAttribute").Any())
+        {
+            return true;
+        }
+
+        // Check if method is on an interface marked with [Service]
+        var containingType = methodSymbol.ContainingType;
+        if (
+            containingType != null &&
+            containingType.TypeKind == TypeKind.Interface &&
+            containingType.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") != null)
+        {
+            return true;
+        }
+
+        // Check if method is on a service class that is NOT implementing an interface with [Service]
+        if (containingType != null && 
+            containingType.TypeKind == TypeKind.Class &&
+            containingType.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") != null)
+        {
+            // Check if this class implements any interface with [Service] attribute
+            foreach (var interfaceType in containingType.AllInterfaces)
+            {
+                if (interfaceType.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") != null)
+                {
+                    // This class implements a service interface, so the class methods are not directly exposed
+                    return false;
+                }
+            }
+            // No service interface found, so this class is directly exposed
+            return true;
+        }
+
+        return false;
     }
 
     private static bool IsValidCoalesceMethod(IMethodSymbol methodSymbol)

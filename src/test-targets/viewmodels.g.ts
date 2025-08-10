@@ -648,6 +648,28 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return downloadAttachment_VaryString
   }
   
+  public get downloadAttachment_VaryStringCustomCache() {
+    const downloadAttachment_VaryStringCustomCache = this.$apiClient.$makeCaller(
+      this.$metadata.methods.downloadAttachment_VaryStringCustomCache,
+      (c) => c.downloadAttachment_VaryStringCustomCache(this.$primaryKey, this.name),
+      () => ({}),
+      (c, args) => c.downloadAttachment_VaryStringCustomCache(this.$primaryKey, this.name))
+    
+    Object.defineProperty(this, 'downloadAttachment_VaryStringCustomCache', {value: downloadAttachment_VaryStringCustomCache});
+    return downloadAttachment_VaryStringCustomCache
+  }
+  
+  public get downloadAttachment_VaryStringNoCache() {
+    const downloadAttachment_VaryStringNoCache = this.$apiClient.$makeCaller(
+      this.$metadata.methods.downloadAttachment_VaryStringNoCache,
+      (c) => c.downloadAttachment_VaryStringNoCache(this.$primaryKey, this.name),
+      () => ({}),
+      (c, args) => c.downloadAttachment_VaryStringNoCache(this.$primaryKey, this.name))
+    
+    Object.defineProperty(this, 'downloadAttachment_VaryStringNoCache', {value: downloadAttachment_VaryStringNoCache});
+    return downloadAttachment_VaryStringNoCache
+  }
+  
   public get downloadAttachment_VaryInt() {
     const downloadAttachment_VaryInt = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryInt,
@@ -1436,6 +1458,28 @@ export class StandaloneReadWriteListViewModel extends ListViewModel<$models.Stan
 }
 
 
+export interface StringEnumModelViewModel extends $models.StringEnumModel {
+  id: number | null;
+  stringEnum: string | null;
+  regularEnum: $models.RegularEnum | null;
+  nullableStringEnum: string | null;
+}
+export class StringEnumModelViewModel extends ViewModel<$models.StringEnumModel, $apiClients.StringEnumModelApiClient, number> implements $models.StringEnumModel  {
+  
+  constructor(initialData?: DeepPartial<$models.StringEnumModel> | null) {
+    super($metadata.StringEnumModel, new $apiClients.StringEnumModelApiClient(), initialData)
+  }
+}
+defineProps(StringEnumModelViewModel, $metadata.StringEnumModel)
+
+export class StringEnumModelListViewModel extends ListViewModel<$models.StringEnumModel, $apiClients.StringEnumModelApiClient, StringEnumModelViewModel> {
+  
+  constructor() {
+    super($metadata.StringEnumModel, new $apiClients.StringEnumModelApiClient())
+  }
+}
+
+
 export interface StringIdentityViewModel extends $models.StringIdentity {
   stringIdentityId: string | null;
   parentId: string | null;
@@ -1569,6 +1613,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   Sibling: SiblingViewModel,
   StandaloneReadonly: StandaloneReadonlyViewModel,
   StandaloneReadWrite: StandaloneReadWriteViewModel,
+  StringEnumModel: StringEnumModelViewModel,
   StringIdentity: StringIdentityViewModel,
   Test: TestViewModel,
   ZipCode: ZipCodeViewModel,
@@ -1600,6 +1645,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Sibling: SiblingListViewModel,
   StandaloneReadonly: StandaloneReadonlyListViewModel,
   StandaloneReadWrite: StandaloneReadWriteListViewModel,
+  StringEnumModel: StringEnumModelListViewModel,
   StringIdentity: StringIdentityListViewModel,
   Test: TestListViewModel,
   ZipCode: ZipCodeListViewModel,

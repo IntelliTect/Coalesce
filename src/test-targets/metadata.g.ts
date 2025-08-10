@@ -51,6 +51,28 @@ export const Genders = domain.enums.Genders = {
   },
   ]),
 }
+export const RegularEnum = domain.enums.RegularEnum = {
+  name: "RegularEnum" as const,
+  displayName: "Regular Enum",
+  type: "enum",
+  ...getEnumMeta<"FirstValue"|"SecondValue"|"ThirdValue">([
+  {
+    value: 1,
+    strValue: "FirstValue",
+    displayName: "First Value",
+  },
+  {
+    value: 2,
+    strValue: "SecondValue",
+    displayName: "Second Value",
+  },
+  {
+    value: 3,
+    strValue: "ThirdValue",
+    displayName: "Third Value",
+  },
+  ]),
+}
 export const SkyConditions = domain.enums.SkyConditions = {
   name: "SkyConditions" as const,
   displayName: "Sky Conditions",
@@ -104,6 +126,28 @@ export const Statuses = domain.enums.Statuses = {
     value: 99,
     strValue: "Cancelled",
     displayName: "Cancelled",
+  },
+  ]),
+}
+export const StringSerializedEnum = domain.enums.StringSerializedEnum = {
+  name: "StringSerializedEnum" as const,
+  displayName: "String Serialized Enum",
+  type: "enum",
+  ...getEnumMeta<"FirstValue"|"SecondValue"|"ThirdValue">([
+  {
+    value: 1,
+    strValue: "FirstValue",
+    displayName: "First Value",
+  },
+  {
+    value: 2,
+    strValue: "SecondValue",
+    displayName: "Second Value",
+  },
+  {
+    value: 3,
+    strValue: "ThirdValue",
+    displayName: "Third Value",
   },
   ]),
 }
@@ -1198,7 +1242,7 @@ export const ComplexModel = domain.types.ComplexModel = {
     restrictedString: {
       name: "restrictedString",
       displayName: "Restricted String",
-      description: "This is a multiline string in an attribute.\r\nThis is a second line in the string.",
+      description: "This is a multiline string in an attribute.\nThis is a second line in the string.",
       type: "string",
       role: "value",
     },
@@ -2349,6 +2393,68 @@ export const ComplexModel = domain.types.ComplexModel = {
     downloadAttachment_VaryString: {
       name: "downloadAttachment_VaryString",
       displayName: "Download Attachment _ Vary String",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.name },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+    downloadAttachment_VaryStringCustomCache: {
+      name: "downloadAttachment_VaryStringCustomCache",
+      displayName: "Download Attachment _ Vary String Custom Cache",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.name },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+    downloadAttachment_VaryStringNoCache: {
+      name: "downloadAttachment_VaryStringNoCache",
+      displayName: "Download Attachment _ Vary String No Cache",
       transportType: "item",
       httpMethod: "GET",
       params: {
@@ -4232,6 +4338,49 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
     },
   },
 }
+export const StringEnumModel = domain.types.StringEnumModel = {
+  name: "StringEnumModel" as const,
+  displayName: "String Enum Model",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "StringEnumModel",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    stringEnum: {
+      name: "stringEnum",
+      displayName: "String Enum",
+      type: "enum",
+      get typeDef() { return StringSerializedEnum },
+      role: "value",
+    },
+    regularEnum: {
+      name: "regularEnum",
+      displayName: "Regular Enum",
+      type: "enum",
+      get typeDef() { return RegularEnum },
+      role: "value",
+    },
+    nullableStringEnum: {
+      name: "nullableStringEnum",
+      displayName: "Nullable String Enum",
+      type: "enum",
+      get typeDef() { return StringSerializedEnum },
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const StringIdentity = domain.types.StringIdentity = {
   name: "StringIdentity" as const,
   displayName: "String Identity",
@@ -5182,8 +5331,10 @@ interface AppDomain extends Domain {
   enums: {
     EnumPkId: typeof EnumPkId
     Genders: typeof Genders
+    RegularEnum: typeof RegularEnum
     SkyConditions: typeof SkyConditions
     Statuses: typeof Statuses
+    StringSerializedEnum: typeof StringSerializedEnum
     Titles: typeof Titles
   }
   types: {
@@ -5228,6 +5379,7 @@ interface AppDomain extends Domain {
     Sibling: typeof Sibling
     StandaloneReadonly: typeof StandaloneReadonly
     StandaloneReadWrite: typeof StandaloneReadWrite
+    StringEnumModel: typeof StringEnumModel
     StringIdentity: typeof StringIdentity
     Test: typeof Test
     ValidationTarget: typeof ValidationTarget

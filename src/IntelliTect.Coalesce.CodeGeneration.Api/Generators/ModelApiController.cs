@@ -259,8 +259,8 @@ public class ModelApiController : ApiController
                     // the etag is still valid, but including the correct hash
                     // in the querystring this means the client has prior knowledge
                     // about the current version via the VaryByProperty's value).
-                    
-                    var clientCacheDurationSeconds = method.GetAttributeValue<ExecuteAttribute>(a => a.ClientCacheDurationSeconds);
+
+                    var clientCacheDurationSeconds = method.GetAttribute<ExecuteAttribute>().GetValue(a => a.ClientCacheDurationSeconds);
                     if (clientCacheDurationSeconds != null)
                     {
                         b.Line($"_cacheControlHeader.MaxAge = TimeSpan.FromSeconds({clientCacheDurationSeconds.Value});");

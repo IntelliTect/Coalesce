@@ -62,5 +62,29 @@ public abstract class AttributeViewModel<TAttribute>
         return GetValue<T>(propertyExpression.GetExpressedProperty().Name);
     }
 
+    public T? GetValue<T>(
+        Expression<Func<TAttribute, Nullable<T>>> propertyExpression,
+        Expression<Func<TAttribute, bool>>? hasValueExpression = null
+    )
+        where T : struct
+    {
+        // In reflection contexts, for attributes that can have "unset" as a value that means null,
+        // we have to check this state with an additional property. E.g. ExecuteAttribute.ValidateAttributes.
+        // In symbol contexts, the absence of syntax that assigns a value to the property implies this "unset" state.
+        if (hasValueExpression is not null)
+        {
+            // `hasValue` will always be non-null in reflection contexts,
+            // and always null in symbol contexts where the HasValue property won't ever be set.
+            var hasValue = GetValue<bool>(hasValueExpression.GetExpressedProperty().Name);
+            if (hasValue == false)
+            {
+                return null;
+            }
+        }
+
+
+        return GetValue<T>(propertyExpression.GetExpressedProperty().Name);
+    }
+
     public abstract object? GetValue(string valueName);
 }

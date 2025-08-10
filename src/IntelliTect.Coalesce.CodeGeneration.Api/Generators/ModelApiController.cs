@@ -260,7 +260,9 @@ public class ModelApiController : ApiController
                     // in the querystring this means the client has prior knowledge
                     // about the current version via the VaryByProperty's value).
 
-                    var clientCacheDurationSeconds = method.GetAttribute<ExecuteAttribute>().GetValue(a => a.ClientCacheDurationSeconds);
+                    var clientCacheDurationSeconds = method
+                        .GetAttribute<ExecuteAttribute>()
+                        ?.GetValue(a => a.ClientCacheDurationSeconds);
                     if (clientCacheDurationSeconds != null)
                     {
                         b.Line($"_cacheControlHeader.MaxAge = TimeSpan.FromSeconds({clientCacheDurationSeconds.Value});");

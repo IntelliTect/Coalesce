@@ -133,6 +133,7 @@ export const StringSerializedEnum = domain.enums.StringSerializedEnum = {
   name: "StringSerializedEnum" as const,
   displayName: "String Serialized Enum",
   type: "enum",
+  serializeAsString: true,
   ...getEnumMeta<"FirstValue"|"SecondValue"|"ThirdValue">([
   {
     value: 1,

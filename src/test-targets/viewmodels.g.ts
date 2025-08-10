@@ -1460,9 +1460,9 @@ export class StandaloneReadWriteListViewModel extends ListViewModel<$models.Stan
 
 export interface StringEnumModelViewModel extends $models.StringEnumModel {
   id: number | null;
-  stringEnum: string | null;
+  stringEnum: $models.StringSerializedEnum | null;
   regularEnum: $models.RegularEnum | null;
-  nullableStringEnum: string | null;
+  nullableStringEnum: $models.StringSerializedEnum | null;
 }
 export class StringEnumModelViewModel extends ViewModel<$models.StringEnumModel, $apiClients.StringEnumModelApiClient, number> implements $models.StringEnumModel  {
   

@@ -25,24 +25,12 @@ public class TsModels : StringBuilderFileGenerator<ReflectionRepository>
 
         foreach (var model in Model.ClientEnums.OrderBy(e => e.ClientTypeName))
         {
-            // Check if this enum should be serialized as strings
-            var isStringEnum = model.IsEnumStringSerializable;
-            
             using (b.Block($"export enum {model.ClientTypeName}"))
             {
                 foreach (var value in model.EnumValues)
                 {
                     b.DocComment(value.Comment ?? value.Description);
-                    if (isStringEnum)
-                    {
-                        // String enum: assign string literals
-                        b.Line($"{value.Name} = \"{value.Name}\",");
-                    }
-                    else
-                    {
-                        // Numeric enum: assign numeric values
-                        b.Line($"{value.Name} = {value.Value},");
-                    }
+                    b.Line($"{value.Name} = {value.Value},");
                 }
             }
 

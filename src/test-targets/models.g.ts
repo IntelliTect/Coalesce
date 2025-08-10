@@ -47,9 +47,9 @@ export enum Statuses {
 
 
 export enum StringSerializedEnum {
-  FirstValue = "FirstValue",
-  SecondValue = "SecondValue",
-  ThirdValue = "ThirdValue",
+  FirstValue = 1,
+  SecondValue = 2,
+  ThirdValue = 3,
 }
 
 
@@ -900,9 +900,9 @@ export class Sibling {
 
 export interface StringEnumModel extends Model<typeof metadata.StringEnumModel> {
   id: number | null
-  stringEnum: string | null
+  stringEnum: StringSerializedEnum | null
   regularEnum: RegularEnum | null
-  nullableStringEnum: string | null
+  nullableStringEnum: StringSerializedEnum | null
 }
 export class StringEnumModel {
   

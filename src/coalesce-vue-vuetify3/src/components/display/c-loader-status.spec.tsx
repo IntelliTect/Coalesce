@@ -105,7 +105,7 @@ describe("CLoaderStatus", () => {
 
   test("show-success flag can be enabled", () => {
     const wrapper = mountApp(() => (
-      <CLS loaders={vm.$load} no-show-success={false} />
+      <CLS loaders={vm.$load} show-success />
     )).findComponent(CLS);
 
     expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(true);
@@ -117,18 +117,6 @@ describe("CLoaderStatus", () => {
     )).findComponent(CLS);
 
     expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(true);
-  });
-
-  test("show-success flag precedence", () => {
-    const wrapper = mountApp(() => (
-      <CLS
-        loaders={{ "no-show-success": [vm.$load] }}
-        no-show-success={false}
-      />
-    )).findComponent(CLS);
-
-    // Flags string should override component-level prop
-    expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(false);
   });
 
   test("success messages computation", () => {

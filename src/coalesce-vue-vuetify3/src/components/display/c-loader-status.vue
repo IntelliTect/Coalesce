@@ -402,19 +402,6 @@ defineExpose({ loaderFlags });
     }
   }
 
-  // Specific alert container classes
-  .c-loader-status--errors {
-    ul {
-      padding-left: 24px;
-    }
-  }
-
-  .c-loader-status--success {
-    ul {
-      padding-left: 24px;
-    }
-  }
-
   // Common styles for all messages
   .c-loader-status--message {
     white-space: pre-wrap;

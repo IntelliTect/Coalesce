@@ -19,90 +19,89 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue3.Api
+namespace Coalesce.Web.Vue3.Api;
+
+[Route("api/AIAgentService")]
+[ServiceFilter(typeof(IApiActionFilter))]
+public partial class AIAgentServiceController : BaseApiController
 {
-    [Route("api/AIAgentService")]
-    [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class AIAgentServiceController : BaseApiController
+    protected Coalesce.Domain.AIAgentService Service { get; }
+
+    public AIAgentServiceController(CrudContext context, Coalesce.Domain.AIAgentService service) : base(context)
     {
-        protected Coalesce.Domain.AIAgentService Service { get; }
+        GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.AIAgentService>();
+        Service = service;
+    }
 
-        public AIAgentServiceController(CrudContext context, Coalesce.Domain.AIAgentService service) : base(context)
+    /// <summary>
+    /// Method: ChatAgent
+    /// </summary>
+    [HttpPost("ChatAgent")]
+    [Authorize]
+    [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
+    public virtual async Task<ItemResult<ChatResponseResponse>> ChatAgent(
+        System.Threading.CancellationToken cancellationToken,
+        [FromForm(Name = "history")] string history,
+        [FromForm(Name = "prompt")] string prompt)
+    {
+        var _method = GeneratedForClassViewModel!.MethodByName("ChatAgent");
+        var _params = new
         {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.AIAgentService>();
-            Service = service;
+            History = history,
+            Prompt = prompt
+        };
+
+        if (Context.Options.ValidateAttributesForMethods)
+        {
+            var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+            if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
         }
 
-        /// <summary>
-        /// Method: ChatAgent
-        /// </summary>
-        [HttpPost("ChatAgent")]
-        [Authorize]
-        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
-        public virtual async Task<ItemResult<ChatResponseResponse>> ChatAgent(
-            System.Threading.CancellationToken cancellationToken,
-            [FromForm(Name = "history")] string history,
-            [FromForm(Name = "prompt")] string prompt)
+        IncludeTree includeTree = null;
+        var _mappingContext = new MappingContext(Context);
+        var _methodResult = await Service.ChatAgent(
+            _params.History,
+            _params.Prompt,
+            cancellationToken
+        );
+        var _result = new ItemResult<ChatResponseResponse>();
+        _result.Object = Mapper.MapToDto<Coalesce.Domain.AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
+        return _result;
+    }
+
+    public class ChatAgentParameters
+    {
+        public string History { get; set; }
+        public string Prompt { get; set; }
+    }
+
+    /// <summary>
+    /// Method: ChatAgent
+    /// </summary>
+    [HttpPost("ChatAgent")]
+    [Authorize]
+    [Consumes("application/json")]
+    public virtual async Task<ItemResult<ChatResponseResponse>> ChatAgent(
+        System.Threading.CancellationToken cancellationToken,
+        [FromBody] ChatAgentParameters _params
+    )
+    {
+        var _method = GeneratedForClassViewModel!.MethodByName("ChatAgent");
+        if (Context.Options.ValidateAttributesForMethods)
         {
-            var _method = GeneratedForClassViewModel!.MethodByName("ChatAgent");
-            var _params = new
-            {
-                History = history,
-                Prompt = prompt
-            };
-
-            if (Context.Options.ValidateAttributesForMethods)
-            {
-                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
-                if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
-            }
-
-            IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(Context);
-            var _methodResult = await Service.ChatAgent(
-                _params.History,
-                _params.Prompt,
-                cancellationToken
-            );
-            var _result = new ItemResult<ChatResponseResponse>();
-            _result.Object = Mapper.MapToDto<Coalesce.Domain.AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
-            return _result;
+            var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+            if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
         }
 
-        public class ChatAgentParameters
-        {
-            public string History { get; set; }
-            public string Prompt { get; set; }
-        }
-
-        /// <summary>
-        /// Method: ChatAgent
-        /// </summary>
-        [HttpPost("ChatAgent")]
-        [Authorize]
-        [Consumes("application/json")]
-        public virtual async Task<ItemResult<ChatResponseResponse>> ChatAgent(
-            System.Threading.CancellationToken cancellationToken,
-            [FromBody] ChatAgentParameters _params
-        )
-        {
-            var _method = GeneratedForClassViewModel!.MethodByName("ChatAgent");
-            if (Context.Options.ValidateAttributesForMethods)
-            {
-                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
-                if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
-            }
-
-            IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(Context);
-            var _methodResult = await Service.ChatAgent(
-                _params.History,
-                _params.Prompt,
-                cancellationToken
-            );
-            var _result = new ItemResult<ChatResponseResponse>();
-            _result.Object = Mapper.MapToDto<Coalesce.Domain.AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
-            return _result;
-        }
+        IncludeTree includeTree = null;
+        var _mappingContext = new MappingContext(Context);
+        var _methodResult = await Service.ChatAgent(
+            _params.History,
+            _params.Prompt,
+            cancellationToken
+        );
+        var _result = new ItemResult<ChatResponseResponse>();
+        _result.Object = Mapper.MapToDto<Coalesce.Domain.AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
+        return _result;
     }
 }

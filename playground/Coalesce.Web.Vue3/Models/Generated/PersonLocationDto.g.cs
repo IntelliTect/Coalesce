@@ -7,72 +7,71 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 
-namespace Coalesce.Web.Vue3.Models
+namespace Coalesce.Web.Vue3.Models;
+
+public partial class PersonLocationParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.PersonLocation>
 {
-    public partial class PersonLocationParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.PersonLocation>
+    public PersonLocationParameter() { }
+
+    private double? _Latitude;
+    private double? _Longitude;
+
+    public double? Latitude
     {
-        public PersonLocationParameter() { }
-
-        private double? _Latitude;
-        private double? _Longitude;
-
-        public double? Latitude
-        {
-            get => _Latitude;
-            set { _Latitude = value; Changed(nameof(Latitude)); }
-        }
-        public double? Longitude
-        {
-            get => _Longitude;
-            set { _Longitude = value; Changed(nameof(Longitude)); }
-        }
-
-        /// <summary>
-        /// Map from the current DTO instance to the domain object.
-        /// </summary>
-        public void MapTo(Coalesce.Domain.PersonLocation entity, IMappingContext context)
-        {
-            var includes = context.Includes;
-
-            if (ShouldMapTo(nameof(Latitude))) entity.Latitude = (Latitude ?? entity.Latitude);
-            if (ShouldMapTo(nameof(Longitude))) entity.Longitude = (Longitude ?? entity.Longitude);
-        }
-
-        /// <summary>
-        /// Map from the current DTO instance to a new instance of the domain object.
-        /// </summary>
-        public Coalesce.Domain.PersonLocation MapToNew(IMappingContext context)
-        {
-            var entity = new Coalesce.Domain.PersonLocation();
-            MapTo(entity, context);
-            return entity;
-        }
-
-        public Coalesce.Domain.PersonLocation MapToModelOrNew(Coalesce.Domain.PersonLocation obj, IMappingContext context)
-        {
-            if (obj is null) return MapToNew(context);
-            MapTo(obj, context);
-            return obj;
-        }
+        get => _Latitude;
+        set { _Latitude = value; Changed(nameof(Latitude)); }
+    }
+    public double? Longitude
+    {
+        get => _Longitude;
+        set { _Longitude = value; Changed(nameof(Longitude)); }
     }
 
-    public partial class PersonLocationResponse : IGeneratedResponseDto<Coalesce.Domain.PersonLocation>
+    /// <summary>
+    /// Map from the current DTO instance to the domain object.
+    /// </summary>
+    public void MapTo(Coalesce.Domain.PersonLocation entity, IMappingContext context)
     {
-        public PersonLocationResponse() { }
+        var includes = context.Includes;
 
-        public double? Latitude { get; set; }
-        public double? Longitude { get; set; }
+        if (ShouldMapTo(nameof(Latitude))) entity.Latitude = (Latitude ?? entity.Latitude);
+        if (ShouldMapTo(nameof(Longitude))) entity.Longitude = (Longitude ?? entity.Longitude);
+    }
 
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public void MapFrom(Coalesce.Domain.PersonLocation obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
+    /// <summary>
+    /// Map from the current DTO instance to a new instance of the domain object.
+    /// </summary>
+    public Coalesce.Domain.PersonLocation MapToNew(IMappingContext context)
+    {
+        var entity = new Coalesce.Domain.PersonLocation();
+        MapTo(entity, context);
+        return entity;
+    }
 
-            this.Latitude = obj.Latitude;
-            this.Longitude = obj.Longitude;
-        }
+    public Coalesce.Domain.PersonLocation MapToModelOrNew(Coalesce.Domain.PersonLocation obj, IMappingContext context)
+    {
+        if (obj is null) return MapToNew(context);
+        MapTo(obj, context);
+        return obj;
+    }
+}
+
+public partial class PersonLocationResponse : IGeneratedResponseDto<Coalesce.Domain.PersonLocation>
+{
+    public PersonLocationResponse() { }
+
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+
+    /// <summary>
+    /// Map from the domain object to the properties of the current DTO instance.
+    /// </summary>
+    public void MapFrom(Coalesce.Domain.PersonLocation obj, IMappingContext context, IncludeTree tree = null)
+    {
+        if (obj == null) return;
+        var includes = context.Includes;
+
+        this.Latitude = obj.Latitude;
+        this.Longitude = obj.Longitude;
     }
 }

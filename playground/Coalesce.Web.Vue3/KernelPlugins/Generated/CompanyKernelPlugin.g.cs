@@ -59,7 +59,7 @@ public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
             var _dataSource = (Coalesce.Domain.Company.DefaultSource)dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("DefaultSource");
             MappingContext _mappingContext = new(context);
 
-            var _listParams = new ListParameters { DataSource = "DefaultSource", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 25 };
+            var _listParams = new ListParameters { DataSource = "DefaultSource", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
             if (countOnly)
             {
                 var result = await _dataSource.GetCountAsync(_listParams);

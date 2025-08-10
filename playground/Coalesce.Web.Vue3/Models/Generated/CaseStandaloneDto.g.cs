@@ -7,59 +7,60 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 
-namespace Coalesce.Web.Vue3.Models;
-
-public partial class CaseStandaloneParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.CaseStandalone>
+namespace Coalesce.Web.Vue3.Models
 {
-    public CaseStandaloneParameter() { }
-
-
-
-    /// <summary>
-    /// Map from the current DTO instance to the domain object.
-    /// </summary>
-    public void MapTo(Coalesce.Domain.CaseStandalone entity, IMappingContext context)
+    public partial class CaseStandaloneParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.CaseStandalone>
     {
-        var includes = context.Includes;
+        public CaseStandaloneParameter() { }
 
+
+
+        /// <summary>
+        /// Map from the current DTO instance to the domain object.
+        /// </summary>
+        public void MapTo(Coalesce.Domain.CaseStandalone entity, IMappingContext context)
+        {
+            var includes = context.Includes;
+
+        }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public Coalesce.Domain.CaseStandalone MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.CaseStandalone();
+            MapTo(entity, context);
+            return entity;
+        }
+
+        public Coalesce.Domain.CaseStandalone MapToModelOrNew(Coalesce.Domain.CaseStandalone obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    /// <summary>
-    /// Map from the current DTO instance to a new instance of the domain object.
-    /// </summary>
-    public Coalesce.Domain.CaseStandalone MapToNew(IMappingContext context)
+    public partial class CaseStandaloneResponse : IGeneratedResponseDto<Coalesce.Domain.CaseStandalone>
     {
-        var entity = new Coalesce.Domain.CaseStandalone();
-        MapTo(entity, context);
-        return entity;
-    }
+        public CaseStandaloneResponse() { }
 
-    public Coalesce.Domain.CaseStandalone MapToModelOrNew(Coalesce.Domain.CaseStandalone obj, IMappingContext context)
-    {
-        if (obj is null) return MapToNew(context);
-        MapTo(obj, context);
-        return obj;
-    }
-}
+        public int? Id { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonResponse AssignedTo { get; set; }
 
-public partial class CaseStandaloneResponse : IGeneratedResponseDto<Coalesce.Domain.CaseStandalone>
-{
-    public CaseStandaloneResponse() { }
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public void MapFrom(Coalesce.Domain.CaseStandalone obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
 
-    public int? Id { get; set; }
-    public Coalesce.Web.Vue3.Models.PersonResponse AssignedTo { get; set; }
+            this.Id = obj.Id;
+            if (tree == null || tree[nameof(this.AssignedTo)] != null)
+                this.AssignedTo = obj.AssignedTo.MapToDto<Coalesce.Domain.Person, PersonResponse>(context, tree?[nameof(this.AssignedTo)]);
 
-    /// <summary>
-    /// Map from the domain object to the properties of the current DTO instance.
-    /// </summary>
-    public void MapFrom(Coalesce.Domain.CaseStandalone obj, IMappingContext context, IncludeTree tree = null)
-    {
-        if (obj == null) return;
-        var includes = context.Includes;
-
-        this.Id = obj.Id;
-        if (tree == null || tree[nameof(this.AssignedTo)] != null)
-            this.AssignedTo = obj.AssignedTo.MapToDto<Coalesce.Domain.Person, PersonResponse>(context, tree?[nameof(this.AssignedTo)]);
-
+        }
     }
 }

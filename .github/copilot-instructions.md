@@ -44,6 +44,6 @@ cd ../coalesce-vue-vuetify3 && npm run test
    If you make changes to the template in the `templates` directory, validate the changes by running `TestLocal.ps1 -- "--FeatureOne --FeatureTwo"` where the FeatureOne, FeatureTwo parameters are replaced with each flag that might affect the changes you made. Run it multiple times if there are different combinations of feature flags that might interact in different ways. The flags are the variables checked by the `#if` in the template code.
 
 4. **Documentation verification**:
-   If the documentation was updated, run `npm run build` in the docs folder. You can expect the linkchecks to fail - you do not have access to the internet to validate the links.
+   If the documentation was updated, run `npm run build` in the docs folder. You can expect the link checks to fail - you do not have access to the internet to validate the links.
 
 REMEMBER: NEVER CANCEL long-running build operations.

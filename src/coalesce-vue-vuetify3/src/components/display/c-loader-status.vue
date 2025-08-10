@@ -9,20 +9,31 @@
     }"
   >
     <!-- Outer div is needed because a transition can't be a child of another transition  -->
-    <div key="error">
+    <div key="messages">
       <v-expand-transition>
         <!-- This div is to reduce jank caused by padding/margins on v-alert -->
-        <div v-if="errorMessages.length">
+        <div v-if="errorMessages.length || successMessages.length">
           <v-alert
             :modelValue="true"
-            type="error"
-            class="c-loader-status--errors"
+            :type="errorMessages.length ? 'error' : 'success'"
+            :class="[
+              'c-loader-status--messages',
+              errorMessages.length
+                ? 'c-loader-status--errors'
+                : 'c-loader-status--success',
+            ]"
           >
             <ul>
               <li
                 v-for="(message, i) in errorMessages"
-                :key="'message-' + i"
-                class="c-loader-status--error-message"
+                :key="'error-message-' + i"
+                class="c-loader-status--message c-loader-status--error-message"
+                v-text="message"
+              ></li>
+              <li
+                v-for="(message, i) in successMessages"
+                :key="'success-message-' + i"
+                class="c-loader-status--message c-loader-status--success-message"
                 v-text="message"
               ></li>
             </ul>
@@ -71,6 +82,7 @@ class Flags {
   "loading-content" = true;
   "error-content" = true;
   "initial-content" = true;
+  "show-success" = false;
 }
 </script>
 
@@ -94,6 +106,8 @@ type CamelFlags =
   | "noLoadingContent"
   | "noErrorContent"
   | "noInitialContent";
+
+type CamelYesFlags = "showSuccess";
 
 type YesFlags = keyof Flags;
 type NoFlags = `no-${YesFlags}`;
@@ -138,7 +152,7 @@ const props = withDefaults(
       height?: number;
       /** The color of the progress bar */
       color?: string;
-    } & { [K in CamelFlags]?: boolean }
+    } & { [K in CamelFlags]?: boolean } & { [K in CamelYesFlags]?: boolean }
   >(),
   {
     progressPlaceholder: true,
@@ -148,20 +162,27 @@ const props = withDefaults(
     // so we can detect if they were specified at all.
     ...Object.fromEntries(
       Object.entries(new Flags()).flatMap((f) => [
-        // [camelize(f[0]), undefined],
+        [camelize(f[0]), undefined],
         [camelize("no-" + f[0]), undefined],
-      ])
+      ]),
     ),
-  }
+  },
 );
 
 const baselineFlags = computed(() => {
   const flags = new Flags();
   for (const key in flags) {
     const noFlag = camelize(("no-" + key) as NoFlags) as Camelize<NoFlags>;
+    const yesFlag = camelize(key as YesFlags) as Camelize<YesFlags>;
 
-    const flagValue = props[noFlag];
-    if (flagValue != null) flags[key as YesFlags] = !flagValue;
+    const noFlagValue = (props as any)[noFlag];
+    const yesFlagValue = (props as any)[yesFlag];
+
+    if (noFlagValue != null) {
+      flags[key as YesFlags] = !noFlagValue;
+    } else if (yesFlagValue != null) {
+      flags[key as YesFlags] = yesFlagValue;
+    }
   }
 
   return Object.freeze(flags);
@@ -221,6 +242,12 @@ const errorMessages = computed(() => {
     .map((f) => f[0].message);
 });
 
+const successMessages = computed(() => {
+  return loaderFlags.value
+    .filter((f) => f[0].wasSuccessful === true && f[1]["show-success"])
+    .map((f) => f[0].message || "Success");
+});
+
 const showLoading = computed(() => {
   return loaderFlags.value.some((f) => {
     const [loader, flags] = f;
@@ -248,7 +275,7 @@ const usePlaceholder = computed(() => {
         f[1]["secondary-progress"] &&
         // If loading content was off then the progressbar will just take the place of the content,
         // so a placeholder is only needed if loading-content is on.
-        f[1]["loading-content"]
+        f[1]["loading-content"],
     )
   );
 });
@@ -369,15 +396,17 @@ defineExpose({ loaderFlags });
     // overflow: hidden;
   }
 
-  .c-loader-status--errors {
+  .c-loader-status--messages {
     ul {
       padding-left: 24px;
     }
   }
-  .c-loader-status--error-message {
+
+  // Common styles for all messages
+  .c-loader-status--message {
     white-space: pre-wrap;
 
-    // Remove bulleting when there's only one error.
+    // Remove bulleting when there's only one message.
     &:only-child {
       list-style: none;
       margin-left: -20px;

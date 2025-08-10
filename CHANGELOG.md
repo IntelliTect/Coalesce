@@ -30,6 +30,7 @@
 - `c-select`: Now supports binding to a non-many-to-many collection navigation property. Selecting an item will populate the foreign key of the dependent item, and deselecting an item will clear the foreign key. This mechanism is only available when using c-select directly - it is not delegated by c-input.
 - `c-select`: The `create` prop now supports a `position` property to control whether the create item appears at the start ('start', default) or end ('end') of the dropdown list.
 - `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
+- `c-loader-status`: Added `show-success` prop and flag to display success messages when operations complete successfully.
 
 ## Fixes
 - Fix error in codegen when using JS reserved keywords or C# contextual keywords as parameter names.

@@ -53,11 +53,11 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
     public static readonly DiagnosticDescriptor MissingFileTypeAttributeRule = new(
         id: "COA0201",
         title: "Consider adding FileTypeAttribute to IFile parameter",
-        messageFormat: "Consider adding [FileType] attribute to specify allowed file types for this IFile parameter",
+        messageFormat: "Consider adding [FileType] attribute to specify suggested file types in the browser for this IFile parameter",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Info,
         isEnabledByDefault: true,
-        description: "IFile parameters on Coalesce-exposed methods should specify allowed file types using the [FileType] attribute to improve default user experience.");
+        description: "IFile parameters on Coalesce-exposed methods should specify suggested file types using the [FileType] attribute to improve default user experience.");
 
     public static readonly DiagnosticDescriptor InvalidSemanticKernelAttributeUsageRule = new(
         id: "COA0007",
@@ -175,18 +175,21 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(GenericInvalidAttributeUsageRule, attrLocation, badAttrInsideCrudStrategy.AttributeClass!.Name));
         }
 
-        if (IsValidCoalesceMethod(methodSymbol))
+        if (IsValidCoalesceMethod(methodSymbol, true))
         {
-            // COA0201 Check for IFile parameters without FileType attribute
-            foreach (var parameter in methodSymbol.Parameters)
+            if (IsValidCoalesceMethod(methodSymbol, false))
             {
-                if (parameter.Type is INamedTypeSymbol namedType &&
-                    namedType.InheritsFromOrImplements("IntelliTect.Coalesce.Models.IFile") &&
-                    parameter.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.FileTypeAttribute") is null &&
-                    parameter.Locations.FirstOrDefault() is Location paramLocation
-                )
+                // COA0201 Suggest FileType on IFile parameters on exposed signatures (not implementations)
+                foreach (var parameter in methodSymbol.Parameters)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(MissingFileTypeAttributeRule, paramLocation));
+                    if (parameter.Type is INamedTypeSymbol namedType &&
+                        namedType.InheritsFromOrImplements("IntelliTect.Coalesce.Models.IFile") &&
+                        parameter.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.FileTypeAttribute") is null &&
+                        parameter.Locations.FirstOrDefault() is Location paramLocation
+                    )
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(MissingFileTypeAttributeRule, paramLocation));
+                    }
                 }
             }
             return;
@@ -208,10 +211,9 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
                 context.ReportDiagnostic(Diagnostic.Create(InvalidInjectAttributeUsageRule, location2));
             }
         }
-
     }
 
-    private static bool IsValidCoalesceMethod(IMethodSymbol methodSymbol)
+    private static bool IsValidCoalesceMethod(IMethodSymbol methodSymbol, bool includeInterfaceImplementations = false)
     {
         // Check if method has [Coalesce] or [SemanticKernel] attribute
         if (methodSymbol.GetAttributesByName(
@@ -232,7 +234,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         }
 
         // Check if method implements an interface method that would be valid
-        if (containingType != null && containingType.TypeKind == TypeKind.Class)
+        if (includeInterfaceImplementations && containingType != null && containingType.TypeKind == TypeKind.Class)
         {
             foreach (var interfaceType in containingType.AllInterfaces)
             {
@@ -240,7 +242,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
                     .OfType<IMethodSymbol>()
                     .FirstOrDefault(m => methodSymbol.ContainingType.FindImplementationForInterfaceMember(m)?.Equals(methodSymbol, SymbolEqualityComparer.Default) == true);
 
-                if (interfaceMethod != null && IsValidCoalesceMethod(interfaceMethod))
+                if (interfaceMethod != null && IsValidCoalesceMethod(interfaceMethod, includeInterfaceImplementations))
                     return true;
             }
         }

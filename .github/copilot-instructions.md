@@ -12,6 +12,7 @@ The required tools and dependencies are automatically installed via the GitHub A
 
 ## Instructions
 
+- Format PR titles with Semantic Commits. The work item number should follow the colon after the commit type like `feat: #12345 added ...`
 - Always update the documentation when making changes or adding features that will affect developers who use Coalesce.
 - Always add an entry to CHANGELOG.md when adding new features or fixing non-trivial bugs.
 - Avoid making breaking changes if not necessary. A less obvious example of a breaking change would be changing an existing CSS class name.

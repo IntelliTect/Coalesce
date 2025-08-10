@@ -127,7 +127,7 @@ no-initial-content?: boolean;
 no-progress?: boolean;
 no-initial-progress?: boolean;
 no-secondary-progress?: boolean;
-no-show-success?: boolean;" lang="ts" id="flags-props" />
+show-success?: boolean;" lang="ts" id="flags-props" />
 
 Component level [flags](#flags) options that control behavior when the simple form of `loaders` (single instance or array) is used, as well as provide baseline defaults that can be overridden by the advanced form of `loaders` (object map) .
 
@@ -143,7 +143,7 @@ The available flags are as follows, all of which default to `true` except for `s
 | `no-progress` | Master toggle for whether the progress indicator is shown in any scenario. |
 | `no-initial-progress` | Controls whether the progress indicator is shown when an API Caller is loading for the very first time (i.e. when  `caller.wasSuccessful === null`). |
 | `no-secondary-progress` | Controls whether the progress indicator is shown when an API Caller is loading any time after its first invocation (i.e. when  `caller.wasSuccessful !== null`). |
-| `no-show-success` | Controls whether success alerts are shown when API calls complete successfully (i.e. when `caller.wasSuccessful === true`). Unlike other flags, this defaults to `false` so success alerts are hidden by default. |
+| `show-success` | Controls whether success alerts are shown when API calls complete successfully (i.e. when `caller.wasSuccessful === true`). |
 
 ## Slots
 

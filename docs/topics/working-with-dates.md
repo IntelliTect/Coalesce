@@ -186,7 +186,7 @@ services.AddCoalesce(builder => builder
 
 ### Client-Side Configuration
 
-You can configure a default timezone for your client application to control how `DateTimeOffset` values are displayed in the UI. By default, this uses the client computer's timezone and does not need to be configured unless you want to override this. See [Time Zones](/modeling/model-types/models.md#time-zones) for more details.
+You can configure a default timezone for your client application to control how `DateTimeOffset` values are displayed in the UI. By default, this uses the client computer's timezone and does not need to be configured unless you want to override this. See [Time Zones](/stacks/vue/layers/models.md#time-zones) for more details.
 
 You can override this on a per-component or per-operation basis using the `timeZone` format option described above.
 

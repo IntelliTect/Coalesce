@@ -3,6 +3,7 @@
     "language": "en",
     "words": [
         "appsettings",
+        "ASPNETCORE",
         "autosave",
         "autosaving",
         "Axios",
@@ -10,6 +11,7 @@
         "Coalesce",
         "coalesceko",
         "coalescevue",
+        "discoverability",
         "dontSerialize",
         "dtos",
         "EF",
@@ -18,11 +20,12 @@
         "instanceof",
         "IntelliTect",
         "mkdir",
+        "msword",
         "nameof",
-        "overridable",
-        "discoverability",
         "netcoreapp",
         "netstandard",
+        "officedocument",
+        "openxmlformats",
         "overridable",
         "POCOs",
         "queryable",
@@ -31,6 +34,8 @@
         "readonly",
         "snapshotted",
         "Stampable",
+        "swashbuckle",
+        "Swashbuckle",
         "TPCT",
         "treeshaken",
         "typeof",
@@ -41,9 +46,9 @@
         "Vitest",
         "Vuetify",
         "webp",
-        "wwwroot",
-        "Swashbuckle",
-        "swashbuckle"
+        "westus",
+        "wordprocessingml",
+        "wwwroot"
     ],
     "ignorePaths": [
         "node_modules"

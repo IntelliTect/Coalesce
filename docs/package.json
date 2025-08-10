@@ -8,8 +8,9 @@
   "license": "Apache-2.0",
   "scripts": {
     "dev": "vitepress dev",
-    "linkcheck": "linkcheck localhost:8087/Coalesce -e --skip-file ./.vitepress/linkcheck-skip-file.txt",
-    "build": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist/Coalesce && node check-links.mjs"
+    "build-only": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist/Coalesce",
+    "linkcheck": "node check-links.mjs",
+    "build": "npm run build-only && npm run linkcheck"
   },
   "dependencies": {
     "shiki": "1.4.0"

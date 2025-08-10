@@ -73,7 +73,7 @@ public class ExecuteAttribute : SecurityAttribute
     /// when the client provides the correct ETag value in the querystring.
     /// </para>
     /// <para>
-    /// Defaults to 30 days (2,592,000 seconds) if not specified. Set to 0 to disable client caching.
+    /// Defaults to 30 days (2,592,000 seconds) if not specified.
     /// </para>
     /// </summary>
     public int? ClientCacheDurationSeconds { get; set; }

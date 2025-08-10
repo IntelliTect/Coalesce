@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -276,6 +278,114 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         }
     }
 
+    /// <summary>
+    /// Generates a stored procedure name based on the SQL hash to handle version conflicts.
+    /// </summary>
+    private static string GetStoredProcedureName(string sql)
+    {
+        using var sha256 = SHA256.Create();
+        var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(sql));
+        var shortHash = Convert.ToHexString(hash)[..8]; // Use first 8 characters
+        return $"CoalesceAuditMerge_{shortHash}";
+    }
+
+    /// <summary>
+    /// Generates the DDL to create the stored procedure.
+    /// </summary>
+    private static string GetStoredProcedureDdl(string procedureName, string sql)
+    {
+        return $"""
+            IF OBJECT_ID('{procedureName}', 'P') IS NOT NULL
+                DROP PROCEDURE [{procedureName}];
+
+            EXEC('CREATE PROCEDURE [{procedureName}]
+                @MergePayload NVARCHAR(MAX),
+                @MergeWindowSeconds INT
+            AS
+            BEGIN
+                {sql.Replace("'", "''")}
+            END');
+            """;
+    }
+
+    /// <summary>
+    /// Cache for stored procedure names. Size is limited in case there is an application whose Model
+    /// is not a singleton, e.g. dynamic model configuration for schema-based tenancy.
+    /// </summary>
+    private static readonly MemoryCache _storedProcedureCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000_000 });
+
+    /// <summary>
+    /// Ensures the stored procedure exists and returns its name.
+    /// </summary>
+    private async ValueTask<string> EnsureStoredProcedureExists(DbContext db, string sql, bool async)
+    {
+        var procedureName = GetStoredProcedureName(sql);
+        
+        // Check if we've already verified this procedure exists for this model
+        var cacheKey = (db.Model, procedureName);
+        if (_storedProcedureCache.TryGetValue(cacheKey, out _))
+        {
+            return procedureName;
+        }
+
+        // Check if the procedure exists in the database
+        var checkSql = "SELECT COUNT(*) FROM sys.procedures WHERE name = @procedureName";
+        int exists;
+        
+        if (async)
+        {
+            using var command = db.Database.GetDbConnection().CreateCommand();
+            command.CommandText = checkSql;
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = "@procedureName";
+            parameter.Value = procedureName;
+            command.Parameters.Add(parameter);
+            
+            if (db.Database.GetDbConnection().State != ConnectionState.Open)
+                await db.Database.GetDbConnection().OpenAsync();
+            var result = await command.ExecuteScalarAsync();
+            exists = Convert.ToInt32(result);
+        }
+        else
+        {
+            using var command = db.Database.GetDbConnection().CreateCommand();
+            command.CommandText = checkSql;
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = "@procedureName";
+            parameter.Value = procedureName;
+            command.Parameters.Add(parameter);
+            
+            if (db.Database.GetDbConnection().State != ConnectionState.Open)
+                db.Database.GetDbConnection().Open();
+            var result = command.ExecuteScalar();
+            exists = Convert.ToInt32(result);
+        }
+
+        if (exists == 0)
+        {
+            // Create the stored procedure
+            var ddl = GetStoredProcedureDdl(procedureName, sql);
+            
+            if (async)
+            {
+                await db.Database.ExecuteSqlRawAsync(ddl);
+            }
+            else
+            {
+                db.Database.ExecuteSqlRaw(ddl);
+            }
+        }
+
+        // Cache that we've verified this procedure exists
+        _storedProcedureCache.Set(cacheKey, true, new MemoryCacheEntryOptions
+        {
+            Size = 1,
+            SlidingExpiration = TimeSpan.FromHours(1) // Re-verify after an hour
+        });
+
+        return procedureName;
+    }
+
     private async ValueTask SaveAudit(DbContext db, CoalesceAudit audit, bool async)
     {
         audit.PostSaveChanges();
@@ -409,21 +519,28 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         {
             var conn = db.Database.GetDbConnection();
             var cmd = conn.CreateCommand();
-            cmd.CommandText = GetSqlServerSql(db.Model);
-
+            
             var jsonParam = cmd.CreateParameter();
             jsonParam.ParameterName = "MergePayload";
             jsonParam.Value = JsonSerializer.Serialize(mergeLogs, _mergeJsonOptions);
 
-
-            // MergeWindowSeconds, in seconds, that a record can be for it to be updated (rather than inserting a new one).
-            // This is chosen to be just under a minute so that changes happening on a one-minute interval to the same record
-            // (there's nothing like this that I'm aware of currently in the application, but anyway...)
-            // will not continuously roll forward on the same AuditLog record for all time.
-
             var mergeWindowParam = cmd.CreateParameter();
             mergeWindowParam.ParameterName = "MergeWindowSeconds";
             mergeWindowParam.Value = _options.MergeWindow.TotalSeconds;
+
+            if (_options.UseStoredProcedures)
+            {
+                // Use stored procedure mode
+                var sql = GetSqlServerSql(db.Model);
+                var procedureName = await EnsureStoredProcedureExists(db, sql, async);
+                
+                cmd.CommandText = $"EXEC [{procedureName}] @MergePayload, @MergeWindowSeconds";
+            }
+            else
+            {
+                // Use raw SQL mode (existing behavior)
+                cmd.CommandText = GetSqlServerSql(db.Model);
+            }
 
             if (async)
             {

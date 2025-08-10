@@ -46,6 +46,13 @@ Wrap a save/submit button:
 </c-loader-status>
 ```
 
+Show success alerts when operations complete successfully:
+``` vue-html
+<c-loader-status :loaders="person.$save" show-success>
+    <button> Save </button>
+</c-loader-status>
+```
+
 Hides the table before the first load has completed, or if loading the list encountered an error. Don't show the progress bar after we've already loaded the list for the first time (useful for loads that occur without user interaction, e.g. `setInterval`):
 
 ``` vue-html
@@ -119,13 +126,14 @@ no-error-content?: boolean;
 no-initial-content?: boolean;
 no-progress?: boolean;
 no-initial-progress?: boolean;
-no-secondary-progress?: boolean;" lang="ts" id="flags-props" />
+no-secondary-progress?: boolean;
+show-success?: boolean;" lang="ts" id="flags-props" />
 
 Component level [flags](#flags) options that control behavior when the simple form of `loaders` (single instance or array) is used, as well as provide baseline defaults that can be overridden by the advanced form of `loaders` (object map) .
 
 ## Flags
 
-The available flags are as follows, all of which default to `true`. In the object literal syntax for `loaders`, the `no-` prefix may be omitted to set the flag to `true`.
+The available flags are as follows, all of which default to `true` except for `show-success` which defaults to `false`. In the object literal syntax for `loaders`, the `no-` prefix may be omitted to set the flag to `true`.
 
 | <div style="width:160px">Flag</div> | Description |
 | - | - |
@@ -135,6 +143,7 @@ The available flags are as follows, all of which default to `true`. In the objec
 | `no-progress` | Master toggle for whether the progress indicator is shown in any scenario. |
 | `no-initial-progress` | Controls whether the progress indicator is shown when an API Caller is loading for the very first time (i.e. when  `caller.wasSuccessful === null`). |
 | `no-secondary-progress` | Controls whether the progress indicator is shown when an API Caller is loading any time after its first invocation (i.e. when  `caller.wasSuccessful !== null`). |
+| `show-success` | Controls whether success alerts are shown when API calls complete successfully (i.e. when `caller.wasSuccessful === true`). |
 
 ## Slots
 

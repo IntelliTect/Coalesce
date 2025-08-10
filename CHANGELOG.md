@@ -22,6 +22,7 @@
 - `ListViewModel.$orderByToggle()` method added to cycle through ascending, descending, and no ordering for a field.
 - Custom methods now support descriptions via `DescriptionAttribute`. These are displayed in the admin pages. 
 - Added `FileTypeAttribute` to control allowed file types for custom method file parameters.
+- Added `ClientCacheDurationSeconds` property to `ExecuteAttribute` to customize client-side cache duration for GET custom methods with `VaryByProperty`.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
 - `c-datetime-picker`: Added prop `showTodayButton`
 - `c-input`: Added a `filter` prop for enum inputs to restrict the values available for selection.
@@ -29,6 +30,7 @@
 - `c-select`: Now supports binding to a non-many-to-many collection navigation property. Selecting an item will populate the foreign key of the dependent item, and deselecting an item will clear the foreign key. This mechanism is only available when using c-select directly - it is not delegated by c-input.
 - `c-select`: The `create` prop now supports a `position` property to control whether the create item appears at the start ('start', default) or end ('end') of the dropdown list.
 - `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
+- `c-loader-status`: Added `show-success` prop and flag to display success messages when operations complete successfully.
 
 ## Fixes
 - Fix error in codegen when using JS reserved keywords or C# contextual keywords as parameter names.

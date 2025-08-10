@@ -23,7 +23,7 @@ let server;
 try {
   // Start static file server
   server = createServer((req, res) =>
-    handler(req, res, { public: ".vitepress/dist" })
+    handler(req, res, { public: ".vitepress/dist" }),
   );
 
   await new Promise((resolve) => server.listen(8087, resolve));
@@ -32,7 +32,12 @@ try {
   await waitOn({ resources: ["http://localhost:8087"], timeout: 30000 });
 
   // Run linkcheck
-  await run("npm", ["run", "linkcheck"]);
+  await run("linkcheck", [
+    "localhost:8087/Coalesce",
+    "-e",
+    "--skip-file",
+    "./.vitepress/linkcheck-skip-file.txt",
+  ]);
 
   process.exit(0);
 } catch (err) {

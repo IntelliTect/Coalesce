@@ -686,7 +686,7 @@ For a more complete explanation of everything you can do with behaviors, see the
 
 Since Coalesce's data access layer is built on top of Entity Framework, you can also use [Entity Framework's Global Query Filters](https://learn.microsoft.com/en-us/ef/core/querying/filters) feature to apply row-level security.
 
-This approach is less flexible than custom Coalesce data sources and has other [drawbacks](https://learn.microsoft.com/en-us/ef/core/querying/filters#accessing-entity-with-query-filter-using-required-navigation) as well, but on the other hand it has more absolute authority, is less susceptible to issues like inadvertently returning data through unfiltered navigation properties, and can sometimes require less work to implement than individual data sources.
+This approach is less flexible than custom Coalesce data sources and has other [drawbacks](https://learn.microsoft.com/en-us/ef/core/querying/filters#query-filters-and-required-navigations) as well, but on the other hand it has more absolute authority, is less susceptible to issues like inadvertently returning data through unfiltered navigation properties, and can sometimes require less work to implement than individual data sources.
 
 Global Query Filters are also the only way to implement database-executed [filtered includes](#filtered-includes) of [reference navigation properties](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/glossary), as there is no version of `.Include()` for reference navigation properties that allows a database-executed predicate to be applied. See [this open issue](https://github.com/dotnet/efcore/issues/24422) on EF Core.
 

@@ -85,11 +85,6 @@ public class Role
                     ur.Role!.Permissions!.Contains(Permission.UserAdmin)))
                 .Count();
 
-#if Tenancy
-            // In tenancy mode, also check for global admins
-            adminUserCount += Db.Users.Count(u => u.IsGlobalAdmin);
-#endif
-
             if (adminUserCount == 0)
             {
                 return "This action would leave the system with no user administrators. At least one user admin must remain.";

@@ -175,12 +175,11 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(GenericInvalidAttributeUsageRule, attrLocation, badAttrInsideCrudStrategy.AttributeClass!.Name));
         }
 
-        if (IsValidCoalesceMethod(methodSymbol))
+        if (IsValidCoalesceMethod(methodSymbol, true))
         {
-            // Only suggest FileType on directly exposed methods (not implementations)
-            if (IsDirectlyExposedCoalesceMethod(methodSymbol))
+            if (IsValidCoalesceMethod(methodSymbol, false))
             {
-                // COA0201 Check for IFile parameters without FileType attribute
+                // COA0201 Suggest FileType on IFile parameters on exposed signatures (not implementations)
                 foreach (var parameter in methodSymbol.Parameters)
                 {
                     if (parameter.Type is INamedTypeSymbol namedType &&
@@ -212,51 +211,9 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
                 context.ReportDiagnostic(Diagnostic.Create(InvalidInjectAttributeUsageRule, location2));
             }
         }
-
     }
 
-    private static bool IsDirectlyExposedCoalesceMethod(IMethodSymbol methodSymbol)
-    {
-        // Check if method has [Coalesce] or [SemanticKernel] attribute
-        if (methodSymbol.GetAttributesByName(
-            "IntelliTect.Coalesce.CoalesceAttribute",
-            "IntelliTect.Coalesce.SemanticKernelAttribute").Any())
-        {
-            return true;
-        }
-
-        // Check if method is on an interface marked with [Service]
-        var containingType = methodSymbol.ContainingType;
-        if (
-            containingType != null &&
-            containingType.TypeKind == TypeKind.Interface &&
-            containingType.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") != null)
-        {
-            return true;
-        }
-
-        // Check if method is on a service class that is NOT implementing an interface with [Service]
-        if (containingType != null && 
-            containingType.TypeKind == TypeKind.Class &&
-            containingType.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") != null)
-        {
-            // Check if this class implements any interface with [Service] attribute
-            foreach (var interfaceType in containingType.AllInterfaces)
-            {
-                if (interfaceType.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") != null)
-                {
-                    // This class implements a service interface, so the class methods are not directly exposed
-                    return false;
-                }
-            }
-            // No service interface found, so this class is directly exposed
-            return true;
-        }
-
-        return false;
-    }
-
-    private static bool IsValidCoalesceMethod(IMethodSymbol methodSymbol)
+    private static bool IsValidCoalesceMethod(IMethodSymbol methodSymbol, bool includeInterfaceImplementations = false)
     {
         // Check if method has [Coalesce] or [SemanticKernel] attribute
         if (methodSymbol.GetAttributesByName(
@@ -277,7 +234,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         }
 
         // Check if method implements an interface method that would be valid
-        if (containingType != null && containingType.TypeKind == TypeKind.Class)
+        if (includeInterfaceImplementations && containingType != null && containingType.TypeKind == TypeKind.Class)
         {
             foreach (var interfaceType in containingType.AllInterfaces)
             {
@@ -285,7 +242,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
                     .OfType<IMethodSymbol>()
                     .FirstOrDefault(m => methodSymbol.ContainingType.FindImplementationForInterfaceMember(m)?.Equals(methodSymbol, SymbolEqualityComparer.Default) == true);
 
-                if (interfaceMethod != null && IsValidCoalesceMethod(interfaceMethod))
+                if (interfaceMethod != null && IsValidCoalesceMethod(interfaceMethod, includeInterfaceImplementations))
                     return true;
             }
         }

@@ -217,6 +217,7 @@ internal static class ValidateContext
 
                 if (method.IsClientMethod)
                 {
+                    var exec = method.GetAttribute<ExecuteAttribute>();
                     if (method is SymbolMethodViewModel smvm)
                     {
                         assert.IsFalse(smvm.Symbol.IsAsync && method.ReturnType.IsVoid, "Async methods must not return void.");
@@ -236,11 +237,17 @@ internal static class ValidateContext
 #pragma warning disable CS0618 // Type or member is obsolete
                             method.GetAttributeValue<ControllerActionAttribute>(a => a.VaryByProperty) != null ||
 #pragma warning restore CS0618 // Type or member is obsolete
-                            method.GetAttributeValue<ExecuteAttribute>(a => a.VaryByProperty) != null
+                            exec?.GetValue(a => a.VaryByProperty) != null
                         ) &&
                         method.VaryByProperty == null,
                         $"{nameof(ExecuteAttribute.VaryByProperty)} is only applicable to HTTP GET model instance methods, " +
                         $"and must reference a property on the parent instance."
+                    );
+
+                    assert.IsFalse(
+                        exec?.GetValue(a => a.ClientCacheDurationSeconds) != null &&
+                        exec?.GetValue(a => a.VaryByProperty) == null,
+                        $"{nameof(ExecuteAttribute.ClientCacheDurationSeconds)} can only be specified when {nameof(ExecuteAttribute.VaryByProperty)} is also specified."
                     );
 
                     assert.IsFalse(method.ResultType.IsInternalUse, "Method return types cannot be internal use.");

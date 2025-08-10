@@ -63,12 +63,16 @@ services.AddScoped<IWeatherService, WeatherService>();
 
 foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
     services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
-services.AddScoped<AIAgentService>();
-services.AddAzureOpenAIChatCompletion(
-    deploymentName: builder.Configuration["Azure:OpenAI:Deployment"]!,
-    endpoint: builder.Configuration["Azure:OpenAI:Endpoint"]!,
-    apiKey: builder.Configuration["Azure:OpenAI:Key"]!
-);
+
+if (!string.IsNullOrWhiteSpace(builder.Configuration["Azure:OpenAI:Deployment"]))
+{
+    services.AddScoped<AIAgentService>();
+    services.AddAzureOpenAIChatCompletion(
+        deploymentName: builder.Configuration["Azure:OpenAI:Deployment"]!,
+        endpoint: builder.Configuration["Azure:OpenAI:Endpoint"]!,
+        apiKey: builder.Configuration["Azure:OpenAI:Key"]!
+    );
+}
 
 
 services.AddAuthentication(DemoMiddleware.AuthenticationScheme).AddCookie(DemoMiddleware.AuthenticationScheme);

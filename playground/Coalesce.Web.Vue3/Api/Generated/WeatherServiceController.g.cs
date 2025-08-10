@@ -19,91 +19,92 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue3.Api;
-
-[Route("api/WeatherService")]
-[ServiceFilter(typeof(IApiActionFilter))]
-public partial class WeatherServiceController : BaseApiController
+namespace Coalesce.Web.Vue3.Api
 {
-    protected Coalesce.Domain.Services.IWeatherService Service { get; }
-
-    public WeatherServiceController(CrudContext context, Coalesce.Domain.Services.IWeatherService service) : base(context)
+    [Route("api/WeatherService")]
+    [ServiceFilter(typeof(IApiActionFilter))]
+    public partial class WeatherServiceController : BaseApiController
     {
-        GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Services.IWeatherService>();
-        Service = service;
-    }
+        protected Coalesce.Domain.Services.IWeatherService Service { get; }
 
-    /// <summary>
-    /// Method: GetWeatherAsync
-    /// </summary>
-    [HttpPost("GetWeather")]
-    [HttpPost("GetWeatherAsync")]
-    [Authorize]
-    [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
-    public virtual async Task<ItemResult<WeatherDataResponse>> GetWeather(
-        [FromServices] Coalesce.Domain.AppDbContext parameterDbContext,
-        [FromForm(Name = "location")] LocationParameter location,
-        [FromForm(Name = "dateTime")] System.DateTimeOffset? dateTime)
-    {
-        var _method = GeneratedForClassViewModel!.MethodByName("GetWeatherAsync");
-        var _params = new
+        public WeatherServiceController(CrudContext context, Coalesce.Domain.Services.IWeatherService service) : base(context)
         {
-            Location = !Request.Form.HasAnyValue("location") ? null : location,
-            DateTime = dateTime
-        };
-
-        if (Context.Options.ValidateAttributesForMethods)
-        {
-            var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
-            if (!_validationResult.WasSuccessful) return new ItemResult<WeatherDataResponse>(_validationResult);
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Services.IWeatherService>();
+            Service = service;
         }
 
-        IncludeTree includeTree = null;
-        var _mappingContext = new MappingContext(Context);
-        var _methodResult = await Service.GetWeatherAsync(
-            parameterDbContext,
-            _params.Location?.MapToNew(_mappingContext),
-            _params.DateTime
-        );
-        var _result = new ItemResult<WeatherDataResponse>();
-        _result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataResponse>(_methodResult, _mappingContext, includeTree);
-        return _result;
-    }
-
-    public class GetWeatherParameters
-    {
-        public LocationParameter Location { get; set; }
-        public System.DateTimeOffset? DateTime { get; set; }
-    }
-
-    /// <summary>
-    /// Method: GetWeatherAsync
-    /// </summary>
-    [HttpPost("GetWeather")]
-    [HttpPost("GetWeatherAsync")]
-    [Authorize]
-    [Consumes("application/json")]
-    public virtual async Task<ItemResult<WeatherDataResponse>> GetWeather(
-        [FromServices] Coalesce.Domain.AppDbContext parameterDbContext,
-        [FromBody] GetWeatherParameters _params
-    )
-    {
-        var _method = GeneratedForClassViewModel!.MethodByName("GetWeatherAsync");
-        if (Context.Options.ValidateAttributesForMethods)
+        /// <summary>
+        /// Method: GetWeatherAsync
+        /// </summary>
+        [HttpPost("GetWeather")]
+        [HttpPost("GetWeatherAsync")]
+        [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
+        public virtual async Task<ItemResult<WeatherDataResponse>> GetWeather(
+            [FromServices] Coalesce.Domain.AppDbContext parameterDbContext,
+            [FromForm(Name = "location")] LocationParameter location,
+            [FromForm(Name = "dateTime")] System.DateTimeOffset? dateTime)
         {
-            var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
-            if (!_validationResult.WasSuccessful) return new ItemResult<WeatherDataResponse>(_validationResult);
+            var _method = GeneratedForClassViewModel!.MethodByName("GetWeatherAsync");
+            var _params = new
+            {
+                Location = !Request.Form.HasAnyValue("location") ? null : location,
+                DateTime = dateTime
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+                if (!_validationResult.WasSuccessful) return new ItemResult<WeatherDataResponse>(_validationResult);
+            }
+
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = await Service.GetWeatherAsync(
+                parameterDbContext,
+                _params.Location?.MapToNew(_mappingContext),
+                _params.DateTime
+            );
+            var _result = new ItemResult<WeatherDataResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataResponse>(_methodResult, _mappingContext, includeTree);
+            return _result;
         }
 
-        IncludeTree includeTree = null;
-        var _mappingContext = new MappingContext(Context);
-        var _methodResult = await Service.GetWeatherAsync(
-            parameterDbContext,
-            _params.Location?.MapToNew(_mappingContext),
-            _params.DateTime
-        );
-        var _result = new ItemResult<WeatherDataResponse>();
-        _result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataResponse>(_methodResult, _mappingContext, includeTree);
-        return _result;
+        public class GetWeatherParameters
+        {
+            public LocationParameter Location { get; set; }
+            public System.DateTimeOffset? DateTime { get; set; }
+        }
+
+        /// <summary>
+        /// Method: GetWeatherAsync
+        /// </summary>
+        [HttpPost("GetWeather")]
+        [HttpPost("GetWeatherAsync")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult<WeatherDataResponse>> GetWeather(
+            [FromServices] Coalesce.Domain.AppDbContext parameterDbContext,
+            [FromBody] GetWeatherParameters _params
+        )
+        {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetWeatherAsync");
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+                if (!_validationResult.WasSuccessful) return new ItemResult<WeatherDataResponse>(_validationResult);
+            }
+
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = await Service.GetWeatherAsync(
+                parameterDbContext,
+                _params.Location?.MapToNew(_mappingContext),
+                _params.DateTime
+            );
+            var _result = new ItemResult<WeatherDataResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataResponse>(_methodResult, _mappingContext, includeTree);
+            return _result;
+        }
     }
 }

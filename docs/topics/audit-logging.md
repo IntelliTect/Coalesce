@@ -117,9 +117,9 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 
 ### Exclusions & Formatting
 
-Coalesce's audit logging is built on top of [Entity Framework Plus](https://entityframework-plus.net/ef-core-audit) and can be configured using all of its [configuration](https://entityframework-plus.net/ef-core-audit#scenarios), including [includes/excludes](https://entityframework-plus.net/ef-core-audit-exclude-include-entity) and [custom property formatting](https://entityframework-plus.net/ef-core-audit-format-value).
+Coalesce's audit logging uses Entity Framework's change tracking capabilities to automatically detect and record changes to your entities. It intercepts the `SaveChanges` operation to capture entity state changes and property modifications before they're committed to the database.
 
-Coalesce will not use EF Plus's `AuditManager.DefaultConfiguration` global singleton instance. You must use Coalesce's configuration extensions which allow for more targeted configuration per context that does not rely on a global static singleton. For example:
+You can configure which entities and properties to include or exclude from auditing, as well as customize how property values are formatted in the audit logs. Coalesce's configuration extensions allow for targeted configuration per context without relying on global static singletons. For example:
 
 ``` c#
 public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>

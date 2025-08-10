@@ -66,6 +66,24 @@ public class ExecuteAttribute : SecurityAttribute
     /// By default, the model type's default data source is used.
     /// </summary>
     public Type? DataSource { get; set; }
+
+    /// <summary>
+    /// <para>
+    /// For HTTP GET methods with <see cref="VaryByProperty"/>, specifies the client cache duration in seconds
+    /// when the client provides the correct ETag value in the querystring.
+    /// </para>
+    /// <para>
+    /// Defaults to 30 days (2,592,000 seconds) if not specified.
+    /// </para>
+    /// </summary>
+    public int? ClientCacheDurationSeconds { get; set; }
+
+    /// <summary>
+    /// Gets the ClientCacheDuration as a TimeSpan based on ClientCacheDurationSeconds.
+    /// </summary>
+    public TimeSpan? ClientCacheDuration => ClientCacheDurationSeconds.HasValue 
+        ? TimeSpan.FromSeconds(ClientCacheDurationSeconds.Value) 
+        : null;
 }
 
 public enum HttpMethod

@@ -94,4 +94,54 @@ describe("CLoaderStatus", () => {
 
     expect(wrapper.vm.loaderFlags[0][1]["initial-content"]).toBe(false);
   });
+
+  test("show-success flag defaults to false", () => {
+    const wrapper = mountApp(() => <CLS loaders={vm.$load} />).findComponent(
+      CLS,
+    );
+
+    expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(false);
+  });
+
+  test("show-success flag can be enabled", () => {
+    const wrapper = mountApp(() => (
+      <CLS loaders={vm.$load} show-success />
+    )).findComponent(CLS);
+
+    expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(true);
+  });
+
+  test("show-success in flags string", () => {
+    const wrapper = mountApp(() => (
+      <CLS loaders={{ "show-success": [vm.$load] }} />
+    )).findComponent(CLS);
+
+    expect(wrapper.vm.loaderFlags[0][1]["show-success"]).toBe(true);
+  });
+
+  test("success messages computation", () => {
+    // Set up the loader in a successful state with a custom message
+    vm.$load.wasSuccessful = true;
+    vm.$load.message = "Test success message";
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={vm.$load} show-success />
+    )).findComponent(CLS);
+
+    // Verify the success message is displayed in the rendered text
+    expect(wrapper.text()).toContain("Test success message");
+  });
+
+  test("success messages with null message shows default", () => {
+    // Set up the loader in a successful state with null message
+    vm.$save.wasSuccessful = true;
+    vm.$save.message = null;
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={vm.$save} show-success />
+    )).findComponent(CLS);
+
+    // Verify the default "Success" message is displayed
+    expect(wrapper.text()).toContain("Success");
+  });
 });

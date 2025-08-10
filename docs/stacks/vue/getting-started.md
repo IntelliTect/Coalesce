@@ -75,7 +75,7 @@ If any of the options you chose above require external integrations, you'll need
 
 ### AppHost Project
 
-The AppHost project is a [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) dev-time orchestration project. It is recommended you set this as your startup project when developing, although this is not strictly required if your project only has SQL Server as its sole dependency. If you're not familiar with .NET Aspire, you're strongly encouraged to read through its [overview documentation](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview#dev-time-orchestration) and learn about the features of the [Aspire dashboard](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/dashboard/explore).
+The AppHost project is a [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) dev-time orchestration project. It is recommended you set this as your startup project when developing, although this is not strictly required if your project only has SQL Server as its sole dependency. If you're not familiar with .NET Aspire, you're strongly encouraged to read through its [overview documentation](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) and learn about the features of the [Aspire dashboard](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/dashboard/explore).
 
 ### Data Project
 

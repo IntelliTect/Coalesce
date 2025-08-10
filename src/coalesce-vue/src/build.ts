@@ -483,17 +483,20 @@ function getConfigurationSuggestionTag(
       
         messages.push(\`The TLS certificate of <code>${
           new URL(viteOrigin).host
-        }</code> might not be trusted. Open <a href="${viteOrigin}${base}" target=_blank>this link</a> in a new tab and add an additional certificate exception if prompted. This is especially useful if this browser is on a different device than the dev server.\`)
+        }</code> might not be trusted. Open <a href="${viteOrigin}${base}" target=_blank>this link</a> in a new tab and add an additional certificate exception if prompted. This likely if this browser is on a different device than the dev server.\`)
       }
 
       const isSameHostname = "${
         new URL(viteOrigin).hostname
       }" == window.location.hostname;
+
       messages[!isSameHostname ? 'unshift' : 'push'](\`If the dev server is not routable from this browser using URL <code>${viteOrigin}</code>, pass either: <ul><li>  <code>{host: 'network-hostname-or-ip-of-dev-server'}</code> (better)</li> <li> <code>{assetBypass: false}</code> (slower)</li></ul> to <code>createAspNetCoreHmrPlugin()</code> in vite.config.ts. Don't commit this change because it will break other developers.\`)
 
       messages.push("You launched locally without <code>UseViteDevelopmentServer()</code>, or didn't build for production before deploying, and are therefore operating off a stale <code>${escapeHTML(
         indexHtmlPath,
-      )}</code> file. Or, the vite server crashed.")
+      )}</code> file.")
+
+      messages.push("The vite server may have crashed. Check the console output of your .NET web application.")
 
       document.body.insertAdjacentHTML("beforeend", \`
       <div style="height: 100vh;

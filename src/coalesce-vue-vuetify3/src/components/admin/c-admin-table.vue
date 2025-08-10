@@ -6,6 +6,11 @@
       @update:editable="editable = $event"
       :editable="canEdit ? editable : undefined"
       :color="color"
+      :available-props="availableProps"
+      :selected-columns="selectedColumns"
+      :default-columns="defaultColumns"
+      :column-selection-enabled="effectiveColumnSelection"
+      @update:selected-columns="selectedColumns = $event"
     />
 
     <div v-if="metadata.description" class="c-admin-page--description">
@@ -18,6 +23,7 @@
         admin
         :editable="editable"
         :list="viewModel"
+        :props="selectedColumns"
         :extra-headers="[{ header: 'Actions', isFixed: true }]"
         :loaders="{
           '': list.$modelOnlyMode
@@ -119,10 +125,11 @@ import {
   mapParamsToDto,
   bindToQueryString,
   ModelType,
+  HiddenAreas,
 } from "coalesce-vue";
 
-import { computed, defineComponent, PropType, ref, toRef } from "vue";
-import { useRouter } from "vue-router";
+import { computed, defineComponent, PropType, ref, toRef, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
 import { copyParamsToNewViewModel } from "./util";
 
@@ -142,11 +149,107 @@ export default defineComponent({
       type: [String, Boolean] as PropType<"auto" | boolean>,
       default: "auto",
     },
+    columns: { 
+      required: false, 
+      type: Array as PropType<string[]>,
+      default: undefined 
+    },
+    columnSelection: { 
+      required: false, 
+      type: Boolean, 
+      default: undefined 
+    },
+    columnSelectionKey: { 
+      required: false, 
+      type: String, 
+      default: undefined 
+    },
   },
 
   setup(props) {
     const tableProps = useAdminTable(toRef(props, "list"));
     const editable = ref(false);
+    const route = useRoute();
+
+    // Column selection logic
+    const availableProps = computed(() => {
+      return Object.values(tableProps.metadata.value.props).filter(
+        (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0,
+      );
+    });
+
+    const defaultColumns = computed(() => {
+      return availableProps.value.map(p => p.name);
+    });
+
+    const effectiveColumnSelection = computed(() => {
+      // If columns prop is provided, disable column selection by default
+      if (props.columns !== undefined) {
+        return props.columnSelection === true;
+      }
+      // Otherwise, enable column selection by default unless explicitly disabled
+      return props.columnSelection !== false;
+    });
+
+    const storageKey = computed(() => {
+      if (props.columnSelectionKey) {
+        return `coalesce-admin-table-columns-${props.columnSelectionKey}`;
+      }
+      return `coalesce-admin-table-columns-${route.path}`;
+    });
+
+    const selectedColumns = ref<string[]>([]);
+
+    // Load saved column selection from localStorage
+    const loadColumnSelection = () => {
+      if (!effectiveColumnSelection.value) {
+        selectedColumns.value = props.columns || defaultColumns.value;
+        return;
+      }
+
+      try {
+        const saved = localStorage.getItem(storageKey.value);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            // Ensure saved columns are still valid
+            const validColumns = parsed.filter(col => 
+              availableProps.value.some(prop => prop.name === col)
+            );
+            selectedColumns.value = validColumns.length > 0 ? validColumns : defaultColumns.value;
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load column selection from localStorage:', error);
+      }
+      
+      selectedColumns.value = props.columns || defaultColumns.value;
+    };
+
+    // Save column selection to localStorage
+    const saveColumnSelection = () => {
+      if (!effectiveColumnSelection.value) return;
+      
+      try {
+        localStorage.setItem(storageKey.value, JSON.stringify(selectedColumns.value));
+      } catch (error) {
+        console.warn('Failed to save column selection to localStorage:', error);
+      }
+    };
+
+    // Watch for changes to selected columns and save them
+    watch(selectedColumns, saveColumnSelection, { deep: true });
+
+    // Watch for changes to available props and update selected columns if needed
+    watch(availableProps, () => {
+      loadColumnSelection();
+    }, { immediate: true });
+
+    // Watch for changes to props that affect column selection
+    watch(() => [props.columns, props.columnSelection, props.columnSelectionKey], () => {
+      loadColumnSelection();
+    });
 
     const effectiveAutoSave = computed(() => {
       if (!editable.value) return false;
@@ -169,6 +272,10 @@ export default defineComponent({
       ...tableProps,
       editable,
       effectiveAutoSave,
+      availableProps,
+      defaultColumns,
+      selectedColumns,
+      effectiveColumnSelection,
     };
   },
 

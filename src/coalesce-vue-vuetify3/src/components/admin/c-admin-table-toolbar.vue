@@ -45,6 +45,14 @@
       </template>
     </v-btn>
 
+    <c-admin-table-column-selector
+      v-if="columnSelectionEnabled"
+      :available-props="availableProps || []"
+      :selected-columns="selectedColumns || []"
+      :default-columns="defaultColumns || []"
+      @update:selected-columns="emit('update:selectedColumns', $event)"
+    />
+
     <v-spacer></v-spacer>
 
     <span v-if="list" class="c-admin-table-toolbar--range hidden-sm-and-down">
@@ -80,22 +88,32 @@
 
 <script setup lang="ts">
 import { PropType, toRef } from "vue";
-import { ListViewModel, ModelType } from "coalesce-vue";
+import { ListViewModel, ModelType, Property } from "coalesce-vue";
 import { useAdminTable } from "./useAdminTable";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";
+import CAdminTableColumnSelector from "./c-admin-table-column-selector.vue";
 import { useRouter } from "vue-router";
 
 const props = defineProps({
   list: { required: true, type: Object as PropType<ListViewModel> },
   pageSizes: { required: false, type: Array as PropType<number[]> },
   color: { required: false, type: String, default: null },
+  // Column selection props
+  availableProps: { required: false, type: Array as PropType<Property[]> },
+  selectedColumns: { required: false, type: Array as PropType<string[]> },
+  defaultColumns: { required: false, type: Array as PropType<string[]> },
+  columnSelectionEnabled: { required: false, type: Boolean, default: false },
 });
 
 const editable = defineModel<boolean>("editable", {
   default: null,
   required: false,
 });
+
+const emit = defineEmits<{
+  "update:selectedColumns": [columns: string[]];
+}>();
 
 const { metadata } = useAdminTable(toRef(props, "list"));
 

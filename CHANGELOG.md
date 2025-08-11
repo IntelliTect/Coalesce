@@ -6,6 +6,7 @@
 - The types generated for inheritance hierarchies have changed significantly. If two or more models in a type hierarchy (i.e. a base type and a derived type) are both exposed by Coalesce, that relationship is now reflected throughout the generated DTOs, generated TypeScript, and admin pages. The generated ViewModels classes for abstract classes are now just proxies intended to be used only for loading one of the concrete implementation types.
 - `StandardBehaviors.AfterDelete` is now `AfterDeleteAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
 - `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
+- `IntelliTect.Coalesce.AuditLogging` now uses stored procedures by default to upsert audit log entries. You can disable this by chaining `.WithStoredProcedures(false)` when you configure audit logging.
 - The CommonJS build of coalesce-vue has been dropped - only the ESM build remains. Most projects should be unaffected.
 
 ## Features
@@ -31,7 +32,6 @@
 - `c-select`: The `create` prop now supports a `position` property to control whether the create item appears at the start ('start', default) or end ('end') of the dropdown list.
 - `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
 - `c-loader-status`: Added `show-success` prop and flag to display success messages when operations complete successfully.
-- Audit logging now supports stored procedures for better performance and easier monitoring. Stored procedures are enabled by default for SQL Server databases and use hash-based naming to prevent conflicts during deployments.
 
 ## Fixes
 - Fix error in codegen when using JS reserved keywords or C# contextual keywords as parameter names.

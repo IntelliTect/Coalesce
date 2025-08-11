@@ -731,6 +731,11 @@ export class StandaloneReadWriteApiClient extends ModelApiClient<$models.Standal
 }
 
 
+export class StringEnumModelApiClient extends ModelApiClient<$models.StringEnumModel> {
+  constructor() { super($metadata.StringEnumModel) }
+}
+
+
 export class StringIdentityApiClient extends ModelApiClient<$models.StringIdentity> {
   constructor() { super($metadata.StringIdentity) }
 }

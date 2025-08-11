@@ -208,7 +208,6 @@ export function parseValue(
 
   switch (meta.type) {
     case "number":
-    case "enum":
       if (type === "number") return value;
 
       if (type !== "string") {
@@ -229,6 +228,36 @@ export function parseValue(
         throw parseError(value, meta);
       }
       return parsed;
+
+    case "enum":
+      if (type === "number") return value;
+
+      if (type !== "string") {
+        // We don't want to parse things like booleans into numbers.
+        // Strings are all we should be handling.
+        throw parseError(value, meta);
+      }
+
+      // Parse empty/blank as null, not zero.
+      if (isNullOrWhitespace(value)) {
+        return null;
+      }
+
+      // If this enum is string-serialized and we have a string value,
+      // look up the corresponding numeric value
+      if (meta.typeDef.serializeAsString) {
+        const enumMember = meta.typeDef.valueLookup[value];
+        if (enumMember) {
+          return enumMember.value;
+        }
+        // If we can't find the string value, fall through to numeric parsing
+      }
+
+      const enumParsed = Number(value);
+      if (isNaN(enumParsed)) {
+        throw parseError(value, meta);
+      }
+      return enumParsed;
 
     case "string":
       if (type === "string") return value;
@@ -691,7 +720,18 @@ class MapToDtoVisitor extends Visitor<
   }
 
   protected visitEnumValue(value: any, meta: EnumValue) {
-    return parseValue(value, meta);
+    const parsed = parseValue(value, meta);
+    if (parsed == null) return null;
+
+    // If this enum should be serialized as strings, convert the numeric value to string
+    if (meta.typeDef.serializeAsString) {
+      const enumMember = meta.typeDef.valueLookup[parsed];
+      if (enumMember) {
+        return enumMember.strValue;
+      }
+    }
+
+    return parsed;
   }
 
   protected visitUnknownValue(value: any, meta: UnknownValue) {

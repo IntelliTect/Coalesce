@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -283,9 +284,8 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
     /// </summary>
     private static string GetStoredProcedureName(string sql)
     {
-        using var sha256 = SHA256.Create();
-        var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(sql));
-        var shortHash = Convert.ToHexString(hash)[..8]; // Use first 8 characters
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(sql));
+        var shortHash = Convert.ToHexString(hash[..4]); // Use first 8 characters
         return $"AuditMerge_{shortHash}";
     }
 

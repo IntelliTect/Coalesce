@@ -12,6 +12,22 @@ The following kinds of properties may be declared on your models.
 
 Most common built-in primitive (numerics, strings, booleans) and other scalar data types (enums, [date types](/topics/working-with-dates.md), `Guid`, `Uri`), and their nullable variants, are all supported as model properties. Collections of these types are also supported.
 
+#### Enum String Serialization
+
+Enums can be serialized as strings in API responses by annotating them with `[JsonConverter(typeof(JsonStringEnumConverter))]`:
+
+```c#
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum Status
+{
+    Active = 1,
+    Inactive = 2,
+    Pending = 3
+}
+```
+
+When this attribute is present, the enum values will be sent as strings (e.g., `"Active"`) in JSON responses instead of numbers. The generated TypeScript enums and ViewModels continue to use numeric values on the client-side, with transparent conversion handled automatically by Coalesce's serialization layer.
+
 ### Non-mapped POCOs
 
 Properties of a type that are not on your `DbContext` will also have corresponding properties generated on the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#generated-members) typed as [Plain Models](/stacks/vue/layers/models.md), and the values of such properties will be sent with the object to the client when requested. Properties of this type will also be sent back to the server by the client when they are encountered.

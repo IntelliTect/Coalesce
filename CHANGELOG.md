@@ -31,6 +31,7 @@
 - `c-select`: The `create` prop now supports a `position` property to control whether the create item appears at the start ('start', default) or end ('end') of the dropdown list.
 - `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
 - `c-loader-status`: Added `show-success` prop and flag to display success messages when operations complete successfully.
+- Support for enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` to be serialized as strings in APIs while maintaining numeric enum behavior on the client-side through transparent conversion.
 
 ## Fixes
 - Fix error in codegen when using JS reserved keywords or C# contextual keywords as parameter names.

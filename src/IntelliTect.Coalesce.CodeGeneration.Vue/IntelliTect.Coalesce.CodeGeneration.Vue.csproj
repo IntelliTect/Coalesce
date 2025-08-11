@@ -4,10 +4,15 @@
     <Description>Vue.js code generation for IntelliTect.Coalesce</Description>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

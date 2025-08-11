@@ -2,6 +2,7 @@
   <Import Project="../Common.props" />
   <PropertyGroup>
     <Nullable>enable</Nullable>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     
     <!-- CS1591: Missing XML comment for publicly visible type or member -->
     <!--<NoWarn>$([System.String]::Copy("$(NoWarn)").Replace(";CS1591",""))</NoWarn>-->
@@ -9,5 +10,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

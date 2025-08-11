@@ -4,6 +4,7 @@
     <Description>Core code generation library for IntelliTect.Coalesce</Description>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Analysis/MsBuild/Targets/**" />
@@ -14,5 +15,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

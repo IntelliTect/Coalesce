@@ -10,6 +10,7 @@
 
     <!-- This project itself should not try to generate api defs on build. -->
     <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +24,10 @@
       which could increase the likelyhood of a version mismatch as projects mature.
     -->
     <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

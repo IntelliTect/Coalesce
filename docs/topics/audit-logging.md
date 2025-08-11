@@ -157,7 +157,7 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 }
 ```
 
-When enabled, Coalesce will automatically create stored procedures with names like `CoalesceAuditMerge_A1B2C3D4`, where the suffix is a short hash of the SQL content. This prevents conflicts between different application versions that might have different audit log schemas. The stored procedure is created automatically on first use and reused for subsequent operations.
+When enabled, Coalesce will automatically create stored procedures with names like `AuditMerge_A1B2C3D4`, where the suffix is a short hash of the SQL content. This prevents conflicts between different application versions that might have different audit log schemas. The stored procedure is created automatically on first use and reused for subsequent operations.
 
 ### Property Descriptions
 

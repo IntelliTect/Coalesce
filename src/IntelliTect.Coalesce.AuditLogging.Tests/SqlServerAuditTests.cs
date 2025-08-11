@@ -172,12 +172,12 @@ public class SqlServerAuditTests
         // Assert - verify stored procedure was created
         using (var command = db.Database.GetDbConnection().CreateCommand())
         {
-            command.CommandText = "SELECT COUNT(*) FROM sys.procedures WHERE name LIKE 'CoalesceAuditMerge_%'";
+            command.CommandText = "SELECT COUNT(*) FROM sys.procedures WHERE name LIKE 'AuditMerge_%'";
             if (db.Database.GetDbConnection().State != ConnectionState.Open)
                 await db.Database.GetDbConnection().OpenAsync();
             var result = await command.ExecuteScalarAsync();
             var procedureCount = Convert.ToInt32(result);
-            Assert.True(procedureCount > 0, "Expected at least one CoalesceAuditMerge stored procedure to be created");
+            Assert.True(procedureCount > 0, "Expected at least one AuditMerge stored procedure to be created");
         }
     }
 
@@ -201,7 +201,7 @@ public class SqlServerAuditTests
         int initialCount;
         using (var command = db1.Database.GetDbConnection().CreateCommand())
         {
-            command.CommandText = "SELECT COUNT(*) FROM sys.procedures WHERE name LIKE 'CoalesceAuditMerge_%'";
+            command.CommandText = "SELECT COUNT(*) FROM sys.procedures WHERE name LIKE 'AuditMerge_%'";
             if (db1.Database.GetDbConnection().State != ConnectionState.Open)
                 await db1.Database.GetDbConnection().OpenAsync();
             var result = await command.ExecuteScalarAsync();
@@ -221,7 +221,7 @@ public class SqlServerAuditTests
         int finalCount;
         using (var command = db2.Database.GetDbConnection().CreateCommand())
         {
-            command.CommandText = "SELECT COUNT(*) FROM sys.procedures WHERE name LIKE 'CoalesceAuditMerge_%'";
+            command.CommandText = "SELECT COUNT(*) FROM sys.procedures WHERE name LIKE 'AuditMerge_%'";
             if (db2.Database.GetDbConnection().State != ConnectionState.Open)
                 await db2.Database.GetDbConnection().OpenAsync();
             var result = await command.ExecuteScalarAsync();

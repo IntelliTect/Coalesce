@@ -61,7 +61,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
 
         if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
         {
-#pragma warning disable CS4014 // Executes synchonously when async: false
+#pragma warning disable CS4014 // Executes synchronously when async: false
             _audit.PopulateOldDescriptions(eventData.Context!, async: false);
 #pragma warning restore CS4014
         }
@@ -76,7 +76,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
     {
         if (_audit is null) return result;
 
-#pragma warning disable CS4014 // Executes synchonously when async: false
+#pragma warning disable CS4014 // Executes synchronously when async: false
         SaveAudit(eventData.Context!, _audit, async: false);
 #pragma warning restore CS4014
 
@@ -286,7 +286,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         using var sha256 = SHA256.Create();
         var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(sql));
         var shortHash = Convert.ToHexString(hash)[..8]; // Use first 8 characters
-        return $"CoalesceAuditMerge_{shortHash}";
+        return $"AuditMerge_{shortHash}";
     }
 
     /// <summary>

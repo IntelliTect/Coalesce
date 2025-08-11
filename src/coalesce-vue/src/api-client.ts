@@ -1096,7 +1096,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   ): ItemResultPromise<TModel> {
     return this.$invoke(
       {
-        name: `get/${id}`,
+        name: `get/${mapToDto(id, this.$metadata.keyProp)}`,
         displayName: "get",
         transportType: "item",
         httpMethod: "GET",
@@ -1223,7 +1223,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   ): ItemResultPromise<TModel> {
     return this.$invoke(
       {
-        name: `delete/${id}`,
+        name: `delete/${mapToDto(id, this.$metadata.keyProp)}`,
         displayName: "delete",
         transportType: "item",
         httpMethod: "POST",

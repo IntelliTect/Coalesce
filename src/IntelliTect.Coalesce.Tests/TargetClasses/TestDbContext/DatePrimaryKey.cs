@@ -28,7 +28,6 @@ public class DateTimeOffsetPk
     public string Name { get; set; } = null!;
 }
 
-#if NET6_0_OR_GREATER
 /// <summary>
 /// Entity with DateOnly primary key
 /// </summary>
@@ -52,4 +51,3 @@ public class TimeOnlyPk
 
     public string Name { get; set; } = null!;
 }
-#endif

@@ -209,7 +209,6 @@ public class PropertyViewModelTests
         Assert.True(prop.IsRequired);
     }
 
-#if NET6_0_OR_GREATER
     [Theory]
     [PropertyViewModelData<DateOnlyPk>(nameof(DateOnlyPk.DateOnlyPkId))]
     public void DateOnlyPk_HasCorrectRulesAndProps(PropertyViewModelData data)
@@ -233,7 +232,6 @@ public class PropertyViewModelTests
         Assert.True(prop.IsCreateOnly);
         Assert.True(prop.IsRequired);
     }
-#endif
 
     [Theory]
     [ClassViewModelData(typeof(ExternalParentAsInputOnly), false, true, false)]

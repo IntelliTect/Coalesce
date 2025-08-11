@@ -47,10 +47,8 @@ public class AppDbContext : DbContext
 
     public DbSet<DateTimePk> DateTimePks { get; set; }
     public DbSet<DateTimeOffsetPk> DateTimeOffsetPks { get; set; }
-#if NET6_0_OR_GREATER
     public DbSet<DateOnlyPk> DateOnlyPks { get; set; }
     public DbSet<TimeOnlyPk> TimeOnlyPks { get; set; }
-#endif
 
 
     public AppDbContext() : this(Guid.NewGuid().ToString()) { }

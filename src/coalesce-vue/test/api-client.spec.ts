@@ -24,6 +24,8 @@ import { Student, Advisor } from "./targets.models";
 import {
   ComplexModelApiClient,
   PersonApiClient,
+  DateOnlyPkApiClient,
+  StringIdentityApiClient,
 } from "@test-targets/api-clients.g";
 import {
   ComplexModelViewModel,
@@ -66,7 +68,7 @@ describe("error handling", () => {
     });
 
     await expect(new StudentApiClient().get(1)).rejects.toThrow(
-      "Unexpected text/html string response from server."
+      "Unexpected text/html string response from server.",
     );
   });
 });
@@ -164,7 +166,7 @@ describe("$useSimultaneousRequestCaching", () => {
       vitest.fn(async (req) => {
         await delay(30);
         return { wasSuccessful: true, object: [] };
-      })
+      }),
     );
 
     // Act
@@ -193,8 +195,8 @@ describe("$invoke", () => {
     await expect(
       new StudentApiClient().$invoke(
         StudentMeta.methods.fullNameAndAge,
-        {} as any
-      )
+        {} as any,
+      ),
     ).resolves.toBeTruthy();
 
     expect(mock.mock.calls[0][0]).toMatchObject({ params: {} });
@@ -205,7 +207,7 @@ describe("$invoke", () => {
       "/ComplexModel/methodWithOptionalParams",
       vitest.fn((req) => ({
         wasSuccessful: true,
-      }))
+      })),
     );
 
     await new ComplexModelApiClient().methodWithOptionalParams(1, 42);
@@ -226,7 +228,7 @@ describe("$invoke", () => {
       "/ComplexModel/methodWithManyParams",
       vitest.fn((req) => ({
         wasSuccessful: true,
-      }))
+      })),
     );
 
     const caller = new ComplexModelViewModel().methodWithManyParams;
@@ -251,7 +253,7 @@ describe("$invoke", () => {
     const res = await new StudentApiClient().$invoke(
       StudentMeta.methods.fullNameAndAge,
       // Our types are actually so good that they will catch this as an error, so we cast to any.
-      { id: 1, extraParam: "" } as any
+      { id: 1, extraParam: "" } as any,
     );
 
     expect(res.data.object).toBe("Bob 42");
@@ -345,7 +347,7 @@ describe("$invoke", () => {
 
     expect(mock).toBeCalledTimes(1);
     expect(mock.mock.calls[0][0].data).toBe(
-      '{"id":42,"file":{"content":"AA==","contentType":"application/pdf","name":"fileName"},"student":{"name":"bob&bob=bob","studentAdvisorId":null}}'
+      '{"id":42,"file":{"content":"AA==","contentType":"application/pdf","name":"fileName"},"student":{"name":"bob&bob=bob","studentAdvisorId":null}}',
     );
   });
 
@@ -446,11 +448,11 @@ describe("$invoke", () => {
         studentAdvisorId: null,
         name: "bob",
       }),
-      { fields: ["studentAdvisorId", "name"] }
+      { fields: ["studentAdvisorId", "name"] },
     );
 
     expect(mock.mock.calls[0][0].data).toBe(
-      '{"name":"bob","studentAdvisorId":null}'
+      '{"name":"bob","studentAdvisorId":null}',
     );
   });
 
@@ -462,19 +464,19 @@ describe("$invoke", () => {
           wasSuccessful: true,
           list: [],
         };
-      })
+      }),
     );
 
     const personList = new PersonListViewModel();
     personList.$dataSource = new Person.DataSources.NamesStartingWithAWithCases(
       {
         allowedStatuses: [Statuses.Open, Statuses.InProgress],
-      }
+      },
     );
     await personList.$load();
 
     expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
-      "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases&dataSource.allowedStatuses=[0,1]"
+      "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases&dataSource.allowedStatuses=[0,1]",
     );
   });
 
@@ -486,7 +488,7 @@ describe("$invoke", () => {
           wasSuccessful: true,
           list: [],
         };
-      })
+      }),
     );
 
     const personList = new PersonListViewModel();
@@ -506,7 +508,7 @@ describe("$invoke", () => {
     await personList.$load();
 
     expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
-      `/api/Person/list?page=1&pageSize=10&dataSource=ParameterTestsSource&dataSource.personCriterion={"personIds":[1,2,3],"name":"Grace","subCriteria":[{"personIds":[],"name":"Bob Newbie"}],"gender":2}`
+      `/api/Person/list?page=1&pageSize=10&dataSource=ParameterTestsSource&dataSource.personCriterion={"personIds":[1,2,3],"name":"Grace","subCriteria":[{"personIds":[],"name":"Bob Newbie"}],"gender":2}`,
     );
   });
 
@@ -524,20 +526,20 @@ describe("$invoke", () => {
           wasSuccessful: true,
           list: [],
         };
-      })
+      }),
     );
 
     const personList = new PersonListViewModel();
     personList.$dataSource = new Person.DataSources.NamesStartingWithAWithCases(
       {
         hasEmail: value,
-      }
+      },
     );
     await personList.$load();
 
     expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
       "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases" +
-        expected
+        expected,
     );
   });
 });
@@ -549,7 +551,7 @@ describe("$makeCaller", () => {
       "item",
       (c, num: number) => {
         return endpointMock(num);
-      }
+      },
     );
 
     const arg = 42;
@@ -575,7 +577,7 @@ describe("$makeCaller", () => {
           name: "mock error",
           message: "mocked throw",
         } as AxiosError;
-      }
+      },
     );
 
     await expect(caller(42)).rejects.toBeTruthy();
@@ -590,7 +592,7 @@ describe("$makeCaller", () => {
           return;
         }
         return endpointMock(num);
-      }
+      },
     );
 
     const arg = 42;
@@ -622,7 +624,7 @@ describe("$makeCaller", () => {
         }
         const res = await endpointMock(num);
         return res;
-      }
+      },
     );
 
     const arg = 42;
@@ -713,7 +715,7 @@ describe("$makeCaller", () => {
     const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller(
       "item",
-      (c, num: number) => endpointMock(num)
+      (c, num: number) => endpointMock(num),
     );
 
     // Precondition: Ensures that our test doesn't accidentally set the property with the same value
@@ -743,7 +745,7 @@ describe("$makeCaller", () => {
     // (i.e. Object.getOwnPropertyDescriptor(caller, 'concurrencyMode') !== undefined)
     const concurrencyModeProp = Object.getOwnPropertyDescriptor(
       caller,
-      "concurrencyMode"
+      "concurrencyMode",
     );
     expect(concurrencyModeProp).toBeUndefined();
   });
@@ -772,9 +774,9 @@ describe("$makeCaller", () => {
     expect(endpointMock.mock.calls[0][0]).toBe(1);
     expect(endpointMock.mock.calls[1][0]).toBe(3);
 
-    expect(calls[0]).resolves.toBeTruthy();
-    expect(calls[1]).resolves.toBeFalsy();
-    expect(calls[2]).resolves.toBeTruthy();
+    await expect(calls[0]).resolves.toBeTruthy();
+    await expect(calls[1]).resolves.toBeFalsy();
+    await expect(calls[2]).resolves.toBeTruthy();
   });
 
   test("concurrencyMode 'debounce' ignores redundant requests when throwing", async () => {
@@ -811,14 +813,14 @@ describe("$makeCaller", () => {
     expect(endpointMock.mock.calls[0][0]).toBe(1);
     expect(endpointMock.mock.calls[1][0]).toBe(3);
 
-    expect(calls[0]).rejects.toBe("thrown");
+    await expect(calls[0]).rejects.toBe("thrown");
 
     // Aborted calls don't throw/reject, since their aborting
     // is normal, expected behavior.
     // They resolve to nothing.
-    expect(calls[1]).resolves.toBeFalsy();
+    await expect(calls[1]).resolves.toBeFalsy();
 
-    expect(calls[2]).rejects.toBe("thrown");
+    await expect(calls[2]).rejects.toBe("thrown");
   });
 
   test("concurrencyMode 'cancel' cancels all previous requests", async () => {
@@ -874,7 +876,7 @@ describe("$makeCaller", () => {
     });
 
     const caller = new StudentApiClient().$makeCaller("item", (c) =>
-      c.getFile(42, "bob")
+      c.getFile(42, "bob"),
     );
 
     await caller();
@@ -901,7 +903,7 @@ describe("$makeCaller", () => {
     });
 
     const caller = new StudentApiClient().$makeCaller("item", (c) =>
-      c.getFile(42, "bob")
+      c.getFile(42, "bob"),
     );
 
     await expect(caller()).rejects.toBeTruthy();
@@ -920,18 +922,18 @@ describe("$makeCaller", () => {
           data: currentBlob,
           status: 200,
           headers: {},
-        }
+        },
     );
 
     const createUrlMock = (URL.createObjectURL = vitest
       .fn()
       .mockImplementation(
-        () => `blob://${Math.random().toString(36).slice(2)}`
+        () => `blob://${Math.random().toString(36).slice(2)}`,
       ));
     const revokeUrlMock = (URL.revokeObjectURL = vitest.fn());
 
     const caller = new StudentApiClient().$makeCaller("item", (c) =>
-      c.getFile(42, "bob")
+      c.getFile(42, "bob"),
     );
 
     const wrapper = mount({ template: "<div></div>" });
@@ -985,7 +987,7 @@ describe("$makeCaller", () => {
               valueArray: [requestNum++],
             },
           };
-        })
+        }),
       );
 
       const runTest = () => {
@@ -994,8 +996,8 @@ describe("$makeCaller", () => {
           (c, param: number) =>
             c.instanceGetMethodWithObjParam(
               param,
-              new ExternalParent({ stringList: ["foo"] })
-            )
+              new ExternalParent({ stringList: ["foo"] }),
+            ),
         );
         caller.useResponseCaching();
         return caller;
@@ -1007,7 +1009,7 @@ describe("$makeCaller", () => {
       await caller1(42);
       expect(caller1.result).not.toBeNull();
       expect(caller1.result).toMatchObject(
-        new ExternalParent({ stringList: ["foo"], valueArray: [1] })
+        new ExternalParent({ stringList: ["foo"], valueArray: [1] }),
       );
       const cacheValue = Object.values(sessionStorage)[0];
       expect(cacheValue).not.toBeFalsy();
@@ -1029,7 +1031,7 @@ describe("$makeCaller", () => {
       // Invoke the caller. At this point, the cached response will get loaded.
       const caller2Promise = caller2(42);
       expect(caller2.result).toMatchObject(
-        new ExternalParent({ stringList: ["foo"], valueArray: [1] })
+        new ExternalParent({ stringList: ["foo"], valueArray: [1] }),
       );
       expect(caller2.wasSuccessful).toBe(true);
       expect(caller2.hasResult).toBe(true);
@@ -1039,7 +1041,7 @@ describe("$makeCaller", () => {
       // Observe that the results are set with the new api response.
       await caller2Promise;
       expect(caller2.result).toMatchObject(
-        new ExternalParent({ stringList: ["foo"], valueArray: [2] })
+        new ExternalParent({ stringList: ["foo"], valueArray: [2] }),
       );
       expect(caller2.wasSuccessful).toBe(true);
       expect(caller2.hasResult).toBe(true);
@@ -1056,7 +1058,7 @@ describe("$makeCaller", () => {
 
       const runTest = () => {
         const caller = new StudentApiClient().$makeCaller("item", (c) =>
-          c.fullNameAndAge(42)
+          c.fullNameAndAge(42),
         );
         caller.useResponseCaching({ maxAgeSeconds: 0.4 });
         return caller;
@@ -1087,7 +1089,7 @@ describe("$makeCaller", () => {
 
       const runTest = () => {
         const caller = new StudentApiClient().$makeCaller("item", (c) =>
-          c.fullNameAndAge(42)
+          c.fullNameAndAge(42),
         );
         caller.useResponseCaching({ maxAgeSeconds: 20 });
         return caller;
@@ -1160,7 +1162,7 @@ describe("$makeCaller with args object", () => {
       "item",
       (c, num: number) => endpointMock(num),
       () => ({ num: null as number | null }),
-      (c, args) => endpointMock(args.num)
+      (c, args) => endpointMock(args.num),
     );
 
     caller.args.num = 42;
@@ -1176,7 +1178,7 @@ describe("$makeCaller with args object", () => {
       "item",
       (c, num: number) => endpointMock(num),
       () => ({ num: null as number | null }),
-      (c, args) => endpointMock(args.num)
+      (c, args) => endpointMock(args.num),
     );
 
     window.confirm = vitest.fn(() => true);
@@ -1200,7 +1202,7 @@ describe("$makeCaller with args object", () => {
           return;
         }
         return endpointMock(args.num);
-      }
+      },
     );
 
     const arg = 42;
@@ -1232,7 +1234,7 @@ describe("$makeCaller with args object", () => {
       "item",
       (c) => c.getFile(42, null),
       () => ({}),
-      (c, args) => c.getFile(42, "bob+/")
+      (c, args) => c.getFile(42, "bob+/"),
     );
 
     expect(caller.url).toBe("/api/Students/getFile?id=42&etag=bob%2B%2F");
@@ -1258,7 +1260,7 @@ describe("$makeCaller with args object", () => {
       "list",
       (c, num: number) => endpointMock(num),
       () => ({ num: null as number | null }),
-      (c, args) => endpointMock(args.num)
+      (c, args) => endpointMock(args.num),
     );
 
     const result: number[] | null = caller.result;
@@ -1286,13 +1288,13 @@ describe("$makeCaller with args object", () => {
     const makeCaller = (
       endpointMock: ReturnType<
         typeof makeEndpointMock<number | null | undefined>
-      >
+      >,
     ) =>
       new StudentApiClient().$makeCaller(
         type,
         (c, num: number) => endpointMock(num),
         () => ({ num: null as number | null }),
-        (c, args) => endpointMock(args.num)
+        (c, args) => endpointMock(args.num),
       );
 
     test("uses own args if args not specified", () => {
@@ -1357,7 +1359,7 @@ describe("$makeCaller with args object", () => {
           async (c, args) => {
             await delay(20);
             return await endpointMock(args.num);
-          }
+          },
         )
         .setConcurrency("debounce");
 
@@ -1379,9 +1381,9 @@ describe("$makeCaller with args object", () => {
       expect(endpointMock.mock.calls[0][0]).toBe(1);
       expect(endpointMock.mock.calls[1][0]).toBe(3);
 
-      expect(calls[0]).resolves.toBeTruthy();
-      expect(calls[1]).resolves.toBeFalsy();
-      expect(calls[2]).resolves.toBeTruthy();
+      await expect(calls[0]).resolves.toBeTruthy();
+      await expect(calls[1]).resolves.toBeFalsy();
+      await expect(calls[2]).resolves.toBeTruthy();
     });
   });
 });
@@ -1421,10 +1423,74 @@ describe("mapQueryToParams", () => {
     const parsed = mapQueryToParams(
       JSON.parse(string),
       ListParameters,
-      new Person().$metadata
+      new Person().$metadata,
     );
 
     expect(parsed).toMatchObject(params);
     expect(string).toBe(JSON.stringify(mapParamsToDto(parsed)));
+  });
+});
+
+describe("ModelApiClient", () => {
+  describe("get method", () => {
+    test.each([
+      {
+        description: "date primary keys",
+        client: DateOnlyPkApiClient,
+        id: new Date("2023-05-15"),
+        expectedUrl: "/DateOnlyPk/get/2023-05-14",
+      },
+      {
+        description: "string primary keys",
+        client: StringIdentityApiClient,
+        id: "test-id",
+        expectedUrl: "/StringIdentity/get/test-id",
+      },
+    ])(
+      "uses mapToDto to convert ID for $description",
+      async ({ client, id, expectedUrl }) => {
+        const mock = (AxiosClient.defaults.adapter = makeAdapterMock());
+
+        const apiClient = new client();
+        await apiClient.get(id as any);
+
+        expect(mock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: expectedUrl,
+          }),
+        );
+      },
+    );
+  });
+
+  describe("delete method", () => {
+    test.each([
+      {
+        description: "date primary keys",
+        client: DateOnlyPkApiClient,
+        id: new Date("2023-05-15"),
+        expectedUrl: "/DateOnlyPk/delete/2023-05-14",
+      },
+      {
+        description: "string primary keys",
+        client: StringIdentityApiClient,
+        id: "test-id",
+        expectedUrl: "/StringIdentity/delete/test-id",
+      },
+    ])(
+      "uses mapToDto to convert ID for $description",
+      async ({ client, id, expectedUrl }) => {
+        const mock = (AxiosClient.defaults.adapter = makeAdapterMock());
+
+        const apiClient = new client();
+        await apiClient.delete(id as any);
+
+        expect(mock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: expectedUrl,
+          }),
+        );
+      },
+    );
   });
 });

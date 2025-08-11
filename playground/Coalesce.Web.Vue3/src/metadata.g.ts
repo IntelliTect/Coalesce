@@ -1598,6 +1598,42 @@ export const Company = domain.types.Company = {
     },
   },
 }
+export const DateOnlyPk = domain.types.DateOnlyPk = {
+  name: "DateOnlyPk" as const,
+  displayName: "Date Only Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "DateOnlyPk",
+  get keyProp() { return this.props.dateOnlyPkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    dateOnlyPkId: {
+      name: "dateOnlyPkId",
+      displayName: "Date Only Pk Id",
+      type: "date",
+      dateKind: "date",
+      noOffset: true,
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Date Only Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const Log = domain.types.Log = {
   name: "Log" as const,
   displayName: "Log",
@@ -3026,6 +3062,7 @@ interface AppDomain extends Domain {
     CaseSummary: typeof CaseSummary
     ChatResponse: typeof ChatResponse
     Company: typeof Company
+    DateOnlyPk: typeof DateOnlyPk
     DevTeam: typeof DevTeam
     Location: typeof Location
     Log: typeof Log

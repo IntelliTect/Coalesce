@@ -149,7 +149,7 @@ public abstract class TypeViewModel : IAttributeProvider
     /// <summary>
     /// True if the type is supported by Coalesce as a key type.
     /// </summary>
-    public bool IsValidKeyType => IsString || IsIntegral || IsEnum || IsGuid || IsUri;
+    public bool IsValidKeyType => IsString || IsIntegral || IsEnum || IsGuid || IsUri || IsDateOrTime;
 
     public virtual bool IsInternalUse => this.HasAttribute<InternalUseAttribute>() || (PureType != this && PureType.IsInternalUse);
 

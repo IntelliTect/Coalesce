@@ -2967,6 +2967,104 @@ export const ComplexModelDependent = domain.types.ComplexModelDependent = {
   dataSources: {
   },
 }
+export const DateOnlyPk = domain.types.DateOnlyPk = {
+  name: "DateOnlyPk" as const,
+  displayName: "Date Only Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "DateOnlyPk",
+  get keyProp() { return this.props.dateOnlyPkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    dateOnlyPkId: {
+      name: "dateOnlyPkId",
+      displayName: "Date Only Pk Id",
+      type: "date",
+      dateKind: "date",
+      noOffset: true,
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Date Only Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const DateTimeOffsetPk = domain.types.DateTimeOffsetPk = {
+  name: "DateTimeOffsetPk" as const,
+  displayName: "Date Time Offset Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "DateTimeOffsetPk",
+  get keyProp() { return this.props.dateTimeOffsetPkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    dateTimeOffsetPkId: {
+      name: "dateTimeOffsetPkId",
+      displayName: "Date Time Offset Pk Id",
+      type: "date",
+      dateKind: "datetime",
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Date Time Offset Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const DateTimePk = domain.types.DateTimePk = {
+  name: "DateTimePk" as const,
+  displayName: "Date Time Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "DateTimePk",
+  get keyProp() { return this.props.dateTimePkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    dateTimePkId: {
+      name: "dateTimePkId",
+      displayName: "Date Time Pk Id",
+      type: "date",
+      dateKind: "datetime",
+      noOffset: true,
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Date Time Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const EnumPk = domain.types.EnumPk = {
   name: "EnumPk" as const,
   displayName: "Enum Pk",
@@ -4428,6 +4526,39 @@ export const Test = domain.types.Test = {
   dataSources: {
   },
 }
+export const TimeOnlyPk = domain.types.TimeOnlyPk = {
+  name: "TimeOnlyPk" as const,
+  displayName: "Time Only Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "TimeOnlyPk",
+  get keyProp() { return this.props.timeOnlyPkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    timeOnlyPkId: {
+      name: "timeOnlyPkId",
+      displayName: "Time Only Pk Id",
+      type: "date",
+      dateKind: "time",
+      noOffset: true,
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Time Only Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const ZipCode = domain.types.ZipCode = {
   name: "ZipCode" as const,
   displayName: "Zip Code",
@@ -5259,6 +5390,9 @@ interface AppDomain extends Domain {
     Company: typeof Company
     ComplexModel: typeof ComplexModel
     ComplexModelDependent: typeof ComplexModelDependent
+    DateOnlyPk: typeof DateOnlyPk
+    DateTimeOffsetPk: typeof DateTimeOffsetPk
+    DateTimePk: typeof DateTimePk
     EnumPk: typeof EnumPk
     ExternalChild: typeof ExternalChild
     ExternalChildAsInputOnly: typeof ExternalChildAsInputOnly
@@ -5292,6 +5426,7 @@ interface AppDomain extends Domain {
     StandaloneReadWrite: typeof StandaloneReadWrite
     StringIdentity: typeof StringIdentity
     Test: typeof Test
+    TimeOnlyPk: typeof TimeOnlyPk
     ValidationTarget: typeof ValidationTarget
     ValidationTargetChild: typeof ValidationTargetChild
     WeatherData: typeof WeatherData

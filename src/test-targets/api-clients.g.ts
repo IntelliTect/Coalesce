@@ -553,6 +553,21 @@ export class ComplexModelDependentApiClient extends ModelApiClient<$models.Compl
 }
 
 
+export class DateOnlyPkApiClient extends ModelApiClient<$models.DateOnlyPk> {
+  constructor() { super($metadata.DateOnlyPk) }
+}
+
+
+export class DateTimeOffsetPkApiClient extends ModelApiClient<$models.DateTimeOffsetPk> {
+  constructor() { super($metadata.DateTimeOffsetPk) }
+}
+
+
+export class DateTimePkApiClient extends ModelApiClient<$models.DateTimePk> {
+  constructor() { super($metadata.DateTimePk) }
+}
+
+
 export class EnumPkApiClient extends ModelApiClient<$models.EnumPk> {
   constructor() { super($metadata.EnumPk) }
 }
@@ -738,6 +753,11 @@ export class StringIdentityApiClient extends ModelApiClient<$models.StringIdenti
 
 export class TestApiClient extends ModelApiClient<$models.Test> {
   constructor() { super($metadata.Test) }
+}
+
+
+export class TimeOnlyPkApiClient extends ModelApiClient<$models.TimeOnlyPk> {
+  constructor() { super($metadata.TimeOnlyPk) }
 }
 
 

@@ -35,6 +35,12 @@ public class Product
     [DataType(DataType.Password)]
     public Guid UniqueId { get; set; } = Guid.NewGuid();
 
+    public DateOnly? MilestoneId { get; set; }
+
+    [ForeignKey("MilestoneId")]
+    [Display(Name = "Milestone", Description = "Product milestone date")]
+    public DateOnlyPk Milestone { get; set; }
+
     [NotMapped]
     public object Unknown { get; set; } = "unknown value";
 }

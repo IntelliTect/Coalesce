@@ -417,6 +417,81 @@ export class ComplexModelDependent {
 }
 
 
+export interface DateOnlyPk extends Model<typeof metadata.DateOnlyPk> {
+  dateOnlyPkId: Date | null
+  name: string | null
+}
+export class DateOnlyPk {
+  
+  /** Mutates the input object and its descendants into a valid DateOnlyPk implementation. */
+  static convert(data?: Partial<DateOnlyPk>): DateOnlyPk {
+    return convertToModel<DateOnlyPk>(data || {}, metadata.DateOnlyPk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid DateOnlyPk implementation. */
+  static map(data?: Partial<DateOnlyPk>): DateOnlyPk {
+    return mapToModel<DateOnlyPk>(data || {}, metadata.DateOnlyPk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.DateOnlyPk; }
+  
+  /** Instantiate a new DateOnlyPk, optionally basing it on the given data. */
+  constructor(data?: Partial<DateOnlyPk> | {[k: string]: any}) {
+    Object.assign(this, DateOnlyPk.map(data || {}));
+  }
+}
+
+
+export interface DateTimeOffsetPk extends Model<typeof metadata.DateTimeOffsetPk> {
+  dateTimeOffsetPkId: Date | null
+  name: string | null
+}
+export class DateTimeOffsetPk {
+  
+  /** Mutates the input object and its descendants into a valid DateTimeOffsetPk implementation. */
+  static convert(data?: Partial<DateTimeOffsetPk>): DateTimeOffsetPk {
+    return convertToModel<DateTimeOffsetPk>(data || {}, metadata.DateTimeOffsetPk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid DateTimeOffsetPk implementation. */
+  static map(data?: Partial<DateTimeOffsetPk>): DateTimeOffsetPk {
+    return mapToModel<DateTimeOffsetPk>(data || {}, metadata.DateTimeOffsetPk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.DateTimeOffsetPk; }
+  
+  /** Instantiate a new DateTimeOffsetPk, optionally basing it on the given data. */
+  constructor(data?: Partial<DateTimeOffsetPk> | {[k: string]: any}) {
+    Object.assign(this, DateTimeOffsetPk.map(data || {}));
+  }
+}
+
+
+export interface DateTimePk extends Model<typeof metadata.DateTimePk> {
+  dateTimePkId: Date | null
+  name: string | null
+}
+export class DateTimePk {
+  
+  /** Mutates the input object and its descendants into a valid DateTimePk implementation. */
+  static convert(data?: Partial<DateTimePk>): DateTimePk {
+    return convertToModel<DateTimePk>(data || {}, metadata.DateTimePk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid DateTimePk implementation. */
+  static map(data?: Partial<DateTimePk>): DateTimePk {
+    return mapToModel<DateTimePk>(data || {}, metadata.DateTimePk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.DateTimePk; }
+  
+  /** Instantiate a new DateTimePk, optionally basing it on the given data. */
+  constructor(data?: Partial<DateTimePk> | {[k: string]: any}) {
+    Object.assign(this, DateTimePk.map(data || {}));
+  }
+}
+
+
 export interface EnumPk extends Model<typeof metadata.EnumPk> {
   enumPkId: EnumPkId | null
   name: string | null
@@ -936,6 +1011,31 @@ export class Test {
   /** Instantiate a new Test, optionally basing it on the given data. */
   constructor(data?: Partial<Test> | {[k: string]: any}) {
     Object.assign(this, Test.map(data || {}));
+  }
+}
+
+
+export interface TimeOnlyPk extends Model<typeof metadata.TimeOnlyPk> {
+  timeOnlyPkId: Date | null
+  name: string | null
+}
+export class TimeOnlyPk {
+  
+  /** Mutates the input object and its descendants into a valid TimeOnlyPk implementation. */
+  static convert(data?: Partial<TimeOnlyPk>): TimeOnlyPk {
+    return convertToModel<TimeOnlyPk>(data || {}, metadata.TimeOnlyPk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid TimeOnlyPk implementation. */
+  static map(data?: Partial<TimeOnlyPk>): TimeOnlyPk {
+    return mapToModel<TimeOnlyPk>(data || {}, metadata.TimeOnlyPk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.TimeOnlyPk; }
+  
+  /** Instantiate a new TimeOnlyPk, optionally basing it on the given data. */
+  constructor(data?: Partial<TimeOnlyPk> | {[k: string]: any}) {
+    Object.assign(this, TimeOnlyPk.map(data || {}));
   }
 }
 
@@ -1529,6 +1629,9 @@ declare module "coalesce-vue/lib/model" {
     Company: Company
     ComplexModel: ComplexModel
     ComplexModelDependent: ComplexModelDependent
+    DateOnlyPk: DateOnlyPk
+    DateTimeOffsetPk: DateTimeOffsetPk
+    DateTimePk: DateTimePk
     EnumPk: EnumPk
     ExternalChild: ExternalChild
     ExternalChildAsInputOnly: ExternalChildAsInputOnly
@@ -1562,6 +1665,7 @@ declare module "coalesce-vue/lib/model" {
     StandaloneReadWrite: StandaloneReadWrite
     StringIdentity: StringIdentity
     Test: Test
+    TimeOnlyPk: TimeOnlyPk
     ValidationTarget: ValidationTarget
     ValidationTargetChild: ValidationTargetChild
     WeatherData: WeatherData

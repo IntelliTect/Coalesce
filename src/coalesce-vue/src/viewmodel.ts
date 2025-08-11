@@ -80,7 +80,7 @@ type DataFreshness = boolean | number;
 export abstract class ViewModel<
   TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = any,
-  TPrimaryKey extends string | number = any,
+  TPrimaryKey extends string | number | Date = any,
 > implements Model<TModel["$metadata"]>
 {
   /** See comments on ReactiveFlags_SKIP for explanation.

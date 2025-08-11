@@ -443,6 +443,31 @@ export namespace Company {
 }
 
 
+export interface DateOnlyPk extends Model<typeof metadata.DateOnlyPk> {
+  dateOnlyPkId: Date | null
+  name: string | null
+}
+export class DateOnlyPk {
+  
+  /** Mutates the input object and its descendants into a valid DateOnlyPk implementation. */
+  static convert(data?: Partial<DateOnlyPk>): DateOnlyPk {
+    return convertToModel<DateOnlyPk>(data || {}, metadata.DateOnlyPk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid DateOnlyPk implementation. */
+  static map(data?: Partial<DateOnlyPk>): DateOnlyPk {
+    return mapToModel<DateOnlyPk>(data || {}, metadata.DateOnlyPk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.DateOnlyPk; }
+  
+  /** Instantiate a new DateOnlyPk, optionally basing it on the given data. */
+  constructor(data?: Partial<DateOnlyPk> | {[k: string]: any}) {
+    Object.assign(this, DateOnlyPk.map(data || {}));
+  }
+}
+
+
 export interface Log extends Model<typeof metadata.Log> {
   logId: number | null
   level: string | null
@@ -566,6 +591,10 @@ export interface Product extends Model<typeof metadata.Product> {
   name: string | null
   details: ProductDetails | null
   uniqueId: string | null
+  milestoneId: Date | null
+  
+  /** Product milestone date */
+  milestone: DateOnlyPk | null
   unknown: unknown | null
 }
 export class Product {
@@ -1035,6 +1064,7 @@ declare module "coalesce-vue/lib/model" {
     CaseSummary: CaseSummary
     ChatResponse: ChatResponse
     Company: Company
+    DateOnlyPk: DateOnlyPk
     DevTeam: DevTeam
     Location: Location
     Log: Log

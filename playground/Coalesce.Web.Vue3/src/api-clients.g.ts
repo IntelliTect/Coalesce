@@ -242,6 +242,11 @@ export class CompanyApiClient extends ModelApiClient<$models.Company> {
 }
 
 
+export class DateOnlyPkApiClient extends ModelApiClient<$models.DateOnlyPk> {
+  constructor() { super($metadata.DateOnlyPk) }
+}
+
+
 export class LogApiClient extends ModelApiClient<$models.Log> {
   constructor() { super($metadata.Log) }
 }

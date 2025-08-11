@@ -92,7 +92,7 @@ public class Case
     [Read, MaxLength(32)]
     public byte[] AttachmentHash { get; set; }
     [InternalUse]
-    public CaseAttachmentContent AttachmentContent { get; set; } 
+    public CaseAttachmentContent AttachmentContent { get; set; }
 
     public class CaseAttachmentContent
     {

@@ -45,6 +45,11 @@ public class AppDbContext : DbContext
     public DbSet<Parent1> Parent1s { get; set; }
     public DbSet<Parent2> Parent2s { get; set; }
 
+    public DbSet<DateTimePk> DateTimePks { get; set; }
+    public DbSet<DateTimeOffsetPk> DateTimeOffsetPks { get; set; }
+    public DbSet<DateOnlyPk> DateOnlyPks { get; set; }
+    public DbSet<TimeOnlyPk> TimeOnlyPks { get; set; }
+
 
     public AppDbContext() : this(Guid.NewGuid().ToString()) { }
 

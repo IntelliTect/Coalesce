@@ -6,6 +6,7 @@
 - The types generated for inheritance hierarchies have changed significantly. If two or more models in a type hierarchy (i.e. a base type and a derived type) are both exposed by Coalesce, that relationship is now reflected throughout the generated DTOs, generated TypeScript, and admin pages. The generated ViewModels classes for abstract classes are now just proxies intended to be used only for loading one of the concrete implementation types.
 - `StandardBehaviors.AfterDelete` is now `AfterDeleteAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
 - `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
+- `IntelliTect.Coalesce.AuditLogging` now uses stored procedures by default to upsert audit log entries. You can disable this (e.g. if your application lacks permission to create/update stored procedures) by chaining `.WithStoredProcedures(false)` when you configure audit logging.
 - The CommonJS build of coalesce-vue has been dropped - only the ESM build remains. Most projects should be unaffected.
 
 ## Features

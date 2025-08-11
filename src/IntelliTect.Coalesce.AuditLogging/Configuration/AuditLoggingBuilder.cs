@@ -55,6 +55,13 @@ public class AuditLoggingBuilder<TAuditLog>
         options.PropertyDescriptions = mode;
         return this;
     }
+
+    /// <inheritdoc cref="AuditOptions.UseStoredProcedures"/> 
+    public AuditLoggingBuilder<TAuditLog> WithStoredProcedures(bool useStoredProcedures = true)
+    {
+        options.UseStoredProcedures = useStoredProcedures;
+        return this;
+    }
     private static readonly MemoryCache _auditConfigTransforms = new(new MemoryCacheOptions { SizeLimit = 512 });
 
     /// <summary>

@@ -916,6 +916,11 @@ export interface ProductViewModel extends $models.Product {
   name: string | null;
   details: $models.ProductDetails | null;
   uniqueId: string | null;
+  milestoneId: Date | null;
+  
+  /** Product milestone date */
+  get milestone(): DateOnlyPkViewModel | null;
+  set milestone(value: DateOnlyPkViewModel | $models.DateOnlyPk | null);
   unknown: unknown | null;
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {

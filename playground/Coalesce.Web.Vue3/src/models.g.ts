@@ -591,6 +591,10 @@ export interface Product extends Model<typeof metadata.Product> {
   name: string | null
   details: ProductDetails | null
   uniqueId: string | null
+  milestoneId: Date | null
+  
+  /** Product milestone date */
+  milestone: DateOnlyPk | null
   unknown: unknown | null
 }
 export class Product {

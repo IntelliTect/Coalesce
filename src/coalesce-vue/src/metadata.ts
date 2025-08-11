@@ -347,7 +347,7 @@ export type DateKind = "date" | "time" | "datetime";
 
 /** Represents the usage of a date */
 export interface DateValue extends ValueMeta<"date"> {
-  readonly role: "value";
+  readonly role: "value" | "foreignKey" | "primaryKey";
   readonly dateKind: DateKind;
 
   /** True if the date value is insensitive to timezone offsets
@@ -454,13 +454,13 @@ export type PrimitiveProperty = PropertyBase &
 
 /** Represents a property that serves as a primary key */
 export type PrimaryKeyProperty = PropertyBase &
-  (StringValue | NumberValue | EnumValue) & {
+  (StringValue | NumberValue | EnumValue | DateValue) & {
     readonly role: "primaryKey";
   };
 
 /** Represents a property that serves as a foreign key */
 export type ForeignKeyProperty = PropertyBase &
-  (StringValue | NumberValue | EnumValue) & {
+  (StringValue | NumberValue | EnumValue | DateValue) & {
     readonly role: "foreignKey";
     readonly principalKey: PrimaryKeyProperty;
     readonly principalType: ModelType;
@@ -468,7 +468,10 @@ export type ForeignKeyProperty = PropertyBase &
   };
 
 /** Represents a date property */
-export interface DateProperty extends PropertyBase, DateValue {}
+export type DateProperty = PropertyBase &
+  DateValue & {
+    readonly role: "value";
+  };
 
 /** Represents an enum property */
 export type EnumProperty = PropertyBase &

@@ -387,6 +387,9 @@ namespace Coalesce.Domain.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
 
+                    b.Property<DateOnly?>("MilestoneId")
+                        .HasColumnType("date");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -395,6 +398,8 @@ namespace Coalesce.Domain.Migrations
                         .HasColumnName("ProductUniqueId");
 
                     b.HasKey("ProductId");
+
+                    b.HasIndex("MilestoneId");
 
                     b.HasIndex("UniqueId")
                         .IsUnique();
@@ -558,6 +563,11 @@ namespace Coalesce.Domain.Migrations
 
             modelBuilder.Entity("Coalesce.Domain.Product", b =>
                 {
+                    b.HasOne("Coalesce.Domain.DateOnlyPk", "Milestone")
+                        .WithMany()
+                        .HasForeignKey("MilestoneId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.OwnsOne("Coalesce.Domain.ProductDetails", "Details", b1 =>
                         {
                             b1.Property<int>("ProductId")
@@ -627,6 +637,8 @@ namespace Coalesce.Domain.Migrations
 
                     b.Navigation("Details")
                         .IsRequired();
+
+                    b.Navigation("Milestone");
                 });
 
             modelBuilder.Entity("IntelliTect.Coalesce.AuditLogging.AuditLogProperty", b =>

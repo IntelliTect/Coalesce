@@ -61,7 +61,7 @@ An immutable number that is unique among all ViewModel instances, regardless of 
 Useful for uniquely identifying instances with ``:key="vm.$stableId"`` in a Vue component, especially for instances that lack a primary key.
 
 
-<Prop def="$primaryKey: string | number" lang="ts" />
+<Prop def="$primaryKey: string | number | Date" lang="ts" />
 
 A getter/setter property that wraps the primary key of the model. Used to interact with the primary key of any ViewModel in a polymorphic way.
 

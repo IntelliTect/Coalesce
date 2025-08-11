@@ -47,7 +47,7 @@ public class ProductKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
         int page,
         [Description("Provide true if you only need a count of results.")]
         bool countOnly,
-        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: ProductId,Name,Details,UniqueId,Unknown")]
+        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: ProductId,Name,Details,UniqueId,MilestoneId,Milestone,Unknown")]
         string[] fields)
     {
         if (!_isScoped) return await InvokeScoped<string>(ListProduct, search, page, countOnly, fields);

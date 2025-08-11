@@ -1437,8 +1437,8 @@ describe("ModelApiClient", () => {
       {
         description: "date primary keys",
         client: DateOnlyPkApiClient,
-        id: new Date("2023-05-15"),
-        expectedUrl: "/DateOnlyPk/get/2023-05-14",
+        id: new Date(2023, 4, 15), // May 15, 2023 in local timezone (month is 0-indexed)
+        expectedUrl: "/DateOnlyPk/get/2023-05-15",
       },
       {
         description: "string primary keys",
@@ -1468,8 +1468,8 @@ describe("ModelApiClient", () => {
       {
         description: "date primary keys",
         client: DateOnlyPkApiClient,
-        id: new Date("2023-05-15"),
-        expectedUrl: "/DateOnlyPk/delete/2023-05-14",
+        id: new Date(2023, 4, 15), // May 15, 2023 in local timezone (month is 0-indexed)
+        expectedUrl: "/DateOnlyPk/delete/2023-05-15",
       },
       {
         description: "string primary keys",

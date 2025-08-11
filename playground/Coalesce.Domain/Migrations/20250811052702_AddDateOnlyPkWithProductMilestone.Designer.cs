@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coalesce.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250811044334_AddDateOnlyPk")]
-    partial class AddDateOnlyPk
+    [Migration("20250811052702_AddDateOnlyPkWithProductMilestone")]
+    partial class AddDateOnlyPkWithProductMilestone
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -390,6 +390,9 @@ namespace Coalesce.Domain.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
 
+                    b.Property<DateOnly?>("MilestoneId")
+                        .HasColumnType("date");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -398,6 +401,8 @@ namespace Coalesce.Domain.Migrations
                         .HasColumnName("ProductUniqueId");
 
                     b.HasKey("ProductId");
+
+                    b.HasIndex("MilestoneId");
 
                     b.HasIndex("UniqueId")
                         .IsUnique();
@@ -561,6 +566,11 @@ namespace Coalesce.Domain.Migrations
 
             modelBuilder.Entity("Coalesce.Domain.Product", b =>
                 {
+                    b.HasOne("Coalesce.Domain.DateOnlyPk", "Milestone")
+                        .WithMany()
+                        .HasForeignKey("MilestoneId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.OwnsOne("Coalesce.Domain.ProductDetails", "Details", b1 =>
                         {
                             b1.Property<int>("ProductId")
@@ -630,6 +640,8 @@ namespace Coalesce.Domain.Migrations
 
                     b.Navigation("Details")
                         .IsRequired();
+
+                    b.Navigation("Milestone");
                 });
 
             modelBuilder.Entity("IntelliTect.Coalesce.AuditLogging.AuditLogProperty", b =>

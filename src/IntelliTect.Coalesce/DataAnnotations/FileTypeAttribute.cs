@@ -6,7 +6,7 @@ namespace IntelliTect.Coalesce.DataAnnotations;
 /// Specify the allowed file types for a <see cref="Models.IFile"/> parameter.
 /// The value is passed through to the "accept" attribute of an 
 /// <see href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/file#accept">HTML File Input</see>.
-/// This does not implement any server-side validation of file content.
+/// This provides UI suggestions and default filtering but does not implement any server-side validation of file content.
 /// </summary>
 /// <param name="fileTypes">Comma-delimited list of file extensions and/or MIME types.</param>
 [AttributeUsage(AttributeTargets.Parameter)]

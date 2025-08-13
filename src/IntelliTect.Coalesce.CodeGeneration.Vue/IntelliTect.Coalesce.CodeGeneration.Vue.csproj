@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
   <PropertyGroup>
-    <Description>Vue.js code generation for IntelliTect.Coalesce</Description>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
+    <Description>Generates frontend Vue.js metadata, models, api clients, and view models for Coalesce projects. Learn more at https://intellitect.github.io/Coalesce/stacks/vue/overview.html</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj" />
+    <ProjectReference
+      Include="..\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj" />
   </ItemGroup>
-
 </Project>

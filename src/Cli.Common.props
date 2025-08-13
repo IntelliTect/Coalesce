@@ -2,17 +2,18 @@
   <!--
     Common build props used by both IntelliTect.Coalesce.Cli and IntelliTect.Coalesce.Cli.Legacy
   -->
-  
+
   <PropertyGroup>
-    <Description>.NET Core command-line tooling for IntelliTect.Coalesce code generation</Description>
     <OutputType>Exe</OutputType>
-    
-    <!-- Always allow the tools to roll forward to take advantage of newer installed SDKs on developer machines. -->
+
+    <!-- Always allow the tools to roll forward to take advantage of newer installed SDKs on
+    developer machines. -->
     <RollForward>LatestMinor</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Vue\IntelliTect.Coalesce.CodeGeneration.Vue.csproj" />
+    <ProjectReference
+      Include="..\IntelliTect.Coalesce.CodeGeneration.Vue\IntelliTect.Coalesce.CodeGeneration.Vue.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" />

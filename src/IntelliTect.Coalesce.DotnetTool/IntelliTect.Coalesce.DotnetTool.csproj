@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
   <Import Project="../Cli.Common.props" />
-  
+
   <!--
     This builds the new style of .NET tools, aka a "local tool" or "global tool".
     https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools-how-to-create
@@ -9,9 +9,14 @@
   <PropertyGroup>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>coalesce</ToolCommandName>
-    
+    <Description>
+      .NET global/local tool for Coalesce code generation. For the `DotNetCliToolReference`-style
+      tool, see https://www.nuget.org/packages/IntelliTect.Coalesce.Tools.
+
+      Learn more at https://intellitect.github.io/Coalesce/
+    </Description>
+
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>coalesce</PackageId>
   </PropertyGroup>
-
 </Project>

@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
   <PropertyGroup>
-    <Description>Shared API code generation for IntelliTect.Coalesce</Description>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
+    <Description>Generates ASP.NET Core API controllers, DTOs, and Semantic Kernel plugins for Coalesce projects. Learn more at https://intellitect.github.io/Coalesce/</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
+    <ProjectReference
+      Include="..\IntelliTect.Coalesce.CodeGeneration\IntelliTect.Coalesce.CodeGeneration.csproj" />
   </ItemGroup>
-
 </Project>

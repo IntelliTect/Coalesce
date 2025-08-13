@@ -27,7 +27,8 @@
 
     <!-- Sourcelink stuff: -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>
+      $(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 
     <!--https://docs.microsoft.com/en-us/nuget/create-packages/symbol-packages-snupkg-->
     <IncludeSymbols>true</IncludeSymbols>

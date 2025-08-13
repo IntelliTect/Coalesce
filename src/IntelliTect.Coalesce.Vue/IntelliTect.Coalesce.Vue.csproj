@@ -1,16 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
-	<PropertyGroup>
-		<Description>Vue.js shared code for server projects for IntelliTect.Coalesce</Description>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <Description>ASP.NET Core services and middleware for Vue.js SPA integration in Coalesce applications. Learn more at https://intellitect.github.io/Coalesce/topics/vite-integration.html</Description>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" />
   </ItemGroup>
-
 </Project>

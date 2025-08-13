@@ -18,7 +18,7 @@ To work with Coalesce, your model must have a single property for a primary key.
 
 ### Foreign Keys & Reference Navigation Properties
 
-While a foreign key may be defined in EF via `DbContext.OnModelCreating` or similar methods, Coalesce won't know that a property is a foreign key unless it is accompanied by a corresponding reference navigation property, and vice versa - Coalesce cannot examine your EF model metadata at generation time - it can only see the API surface of your C# code.
+While a foreign key may be defined in EF via `DbContext.OnModelCreating` or similar methods, Coalesce won't know that a property is a foreign key unless it is accompanied by a corresponding reference navigation property, and vice versa - Coalesce cannot examine your EF model metadata at generation time; it can only see the API surface of your C# code.
 
 In cases where the foreign key is not named after the navigation property with `"Id"` appended, the `[ForeignKeyAttribute]` may be used on either the key or the navigation property to denote the other property of the pair, in accordance with the recommendations set forth by [EF Core's Modeling Guidelines](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/mapping-attributes#foreignkeyattribute).
 
@@ -73,7 +73,7 @@ Read [Attributes](/modeling/model-components/attributes.md) to learn more.
 
 ### Methods
 
-You can place both static and interface methods on your model classes. Any public methods annotated with [[Coalesce]](/modeling/model-components/attributes/coalesce.md) will have a generated API endpoint and corresponding generated TypeScript members for calling this API endpoint. Read [Methods](/modeling/model-components/methods.md) to learn more.
+You can place both static and instance methods on your model classes. Any public methods annotated with [[Coalesce]](/modeling/model-components/attributes/coalesce.md) will have a generated API endpoint and corresponding generated TypeScript members for calling this API endpoint. Read [Methods](/modeling/model-components/methods.md) to learn more.
 
 ## Customizing CRUD Operations
 

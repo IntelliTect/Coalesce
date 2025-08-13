@@ -23,8 +23,8 @@ public class User
         ClaimsPrincipal sender,
         string message
     ) {
-        if (string.IsNullOrWhitespace(Email)) return "Recipient has no email";
-        if (string.IsNullOrWhitespace(message)) return "Message is required";
+        if (string.IsNullOrWhiteSpace(Email)) return "Recipient has no email";
+        if (string.IsNullOrWhiteSpace(message)) return "Message is required";
 
         await client.SendMailAsync(new MailMessage(
             from: sender.GetEmailAddress(),
@@ -38,7 +38,7 @@ public class User
 
 ```
 
-When an instance method is invoked, the target model instance will be loaded using the data source specified by `[Execute(DataSource = typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the model's type. If you have a [Custom Data Source](/modeling/model-components/data-sources.md#defining-data-sources) annotated with `[DefaultDataSource]`, that data source will be used. Otherwise, the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) will be used. The consequence of this is that a user cannot call a method on an instance of entity that they're not allowed to see or load.
+When an instance method is invoked, the target model instance will be loaded using the data source specified by `[Execute(DataSource = typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the model's type. If you have a [Custom Data Source](/modeling/model-components/data-sources.md#defining-data-sources) annotated with `[DefaultDataSource]`, that data source will be used. Otherwise, the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) will be used. This means that a user cannot call a method on an instance of an entity that they're not allowed to see or load.
 
 Instance methods are generated onto the TypeScript ViewModels.
 
@@ -180,7 +180,7 @@ Collections of any of the above valid parameter types above are also valid param
 
 </td><td>
 
-EF Core `DbContext` types are injected automatically.
+EF Core `DbContext` types are injected from the application's `IServiceProvider` without being annotated with [[InjectAttribute]](/modeling/model-components/attributes/inject.md).
 
 </td></tr>
 
@@ -259,7 +259,7 @@ Any of the types of your models may be returned.
 
 Any [Simple Models](/modeling/model-types/simple-models.md) you define may also be returned from a method.
 
-When returning custom types from methods, be careful of the types of their properties. Coalesce will **recursively** discover and generate code for all public properties of your [Simple Models](/modeling/model-types/simple-models.md). If you accidentally include a type that you do not own, these generated types could get out of hand extremely quickly.
+When returning custom types from methods, be careful about the types of their properties. Coalesce will **recursively** discover and generate code for all public properties of your [Simple Models](/modeling/model-types/simple-models.md). If you accidentally include a type that you do not own, these generated types could quickly become unwieldy.
 
 Mark any properties you don't want generated with the [[InternalUse]](/modeling/model-components/attributes/internal-use.md) attribute, or give them a non-public access modifier. Whenever possible, don't return types that you don't own or control.
 
@@ -271,7 +271,7 @@ Mark any properties you don't want generated with the [[InternalUse]](/modeling/
 
 </td><td>
 
-Collections of any of the above valid return types above are also valid return types. IEnumerables are useful for generator functions using `yield`. `ICollection` is highly suggested over `IEnumerable` whenever appropriate, though.
+Collections of any of the above valid return types are also valid return types. IEnumerables are useful for generator functions using `yield`. However, `ICollection` is highly recommended over `IEnumerable` when appropriate.
 
 </td></tr>
 
@@ -281,9 +281,9 @@ Collections of any of the above valid return types above are also valid return t
 
 </td><td>
 
-Queryables of the valid return types above are valid return types. The query will be evaluated, and Coalesce will attempt to pull an [Include Tree](/concepts/include-tree.md) from the queryable to shape the response.
+Queryables of valid return types are also valid return types. The query will be evaluated, and Coalesce will attempt to pull an [Include Tree](/concepts/include-tree.md) from the queryable to shape the response.
 
-When [Include Tree](/concepts/include-tree.md) functionality is needed to shape the response but an `IQueryable<>` return type is not feasible, an `ItemResult` return value with an `IncludeTree` set on it will do the trick as well.
+When [Include Tree](/concepts/include-tree.md) functionality is needed to shape the response but an `IQueryable<>` return type is not feasible, an `ItemResult` return value with an `IncludeTree` set on it will also work.
 
 </td></tr>
 
@@ -305,11 +305,11 @@ Please see the [File Downloads](#file-downloads) section below for more details
 
 </td><td>
 
-An `IntelliTect.Coalesce.Models.ItemResult<T>` of any of the valid return types above, including collections, is valid, as well as its non-generic variant `ItemResult`, and its list variant `ListResult<T>`.
+An `IntelliTect.Coalesce.Models.ItemResult<T>` of any of the valid return types above, including collections, is valid, as are its non-generic variant `ItemResult` and its list variant `ListResult<T>`.
 
-Use an `ItemResult` whenever you might need to signal failure and return an error message from a custom method. The `WasSuccessful` and `Message` properties on the result object will be sent along to the client to indicate success or failure of the method. The type `T` will be mapped to the appropriate DTO object before being serialized as normal.
+Use an `ItemResult` whenever you might need to signal failure and return an error message from a custom method. The `WasSuccessful` and `Message` properties on the result object will be sent to the client to indicate success or failure of the method. The type `T` will be mapped to the appropriate DTO object before being serialized as normal.
 
-An [Include Tree](/concepts/include-tree.md) can be set on the object's `IncludeTree` parameter to shape the serialization of the method's returned value.
+An [Include Tree](/concepts/include-tree.md) can be set on the object's `IncludeTree` property to shape the serialization of the method's returned value.
 
 </td></tr>
 </table>

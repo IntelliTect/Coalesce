@@ -60,7 +60,7 @@ Overrides the default behaviors used, replacing the [Standard Behaviors](/modeli
 
 <Prop def="public Builder UseTimeZone(TimeZoneInfo timeZone)" />
 
-Specify a static time zone that should be used when Coalesce is performing operations on dates/times that lack timezone information. For example, when a user inputs a search term that contains only a date, Coalesce needs to know what timezone's midnight to use when performing the search.
+Specify a static time zone that should be used when Coalesce is performing operations on dates/times that lack timezone information. For example, when a user inputs a search term that contains only a date, Coalesce needs to know which timezone's midnight to use when performing the search.
 
 <Prop def="public Builder UseTimeZone<ITimeZoneResolver>()" />
 

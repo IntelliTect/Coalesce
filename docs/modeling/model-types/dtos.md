@@ -166,7 +166,7 @@ public class CaseDtoSource : ProjectedDtoDataSource<Case, CaseDto, AppDbContext>
 ## Surgical Saves
 
 <!-- MARKER:surgical-saves-warning -->
-Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
+Surgical saves require DTOs on the server that can determine which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
 
 The [Generated C# DTOs](/stacks/agnostic/dtos.md) implement the necessary logic for this; however, any [Custom DTOs](/modeling/model-types/dtos.md) must have this logic manually written by you, the developer. Either implement the same pattern that can be seen in the [Generated C# DTOs](/stacks/agnostic/dtos.md), or do not use surgical saves with Custom DTOs.
 <!-- MARKER:end-surgical-saves-warning -->

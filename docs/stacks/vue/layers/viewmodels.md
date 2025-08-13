@@ -172,9 +172,9 @@ Configures which properties of the model are sent to the server during a save or
 
 By default, only dirty properties (and always the primary key) are sent to the server when performing a save. 
 
-This improves the handling of concurrent changes being made by multiple users against different fields of the same entity at the same time - specifically, it prevents a user with a stale value of some field X from overwriting a more recent value of X in the database when the user is only making changes to some other property Y and has no intention of changing X. 
+This improves the handling of concurrent changes made by multiple users to different fields of the same entity at the same time - specifically, it prevents a user with a stale value of field X from overwriting a more recent value of X in the database when the user is only making changes to a different property Y and has no intention of changing X. 
 
-Save mode `"surgical"` doesn't help when multiple users are editing the same field at the same time - if such a scenario is applicable to your application, you must implement [more advanced handling of concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).
+Save mode `"surgical"` doesn't help when multiple users are editing the same field at the same time - if such a scenario applies to your application, you must implement [more advanced handling of concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).
 
 ::: warning
 @[import-md "after":"MARKER:surgical-saves-warning", "before":"MARKER:end-surgical-saves-warning"](../../../modeling/model-types/dtos.md)

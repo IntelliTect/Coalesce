@@ -30,7 +30,7 @@ description: Documentation home page for IntelliTect.Coalesce
   <img src=/coalesce-icon-color.svg> Coalesce
 </h1>
 
-Coalesce is a rapid-development framework that helps you quickly build amazing web applications. Created by [IntelliTect](https://intellitect.com), it uses code generation and is built on top of:
+Designed to help you quickly build amazing web applications, Coalesce is a rapid-development, code generation-based web application framework created by [IntelliTect](https://intellitect.com) and built on top of:
 
 <table>
 <tbody>

@@ -27,7 +27,7 @@ There are a few special behaviors when assigning to different kinds of data prop
 
 #### Model Collection Properties
 - When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
-- The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and be used instead of the object(s) being pushed.
+- The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and used instead of the object(s) being pushed.
   
 #### Foreign Key Properties
 - If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.

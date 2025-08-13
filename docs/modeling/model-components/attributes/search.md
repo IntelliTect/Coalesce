@@ -5,7 +5,7 @@
 
 Coalesce supports searching through the generated API in its various implementations, including the [admin pages](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and through the [ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels)'s `$search` property.
 
-The `search` parameter of the API can also be formatted as ``PropertyName:SearchTerm`` in order to search on an arbitrary property of a model. For example, a value of ``Nickname:Steve-o`` for a search term would search the `Nickname` property, even though it is not marked as searchable using this attribute.
+The `search` parameter of the API can also be formatted as ``PropertyName:SearchTerm`` to search on an arbitrary property of a model. For example, a value of ``Nickname:Steve-o`` for a search term would search the `Nickname` property, even though it is not marked as searchable using this attribute.
 
 By default, the system will search any field with the name 'Name'. If this doesn't exist, the ID is used as the only searchable field. Once you place the `Search` attribute on one or more properties on a model, only those annotated properties will be searched.
 

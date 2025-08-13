@@ -24,7 +24,7 @@ Each method returns a `Promise<AxiosResponse<TApiResult>>` where `TApiResult` is
 
 ### API Callers/API States
 
-A stateful function for invoking an API endpoint, created with the `$makeCaller` function on an API Client. API Callers provide a wide array of functionality that is useful for working with API endpoints that are utilized by a user interface.
+A stateful function for invoking an API endpoint, created with the `$makeCaller` function on an API Client. API Callers provide a wide array of functionality that is useful for working with API endpoints that are used by a user interface.
 
 Because they are such an integral part of the overall picture of `coalesce-vue`, they have [their own section below](/stacks/vue/layers/api-clients.md) where they are explained in much greater detail.
 

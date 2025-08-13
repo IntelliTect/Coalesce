@@ -70,7 +70,7 @@ You are responsible for the interesting parts of your application:
 - Site Design
 - Custom Scripting
 
-## What does Coalesce build for me?
+## What does Coalesce provide?
 
 Coalesce builds the parts of your application that are mundane and monotonous to build:
 

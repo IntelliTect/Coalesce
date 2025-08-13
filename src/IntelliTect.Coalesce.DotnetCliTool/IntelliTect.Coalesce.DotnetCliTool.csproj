@@ -2,35 +2,30 @@
   <Import Project="../Common.props" />
   <!-- Technique for overriding SDK targets from https://stackoverflow.com/a/47619786/2465631 -->
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-  
+
   <Import Project="../Cli.Common.props" />
-  
+
   <!-- 
     This builds the legacy-style DotNetCliToolReference version of the coalesce CLI.
   -->
-  
+
   <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce.Tools</PackageId>
     <PackageType>DotnetCliTool</PackageType>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
     <!-- Supress vulnerability warnings about .NET Core 2.1 -->
-    <PackageReference Update="Microsoft.NETCore.App" NoWarn="NU1902;NU1903"  />
+    <PackageReference Update="Microsoft.NETCore.App" NoWarn="NU1902;NU1903" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="../IntelliTect.Coalesce.DotnetTool/*.cs" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
-  
+
   <!-- 
     Because Microsoft ignored all feedback on why this format was still useful
     (donet/sdk issue #3115), we'll hack around their arbitrary limitation
@@ -39,7 +34,7 @@
   <!-- Technique for overriding SDK targets from https://stackoverflow.com/a/47619786/2465631 -->
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <Target Name="_PackProjectToolValidation">
-     <!-- 
+    <!-- 
       This is the target in the .NET SDK that performs this validation. 
       Blank it out.
      -->

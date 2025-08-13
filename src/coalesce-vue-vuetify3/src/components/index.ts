@@ -6,6 +6,7 @@ export { default as CAdminEditorPage } from "./admin/c-admin-editor-page.vue";
 export { default as CAdminMethod } from "./admin/c-admin-method.vue";
 export { default as CAdminMethods } from "./admin/c-admin-methods.vue";
 export { default as CAdminTable } from "./admin/c-admin-table.vue";
+export { default as CAdminTableColumnSelector } from "./admin/c-admin-table-column-selector.vue";
 export { default as CAdminTablePage } from "./admin/c-admin-table-page.vue";
 export { default as CAdminTableToolbar } from "./admin/c-admin-table-toolbar.vue";
 export { default as CDatetimePicker } from "./input/c-datetime-picker.vue";
@@ -33,6 +34,7 @@ declare module "vue" {
     CAdminMethod: typeof import(".")["CAdminMethod"];
     CAdminMethods: typeof import(".")["CAdminMethods"];
     CAdminTable: typeof import(".")["CAdminTable"];
+    CAdminTableColumnSelector: typeof import(".")["CAdminTableColumnSelector"];
     CAdminTablePage: typeof import(".")["CAdminTablePage"];
     CAdminTableToolbar: typeof import(".")["CAdminTableToolbar"];
     CDatetimePicker: typeof import(".")["CDatetimePicker"];

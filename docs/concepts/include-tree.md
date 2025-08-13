@@ -1,11 +1,11 @@
 # Include Tree
 
-When Coalesce maps from the your POCO objects that are returned from EF Core queries, it will follow a structure called an `IncludeTree` to determine what relationships to follow and how deep to go in re-creating that structure in the mapped DTOs.
+When Coalesce maps from your POCO objects that are returned from EF Core queries, it follows a structure called an `IncludeTree` to determine what relationships to follow and how deep to go when re-creating that structure in the mapped DTOs.
 
 
 ## Purpose
 
-Without an `IncludeTree` present, Coalesce will map the entire object graph that is reachable from the root object. This can often spiral out of control if there aren't any rules defining how far to go while turning this graph into a tree.
+Without an `IncludeTree` present, Coalesce will map the entire object graph that is reachable from the root object. This can often spiral out of control if there are no rules defining how far to go while turning this graph into a tree.
 
 For example, suppose you had the following model with a many-to-many relationship (key properties omitted for brevity):
 

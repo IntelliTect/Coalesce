@@ -9,7 +9,12 @@
   <PropertyGroup>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>coalesce</ToolCommandName>
-    <Description>.NET global/local tool for Coalesce code generation. For the `DotNetCliToolReference`-style tool, see https://www.nuget.org/packages/IntelliTect.Coalesce.Tools Learn more at https://intellitect.github.io/Coalesce/</Description>
+    <Description>
+      .NET global/local tool for Coalesce code generation. For the `DotNetCliToolReference`-style
+      tool, see https://www.nuget.org/packages/IntelliTect.Coalesce.Tools.
+
+      Learn more at https://intellitect.github.io/Coalesce/
+    </Description>
 
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>coalesce</PackageId>

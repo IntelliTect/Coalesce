@@ -53,14 +53,6 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(IsPackable) == 'true'">
-    <None Include="README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
-  <PropertyGroup Condition="$(IsPackable) == 'true'">
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Roslynator.Analyzers">
       <PrivateAssets>all</PrivateAssets>

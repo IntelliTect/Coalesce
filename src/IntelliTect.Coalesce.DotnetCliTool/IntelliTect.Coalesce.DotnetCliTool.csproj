@@ -11,6 +11,12 @@
 
   <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <Description>
+      Legacy DotNetCliToolReference-style tool for Coalesce code generation. For the modern .NET
+      global/local tool, see https://www.nuget.org/packages/coalesce.
+
+      Learn more at https://intellitect.github.io/Coalesce/
+    </Description>
 
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce.Tools</PackageId>

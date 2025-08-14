@@ -2,10 +2,11 @@
   <v-card class="c-admin-table" :class="'type-' + metadata.name">
     <c-admin-table-toolbar
       :list="viewModel"
-      :page-sizes="pageSizes"
       @update:editable="editable = $event"
       :editable="canEdit ? editable : undefined"
-      :color="color"
+      :pageSizes
+      :color
+      :showColumnSelector
     />
 
     <div v-if="metadata.description" class="c-admin-page--description">
@@ -18,6 +19,7 @@
         admin
         :editable="editable"
         :list="viewModel"
+        :props="tablePreferences.effectiveColumnNames.value"
         :extra-headers="[{ header: 'Actions', isFixed: true }]"
         :loaders="{
           '': list.$modelOnlyMode
@@ -124,6 +126,7 @@ import {
 import { computed, defineComponent, PropType, ref, toRef } from "vue";
 import { useRouter } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
+import { useTablePreferences } from "./useTablePreferences";
 import { copyParamsToNewViewModel } from "./util";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";
@@ -142,11 +145,17 @@ export default defineComponent({
       type: [String, Boolean] as PropType<"auto" | boolean>,
       default: "auto",
     },
+    showColumnSelector: { type: Boolean, default: true },
   },
 
   setup(props) {
     const tableProps = useAdminTable(toRef(props, "list"));
     const editable = ref(false);
+
+    // Initialize table preferences
+    const tablePreferences = useTablePreferences({
+      metadata: tableProps.metadata.value,
+    });
 
     const effectiveAutoSave = computed(() => {
       if (!editable.value) return false;
@@ -169,6 +178,7 @@ export default defineComponent({
       ...tableProps,
       editable,
       effectiveAutoSave,
+      tablePreferences,
     };
   },
 

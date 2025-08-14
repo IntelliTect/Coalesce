@@ -25,6 +25,7 @@
 - Added `FileTypeAttribute` to control allowed file types for custom method file parameters.
 - Added `ClientCacheDurationSeconds` property to `ExecuteAttribute` to customize client-side cache duration for GET custom methods with `VaryByProperty`.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
+- `c-admin-table`: Added column selection feature allowing users to choose which columns to display. User preferences are persisted to localStorage. This feature can be controlled via the `showColumnSelector` prop (default: true).
 - `c-datetime-picker`: Added prop `showTodayButton`
 - `c-input`: Added a `filter` prop for enum inputs to restrict the values available for selection.
 - `c-select`: When bound to a `ViewModel` or `ViewModelCollection`, selected items are converted to `ViewModel` instances before being emitted so that event handlers will receive the final object instance, rather than the intermediate plain model instance.

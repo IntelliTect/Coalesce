@@ -54,6 +54,7 @@
   "devDependencies": {
     "@types/node": "^20.14.11",
     "@vitejs/plugin-vue-jsx": "^4.1.1",
+    "@vueuse/core": "^11.0.0",
     "coalesce-vue": "../coalesce-vue",
     "sass": "^1.69.7",
     "vue-router": "^4.4.1",

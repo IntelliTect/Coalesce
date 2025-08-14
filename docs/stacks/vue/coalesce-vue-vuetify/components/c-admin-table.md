@@ -14,6 +14,13 @@ The table can be in read mode (default), or toggled into edit mode with the butt
 <c-admin-table :list="personList" />
 ```
 
+``` vue-html
+<c-admin-table 
+  :list="personList" 
+  :show-column-selector="false" 
+/>
+```
+
 ## Props
 
 <Prop def="list: ListViewModel" lang="ts" />
@@ -31,4 +38,8 @@ Controls whether auto-save is used for items when in edit mode. If `auto` (the d
 <Prop def="queryBind?: boolean" lang="ts" />
 
 If true, the [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) of the provided [ListViewModel](/stacks/vue/layers/viewmodels.md) will be read from and written to the window's query string. The "Editable" state of the table will also be bound to the query string.
+
+<Prop def="showColumnSelector?: boolean = true" lang="ts" />
+
+Controls whether the column selection feature is available. When enabled (default), users can access a dropdown menu in the table's toolbar to choose which columns to display. User preferences are automatically saved to localStorage and persist across browser sessions.
 

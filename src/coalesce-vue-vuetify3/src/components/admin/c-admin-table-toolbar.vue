@@ -71,6 +71,11 @@
 
       <c-list-filters :list="list" />
 
+      <c-admin-table-column-selector
+        v-if="showColumnSelector"
+        :metadata="metadata"
+      />
+
       <v-spacer></v-spacer>
 
       <c-list-page-size :list="list" :items="pageSizes" />
@@ -84,12 +89,14 @@ import { ListViewModel, ModelType } from "coalesce-vue";
 import { useAdminTable } from "./useAdminTable";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";
+import CAdminTableColumnSelector from "./c-admin-table-column-selector.vue";
 import { useRouter } from "vue-router";
 
 const props = defineProps({
   list: { required: true, type: Object as PropType<ListViewModel> },
   pageSizes: { required: false, type: Array as PropType<number[]> },
   color: { required: false, type: String, default: null },
+  showColumnSelector: { required: false, type: Boolean, default: true },
 });
 
 const editable = defineModel<boolean>("editable", {

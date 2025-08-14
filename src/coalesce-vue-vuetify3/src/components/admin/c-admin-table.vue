@@ -40,6 +40,7 @@
                 })(),
             )
         "
+        @click:header="onHeaderContextMenu"
       >
         <template #item-append="{ item, isHorizontalScrollbarVisible }">
           <td
@@ -109,6 +110,49 @@
         class="mt-4"
       ></c-list-pagination>
     </v-card-text>
+
+    <!-- Column Header Context Menu -->
+    <v-menu
+      v-model="contextMenu.show"
+      :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
+      location="bottom start"
+      absolute
+      offset="2"
+    >
+      <v-list density="compact" min-width="150">
+        <v-list-item
+          v-if="contextMenu.header?.sortable"
+          @click="
+            viewModel.$orderBy = contextMenu.header.value;
+            viewModel.$orderByDescending = null;
+          "
+          title="Sort Ascending"
+          prepend-icon="fa fa-sort-amount-desc"
+        />
+        <v-list-item
+          v-if="contextMenu.header?.sortable"
+          @click="
+            viewModel.$orderBy = null;
+            viewModel.$orderByDescending = contextMenu.header.value;
+          "
+          title="Sort Descending"
+          prepend-icon="fa fa-sort-amount-asc"
+        />
+
+        <v-divider
+          v-if="contextMenu.header?.sortable && contextMenu.header?.prop"
+        ></v-divider>
+
+        <v-list-item
+          v-if="contextMenu.header?.prop"
+          title="Hide Column"
+          @click="
+            tablePreferences.toggleColumn(contextMenu.header.value, false)
+          "
+          prepend-icon="fa fa-eye-slash"
+        />
+      </v-list>
+    </v-menu>
   </v-card>
 </template>
 
@@ -157,6 +201,14 @@ export default defineComponent({
       metadata: tableProps.metadata.value,
     });
 
+    // Context menu state
+    const contextMenu = ref({
+      show: false,
+      x: 0,
+      y: 0,
+      header: null as any,
+    });
+
     const effectiveAutoSave = computed(() => {
       if (!editable.value) return false;
 
@@ -179,6 +231,7 @@ export default defineComponent({
       editable,
       effectiveAutoSave,
       tablePreferences,
+      contextMenu,
     };
   },
 
@@ -203,6 +256,14 @@ export default defineComponent({
       const viewModel = new ViewModel.typeLookup![meta.name]();
       copyParamsToNewViewModel(viewModel, this.list.$params);
       this.list.$items.push(viewModel);
+    },
+
+    onHeaderContextMenu(event: MouseEvent, header: any) {
+      this.contextMenu.show = false;
+      this.contextMenu.x = event.clientX;
+      this.contextMenu.y = event.clientY;
+      this.contextMenu.header = header;
+      this.contextMenu.show = true;
     },
   },
 

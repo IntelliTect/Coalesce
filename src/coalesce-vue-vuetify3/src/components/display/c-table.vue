@@ -9,7 +9,7 @@
             <th
               v-for="header in headers"
               :key="'header-' + header.value"
-              class="text-left"
+              class="text-left cursor-pointer"
               :class="{
                 ['fixed-column-right']:
                   header.isFixed && isHorizontalScrollbarVisible,
@@ -18,6 +18,12 @@
                 ['th-' + header.value]: !header.prop,
               }"
               @click="header.sortable && listVm.$orderByToggle(header.value)"
+              @contextmenu="
+                (event) => {
+                  event.preventDefault();
+                  emit('click:header', event, header);
+                }
+              "
             >
               {{ header.text }}
               <v-icon v-if="listVm.$params.orderBy == header.value">
@@ -111,7 +117,10 @@ defineSlots<{
   }): any;
 }>();
 
-const emit = defineEmits<{ "click:item": [arg: ViewModelType] }>();
+const emit = defineEmits<{
+  "click:item": [arg: ViewModelType];
+  "click:header": [event: MouseEvent, header: Header];
+}>();
 
 // Silly wrapper because using `list` directly in the template
 // has Typescript bugs right now in vue-language-tools.
@@ -158,13 +167,20 @@ const effectiveProps = computed(() => {
   );
 });
 
-const headers = computed(() => {
+type Header = {
+  text: string;
+  value: string;
+  sortable: boolean;
+  prop: string | undefined;
+  isFixed: boolean;
+};
+
+const headers = computed((): Header[] => {
   return [
     ...effectiveProps.value.map((o) => ({
       text: o.displayName,
       value: o.name,
       sortable: o.type != "collection",
-      align: "left",
       prop: o.name,
       isFixed: false,
     })),

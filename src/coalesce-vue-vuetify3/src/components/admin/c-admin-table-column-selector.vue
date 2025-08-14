@@ -12,35 +12,41 @@
       </v-btn>
     </template>
 
-    <v-card min-width="250" max-width="400">
-      <v-card-title class="text-subtitle-1 font-weight-bold">
-        Select Columns
-      </v-card-title>
-      
-      <v-card-text>
-        <v-checkbox
-          v-for="prop in availableProps"
-          :key="prop.name"
-          :model-value="selectedColumns.includes(prop.name)"
-          @update:model-value="(value: boolean | null) => toggleColumn(prop.name, !!value)"
-          :label="prop.displayName"
-          density="compact"
-          hide-details
-        />
-      </v-card-text>
-
-      <v-card-actions>
-        <v-btn @click="selectAll" size="small" variant="text">
+    <v-card>
+      <!-- <v-btn @click="selectAll" size="small" variant="text">
           Select All
         </v-btn>
         <v-btn @click="selectNone" size="small" variant="text">
           Select None
         </v-btn>
-        <v-spacer />
-        <v-btn @click="resetToDefault" size="small" variant="text" color="primary">
-          Reset
-        </v-btn>
-      </v-card-actions>
+        <v-spacer /> -->
+      <v-list density="compact">
+        <v-list-item
+          v-for="prop in availableProps"
+          :key="prop.name"
+          @click.stop="
+            toggleColumn(prop.name, !selectedColumns.includes(prop.name))
+          "
+        >
+          <template v-slot:prepend>
+            <v-checkbox-btn
+              density="compact"
+              class="mr-2"
+              :model-value="selectedColumns.includes(prop.name)"
+            />
+          </template>
+          <v-list-item-title>{{ prop.displayName }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+      <v-divider></v-divider>
+      <v-btn
+        @click="resetToDefault"
+        prepend-icon="fa fa-undo"
+        class="ml-3 my-1"
+        variant="text"
+      >
+        Reset
+      </v-btn>
     </v-card>
   </v-menu>
 </template>
@@ -60,20 +66,24 @@ const emit = defineEmits<{
 }>();
 
 function toggleColumn(propName: string, selected: boolean) {
-  const newColumns = [...props.selectedColumns];
-  if (selected && !newColumns.includes(propName)) {
-    newColumns.push(propName);
+  if (selected && !props.selectedColumns.includes(propName)) {
+    // Insert the column in the correct position based on availableProps order
+    const availableOrder = props.availableProps.map((p) => p.name);
+    const newColumns = [...props.selectedColumns, propName].sort(
+      (a, b) => availableOrder.indexOf(a) - availableOrder.indexOf(b),
+    );
+    emit("update:selectedColumns", newColumns);
   } else if (!selected) {
-    const index = newColumns.indexOf(propName);
-    if (index >= 0) {
-      newColumns.splice(index, 1);
-    }
+    const newColumns = props.selectedColumns.filter((c) => c != propName);
+    emit("update:selectedColumns", newColumns);
   }
-  emit("update:selectedColumns", newColumns);
 }
 
 function selectAll() {
-  emit("update:selectedColumns", props.availableProps.map(p => p.name));
+  emit(
+    "update:selectedColumns",
+    props.availableProps.map((p) => p.name),
+  );
 }
 
 function selectNone() {

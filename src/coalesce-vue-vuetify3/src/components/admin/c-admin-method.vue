@@ -68,92 +68,75 @@
           :loaders="{
             'no-initial-content no-error-content no-loading-content': [caller],
           }"
+          :show-success="methodMeta.return.type == 'void' || !!caller.message"
           style="min-height: 55px"
         >
-          <h3>
-            Result:
-            <v-btn
-              v-if="caller.result && methodMeta.return.type == 'file'"
-              color="primary"
-              @click="downloadFileResult"
-              :loading="caller.isLoading"
-              size="x-small"
-              outlined
+          <template v-if="methodMeta.return.type !== 'void'">
+            <h3>
+              Result:
+              <v-btn
+                v-if="caller.result && methodMeta.return.type == 'file'"
+                color="primary"
+                @click="downloadFileResult"
+                :loading="caller.isLoading"
+                size="x-small"
+                outlined
+              >
+                <v-icon start small>fa fa-download</v-icon>
+                Save to Disk
+              </v-btn>
+            </h3>
+
+            <div v-if="caller.result && methodMeta.return.type == 'file'">
+              <pre
+                >{{ caller.result.name }} • {{ caller.result.type }} • {{
+                  caller.result.size.toLocaleString()
+                }} bytes</pre
+              >
+
+              <br />
+
+              <template
+                v-if="
+                  fileDownloadKind == 'preview' &&
+                  'getResultObjectUrl' in caller
+                "
+              >
+                <img
+                  v-if="caller.result.type.indexOf('image') >= 0"
+                  :src="caller.getResultObjectUrl(instance.proxy)"
+                  :alt="caller.result.name"
+                  class="elevation-1"
+                  style="max-width: 100%"
+                />
+                <video
+                  v-else-if="caller.result.type.indexOf('video') >= 0"
+                  :src="caller.getResultObjectUrl(instance.proxy)"
+                  :alt="caller.result.name"
+                  class="elevation-1"
+                  controls
+                  style="max-width: 100%"
+                />
+                <pre v-else>Unable to show preview.</pre>
+              </template>
+            </div>
+
+            <c-display
+              v-else-if="caller.result != null"
+              element="pre"
+              class="c-method--result-value"
+              v-model="caller.result"
+              :for="methodMeta.return"
+              :options="resultDisplayOptions"
+            />
+
+            <span
+              v-else-if="caller.wasSuccessful != null && caller.result == null"
+              class="c-method--result-null"
             >
-              <v-icon start small>fa fa-download</v-icon>
-              Save to Disk
-            </v-btn>
-          </h3>
-
-          <span
-            v-if="
-              caller.wasSuccessful &&
-              (methodMeta.return.type == 'void' || caller.message)
-            "
-            class="c-method--result-success"
-          >
-            <v-alert type="success" dense>
-              <span
-                class="text-pre-wrap"
-                v-text="caller.message || 'Success'"
-              ></span>
-            </v-alert>
-          </span>
-
-          <div v-if="caller.result && methodMeta.return.type == 'file'">
-            <pre
-              >{{ caller.result.name }} • {{ caller.result.type }} • {{
-                caller.result.size.toLocaleString()
-              }} bytes</pre
-            >
-
-            <br />
-
-            <template
-              v-if="
-                fileDownloadKind == 'preview' && 'getResultObjectUrl' in caller
-              "
-            >
-              <img
-                v-if="caller.result.type.indexOf('image') >= 0"
-                :src="caller.getResultObjectUrl(instance.proxy)"
-                :alt="caller.result.name"
-                class="elevation-1"
-                style="max-width: 100%"
-              />
-              <video
-                v-else-if="caller.result.type.indexOf('video') >= 0"
-                :src="caller.getResultObjectUrl(instance.proxy)"
-                :alt="caller.result.name"
-                class="elevation-1"
-                controls
-                style="max-width: 100%"
-              />
-              <pre v-else>Unable to show preview.</pre>
-            </template>
-          </div>
-
-          <c-display
-            v-else-if="
-              caller.result != null && methodMeta.return.type !== 'void'
-            "
-            element="pre"
-            class="c-method--result-value"
-            v-model="caller.result"
-            :for="methodMeta.return"
-            :options="resultDisplayOptions"
-          />
-
-          <span
-            v-else-if="
-              caller.wasSuccessful != null &&
-              caller.result == null &&
-              methodMeta.return.type !== 'void'
-            "
-            class="c-method--result-null"
-          >
-            <pre>{{ "" + caller.result }}</pre>
-          </span>
+              <pre>{{ "" + caller.result }}</pre>
+            </span>
+          </template>
         </c-loader-status>
       </v-col>
     </v-row>

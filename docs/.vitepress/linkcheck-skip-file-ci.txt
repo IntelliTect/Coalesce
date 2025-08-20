@@ -1,0 +1,6 @@
+# Skip file for CI environments (GitHub Actions)
+# In CI, we can only reliably check internal links, not external websites
+# This filter excludes all non-localhost external links
+
+# Skip all external links (anything that's not localhost)
+^https?://(?!localhost)

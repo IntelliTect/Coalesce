@@ -10,7 +10,7 @@ function autoTitle(link: string) {
   const fullPath = path.join(
     url.fileURLToPath(import.meta.url),
     "../../",
-    link + (path.extname(link) ? "" : ".md")
+    link + (path.extname(link) ? "" : ".md"),
   );
 
   const { data, content } = matter(fs.readFileSync(fullPath));
@@ -31,7 +31,7 @@ function autoTitle(link: string) {
 
 const vuetifyComponents = fs
   .readdirSync(
-    path.resolve(__dirname, "../stacks/vue/coalesce-vue-vuetify/components")
+    path.resolve(__dirname, "../stacks/vue/coalesce-vue-vuetify/components"),
   )
   .map((f) => autoTitle("/stacks/vue/coalesce-vue-vuetify/components/" + f));
 
@@ -50,7 +50,7 @@ function getComponentCategory(item: (typeof vuetifyComponents)[0]) {
 
 const attributes = fs
   .readdirSync(
-    path.resolve(__dirname, "../modeling/model-components/attributes")
+    path.resolve(__dirname, "../modeling/model-components/attributes"),
   )
   .map((f) => autoTitle("/modeling/model-components/attributes/" + f));
 
@@ -97,7 +97,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: "https://github.com/IntelliTect/Coalesce/blob/dev/docs/:path",
+      pattern: "https://github.com/IntelliTect/Coalesce/blob/main/docs/:path",
     },
 
     sidebar: [
@@ -171,7 +171,7 @@ export default defineConfig({
             collapsed: false,
             items: [
               ...vuetifyComponents.filter(
-                (i) => getComponentCategory(i) == "display"
+                (i) => getComponentCategory(i) == "display",
               ),
             ],
           },
@@ -192,7 +192,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               ...vuetifyComponents.filter(
-                (i) => getComponentCategory(i) == "admin"
+                (i) => getComponentCategory(i) == "admin",
               ),
             ],
           },

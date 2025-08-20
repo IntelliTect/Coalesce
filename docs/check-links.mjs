@@ -31,12 +31,21 @@ try {
   // Wait for server to be ready
   await waitOn({ resources: ["http://localhost:8087"], timeout: 30000 });
 
+  // Choose skip file based on environment
+  const isCI =
+    process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+  const skipFile = isCI
+    ? "./.vitepress/linkcheck-skip-file-ci.txt"
+    : "./.vitepress/linkcheck-skip-file.txt";
+
+  console.log(`Running linkcheck with skip file: ${skipFile} (CI: ${isCI})`);
+
   // Run linkcheck
   await run("linkcheck", [
     "localhost:8087/Coalesce",
     "-e",
     "--skip-file",
-    "./.vitepress/linkcheck-skip-file.txt",
+    skipFile,
   ]);
 
   process.exit(0);

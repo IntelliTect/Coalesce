@@ -5,5 +5,8 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "cSpell.words": ["Vite", "unplugin", "iconsets", "viewmodels", "composables"]
+  "cSpell.words": ["Vite", "unplugin", "iconsets", "viewmodels", "composables"],
+  // XML element content is often whitespace sensitive.
+  // Introducing wrapping breaks some csproj elements.
+  "xml.format.maxLineWidth": 0
 }

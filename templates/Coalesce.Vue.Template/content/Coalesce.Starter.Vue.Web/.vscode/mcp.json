@@ -2,7 +2,7 @@
   "servers": {
     "Coalesce": {
       "command": "npx",
-      "args": ["coalesce/mcp-server@latest"]
+      "args": ["coalesce-mcp@latest"]
     }
   }
 }

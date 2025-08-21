@@ -258,7 +258,7 @@
           ]
         },
         {
-          "condition": "!MicrosoftAuth && !GoogleAuth && !OtherOAuth",
+          "condition": "!(MicrosoftAuth || GoogleAuth || OtherOAuth)",
           "exclude": ["**/ExternalLogin.*"]
         },
         {

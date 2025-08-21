@@ -40,6 +40,10 @@ There are a couple of extra options which are only available as CLI parameters t
 - `--verify` - Assert that the code generation does not have any pending changes to its output. Useful in CI builds when combined with `--what-if` to ensure that developers haven't forgotten to run code gen before committing changes.
 - ``-v|--verbosity <level>`` - Set the verbosity of the output. Options are ``trace``, ``debug``, ``information``, ``warning``, ``error``, ``critical``, and ``none``.
 
+### AI-triggered Generation
+
+Code generation can also be triggered through the [MCP server](/topics/mcp-server.md), which enables AI assistants to run code generation as part of development workflows. This helps prevent AI assistants from getting confused by exactly which command and which directory to run code generation from.
+
 ## Generated Code
 
 When you run `dotnet coalesce`, Coalesce will generate a full vertical stack of code for you:

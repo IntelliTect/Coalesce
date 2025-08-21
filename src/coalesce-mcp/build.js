@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const projectRoot = path.resolve(__dirname);
-const buildPath = path.resolve(projectRoot, "build");
+const distPath = path.resolve(projectRoot, "dist");
 const templateSourcePath = path.resolve(
   projectRoot,
   "..",
@@ -19,15 +19,15 @@ const templateSourcePath = path.resolve(
   "Coalesce.Vue.Template",
   "content",
 );
-const templateDestPath = path.resolve(projectRoot, "build", "template");
+const templateDestPath = path.resolve(projectRoot, "dist", "template");
 
 async function main() {
   console.log("Starting MCP server build process...");
 
   try {
     // Clean build directory
-    console.log("Cleaning build directory...");
-    await cleanBuildDirectory();
+    console.log("Cleaning dist directory...");
+    await cleanDistDirectory();
 
     // Run TypeScript compilation
     console.log("Compiling TypeScript...");
@@ -74,12 +74,12 @@ async function runCommand(command, args, options = {}) {
   });
 }
 
-async function cleanBuildDirectory() {
+async function cleanDistDirectory() {
   try {
-    await fs.access(buildPath);
+    await fs.access(distPath);
     // Directory exists, remove it
-    await fs.rm(buildPath, { recursive: true, force: true });
-    console.log(`   Cleaned build directory: ${buildPath}`);
+    await fs.rm(distPath, { recursive: true, force: true });
+    console.log(`   Cleaned dist directory: ${distPath}`);
   } catch (error) {
     // Directory doesn't exist, nothing to clean
     console.log(`   Build directory doesn't exist, skipping clean`);

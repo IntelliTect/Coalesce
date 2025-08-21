@@ -22,6 +22,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: npm publish coalesce-mcp
+        run: npm publish ./coalesce-mcp/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: npm publish coalesce-vue-vuetify
         run: for f in ./coalesce-vue-vuetify*/*.tgz; do npm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public; done
         env:

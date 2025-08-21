@@ -156,15 +156,17 @@ async function findTemplateFiles(pattern?: string): Promise<string[]> {
     dir: string,
     relativePath: string = "",
   ): Promise<void> {
-    const entries = await fs.readdir(dir, { withFileTypes: true });
+    const entries = await fs.readdir(dir);
 
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
+    for (const entryName of entries) {
+      const fullPath = path.join(dir, entryName);
       const relativeFilePath = path
-        .join(relativePath, entry.name)
+        .join(relativePath, entryName)
         .replace(/\\/g, "/");
 
-      if (entry.isDirectory()) {
+      // Use fs.stat to check if it's a directory
+      const stat = await fs.stat(fullPath);
+      if (stat.isDirectory()) {
         await walkDir(fullPath, relativeFilePath);
       } else {
         if (!pattern || minimatch(relativeFilePath, pattern)) {
@@ -361,7 +363,7 @@ export function registerTemplateFeatureResource(server: McpServer) {
   // Register tool function to expose the resource functionality directly.
   //
   server.registerTool(
-    "get_coalesce_template_features",
+    "coalesce_get_template_features",
     {
       description:
         "Get the files for a specific Coalesce template feature, or list all available features if no feature is specified",

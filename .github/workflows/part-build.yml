@@ -93,6 +93,37 @@ jobs:
           name: coalesce-vue
           path: src/coalesce-vue/coalesce-vue*.tgz
 
+  build-coalesce-mcp:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/coalesce-mcp
+
+    env:
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - run: npm ci
+        working-directory: ${{ github.workspace }}
+
+      - name: npm run test
+        run: npm run test
+
+      - run: npm run build
+
+      - name: update version
+        run: sed -i "s/0.1.0/$COALESCE_VERSION/g" package.json
+
+      - run: npm pack
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coalesce-mcp
+          path: src/coalesce-mcp/*.tgz
+
   build-coalesce-vue-vuetify3:
     runs-on: ubuntu-latest
     defaults:

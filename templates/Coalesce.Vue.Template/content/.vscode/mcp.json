@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "coalesce": {
+      "command": "npx",
+      "args": ["coalesce-mcp@latest"]
+    }
+  }
+}

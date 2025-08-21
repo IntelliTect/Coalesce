@@ -208,6 +208,7 @@ export default defineConfig({
           autoTitle("/topics/immutability"),
           autoTitle("/topics/startup"),
           autoTitle("/topics/audit-logging"),
+          autoTitle("/topics/mcp-server"),
           autoTitle("/topics/upgrading"),
           autoTitle("/topics/coalesce-swashbuckle"),
           autoTitle("/topics/template-features"),

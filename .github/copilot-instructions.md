@@ -30,6 +30,7 @@ npm ci
 dotnet build
 cd src/coalesce-vue && npm run build
 cd ../coalesce-vue-vuetify3 && npm run build
+cd ../coalesce-mcp && npm run build
 ```
 
 2. **Test verification**:
@@ -39,6 +40,7 @@ cd ../coalesce-vue-vuetify3 && npm run build
 dotnet test
 cd src/coalesce-vue && npm run test
 cd ../coalesce-vue-vuetify3 && npm run test
+cd ../coalesce-mcp && npm run test
 ```
 
 3. **Template verification**:

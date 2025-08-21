@@ -88,7 +88,7 @@ export function registerCoalesceCodeGenTool(server: McpServer) {
     {
       title: "Coalesce Code Generation",
       description:
-        "Runs Coalesce code generation to generate or regenerate web project *.g.* files from existing data project files.",
+        "Runs Coalesce code generation to regenerate web project *.g.* files from existing data project files.",
       inputSchema: {
         configPath: z.string().describe("Path to the configuration file"),
       },

@@ -101,6 +101,8 @@ async function copyTemplateFiles() {
       "**/*.user",
       "**/*.g.cs",
       "**/*.g.ts",
+      "**/debug.log",
+      "**/appsettings.localhost.json",
       "**/*.lock.json",
     ],
   });

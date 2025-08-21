@@ -4,11 +4,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerCoalesceCodeGenTool } from "./tools/coalesce-generate.js";
 import { registerTemplateFeatureResource } from "./tools/template-features.js";
+import packageJson from "../package.json" with { type: "json" };
 
 // Create the MCP server
 const server = new McpServer({
-  name: "coalesce-mcp-server",
-  version: "0.1.0",
+  name: "coalesce-mcp",
+  version: packageJson.version,
 });
 
 // Register tools and resources

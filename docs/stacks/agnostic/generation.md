@@ -42,7 +42,7 @@ There are a couple of extra options which are only available as CLI parameters t
 
 ### AI-triggered Generation
 
-Code generation can also be triggered through the [MCP server](../topics/mcp-server.md), which enables AI assistants to run code generation as part of development workflows. This allows for seamless integration with AI-powered development tools.
+Code generation can also be triggered through the [MCP server](../topics/mcp-server.md), which enables AI assistants to run code generation as part of development workflows. This helps prevent AI assistants from getting confused by exactly which command and which directory to run code generation from.
 
 ## Generated Code
 

@@ -40,6 +40,19 @@ async function getFilesForFeature(
 ): Promise<Map<string, string>> {
   const featureFiles = new Map<string, string>();
 
+  // Find the correct casing of the feature from template.json symbols
+  const symbols = templateConfig.symbols || {};
+  const correctFeatureName = Object.keys(symbols).find(
+    (name) => name.toLowerCase() === feature.toLowerCase(),
+  );
+
+  if (!correctFeatureName) {
+    throw new Error(`Feature '${feature}' not found in template configuration`);
+  }
+
+  // Use the correctly cased feature name for the rest of the processing
+  feature = correctFeatureName;
+
   // Build a map of file patterns to their exclude conditions from template.json
   const excludeConditions = new Map<string, string>();
   const sources = templateConfig.sources || [];
@@ -118,7 +131,16 @@ function invertCondition(condition: string): string {
     return condition.substring(1).trim();
   }
 
-  // If the condition has parentheses around the entire thing, add negation inside
+  // If the condition is negated with parentheses around the entire thing just remove the negation
+  if (
+    condition.startsWith("!(") &&
+    condition.endsWith(")") &&
+    condition.lastIndexOf("(") == 1
+  ) {
+    return condition.substring(1);
+  }
+
+  // If the condition has parentheses around the entire thing, add negation outside
   if (condition.startsWith("(") && condition.endsWith(")")) {
     return `!${condition}`;
   }
@@ -159,11 +181,11 @@ async function findTemplateFiles(pattern?: string): Promise<string[]> {
 function containsFeatureDirectives(content: string, feature: string): boolean {
   // Regex to match template preprocessor directives
   // Matches #if, #elif, #elseif followed by conditions
-  const directiveRegex = /#(?:if|elif|elseif)\s+([^#\n\r]+)/gi;
+  const directiveRegex = /#(?:if|elif|elseif)[^\n\r]*/gim;
 
   let match;
   while ((match = directiveRegex.exec(content)) !== null) {
-    const condition = match[1].trim();
+    const condition = match[0].trim();
 
     if (condition.includes(feature)) {
       return true;
@@ -219,13 +241,16 @@ function formatFeaturesListResponse(
   return response;
 }
 
-function getResourceSlug(filePath: string): string {
+function getResourceTitle(filePath: string): string {
   const templatePath = getDefaultTemplatePath();
   return path
     .relative(templatePath, filePath)
     .replace(/\\/g, "/")
-    .replaceAll("/", "__") // since we're building a URI, we can't have slashes within the segment of the URI.
     .replaceAll("Coalesce.Starter.Vue", "Coalesce.Template");
+}
+
+function getResourceSlug(filePath: string): string {
+  return getResourceTitle(filePath).replaceAll("/", "__"); // since we're building a URI, we can't have slashes within the segment of the URI.;
 }
 
 function createTemplateFileResourceLink(filePath: string) {
@@ -371,20 +396,30 @@ export function registerTemplateFeatureResource(server: McpServer) {
             templateConfig,
           );
 
+          // Responding with these as resource links works really poorly.
+          // Sometimes the agent will just not even bother to read the resources.
           const resourceLinks = [...featureFiles.keys()].map((filePath) =>
             createTemplateFileResourceLink(filePath),
+          );
+
+          const textContents = [...featureFiles.entries()].map(
+            ([filePath, content]) => ({
+              type: "text" as const,
+              text: getResourceTitle(filePath) + "\n\n" + content,
+            }),
           );
 
           return {
             content: [
               {
                 type: "text" as const,
-                text: `The following is a list of files from the Coalesce project template that are included by or affected by the ${feature} feature. Some of the files may directly implement ${feature}, while others may be supporting infrastructure for ${feature}. If you have been asked to implement the feature, carefully examine the existing code base to see if each part of the feature might already exist in some form. Some of them may include conditional syntax like \`#if\` that should be interpreted while applying changes, but not copied directly to the output. Do not run Coalesce code generation until you're done - coalesce code generation does not produce template features.`,
+                text: `The following is a list of files from the Coalesce project template that are included by or affected by the ${feature} feature. If you have been asked to implement the feature, carefully examine the existing code base to see if each part of the feature might already exist in some form. Some of them may include conditional syntax like \`#if\` that should be interpreted while applying changes, but not copied directly to the output. It is vitally important that you do not make mistakes or functional alterations to the code when copying it over. Do not run Coalesce code generation until you're done.`,
                 annotations: {
                   audience: ["assistant"],
                 },
               },
-              ...resourceLinks,
+              // ...resourceLinks,
+              ...textContents,
             ],
           };
         }

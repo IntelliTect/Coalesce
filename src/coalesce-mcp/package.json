@@ -1,0 +1,30 @@
+{
+  "name": "@coalesce/mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Coalesce framework",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "node build.js",
+    "build:tsc-only": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "coverage": "vitest --coverage"
+  },
+  "bin": {
+    "coalesce-mcp": "build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.3",
+    "zod": "^3.22.4"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "coalesce",
+    "ai"
+  ],
+  "author": "IntelliTect",
+  "license": "Apache-2.0"
+}

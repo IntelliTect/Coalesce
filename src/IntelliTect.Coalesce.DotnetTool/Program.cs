@@ -62,10 +62,14 @@ public class Program
         // This reflects the version of the nuget package.
         string version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 
-        Console.WriteLine($"Starting Coalesce {version}, running under {frameworkVersion}");
-        Console.WriteLine("https://github.com/IntelliTect/Coalesce");
-        Console.WriteLine();
+        if (!Enum.TryParse(LogLevelOption, true, out LogLevel logLevel)) logLevel = LogLevel.Information;
 
+        if (logLevel <= LogLevel.Information)
+        {
+            Console.WriteLine($"Starting Coalesce {version}, running under {frameworkVersion}");
+            Console.WriteLine("https://github.com/IntelliTect/Coalesce");
+            Console.WriteLine();
+        }
 
         FileInfo configFile = LocateConfigFile(ConfigFile);
 
@@ -83,10 +87,10 @@ public class Program
         // Must go AFTER we load in the config file, since if the config file was a relative path, changing this ruins that.
         Directory.SetCurrentDirectory(configFile.DirectoryName);
 
-        Console.WriteLine(
-            $"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFile.FullName)}'");
-
-        if (!Enum.TryParse(LogLevelOption, true, out LogLevel logLevel)) logLevel = LogLevel.Information;
+        if (logLevel <= LogLevel.Information)
+        {
+            Console.WriteLine($"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFile.FullName)}'");
+        }
 
         // TODO: dynamic resolution of the specific generator.
         // For now, we hard-reference all of them and then try and match one of them.

@@ -2,11 +2,10 @@ import { promises as fs } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { minimatch } from "minimatch";
-import {
-  McpServer,
-  ResourceTemplate,
-} from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "tmcp";
 import { z } from "zod";
+
+type McpServerType = McpServer<any>;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -267,36 +266,41 @@ function createTemplateFileResourceLink(filePath: string) {
 }
 
 // Register the template feature resource with completion
-export function registerTemplateFeatureResource(server: McpServer) {
-  server.registerResource(
-    "coalesce-template-file",
-    new ResourceTemplate("coalesce://template-file/{filePath}", {
-      list: undefined,
-      complete: {
-        filePath: async (value) => {
-          const allFiles = await findTemplateFiles();
-
-          return allFiles
-            .map(getResourceSlug)
-            .filter((path) => !path.includes(".template.config"))
-            .filter((path) => path.toLowerCase().includes(value.toLowerCase()))
-            .sort();
-        },
-      },
-    }),
+export function registerTemplateFeatureResource(server: McpServerType) {
+  server.template(
     {
+      name: "coalesce-template-file",
       title: "Coalesce Template Files",
       description:
         "Access individual template files from the Coalesce template",
+      uri: "coalesce://template-file/{filePath}",
+      complete: {
+        filePath: async (arg) => {
+          const allFiles = await findTemplateFiles();
+
+          const items = allFiles
+            .map(getResourceSlug)
+            .filter((path) => !path.includes(".template.config"))
+            .filter((path) => path.toLowerCase().includes(arg.toLowerCase()))
+            .sort();
+
+          return {
+            completion: {
+              total: items.length,
+              hasMore: items.length > 100,
+              values: items.slice(0, 100),
+            },
+          };
+        },
+      },
     },
-    async (uri, { filePath }) => {
-      console.error("path:" + filePath);
+    async (uri, params) => {
       try {
-        if (!filePath) {
+        if (!params.filePath) {
           return {
             contents: [
               {
-                uri: uri.href,
+                uri: uri,
                 text: "Error: No file path specified",
                 mimeType: "text/plain",
               },
@@ -306,7 +310,7 @@ export function registerTemplateFeatureResource(server: McpServer) {
 
         const templatePath = getDefaultTemplatePath();
         const decodedPath = decodeURIComponent(
-          Array.isArray(filePath) ? filePath[0] : filePath,
+          Array.isArray(params.filePath) ? params.filePath[0] : params.filePath,
         );
 
         // Convert template path back to actual path
@@ -338,19 +342,18 @@ export function registerTemplateFeatureResource(server: McpServer) {
         return {
           contents: [
             {
-              uri: uri.href,
+              uri: uri,
               text: content,
             },
           ],
         };
       } catch (error) {
-        console.error("err path:" + filePath);
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error occurred";
         return {
           contents: [
             {
-              uri: uri.href,
+              uri: uri,
               text: `Error reading template file: ${errorMessage}`,
               mimeType: "text/plain",
             },
@@ -362,78 +365,62 @@ export function registerTemplateFeatureResource(server: McpServer) {
 
   // Register tool function to expose the resource functionality directly.
   //
-  server.registerTool(
-    "coalesce_get_template_features",
+  server.tool(
     {
+      name: "coalesce_get_template_features",
       description:
         "Get the files for a specific Coalesce template feature, or list all available features if no feature is specified",
-      inputSchema: {
+      schema: z.object({
         feature: z
           .string()
           .optional()
           .describe(
             "The name of the template feature to get files for. If not provided, lists all available features.",
           ),
-      },
+      }),
     },
     async ({ feature }) => {
-      try {
-        const templateConfig = await loadTemplateConfig();
+      const templateConfig = await loadTemplateConfig();
 
-        if (!feature) {
-          // No feature specified - return list of all features
-          const features = extractFeaturesFromConfig(templateConfig);
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: formatFeaturesListResponse(features),
-              },
-            ],
-          };
-        } else {
-          // Feature specified - return resource links for that feature's files
-          const featureFiles = await getFilesForFeature(
-            feature,
-            templateConfig,
-          );
-
-          // Responding with these as resource links works really poorly.
-          // Sometimes the agent will just not even bother to read the resources.
-          const resourceLinks = [...featureFiles.keys()].map((filePath) =>
-            createTemplateFileResourceLink(filePath),
-          );
-
-          const textContents = [...featureFiles.entries()].map(
-            ([filePath, content]) => ({
-              type: "text" as const,
-              text: getResourceTitle(filePath) + "\n\n" + content,
-            }),
-          );
-
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: `The following is a list of files from the Coalesce project template that are included by or affected by the ${feature} feature. If you have been asked to implement the feature, carefully examine the existing code base to see if each part of the feature might already exist in some form. Some of them may include conditional syntax like \`#if\` that should be interpreted while applying changes, but not copied directly to the output. It is vitally important that you do not make mistakes or functional alterations to the code when copying it over. Do not run Coalesce code generation until you're done.`,
-                annotations: {
-                  audience: ["assistant"],
-                },
-              },
-              // ...resourceLinks,
-              ...textContents,
-            ],
-          };
-        }
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
+      if (!feature) {
+        // No feature specified - return list of all features
+        const features = extractFeaturesFromConfig(templateConfig);
         return {
           content: [
             {
-              type: "text" as const,
-              text: `Error: ${errorMessage}`,
+              type: "text",
+              text: formatFeaturesListResponse(features),
             },
+          ],
+        };
+      } else {
+        // Feature specified - return resource links for that feature's files
+        const featureFiles = await getFilesForFeature(feature, templateConfig);
+
+        // Responding with these as resource links works really poorly.
+        // Sometimes the agent will just not even bother to read the resources.
+        const resourceLinks = [...featureFiles.keys()].map((filePath) =>
+          createTemplateFileResourceLink(filePath),
+        );
+
+        const textContents = [...featureFiles.entries()].map(
+          ([filePath, content]) => ({
+            type: "text" as const,
+            text: getResourceTitle(filePath) + "\n\n" + content,
+          }),
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `The following is a list of files from the Coalesce project template that are included by or affected by the ${feature} feature. If you have been asked to implement the feature, carefully examine the existing code base to see if each part of the feature might already exist in some form. Some of them may include conditional syntax like \`#if\` that should be interpreted while applying changes, but not copied directly to the output. It is vitally important that you do not make mistakes or functional alterations to the code when copying it over. Do not run Coalesce code generation until you're done.`,
+              annotations: {
+                audience: ["assistant"],
+              },
+            },
+            // ...resourceLinks,
+            ...textContents,
           ],
         };
       }

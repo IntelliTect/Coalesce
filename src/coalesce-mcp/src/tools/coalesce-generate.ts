@@ -1,9 +1,10 @@
 import { spawn } from "child_process";
 import { promises as fs } from "fs";
 import path from "path";
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "tmcp";
 import { z } from "zod";
+
+type McpServerType = McpServer<any>;
 
 async function runCoalesceGeneration(
   configPath: string,
@@ -82,23 +83,20 @@ async function runCoalesceGeneration(
 }
 
 // Register the generate coalesce code tool
-export function registerCoalesceCodeGenTool(server: McpServer) {
-  server.registerTool(
-    "coalesce_generate",
+export function registerCoalesceCodeGenTool(server: McpServerType) {
+  server.tool(
     {
+      name: "coalesce_generate",
       title: "Coalesce Code Generation",
       description:
         "Runs Coalesce code generation to regenerate web project *.g.* files from existing data project files.",
-      inputSchema: {
+      schema: z.object({
         configPath: z.string().describe("Path to the configuration file"),
-      },
+      }),
     },
     async ({ configPath }) => {
       if (!configPath) {
-        throw new McpError(
-          ErrorCode.InvalidParams,
-          "configPath parameter is required",
-        );
+        throw new Error("configPath parameter is required");
       }
 
       try {
@@ -108,7 +106,7 @@ export function registerCoalesceCodeGenTool(server: McpServer) {
         return {
           content: [
             {
-              type: "text" as const,
+              type: "text",
               text: `Coalesce code generation completed successfully.\n\nOutput:\n${result.output}`,
             },
           ],
@@ -119,7 +117,7 @@ export function registerCoalesceCodeGenTool(server: McpServer) {
         return {
           content: [
             {
-              type: "text" as const,
+              type: "text",
               text: `Failed to run Coalesce code generation: ${errorMessage}`,
             },
           ],

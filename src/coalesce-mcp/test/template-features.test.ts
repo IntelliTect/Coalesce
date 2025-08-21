@@ -1,15 +1,6 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  beforeAll,
-} from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { promises as fs } from "fs";
 import path from "path";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerTemplateFeatureResource } from "../src/tools/template-features.js";
 
 // Mock fs module
@@ -132,36 +123,38 @@ describe("registerTemplateFeatureResource", () => {
   let mockServer: any;
 
   beforeEach(() => {
-    // Create a mock server with registerResource and registerTool methods
+    // Create a mock server with template and tool methods
     mockServer = {
-      registerResource: vi.fn(),
-      registerTool: vi.fn(),
+      template: vi.fn(),
+      tool: vi.fn(),
     };
   });
 
   it("should register both resource and tool", () => {
-    registerTemplateFeatureResource(mockServer as McpServer);
+    registerTemplateFeatureResource(mockServer);
 
-    expect(mockServer.registerResource).toHaveBeenCalledOnce();
-    expect(mockServer.registerResource).toHaveBeenCalledWith(
-      "coalesce-template-file",
-      expect.any(Object), // ResourceTemplate instance
+    expect(mockServer.template).toHaveBeenCalledOnce();
+    expect(mockServer.template).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Coalesce Template Files",
+        name: "coalesce-template-file",
         description:
           "Access individual template files from the Coalesce template",
+        uri: "coalesce://template-file/{filePath}",
+        complete: expect.objectContaining({
+          filePath: expect.any(Function),
+        }),
       }),
-      expect.any(Function), // Resource handler function
+      expect.any(Function), // Template handler function
     );
 
-    expect(mockServer.registerTool).toHaveBeenCalledOnce();
-    expect(mockServer.registerTool).toHaveBeenCalledWith(
-      "coalesce_get_template_features",
+    expect(mockServer.tool).toHaveBeenCalledOnce();
+    expect(mockServer.tool).toHaveBeenCalledWith(
       expect.objectContaining({
+        name: "coalesce_get_template_features",
         description: expect.stringContaining(
           "Get the files for a specific Coalesce template feature",
         ),
-        inputSchema: expect.any(Object),
+        schema: expect.any(Object),
       }),
       expect.any(Function), // Tool handler function
     );
@@ -174,19 +167,19 @@ describe("template file resource handler", () => {
 
   beforeEach(() => {
     mockServer = {
-      registerResource: vi.fn(),
-      registerTool: vi.fn(),
+      template: vi.fn(),
+      tool: vi.fn(),
     };
 
-    registerTemplateFeatureResource(mockServer as McpServer);
+    registerTemplateFeatureResource(mockServer);
 
-    // Extract the resource handler function from the registerResource call
-    const registerCall = mockServer.registerResource.mock.calls[0];
-    resourceHandler = registerCall[3]; // Fourth argument is the handler function
+    // Extract the resource handler function from the template call
+    const registerCall = mockServer.template.mock.calls[0];
+    resourceHandler = registerCall[1]; // Second argument is the handler function
   });
 
   it("should handle missing file path", async () => {
-    const uri = { href: "coalesce://template-file/" };
+    const uri = "coalesce://template-file/";
     const result = await resourceHandler(uri, {});
 
     expect(result.contents).toHaveLength(1);
@@ -194,7 +187,7 @@ describe("template file resource handler", () => {
   });
 
   it("should handle invalid file path", async () => {
-    const uri = { href: "coalesce://template-file/invalid" };
+    const uri = "coalesce://template-file/invalid";
     mockFs.readFile.mockRejectedValue(new Error("File not found"));
 
     const result = await resourceHandler(uri, { filePath: "invalid" });
@@ -205,7 +198,7 @@ describe("template file resource handler", () => {
   });
 
   it("should read and process template file successfully", async () => {
-    const uri = { href: "coalesce://template-file/test.cs" };
+    const uri = "coalesce://template-file/test.cs";
     const mockContent = "namespace Coalesce.Starter.Vue { }";
     mockFs.readFile.mockResolvedValue(mockContent);
 
@@ -222,15 +215,15 @@ describe("template features tool handler", () => {
 
   beforeEach(() => {
     mockServer = {
-      registerResource: vi.fn(),
-      registerTool: vi.fn(),
+      template: vi.fn(),
+      tool: vi.fn(),
     };
 
-    registerTemplateFeatureResource(mockServer as McpServer);
+    registerTemplateFeatureResource(mockServer);
 
-    // Extract the tool handler function from the registerTool call
-    const registerCall = mockServer.registerTool.mock.calls[0];
-    toolHandler = registerCall[2]; // Third argument is the handler function
+    // Extract the tool handler function from the tool call
+    const registerCall = mockServer.tool.mock.calls[0];
+    toolHandler = registerCall[1]; // Second argument is the handler function
   });
 
   it("should list all features when no feature parameter is provided", async () => {
@@ -256,39 +249,43 @@ describe("template features tool handler", () => {
   it("should handle file system errors gracefully", async () => {
     mockFs.readFile.mockRejectedValue(new Error("Permission denied"));
 
-    const result = await toolHandler({});
-
-    expect(result.content).toHaveLength(1);
-    expect(result.content[0].text).toContain("Error:");
-    expect(result.content[0].text).toContain("Permission denied");
+    try {
+      await toolHandler({});
+      // Should not reach here
+      expect(false).toBe(true);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain("Permission denied");
+    }
   });
 });
 
 describe("resource template completion", () => {
   let mockServer: any;
-  let resourceTemplate: any;
+  let templateDefinition: any;
 
   beforeEach(() => {
     mockServer = {
-      registerResource: vi.fn(),
-      registerTool: vi.fn(),
+      template: vi.fn(),
+      tool: vi.fn(),
     };
 
-    registerTemplateFeatureResource(mockServer as McpServer);
+    registerTemplateFeatureResource(mockServer);
 
-    // Extract the ResourceTemplate instance from the registerResource call
-    const registerCall = mockServer.registerResource.mock.calls[0];
-    resourceTemplate = registerCall[1]; // Second argument is the ResourceTemplate
+    // Extract the template definition from the template call
+    const registerCall = mockServer.template.mock.calls[0];
+    templateDefinition = registerCall[0]; // First argument is the template definition
   });
 
   it("should provide completion for feature names", async () => {
-    // Check if complete exists and has the filePath property
-    if (resourceTemplate._callbacks?.complete?.filePath) {
-      const completions =
-        await resourceTemplate._callbacks.complete.filePath("Iden");
+    // Check if complete function exists and has the filePath property
+    if (templateDefinition.complete && templateDefinition.complete.filePath) {
+      const result = await templateDefinition.complete.filePath("Iden");
 
-      expect(Array.isArray(completions)).toBe(true);
-      expect(completions.length).toBeGreaterThanOrEqual(0);
+      expect(result).toHaveProperty("completion");
+      expect(result.completion).toHaveProperty("values");
+      expect(Array.isArray(result.completion.values)).toBe(true);
+      expect(result.completion.values.length).toBeGreaterThanOrEqual(0);
     } else {
       // Skip if completion is not available in the current structure
       expect(true).toBe(true);

@@ -29,7 +29,9 @@
     "coalesce-mcp": "dist/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.3",
-    "zod": "^3.22.4"
+    "@tmcp/adapter-zod-v3": "0.2.1",
+    "@tmcp/transport-stdio": "0.1.3",
+    "tmcp": "1.10.2",
+    "zod": "3.25.76"
   }
 }

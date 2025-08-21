@@ -84,10 +84,11 @@ async function runCoalesceGeneration(
 // Register the generate coalesce code tool
 export function registerCoalesceCodeGenTool(server: McpServer) {
   server.registerTool(
-    "generate_coalesce_code",
+    "coalesce_generate",
     {
-      title: "Generate Coalesce Code",
-      description: "Generate Coalesce framework code from configuration",
+      title: "Coalesce Code Generation",
+      description:
+        "Runs Coalesce code generation to generate or regenerate web project *.g.* files from existing data project files.",
       inputSchema: {
         configPath: z.string().describe("Path to the configuration file"),
       },

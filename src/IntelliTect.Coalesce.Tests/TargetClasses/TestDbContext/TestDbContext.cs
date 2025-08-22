@@ -44,6 +44,8 @@ public class AppDbContext : DbContext
     public DbSet<MultipleParents> MultipleParents { get; set; }
     public DbSet<Parent1> Parent1s { get; set; }
     public DbSet<Parent2> Parent2s { get; set; }
+    
+    public DbSet<StringEnumModel> StringEnumModels { get; set; }
 
     public DbSet<DateTimePk> DateTimePks { get; set; }
     public DbSet<DateTimeOffsetPk> DateTimeOffsetPks { get; set; }

@@ -1518,6 +1518,28 @@ export class StandaloneReadWriteListViewModel extends ListViewModel<$models.Stan
 }
 
 
+export interface StringEnumModelViewModel extends $models.StringEnumModel {
+  id: number | null;
+  stringEnum: $models.StringSerializedEnum | null;
+  regularEnum: $models.RegularEnum | null;
+  nullableStringEnum: $models.StringSerializedEnum | null;
+}
+export class StringEnumModelViewModel extends ViewModel<$models.StringEnumModel, $apiClients.StringEnumModelApiClient, number> implements $models.StringEnumModel  {
+  
+  constructor(initialData?: DeepPartial<$models.StringEnumModel> | null) {
+    super($metadata.StringEnumModel, new $apiClients.StringEnumModelApiClient(), initialData)
+  }
+}
+defineProps(StringEnumModelViewModel, $metadata.StringEnumModel)
+
+export class StringEnumModelListViewModel extends ListViewModel<$models.StringEnumModel, $apiClients.StringEnumModelApiClient, StringEnumModelViewModel> {
+  
+  constructor() {
+    super($metadata.StringEnumModel, new $apiClients.StringEnumModelApiClient())
+  }
+}
+
+
 export interface StringIdentityViewModel extends $models.StringIdentity {
   stringIdentityId: string | null;
   parentId: string | null;
@@ -1674,6 +1696,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   Sibling: SiblingViewModel,
   StandaloneReadonly: StandaloneReadonlyViewModel,
   StandaloneReadWrite: StandaloneReadWriteViewModel,
+  StringEnumModel: StringEnumModelViewModel,
   StringIdentity: StringIdentityViewModel,
   Test: TestViewModel,
   TimeOnlyPk: TimeOnlyPkViewModel,
@@ -1709,6 +1732,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Sibling: SiblingListViewModel,
   StandaloneReadonly: StandaloneReadonlyListViewModel,
   StandaloneReadWrite: StandaloneReadWriteListViewModel,
+  StringEnumModel: StringEnumModelListViewModel,
   StringIdentity: StringIdentityListViewModel,
   Test: TestListViewModel,
   TimeOnlyPk: TimeOnlyPkListViewModel,

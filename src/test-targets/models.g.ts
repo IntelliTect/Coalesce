@@ -1461,6 +1461,32 @@ export class PositionalRecord {
 }
 
 
+export interface SimpleModelTarget extends Model<typeof metadata.SimpleModelTarget> {
+  id: number | null
+  name: string | null
+  createdDate: Date | null
+}
+export class SimpleModelTarget {
+  
+  /** Mutates the input object and its descendants into a valid SimpleModelTarget implementation. */
+  static convert(data?: Partial<SimpleModelTarget>): SimpleModelTarget {
+    return convertToModel<SimpleModelTarget>(data || {}, metadata.SimpleModelTarget) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid SimpleModelTarget implementation. */
+  static map(data?: Partial<SimpleModelTarget>): SimpleModelTarget {
+    return mapToModel<SimpleModelTarget>(data || {}, metadata.SimpleModelTarget) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.SimpleModelTarget; }
+  
+  /** Instantiate a new SimpleModelTarget, optionally basing it on the given data. */
+  constructor(data?: Partial<SimpleModelTarget> | {[k: string]: any}) {
+    Object.assign(this, SimpleModelTarget.map(data || {}));
+  }
+}
+
+
 export interface StandaloneReadonly extends Model<typeof metadata.StandaloneReadonly> {
   id: number | null
   name: string | null
@@ -1661,6 +1687,7 @@ declare module "coalesce-vue/lib/model" {
     RecursiveHierarchy: RecursiveHierarchy
     RequiredAndInitModel: RequiredAndInitModel
     Sibling: Sibling
+    SimpleModelTarget: SimpleModelTarget
     StandaloneReadonly: StandaloneReadonly
     StandaloneReadWrite: StandaloneReadWrite
     StringIdentity: StringIdentity

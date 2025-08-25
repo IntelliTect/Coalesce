@@ -10,7 +10,8 @@ The set of simple models in a Coalesce application looks like this:
     
 1. Take all of the exposed property types, method parameters, and method return types of your [CRUD Models](/modeling/model-types/crud.md), as well as method parameters and returns from [Services](/modeling/model-types/services.md).
 2. Any of these types which are not built-in scalar types and not one of the aforementioned CRUD models are simple models.
-3. For any simple model discovered, any of the property types which qualify under the above rules are also simple models.
+3. Types explicitly marked with `[Coalesce]` that are not [Services](/modeling/model-types/services.md) or [Standalone Entities](/modeling/model-types/standalone-entities.md) are also simple models.
+4. For any simple model discovered, any of the property types which qualify under the above rules are also simple models.
 
 ::: warning
 Be careful when using types that you do not own for properties and method returns in your data model. When Coalesce generates simple model ViewModels and DTOs, it will not stop until it has exhausted all paths that can be reached by following public property types and method returns.
@@ -34,6 +35,7 @@ For example, in the following scenario, these classes are considered simple mode
 * `ReportParameters`, exposed through a method parameter on `ReportService`.
 * `ReportResponse`, exposed through a method return on `ReportService`.
 * `ReportSummary`, exposed through a property on `ReportResponse`.
+* `ReportSettings`, explicitly marked with `[Coalesce]` to be included as a simple model.
 
 ``` c#
 [Coalesce, Service]
@@ -55,6 +57,14 @@ public class SalesReport {
 public class ReportSummary { 
     public int TotalRecords { get; set; }
     public DateTime GeneratedAt { get; set; }
+}
+
+// Explicitly include this type as a Simple Model
+[Coalesce]
+public class ReportSettings { 
+    public string Format { get; set; }
+    public bool IncludeCharts { get; set; }
+    public string Theme { get; set; }
 }
 ```
 

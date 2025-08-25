@@ -10,7 +10,7 @@ The set of simple models in a Coalesce application looks like this:
     
 1. Take all of the exposed property types, method parameters, and method return types of your [CRUD Models](/modeling/model-types/crud.md), as well as method parameters and returns from [Services](/modeling/model-types/services.md).
 2. Any of these types which are not built-in scalar types and not one of the aforementioned CRUD models are simple models.
-3. Types explicitly marked with `[SimpleModel]` are also simple models.
+3. Types explicitly marked with `[Coalesce, SimpleModel]` are also simple models.
 4. For any simple model discovered, any of the property types which qualify under the above rules are also simple models.
 
 ::: warning
@@ -60,7 +60,7 @@ public class ReportSummary {
 }
 
 // Explicitly include this type as a Simple Model
-[SimpleModel]
+[Coalesce, SimpleModel]
 public class ReportSettings { 
     public string Format { get; set; }
     public bool IncludeCharts { get; set; }

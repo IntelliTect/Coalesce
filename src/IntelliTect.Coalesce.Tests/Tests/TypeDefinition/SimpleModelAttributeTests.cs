@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 public class SimpleModelAttributeTests
 {
     [Fact]
-    public void CoalesceAttributeOnly_AddsTypeAsSimpleModel()
+    public void SimpleModelAttribute_AddsTypeAsSimpleModel()
     {
         // Arrange
         var repo = ReflectionRepositoryFactory.Reflection;
@@ -24,7 +24,7 @@ public class SimpleModelAttributeTests
     }
 
     [Fact]
-    public void TypeWithoutCoalesceAttribute_NotInExternalTypes()
+    public void TypeWithoutSimpleModelAttribute_NotInExternalTypes()
     {
         // Arrange
         var repo = ReflectionRepositoryFactory.Reflection;
@@ -36,5 +36,20 @@ public class SimpleModelAttributeTests
         
         // Assert
         Assert.Null(notMarkedType);
+    }
+
+    [Fact]
+    public void CoalesceAttributeOnly_DoesNotAddTypeAsSimpleModel()
+    {
+        // Arrange
+        var repo = ReflectionRepositoryFactory.Reflection;
+        
+        // Act
+        var simpleModelTypes = repo.ExternalTypes;
+        var coalesceOnlyType = simpleModelTypes
+            .FirstOrDefault(t => t.Name == nameof(CoalesceOnlyTarget));
+        
+        // Assert
+        Assert.Null(coalesceOnlyType);
     }
 }

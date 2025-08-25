@@ -76,7 +76,16 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule, InvalidSemanticKernelAttributeUsageRule, GenericInvalidAttributeUsageRule);
+    public static readonly DiagnosticDescriptor InvalidSimpleModelUsageRule = new(
+        id: "COA0011",
+        title: "Invalid SimpleModelAttribute usage",
+        messageFormat: "SimpleModelAttribute should only be used on regular class types, not on interfaces, enums, or types with special Coalesce roles",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "SimpleModelAttribute is intended for simple POCO classes that should be exposed as Simple Models.");
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule, InvalidSemanticKernelAttributeUsageRule, GenericInvalidAttributeUsageRule, InvalidSimpleModelUsageRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -91,7 +100,25 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         var typeSymbol = (INamedTypeSymbol)context.Symbol;
 
         var coalesceAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.CoalesceAttribute");
+        var simpleModelAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.SimpleModelAttribute");
         var semanticKernelAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.SemanticKernelAttribute");
+
+        // COA0011: Check for SimpleModelAttribute on types that aren't suitable for Simple Models
+        if (simpleModelAttr is not null)
+        {
+            if (typeSymbol.TypeKind != TypeKind.Class || 
+                typeSymbol.InheritsFromOrImplements(
+                    "Microsoft.EntityFrameworkCore.DbContext",
+                    "IntelliTect.Coalesce.IDataSource`1",
+                    "IntelliTect.Coalesce.IBehaviors`1",
+                    "IntelliTect.Coalesce.IClassDto`1") ||
+                typeSymbol.GetAttributesByName(
+                    "IntelliTect.Coalesce.ServiceAttribute",
+                    "IntelliTect.Coalesce.StandaloneEntityAttribute").Any())
+            {
+                context.ReportDiagnostic(Diagnostic.Create(InvalidSimpleModelUsageRule, simpleModelAttr.GetLocation()));
+            }
+        }
 
         // COA0007: Check for SemanticKernelAttribute on services or IBehaviors
         if (semanticKernelAttr is not null)

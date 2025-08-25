@@ -108,7 +108,7 @@ public class ReflectionRepository
                 .AsParallel()
                 .Where(type =>
                     !type.IsInternalUse &&
-                    (type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(IGeneratedParameterDto<>)))
+                    (type.HasAttribute<CoalesceAttribute>() || type.HasAttribute<SimpleModelAttribute>() || type.IsA(typeof(IGeneratedParameterDto<>)))
                 )
             );
         }
@@ -161,6 +161,28 @@ public class ReflectionRepository
         if (generatedDtoEntity?.ClassViewModel is ClassViewModel cvm)
         {
             _generatedParamDtos[cvm] = type.ClassViewModel!;
+        }
+
+        // Check for SimpleModelAttribute first to treat as Simple Model
+        if (type.HasAttribute<SimpleModelAttribute>())
+        {
+            if (_rootTypeWhitelist != null && !_rootTypeWhitelist.Contains(type.Name))
+            {
+                return;
+            }
+
+            if (type.ClassViewModel != null)
+            {
+                // Null this out so it gets recomputed on next access.
+                _clientTypes = null;
+                
+                var classViewModel = type.ClassViewModel;
+                if (_externalTypes.Add(classViewModel))
+                {
+                    DiscoverExternalPropertyTypesOn(classViewModel);
+                }
+            }
+            return;
         }
 
         if (!type.HasAttribute<CoalesceAttribute>())
@@ -222,16 +244,6 @@ public class ReflectionRepository
             _entities.Add(classViewModel);
             _externalTypes.Remove(classViewModel);
             DiscoverOnApiBackedClass(classViewModel);
-        }
-        else if (type.ClassViewModel != null)
-        {
-            // This is a type marked with [Coalesce] that doesn't fit other categories.
-            // Add it as a Simple Model (External Type).
-            var classViewModel = type.ClassViewModel;
-            if (_externalTypes.Add(classViewModel))
-            {
-                DiscoverExternalPropertyTypesOn(classViewModel);
-            }
         }
 
         void DiscoverOnApiBackedClass(ClassViewModel classViewModel)

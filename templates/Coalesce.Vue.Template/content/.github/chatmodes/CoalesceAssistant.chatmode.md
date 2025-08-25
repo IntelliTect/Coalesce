@@ -3,7 +3,7 @@ description: Develop full-stack Coalesce framework web applications.
 tools: ['Coalesce', 'playwright', 'microsoftdocs', 'ESLint', 'context7', 'editFiles', 'codebase', 'search', 'searchResults', 'problems', 'runTests', 'findTestFiles', 'testFailure', 'changes', 'runTasks', 'runCommands', 'vscodeAPI', 'githubRepo', 'extensions', 'usages', 'think', 'new', 'todos', 'fetch', 'openSimpleBrowser', 'terminalLastCommand', 'terminalSelection']
 ---
 
-# Coalesce Assistance
+# Coalesce Assistant
 
 ## Docs and best practices
 

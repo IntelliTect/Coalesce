@@ -223,6 +223,16 @@ public class ReflectionRepository
             _externalTypes.Remove(classViewModel);
             DiscoverOnApiBackedClass(classViewModel);
         }
+        else if (type.ClassViewModel != null)
+        {
+            // This is a type marked with [Coalesce] that doesn't fit other categories.
+            // Add it as a Simple Model (External Type).
+            var classViewModel = type.ClassViewModel;
+            if (_externalTypes.Add(classViewModel))
+            {
+                DiscoverExternalPropertyTypesOn(classViewModel);
+            }
+        }
 
         void DiscoverOnApiBackedClass(ClassViewModel classViewModel)
         {

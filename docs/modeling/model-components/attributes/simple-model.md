@@ -2,13 +2,14 @@
 
 `IntelliTect.Coalesce.SimpleModelAttribute`
 
-Used to mark a class as a [Simple Model](/modeling/model-types/simple-models.md) for generation by Coalesce.
+Used to mark a class as a [Simple Model](/modeling/model-types/simple-models.md) for generation by Coalesce. Must be used in conjunction with the `[Coalesce]` attribute.
 
 ## Usage
 
-The `[SimpleModel]` attribute is used to explicitly include a standalone class as a Simple Model in your Coalesce application. This is particularly useful for data transfer objects, configuration objects, or other data classes that are not naturally discovered through the typical Coalesce discovery process.
+The `[SimpleModel]` attribute is used alongside the `[Coalesce]` attribute to explicitly include a standalone class as a Simple Model in your Coalesce application. This is particularly useful for data transfer objects, configuration objects, or other data classes that are not naturally discovered through the typical Coalesce discovery process.
 
 ``` c#
+[Coalesce]
 [SimpleModel]
 public class ReportSettings
 {

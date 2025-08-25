@@ -5184,34 +5184,6 @@ export const PositionalRecord = domain.types.PositionalRecord = {
     },
   },
 }
-export const SimpleModelTarget = domain.types.SimpleModelTarget = {
-  name: "SimpleModelTarget" as const,
-  displayName: "Simple Model Target",
-  get displayProp() { return this.props.name }, 
-  type: "object",
-  props: {
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "number",
-      role: "value",
-    },
-    name: {
-      name: "name",
-      displayName: "Name",
-      type: "string",
-      role: "value",
-    },
-    createdDate: {
-      name: "createdDate",
-      displayName: "Created Date",
-      type: "date",
-      dateKind: "datetime",
-      noOffset: true,
-      role: "value",
-    },
-  },
-}
 export const ValidationTarget = domain.types.ValidationTarget = {
   name: "ValidationTarget" as const,
   displayName: "Validation Target",
@@ -5450,7 +5422,6 @@ interface AppDomain extends Domain {
     RecursiveHierarchy: typeof RecursiveHierarchy
     RequiredAndInitModel: typeof RequiredAndInitModel
     Sibling: typeof Sibling
-    SimpleModelTarget: typeof SimpleModelTarget
     StandaloneReadonly: typeof StandaloneReadonly
     StandaloneReadWrite: typeof StandaloneReadWrite
     StringIdentity: typeof StringIdentity

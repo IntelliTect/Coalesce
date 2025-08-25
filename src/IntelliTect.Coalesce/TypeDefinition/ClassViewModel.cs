@@ -141,6 +141,7 @@ public abstract class ClassViewModel : IAttributeProvider
 
     public bool IsService => this.HasAttribute<CoalesceAttribute>() && this.HasAttribute<ServiceAttribute>();
     public bool IsStandaloneEntity => this.HasAttribute<CoalesceAttribute>() && this.HasAttribute<StandaloneEntityAttribute>();
+    public bool IsSimpleModel => this.HasAttribute<CoalesceAttribute>() && this.HasAttribute<SimpleModelAttribute>();
 
     public string ServiceClientClassName => ClientTypeName + "Client";
 

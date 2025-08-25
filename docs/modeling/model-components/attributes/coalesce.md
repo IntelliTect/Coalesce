@@ -11,13 +11,6 @@ On the other hand, [Methods](/modeling/model-components/methods.md) on these typ
 
 ## Type-Level Usage
 
-When used on a class, the `[Coalesce]` attribute will cause the type to be included in Coalesce generation:
-
-- If the type also has `[Service]`, it becomes a [Service](/modeling/model-types/services.md).
-- If the type also has `[StandaloneEntity]`, it becomes a [Standalone Entity](/modeling/model-types/standalone-entities.md).
-- If used on a `DbContext`, it enables the context and its entities for Coalesce generation.
-- Other specialized interface implementations (like `IDataSource<>`, `IBehaviors<>`, `IClassDto<>`) become their respective component types.
-
-For standalone data classes that should be treated as [Simple Models](/modeling/model-types/simple-models.md), use the `[SimpleModel]` attribute instead.
+When used on a class, the `[Coalesce]` attribute will cause the type to be included in Coalesce generation.
 
 The documentation pages for types and members that require/accept this attribute will state as such. An exhaustive list of all valid targets for `[Coalesce]` will not be found on this page.

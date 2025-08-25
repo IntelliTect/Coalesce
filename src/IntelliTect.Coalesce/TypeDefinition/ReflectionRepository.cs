@@ -163,28 +163,6 @@ public class ReflectionRepository
             _generatedParamDtos[cvm] = type.ClassViewModel!;
         }
 
-        // Check for SimpleModelAttribute first to treat as Simple Model
-        if (type.HasAttribute<SimpleModelAttribute>())
-        {
-            if (_rootTypeWhitelist != null && !_rootTypeWhitelist.Contains(type.Name))
-            {
-                return;
-            }
-
-            if (type.ClassViewModel != null)
-            {
-                // Null this out so it gets recomputed on next access.
-                _clientTypes = null;
-                
-                var classViewModel = type.ClassViewModel;
-                if (_externalTypes.Add(classViewModel))
-                {
-                    DiscoverExternalPropertyTypesOn(classViewModel);
-                }
-            }
-            return;
-        }
-
         if (!type.HasAttribute<CoalesceAttribute>())
         {
             return;
@@ -244,6 +222,14 @@ public class ReflectionRepository
             _entities.Add(classViewModel);
             _externalTypes.Remove(classViewModel);
             DiscoverOnApiBackedClass(classViewModel);
+        }
+        else if (type.ClassViewModel?.IsSimpleModel ?? false)
+        {
+            var classViewModel = type.ClassViewModel;
+            if (_externalTypes.Add(classViewModel))
+            {
+                DiscoverExternalPropertyTypesOn(classViewModel);
+            }
         }
 
         void DiscoverOnApiBackedClass(ClassViewModel classViewModel)

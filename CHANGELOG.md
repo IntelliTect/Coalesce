@@ -12,7 +12,7 @@
 ## Features
 
 - Added support for generating Semantic Kernel plugins from CRUD models and custom methods via the new `[SemanticKernel]` attribute. Semantic Kernel is a Microsoft framework that allows you to create AI Agents that can call tool functions provided by your application. This feature is in beta and may undergo breaking changes in non-major releases.
-- Added `[SimpleModel]` attribute to explicitly declare types as Simple Models, providing explicit control over what gets included in Coalesce generation.
+- Added `[SimpleModel]` attribute to explicitly declare types as Simple Models, allowing TypeScript outputs to be generated for types that are otherwise unused by Coalesce endpoints.
 - Added a set of Roslyn analyzers to help avoid common issues and suggest improvements. These analyzers are included and enabled by default.
 - All endpoints with bodies are now sent as JSON instead of form data, with the exception of endpoints that have file parameter(s) and no other non-scalar parameters.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.

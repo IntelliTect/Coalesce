@@ -223,9 +223,13 @@ public class ReflectionRepository
             _externalTypes.Remove(classViewModel);
             DiscoverOnApiBackedClass(classViewModel);
         }
-        else if (type.ClassViewModel?.IsSimpleModel ?? false)
+        else if (type.ClassViewModel?.HasAttribute<SimpleModelAttribute>() ?? false)
         {
             var classViewModel = type.ClassViewModel;
+
+            if (_entities.Contains(classViewModel))
+                throw new InvalidOperationException($"Type {type} is already discovered as an entity. It must not be marked with [SimpleModel].");
+
             if (_externalTypes.Add(classViewModel))
             {
                 DiscoverExternalPropertyTypesOn(classViewModel);

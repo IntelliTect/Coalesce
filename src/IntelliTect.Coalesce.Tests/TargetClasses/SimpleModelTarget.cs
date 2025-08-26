@@ -3,8 +3,7 @@ using System;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses;
 
-[Coalesce]
-[SimpleModel]
+[Coalesce, SimpleModel]
 public class SimpleModelTarget
 {
     public int Id { get; set; }

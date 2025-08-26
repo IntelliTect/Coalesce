@@ -26,7 +26,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
     public static readonly DiagnosticDescriptor InvalidCoalesceUsageRule = new(
         id: "COA0004",
         title: "Invalid CoalesceAttribute usage on unsupported type",
-        messageFormat: "CoalesceAttribute can only expose types that inherit from DbContext, implement IDataSource<T>, IBehaviors<T>, IClassDto<T>, or are marked with [Service] or [StandaloneEntity]",
+        messageFormat: "CoalesceAttribute can only expose types that inherit from DbContext, implement IDataSource<T>, IBehaviors<T>, IClassDto<T>, or are marked with [Service], [StandaloneEntity], or [SimpleModel]",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
@@ -39,7 +39,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Types marked with [Service] or [StandaloneEntity] require [Coalesce] attribute to be properly processed by the Coalesce framework.");
+        description: "Types marked with [Service], [StandaloneEntity], or [SimpleModel] require [Coalesce] attribute to be properly processed by the Coalesce framework.");
 
     public static readonly DiagnosticDescriptor UnexposedSecondaryAttributeForMethodsRule = new(
         id: "COA0006",
@@ -76,16 +76,16 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
-    public static readonly DiagnosticDescriptor InvalidSimpleModelUsageRule = new(
-        id: "COA0011",
-        title: "Invalid SimpleModelAttribute usage",
-        messageFormat: "SimpleModelAttribute should only be used on regular class types, not on interfaces, enums, or types with special Coalesce roles",
+    public static readonly DiagnosticDescriptor MutuallyExclusiveCoalesceTypesRule = new(
+        id: "COA0013",
+        title: "Mutually exclusive Coalesce type markers",
+        messageFormat: "Type cannot have multiple Coalesce type markers: {0}",
         category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Warning,
+        defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "SimpleModelAttribute is intended for simple POCO classes that should be exposed as Simple Models.");
+        description: "Types can only have one of the following: [Service], [StandaloneEntity], [SimpleModel] attributes, or inherit from DbContext, IDataSource<T>, IBehaviors<T>, or IClassDto<T>.");
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule, InvalidSemanticKernelAttributeUsageRule, GenericInvalidAttributeUsageRule, InvalidSimpleModelUsageRule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule, InvalidSemanticKernelAttributeUsageRule, GenericInvalidAttributeUsageRule, MutuallyExclusiveCoalesceTypesRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -99,31 +99,45 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
     {
         var typeSymbol = (INamedTypeSymbol)context.Symbol;
 
-        var coalesceAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.CoalesceAttribute");
-        var simpleModelAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.SimpleModelAttribute");
-        var semanticKernelAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.SemanticKernelAttribute");
+        // COA0013: Check for mutually exclusive Coalesce type markers
+        var typeMarkers = new List<string>();
 
-        // COA0011: Check for SimpleModelAttribute on types that aren't suitable for Simple Models
-        if (simpleModelAttr is not null)
+        // Check for attributes
+        var serviceAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute");
+        if (serviceAttr is not null) typeMarkers.Add("[Service]");
+
+        var standaloneEntityAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.StandaloneEntityAttribute");
+        if (standaloneEntityAttr is not null) typeMarkers.Add("[StandaloneEntity]");
+
+        var simpleModelAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.SimpleModelAttribute");
+        if (simpleModelAttr is not null) typeMarkers.Add("[SimpleModel]");
+
+        var exposeAttr = standaloneEntityAttr ?? serviceAttr ?? simpleModelAttr;
+
+        // Check for interface/base class implementations
+        if (typeSymbol.InheritsFromOrImplements("Microsoft.EntityFrameworkCore.DbContext"))
+            typeMarkers.Add("DbContext");
+        if (typeSymbol.InheritsFromOrImplements("IntelliTect.Coalesce.IDataSource`1"))
+            typeMarkers.Add("IDataSource<T>");
+        if (typeSymbol.InheritsFromOrImplements("IntelliTect.Coalesce.IBehaviors`1"))
+            typeMarkers.Add("IBehaviors<T>");
+        if (typeSymbol.InheritsFromOrImplements("IntelliTect.Coalesce.IClassDto`1"))
+            typeMarkers.Add("IClassDto<T>");
+
+        if (typeMarkers.Count > 1)
         {
-            if (typeSymbol.TypeKind != TypeKind.Class || 
-                typeSymbol.InheritsFromOrImplements(
-                    "Microsoft.EntityFrameworkCore.DbContext",
-                    "IntelliTect.Coalesce.IDataSource`1",
-                    "IntelliTect.Coalesce.IBehaviors`1",
-                    "IntelliTect.Coalesce.IClassDto`1") ||
-                typeSymbol.GetAttributesByName(
-                    "IntelliTect.Coalesce.ServiceAttribute",
-                    "IntelliTect.Coalesce.StandaloneEntityAttribute").Any())
-            {
-                context.ReportDiagnostic(Diagnostic.Create(InvalidSimpleModelUsageRule, simpleModelAttr.GetLocation()));
-            }
+            var markersString = string.Join(", ", typeMarkers);
+            var location = typeSymbol.Locations.FirstOrDefault() ?? Location.None;
+            context.ReportDiagnostic(Diagnostic.Create(MutuallyExclusiveCoalesceTypesRule, location, markersString));
         }
+
+        var coalesceAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.CoalesceAttribute");
+        var semanticKernelAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.SemanticKernelAttribute");
 
         // COA0007: Check for SemanticKernelAttribute on services or IBehaviors
         if (semanticKernelAttr is not null)
         {
-            var isService = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") is not null;
+            var isService = serviceAttr is not null;
             var isBehavior = typeSymbol.InheritsFromOrImplements("IntelliTect.Coalesce.IBehaviors`1");
 
             if (isService || isBehavior)
@@ -135,13 +149,10 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 
         if (coalesceAttr is null)
         {
-            // COA0005: Check for StandaloneEntity or Service attributes without Coalesce
-            foreach (var attr in typeSymbol.GetAttributesByName(
-                "IntelliTect.Coalesce.StandaloneEntityAttribute",
-                "IntelliTect.Coalesce.ServiceAttribute"
-            ))
+            // COA0005: Check for StandaloneEntity, Service, or SimpleModel attributes without Coalesce
+            if (exposeAttr is not null)
             {
-                context.ReportDiagnostic(Diagnostic.Create(UnexposedSecondaryAttributeForTypesRule, attr.GetLocation(), attr.AttributeClass!.Name!));
+                context.ReportDiagnostic(Diagnostic.Create(UnexposedSecondaryAttributeForTypesRule, exposeAttr.GetLocation(), exposeAttr.AttributeClass!.Name!));
             }
         }
         else if (!coalesceAttr.ConstructorArguments.Any() && !coalesceAttr.NamedArguments.Any())
@@ -155,9 +166,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
                     "IntelliTect.Coalesce.IDataSource`1",
                     "IntelliTect.Coalesce.IBehaviors`1",
                     "IntelliTect.Coalesce.IClassDto`1") &&
-                !typeSymbol.GetAttributesByName(
-                    "IntelliTect.Coalesce.ServiceAttribute",
-                    "IntelliTect.Coalesce.StandaloneEntityAttribute").Any()
+                serviceAttr is null && standaloneEntityAttr is null && simpleModelAttr is null
             )
             {
                 context.ReportDiagnostic(Diagnostic.Create(InvalidCoalesceUsageRule, coalesceAttr.GetLocation()));

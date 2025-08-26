@@ -24,7 +24,6 @@ Use the Context7 server to fetch official docs. Flow: `#resolve-library-id` → 
 
 - After EF model or migration changes, run `coalesce_generate` to sync DTOs, controllers, and TypeScript.
 - Build the solution to validate server-side changes.
-- If generated TypeScript changed, rebuild the frontend.
 - Run the app end-to-end with `dotnet run` in the web project.
 
 ## Troubleshooting

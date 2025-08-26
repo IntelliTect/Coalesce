@@ -79,6 +79,18 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
     }
 
     [Fact]
+    public async Task CoalesceAttributeOnSimpleModel_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            [Coalesce, SimpleModel]
+            public class Person
+            {
+                public int Id { get; set; }
+            }
+            """);
+    }
+
+    [Fact]
     public async Task CoalesceAttributeOnRegularClass_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""

@@ -108,7 +108,7 @@ public class ReflectionRepository
                 .AsParallel()
                 .Where(type =>
                     !type.IsInternalUse &&
-                    (type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(IGeneratedParameterDto<>)))
+                    (type.HasAttribute<CoalesceAttribute>() || type.HasAttribute<SimpleModelAttribute>() || type.IsA(typeof(IGeneratedParameterDto<>)))
                 )
             );
         }
@@ -222,6 +222,18 @@ public class ReflectionRepository
             _entities.Add(classViewModel);
             _externalTypes.Remove(classViewModel);
             DiscoverOnApiBackedClass(classViewModel);
+        }
+        else if (type.ClassViewModel?.HasAttribute<SimpleModelAttribute>() ?? false)
+        {
+            var classViewModel = type.ClassViewModel;
+
+            if (_entities.Contains(classViewModel))
+                throw new InvalidOperationException($"Type {type} is already discovered as an entity. It must not be marked with [SimpleModel].");
+
+            if (_externalTypes.Add(classViewModel))
+            {
+                DiscoverExternalPropertyTypesOn(classViewModel);
+            }
         }
 
         void DiscoverOnApiBackedClass(ClassViewModel classViewModel)

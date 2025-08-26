@@ -10,7 +10,7 @@ An `IntelliTect Coalesce`–based project.
 
 - Backend: ASP.NET Core with EF Core (migrations)
 - Frontend: Vue 3 with Coalesce for data binding and API access
-- Coalesce generates DTOs, controllers, and TypeScript clients from EF Core models — no manual endpoints. Trigger generation after EF model/migration changes with the `coalesce_generate` tool from the Web project.
+- Coalesce generates DTOs, controllers, and TypeScript from your models. After making changes to your models, invoke code generation with the `coalesce_generate` tool.
 
 ## Docs (canonical)
 
@@ -23,7 +23,6 @@ Use the Context7 server to fetch official docs. Flow: `#resolve-library-id` → 
 
 - After EF model or migration changes, run `coalesce_generate` to sync DTOs, controllers, and TypeScript.
 - Build the solution to validate server-side changes.
-- Run the app end-to-end with `dotnet run` in the web project.
 
 ## Troubleshooting
 

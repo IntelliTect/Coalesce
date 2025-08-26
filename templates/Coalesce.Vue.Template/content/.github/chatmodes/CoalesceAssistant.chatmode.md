@@ -16,8 +16,6 @@ tools: ['Coalesce', 'playwright', 'microsoftdocs', 'ESLint', 'context7', 'editFi
   - `#resolve-library-id`, `#get-library-docs` for `/IntelliTect/Coalesce`, `/vuejs/docs`, `/vuetifyjs/vuetify`
 - .NET/ASP.NET Core/EF Core/Azure references: use Microsoft Docs
   - `#microsoft-docs-search`, `#microsoft-docs-fetch`
-- UI automation and browser flows: use Playwright MCP
-  - `#playwright` actions for navigation, interactions, and snapshots
 
 ## Quick-start playbooks
 

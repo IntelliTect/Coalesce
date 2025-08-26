@@ -38,10 +38,10 @@ tools: ['Coalesce', 'playwright', 'microsoftdocs', 'ESLint', 'context7', 'editFi
 
 - Add an EF Core property and propagate
   1) Update EF model and migration (use EF CLI as needed)
-  2) Regenerate Coalesce artifacts (`dotnet coalesce`)
+  2) Regenerate Coalesce artifacts (`coalesce_generate`)
   3) Use generated TS types in Vue and wire up UI
 
 ## Acceptance criteria (quick checks)
 
-- Model changes: `dotnet coalesce`, `dotnet build` completed without errors; generated TS types updated; frontend builds if types changed.
+- Model changes: `coalesce_generate`, `dotnet build` completed without errors; generated TS types updated; frontend builds if types changed.
 - End-to-end: app runs with `dotnet run` in the web project

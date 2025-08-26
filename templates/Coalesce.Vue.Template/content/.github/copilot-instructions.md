@@ -17,7 +17,6 @@ An `IntelliTect Coalesce`–based project.
 Use the Context7 server to fetch official docs. Flow: `#resolve-library-id` → `#get-library-docs`.
 
 - Coalesce: `/IntelliTect/Coalesce`
-- Vue 3: `/vuejs/docs`
 - `Vuetify`: `/vuetifyjs/vuetify`
 
 ## Standard workflow

@@ -9,7 +9,7 @@ applyTo: '**'
 An `IntelliTect Coalesce`–based project.
 
 - Backend: ASP.NET Core with EF Core (migrations)
-- Frontend: Vue 3 with Coalesce for data binding and API access
+- Frontend: Vue 3, Vuetify 3, and Coalesce for data binding and API access
 - Coalesce generates DTOs, controllers, and TypeScript from your models. After making changes to your models, invoke code generation with the `coalesce_generate` tool.
 
 ## Docs (canonical)

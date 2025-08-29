@@ -16,10 +16,12 @@ internal class EntityFrameworkServiceProvider(DbContext db) : IServiceProvider
 
         var internalServiceProvider = db.GetInfrastructure();
 
-        return internalServiceProvider.GetService(serviceType)
-            ?? internalServiceProvider.GetService<IDbContextOptions>()
+        // Prefer services ApplicationServiceProvider when possible,
+        // since that's where developers will generally expect the things they inject into extensions to come from.
+        return internalServiceProvider.GetService<IDbContextOptions>()
                 ?.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault()
                 ?.ApplicationServiceProvider
-                ?.GetService(serviceType);
+                ?.GetService(serviceType)
+            ?? internalServiceProvider.GetService(serviceType);
     }
 }

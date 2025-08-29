@@ -143,6 +143,225 @@ public class SearchTests
             shouldMatch);
     }
 
+    class BeginsWith_SplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.BeginsWith, IsSplitOnSpaces = true)] public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "John Smith", "John")]
+    [InlineData(false, "John Smith", "Smith")] // BeginsWith with IsSplitOnSpaces=true: "Smith" doesn't match beginning of "John Smith"
+    [InlineData(false, "John Smith", "John Smith")] // BeginsWith with IsSplitOnSpaces=true: "John Smith" split into ["John", "Smith"], "Smith" doesn't begin "John Smith"
+    [InlineData(false, "John Smith", "Jo Sm")] // BeginsWith with IsSplitOnSpaces=true: "Jo" and "Sm" don't begin "John Smith"
+    [InlineData(false, "John Smith", "ohn")]
+    [InlineData(false, "John Smith", "mith")]
+    [InlineData(false, "John Smith", "Jane")]
+    public void Search_BeginsWith_SplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (BeginsWith_SplitOnSpaces t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
+    class BeginsWith_NoSplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.BeginsWith, IsSplitOnSpaces = false)] public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "John Smith", "John")]
+    [InlineData(true, "John Smith", "John Smith")]
+    [InlineData(false, "John Smith", "Smith")]
+    [InlineData(false, "John Smith", "Jo Sm")]
+    [InlineData(false, "John Smith", "ohn")]
+    public void Search_BeginsWith_NoSplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (BeginsWith_NoSplitOnSpaces t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
+    class Contains_SplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.Contains, IsSplitOnSpaces = true)] public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "John Smith Jr", "John")]
+    [InlineData(true, "John Smith Jr", "Smith")]
+    [InlineData(true, "John Smith Jr", "Jr")]
+    [InlineData(true, "John Smith Jr", "ohn")]
+    [InlineData(true, "John Smith Jr", "mith")]
+    [InlineData(true, "John Smith Jr", "Jo Sm")]
+    [InlineData(true, "John Smith Jr", "ohn mith")]
+    [InlineData(false, "John Smith Jr", "Jane")]
+    [InlineData(false, "John Smith Jr", "Senior")]
+    public void Search_Contains_SplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (Contains_SplitOnSpaces t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
+    class Contains_NoSplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.Contains, IsSplitOnSpaces = false)] public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "John Smith Jr", "John")]
+    [InlineData(true, "John Smith Jr", "Smith")]
+    [InlineData(true, "John Smith Jr", "Jr")]
+    [InlineData(true, "John Smith Jr", "ohn")]
+    [InlineData(true, "John Smith Jr", "mith")]
+    [InlineData(true, "John Smith Jr", "John Smith")]
+    [InlineData(true, "John Smith Jr", "Smith Jr")]
+    [InlineData(false, "John Smith Jr", "Jo Sm")]
+    [InlineData(false, "John Smith Jr", "Jane")]
+    public void Search_Contains_NoSplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (Contains_NoSplitOnSpaces t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
+    class Equals_SplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.Equals, IsSplitOnSpaces = true)] public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "John", "John")]
+    [InlineData(true, "JOHN", "john")]
+    [InlineData(false, "John Smith", "John")]
+    [InlineData(false, "John Smith", "Smith")]
+    [InlineData(false, "John", "Jo")]
+    public void Search_Equals_SplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (Equals_SplitOnSpaces t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
+    class Equals_NoSplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.Equals, IsSplitOnSpaces = false)] public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "John Smith", "John Smith")]
+    [InlineData(true, "JOHN SMITH", "john smith")]
+    [InlineData(false, "John Smith", "John")]
+    [InlineData(false, "John Smith", "Smith")]
+    [InlineData(false, "John Smith", "john")]
+    public void Search_Equals_NoSplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (Equals_NoSplitOnSpaces t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
+    class EqualsNatural_SplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.EqualsNatural, IsSplitOnSpaces = true)] public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "John", "John")]
+    [InlineData(false, "JOHN", "john")]
+    [InlineData(false, "John Smith", "John")]
+    [InlineData(false, "John", "Jo")]
+    public void Search_EqualsNatural_SplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (EqualsNatural_SplitOnSpaces t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
+    class EqualsNatural_NoSplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.EqualsNatural, IsSplitOnSpaces = false)] public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "John Smith", "John Smith")]
+    [InlineData(false, "JOHN SMITH", "john smith")]
+    [InlineData(false, "John Smith", "John")]
+    [InlineData(false, "John Smith", "Smith")]
+    public void Search_EqualsNatural_NoSplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (EqualsNatural_NoSplitOnSpaces t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
+    class MultipleProperties_SplitOnSpaces
+    {
+        [Search(SearchMethod = SearchAttribute.SearchMethods.BeginsWith, IsSplitOnSpaces = true)]
+        public string FirstName { get; set; }
+
+        [Search(SearchMethod = SearchAttribute.SearchMethods.BeginsWith, IsSplitOnSpaces = true)]
+        public string LastName { get; set; }
+
+        [Search(SearchMethod = SearchAttribute.SearchMethods.Contains, IsSplitOnSpaces = true)]
+        public string Email { get; set; }
+    }
+
+    [Theory]
+    [InlineData(true, "John", "Smith", "john@example.com", "John")]
+    [InlineData(true, "John", "Smith", "john@example.com", "Smith")]
+    [InlineData(true, "John", "Smith", "john@example.com", "example")]  // Email contains "example"
+    [InlineData(true, "John", "Smith", "john@example.com", "John Smith")] // "John" matches FirstName, "Smith" matches LastName
+    [InlineData(true, "John", "Smith", "john@example.com", "John example")] // "John" matches FirstName, "example" matches Email
+    [InlineData(true, "John", "Smith", "john@example.com", "Smith example")] // "Smith" matches LastName, "example" matches Email
+    [InlineData(false, "John", "Smith", "john@example.com", "Jane")] // No property matches "Jane"
+    [InlineData(true, "John", "Smith", "john@example.com", "ohn")]  // Email contains "ohn" in "john@example.com"
+    [InlineData(false, "John", "Smith", "john@example.com", "mith")] // FirstName/LastName use BeginsWith and don't begin with "mith", Email doesn't contain "mith"
+    public void Search_MultipleProperties_SplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string firstName, string lastName, string email, string inputValue)
+    {
+        SearchHelper<MultipleProperties_SplitOnSpaces>(
+            inputValue,
+            model =>
+            {
+                model.FirstName = firstName;
+                model.LastName = lastName;
+                model.Email = email;
+            },
+            shouldMatch);
+    }
+
+    class MixedSplitOnSpaces
+    {
+        [Search(SearchMethod = SearchAttribute.SearchMethods.BeginsWith, IsSplitOnSpaces = true)]
+        public string Name { get; set; }
+
+        [Search(SearchMethod = SearchAttribute.SearchMethods.Contains, IsSplitOnSpaces = false)]
+        public string Description { get; set; }
+    }
+
+    [Theory]
+    [InlineData(true, "John Doe", "Software Engineer", "John")] // "John" begins "John Doe"
+    [InlineData(false, "John Doe", "Software Engineer", "Doe")] // "Doe" doesn't begin "John Doe", and Description doesn't contain "Doe" 
+    [InlineData(true, "John Doe", "Software Engineer", "Software")] // Description contains "Software"
+    [InlineData(true, "John Doe", "Software Engineer", "Engineer")] // Description contains "Engineer"
+    [InlineData(true, "John Doe", "Software Engineer", "Software Engineer")] // Description contains "Software Engineer"
+    [InlineData(true, "John Doe", "Software Engineer", "oftware")] // Description contains "oftware" (part of "Software")
+    [InlineData(true, "John Doe", "Software Engineer", "neer")]    // Description contains "neer" (part of "Engineer")
+    [InlineData(false, "John Doe", "Software Engineer", "John Engineer")] // "John" begins Name but "Engineer" doesn't begin Name, Description contains "Engineer" but not "John"
+    public void Search_MixedSplitOnSpaces_SearchesCorrectly(
+        bool shouldMatch, string name, string description, string inputValue)
+    {
+        SearchHelper<MixedSplitOnSpaces>(
+            inputValue,
+            model =>
+            {
+                model.Name = name;
+                model.Description = description;
+            },
+            shouldMatch);
+    }
+
     [Theory]
     [InlineData(true, "a1", "a1")]
     [InlineData(true, "A1", "a1")]
@@ -270,5 +489,30 @@ public class SearchTests
             Assert.True(matchedItems.Length == 1, $"{searchTerm} didn't match {searchCandidate}.");
         else
             Assert.False(matchedItems.Length == 1, $"{searchTerm} matched on {searchCandidate}, but shouldn't have.");
+    }
+
+    private void SearchHelper<T>(
+        string searchTerm,
+        Action<T> configureModel,
+        bool expectedMatch,
+        TimeZoneInfo timeZoneInfo = null
+    )
+        where T : class, new()
+    {
+        var context = new CrudContext(() => new ClaimsPrincipal(), timeZoneInfo ?? TimeZoneInfo.Local);
+
+        T model = new T();
+        configureModel(model);
+
+        var ds = new SearchTestDataSource<T>(context);
+        var query = new List<T> { model }.AsQueryable();
+        query = ds.ApplyListSearchTerm(query, new FilterParameters { Search = searchTerm });
+
+        var matchedItems = query.ToArray();
+
+        if (expectedMatch)
+            Assert.True(matchedItems.Length == 1, $"{searchTerm} didn't match the configured model.");
+        else
+            Assert.False(matchedItems.Length == 1, $"{searchTerm} matched on the configured model, but shouldn't have.");
     }
 }

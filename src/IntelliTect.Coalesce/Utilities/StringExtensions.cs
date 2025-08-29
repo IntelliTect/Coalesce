@@ -138,7 +138,7 @@ public static class StringExtensions
     [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
     public static string? EscapeStringLiteralForTypeScript(this string? str) => str?
         .Replace(@"\", @"\\")
-        .Replace("\r", @"\r")
+        .Replace("\r", "") // Normalize line endings by stripping \r
         .Replace("\n", @"\n")
         .Replace("\"", "\\\"");
 

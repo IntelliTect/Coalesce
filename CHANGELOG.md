@@ -37,6 +37,7 @@
 ## Fixes
 - Fix error in codegen when using JS reserved keywords or C# contextual keywords as parameter names.
 - Fix c-select not receiving proper disabled styling
+- Default search behavior when no SearchAttribute is present no longer splits on spaces. The old behavior would result in multi-word searches failing to match because the default search behavior is StartsWith, not Contains.
 
 # 5.3.8
 

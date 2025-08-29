@@ -44,7 +44,7 @@ public class SearchTests
         new object[] { true, "6 Nov 17 11:00 AM", -8, new DateTimeOffset(2017, 11, 06, 11, 59, 59, TimeSpan.FromHours(-8)) },
         new object[] { false, "November 6, 2017 11:00 AM", -8, new DateTimeOffset(2017, 11, 06, 12, 00, 00, TimeSpan.FromHours(-8)) },
         new object[] { false, "November 6, 2017 11:00 AM", -8, new DateTimeOffset(2017, 11, 06, 10, 59, 59, TimeSpan.FromHours(-8)) },
-        
+
         new object[] { false, "November 6, 2017 11:00 AM", -6, new DateTimeOffset(2017, 11, 06, 9, 00, 0, TimeSpan.FromHours(-7)) },
         new object[] { false, "November 6, 2017 11:00 AM", -6, new DateTimeOffset(2017, 11, 06, 9, 30, 14, TimeSpan.FromHours(-9)) },
         new object[] { false, "November 6, 2017 11:00", -6, new DateTimeOffset(2017, 11, 06, 9, 59, 59, TimeSpan.FromHours(-6)) },
@@ -127,6 +127,22 @@ public class SearchTests
             shouldMatch);
     }
 
+    class DefaultString { public string Name { get; set; } }
+
+    [Theory]
+    [InlineData(true, "Brisk Breeze", "Brisk Br")]
+    [InlineData(true, "Brisk Breeze", "Brisk Bre")]
+    [InlineData(false, "Brisk Breeze", "Brisk Brz")]
+    public void Search_SingleDefaultString_SearchesCorrectly(
+        bool shouldMatch, string propValue, string inputValue)
+    {
+        SearchHelper(
+            (DefaultString t) => t.Name,
+            inputValue,
+            propValue,
+            shouldMatch);
+    }
+
     [Theory]
     [InlineData(true, "a1", "a1")]
     [InlineData(true, "A1", "a1")]
@@ -187,7 +203,7 @@ public class SearchTests
         SearchHelper(
             (ComplexModel t) => t.Tests,
             inputValue,
-            new[] {new Test { TestName = propValue } },
+            new[] { new Test { TestName = propValue } },
             shouldMatch);
     }
 

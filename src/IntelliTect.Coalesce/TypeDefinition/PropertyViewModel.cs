@@ -50,7 +50,7 @@ public abstract class PropertyViewModel : ValueViewModel
         (Role == PropertyRole.PrimaryKey && DatabaseGenerated == DatabaseGeneratedOption.None) ||
         // And init-only properties
         (IsInitOnly && EffectiveParent.IsDbMappedType);
-            
+
 
     /// <summary>
     /// True if the property has the `required` C# language keyword, introduced in C# 11.
@@ -83,7 +83,7 @@ public abstract class PropertyViewModel : ValueViewModel
     /// use <see cref="EffectiveParent"/>
     /// </summary>
     public ClassViewModel Parent { get; protected set; }
-    
+
     /// <summary>
     /// The class that is the context in which the property was requested.
     /// Not nessecarily the class that the property is declared on. For that, use <see cref="Parent"/>
@@ -104,7 +104,7 @@ public abstract class PropertyViewModel : ValueViewModel
     /// Returns whether or not the property may be exposed to the client.
     /// </summary>
     public bool IsClientProperty => !IsInternalUse && HasGetter && !Type.IsInternalUse && !IsStatic;
-    
+
     public bool PureTypeOnContext => Object?.IsDbMappedType ?? false;
 
     /// <summary>
@@ -160,8 +160,8 @@ public abstract class PropertyViewModel : ValueViewModel
             PropertyViewModel? firstCandidate = null;
             var candidates = Object.ClientProperties.Where(p =>
                 p.Role == PropertyRole.ReferenceNavigation &&
-                propName is null 
-                    ? !p.Equals(ManyToManyNearNavigationProperty) 
+                propName is null
+                    ? !p.Equals(ManyToManyNearNavigationProperty)
                     : propName == p.Name);
 
             foreach (var prop in candidates)
@@ -177,7 +177,7 @@ public abstract class PropertyViewModel : ValueViewModel
             return firstCandidate;
         }
     }
-        
+
 
 
     /// <summary>
@@ -357,7 +357,11 @@ public abstract class PropertyViewModel : ValueViewModel
     /// True if the search term should be split on spaces and evaluated individually with or.
     /// </summary>
     public bool SearchIsSplitOnSpaces =>
-        this.GetAttributeValue<SearchAttribute, bool>(a => a.IsSplitOnSpaces) ?? true;
+        // If no attribute (i.e. this is an implicit search on Name),
+        // don't split on spaces because that produces weird behavior.
+        // See test Search_SingleDefaultString_SearchesCorrectly that breaks without doing this.
+        this.GetAttribute<SearchAttribute>() is not { } searchAttr ? false :
+        searchAttr.GetValue(a => a.IsSplitOnSpaces) ?? true;
 
     /// <summary>
     /// Returns the fields to search for this object. This could be just the field itself 
@@ -518,8 +522,8 @@ public abstract class PropertyViewModel : ValueViewModel
                     return EffectiveParent.PrimaryKey;
                 }
 
-                if (Object!.ClientProperties.Any(p => 
-                    p.ForeignKeyProperty == Object.PrimaryKey && 
+                if (Object!.ClientProperties.Any(p =>
+                    p.ForeignKeyProperty == Object.PrimaryKey &&
                     p.Type == this.EffectiveParent.Type
                 ))
                 {
@@ -595,8 +599,8 @@ public abstract class PropertyViewModel : ValueViewModel
             // collection navigation on the other side of the relationship.
             return Parent.Usages
                 .OfType<PropertyViewModel>()
-                .FirstOrDefault(p => 
-                    p.Type.IsCollection && 
+                .FirstOrDefault(p =>
+                    p.Type.IsCollection &&
                     p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name) == this.Name &&
                     p.EffectiveParent.IsDbMappedType
                 )
@@ -674,7 +678,8 @@ public abstract class PropertyViewModel : ValueViewModel
     /// <summary>
     /// If this is a navigation property, returns the property that holds the foreign key. 
     /// </summary>
-    public PropertyViewModel? InverseProperty => _InverseProperty.GetValue(() => {
+    public PropertyViewModel? InverseProperty => _InverseProperty.GetValue(() =>
+    {
         if (Object == null || HasNotMapped)
         {
             return null;
@@ -717,7 +722,7 @@ public abstract class PropertyViewModel : ValueViewModel
 
         return null;
     });
-    
+
 
     /// <summary>
     /// For a collection navigation property, this is the ID reference to this object from the contained object.
@@ -762,7 +767,7 @@ public abstract class PropertyViewModel : ValueViewModel
             if (PureType.Assembly.GetAttributeValue<CoalesceConfigurationAttribute, bool>(a => a.NoAutoInclude) == true)
             {
                 return false;
-            } 
+            }
 
             return true;
         }
@@ -773,10 +778,10 @@ public abstract class PropertyViewModel : ValueViewModel
     /// </summary>
     public bool HasNotMapped => this.HasAttribute<NotMappedAttribute>();
 
-    public bool IsDbMapped => 
-        !HasNotMapped && 
+    public bool IsDbMapped =>
+        !HasNotMapped &&
         // Collection navigation properties are allowed to be getter-only
-        (HasSetter || (Type.IsCollection && PureType.IsPOCO)) && 
+        (HasSetter || (Type.IsCollection && PureType.IsPOCO)) &&
         (Object?.IsDbMappedType ?? true);
 
     /// <summary>

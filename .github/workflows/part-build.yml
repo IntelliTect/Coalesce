@@ -114,7 +114,7 @@ jobs:
       - run: npm run build
 
       - name: update version
-        run: sed -i "s/0.1.0/$COALESCE_VERSION/g" package.json
+        run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 
       - run: npm pack
 

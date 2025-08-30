@@ -40,14 +40,10 @@ async function runCoalesceGeneration(
   const absoluteConfigPath = path.resolve(configPath);
 
   return new Promise((resolve, reject) => {
-    const process = spawn(
-      "dotnet",
-      ["coalesce", "-v", "warning", absoluteConfigPath],
-      {
-        cwd: webProjectPath,
-        stdio: ["pipe", "pipe", "pipe"],
-      },
-    );
+    const process = spawn("dotnet", ["coalesce", absoluteConfigPath], {
+      cwd: webProjectPath,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
 
     let stdout = "";
     let stderr = "";

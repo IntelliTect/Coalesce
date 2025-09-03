@@ -34,6 +34,7 @@
             <v-checkbox-btn
               density="compact"
               class="mr-2"
+              title="Toggle Visibility"
               :model-value="selectedColumns?.includes(prop.name) ?? false"
             />
           </template>

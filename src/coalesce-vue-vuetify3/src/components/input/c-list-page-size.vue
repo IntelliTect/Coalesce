@@ -24,32 +24,32 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ListViewModel } from "coalesce-vue";
-import { defineComponent, PropType } from "vue";
+import { computed } from "vue";
 
-export default defineComponent({
+defineOptions({
   name: "c-list-page-size",
+});
 
-  props: {
-    list: { required: true, type: Object as PropType<ListViewModel> },
-    items: {
-      default() {
-        return [10, 25, 100];
-      },
-    },
+const props = withDefaults(
+  defineProps<{
+    list: ListViewModel;
+    items?: number[];
+  }>(),
+  {
+    items: () => [10, 25, 100],
   },
-  computed: {
-    selectBinds(): any {
-      return {
-        variant: "outlined",
-        "hide-details": true,
-        density: "compact",
-        items: this.items,
-        class: "c-list-page-size--dropdown",
-      };
-    },
-  },
+);
+
+const selectBinds = computed((): any => {
+  return {
+    variant: "outlined",
+    "hide-details": true,
+    density: "compact",
+    items: props.items,
+    class: "c-list-page-size--dropdown",
+  };
 });
 </script>
 

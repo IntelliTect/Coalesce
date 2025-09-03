@@ -145,8 +145,8 @@
                       (prop.subtype == 'email'
                         ? 'mailto:'
                         : prop.subtype == 'tel'
-                        ? 'tel:'
-                        : '') + (model as any)[prop.name]
+                          ? 'tel:'
+                          : '') + (model as any)[prop.name]
                     "
                   >
                     <v-icon class="black--text"
@@ -194,7 +194,7 @@
   </v-card>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   ViewModel,
   Property,
@@ -205,112 +205,108 @@ import {
 
 import { getRefNavRoute } from "./util";
 import { isPropReadOnly } from "../../util";
-import { PropType, defineComponent, ref, watch } from "vue";
+import { watch, computed, useTemplateRef } from "vue";
 
-export default defineComponent({
+defineOptions({
   name: "c-admin-editor",
+});
 
-  setup() {
-    const form = ref<any>();
-    // Validate the form when it is rendered to trigger all validation messages.
-    // This will either be immediate for a create scenario, or delayed until load for an edit.
-    watch(form, (form) => {
-      form?.validate?.();
-    });
-
-    return { form, isPropReadOnly };
-  },
-
-  props: {
-    model: {
-      required: true,
-      type: Object as PropType<ViewModel>,
-    },
-    color: { required: false, type: String, default: null },
-
+const props = withDefaults(
+  defineProps<{
+    model: ViewModel;
+    color?: string;
     /** Whether or not a delete button is shown. Default true if the provided model allows deletes. */
-    deletable: { required: false, type: Boolean, default: true },
+    deletable?: boolean;
+  }>(),
+  {
+    deletable: true,
   },
+);
 
-  methods: {
-    getRefNavRoute,
-    propInputBinds(p: Property) {
-      let readonly = isPropReadOnly(p, this.model);
+const emit = defineEmits<{
+  deleted: [];
+}>();
 
-      return {
-        readonly,
-      };
-    },
+const form = useTemplateRef("form");
 
-    async deleteItemWithConfirmation() {
-      if (confirm("Are you sure you wish to delete this item?")) {
-        await this.model.$delete();
-        this.$emit("deleted");
-      }
-    },
+// Validate the form when it is rendered to trigger all validation messages.
+// This will either be immediate for a create scenario, or delayed until load for an edit.
+watch(form, (form) => {
+  form?.validate?.();
+});
 
-    async reload() {
-      this.model.$save.wasSuccessful = null;
-      this.model.$delete.wasSuccessful = null;
-      this.model.$bulkSave.wasSuccessful = null;
-      this.model.$load();
-    },
-  },
+function propInputBinds(p: Property) {
+  let readonly = isPropReadOnly(p, props.model);
 
-  computed: {
-    metadata(): ModelType {
-      if (this.model) {
-        return this.model.$metadata;
-      }
-      throw `No metadata available.`;
-    },
+  return {
+    readonly,
+  };
+}
 
-    showContent() {
-      const model = this.model;
-      return (
-        // If we have loaded at least once, we're in an edit scenario and the object is loaded.
-        model.$load.wasSuccessful ||
-        // If we're not loading now, we're in a create scenario.
-        !model.$load.isLoading
-      );
-    },
+async function deleteItemWithConfirmation() {
+  if (confirm("Are you sure you wish to delete this item?")) {
+    await props.model.$delete();
+    emit("deleted");
+  }
+}
 
-    hasPk() {
-      return this.model.$primaryKey != null;
-    },
+async function reload() {
+  props.model.$save.wasSuccessful = null;
+  props.model.$delete.wasSuccessful = null;
+  props.model.$bulkSave.wasSuccessful = null;
+  props.model.$load();
+}
+const metadata = computed((): ModelType => {
+  if (props.model) {
+    return props.model.$metadata;
+  }
+  throw `No metadata available.`;
+});
 
-    canEdit() {
-      const metadata = this.metadata;
-      if (!metadata) return false;
+const showContent = computed(() => {
+  const model = props.model;
+  return (
+    // If we have loaded at least once, we're in an edit scenario and the object is loaded.
+    model.$load.wasSuccessful ||
+    // If we're not loading now, we're in a create scenario.
+    !model.$load.isLoading
+  );
+});
 
-      return (
-        (metadata.behaviorFlags &
-          (this.hasPk ? BehaviorFlags.Edit : BehaviorFlags.Create)) !=
-        0
-      );
-    },
+const hasPk = computed(() => {
+  return props.model.$primaryKey != null;
+});
 
-    canDelete() {
-      return (
-        this.deletable &&
-        (this.metadata?.behaviorFlags & BehaviorFlags.Delete) != 0
-      );
-    },
+const canEdit = computed(() => {
+  const metadataValue = metadata.value;
+  if (!metadataValue) return false;
 
-    showProps() {
-      if (!this.model) return [];
+  return (
+    (metadataValue.behaviorFlags &
+      (hasPk.value ? BehaviorFlags.Edit : BehaviorFlags.Create)) !=
+    0
+  );
+});
 
-      return Object.values(this.metadata.props).filter(
-        (p: Property) =>
-          p.hidden === undefined || (p.hidden & HiddenAreas.Edit) == 0
-        // && (!p.dontSerialize || p.role == "referenceNavigation" || p.role == "collectionNavigation")
-      );
-    },
+const canDelete = computed(() => {
+  return (
+    props.deletable &&
+    (metadata.value?.behaviorFlags & BehaviorFlags.Delete) != 0
+  );
+});
 
-    isBulkSaveDirty() {
-      return this.model.$bulkSavePreview().isDirty;
-    },
-  },
+const showProps = computed(() => {
+  if (!props.model) return [];
+
+  return Object.values(metadata.value.props).filter(
+    (p: Property) =>
+      p.hidden === undefined || (p.hidden & HiddenAreas.Edit) == 0,
+    // && (!p.dontSerialize || p.role == "referenceNavigation" || p.role == "collectionNavigation")
+  );
+});
+
+const isBulkSaveDirty = computed(() => {
+  return props.model.$bulkSavePreview().isDirty;
 });
 </script>
 

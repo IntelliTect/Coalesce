@@ -81,7 +81,7 @@
 </template>
 
 <script setup lang="ts" generic="TList extends ListViewModel = ListViewModel">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { ListViewModel, ModelType, HiddenAreas } from "coalesce-vue";
 import { VTable } from "vuetify/components";
 import { isPropReadOnly } from "../../util";
@@ -117,17 +117,17 @@ const emit = defineEmits<{ "click:item": [arg: ViewModelType] }>();
 // has Typescript bugs right now in vue-language-tools.
 const listVm = computed(() => props.list);
 
-const cTable = ref<HTMLDivElement>();
+const cTable = useTemplateRef("cTable");
 const isHorizontalScrollbarVisible = ref(false);
 
-const checkHorizontalScrollbar = () => {
+function checkHorizontalScrollbar() {
   const divElement = cTable.value;
   const tableElement = divElement?.querySelector("table");
   if (tableElement && divElement) {
     isHorizontalScrollbarVisible.value =
       divElement.clientWidth < tableElement.clientWidth;
   }
-};
+}
 
 const resizeObserver = new ResizeObserver(() => {
   checkHorizontalScrollbar();

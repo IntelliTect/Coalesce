@@ -19,41 +19,41 @@
   </span>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from "vue";
+<script setup lang="ts">
+import { computed } from "vue";
 import type { ListViewModel } from "coalesce-vue";
 
-export default defineComponent({
+defineOptions({
   name: "c-list-range-display",
-  props: {
-    list: { required: true, type: Object as PropType<ListViewModel> },
-  },
-  computed: {
-    rangeStart(): number {
-      const list = this.list!;
-      const page = list.$load.page ?? 0;
-      const pageSize = list.$load.pageSize ?? 0;
+});
 
-      if (!list.$load.totalCount) {
-        return 0;
-      }
+const props = defineProps<{
+  list: ListViewModel;
+}>();
 
-      return (page - 1) * pageSize + 1;
-    },
+const rangeStart = computed((): number => {
+  const list = props.list!;
+  const page = list.$load.page ?? 0;
+  const pageSize = list.$load.pageSize ?? 0;
 
-    rangeEnd(): number {
-      const list = this.list!;
+  if (!list.$load.totalCount) {
+    return 0;
+  }
 
-      if (!list.$load.totalCount) {
-        return 0;
-      }
+  return (page - 1) * pageSize + 1;
+});
 
-      return (
-        this.rangeStart +
-        (list.$modelOnlyMode ? list.$modelItems : list.$items).length -
-        1
-      );
-    },
-  },
+const rangeEnd = computed((): number => {
+  const list = props.list!;
+
+  if (!list.$load.totalCount) {
+    return 0;
+  }
+
+  return (
+    rangeStart.value +
+    (list.$modelOnlyMode ? list.$modelItems : list.$items).length -
+    1
+  );
 });
 </script>

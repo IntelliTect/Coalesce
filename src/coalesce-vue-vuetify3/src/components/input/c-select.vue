@@ -394,6 +394,7 @@ import {
   watch,
   camelize,
   onBeforeUnmount,
+  useTemplateRef,
 } from "vue";
 import {
   useMetadataProps,
@@ -569,10 +570,10 @@ const passthroughSlots = computed(() => {
   return ret;
 });
 
-const rootRef = ref<VInput>();
-const mainInputRef = ref<HTMLInputElement>();
-const menuContentRef = ref<ComponentPublicInstance>();
-const searchRef = ref<ComponentPublicInstance>();
+const rootRef = useTemplateRef("rootRef");
+const mainInputRef = useTemplateRef("mainInputRef");
+const menuContentRef = useTemplateRef("menuContentRef");
+const searchRef = useTemplateRef("searchRef");
 
 const fieldAttrs = computed(() =>
   VField.filterProps(

@@ -14,18 +14,17 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ListViewModel } from "coalesce-vue";
-import { defineComponent, PropType } from "vue";
 
-export default defineComponent({
+defineOptions({
   name: "c-list-pagination",
-
-  props: {
-    list: { required: true, type: Object as PropType<ListViewModel> },
-    pageSizes: { required: false, type: Array as PropType<number[]> },
-  },
 });
+
+defineProps<{
+  list: ListViewModel;
+  pageSizes?: number[];
+}>();
 </script>
 
 <style lang="scss">

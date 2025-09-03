@@ -41,8 +41,8 @@
   </v-card>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { computed } from "vue";
 import {
   ViewModel,
   ModelType,
@@ -50,56 +50,46 @@ import {
   HiddenAreas,
   ServiceViewModel,
 } from "coalesce-vue";
-import { PropType } from "vue";
 
 type AnyViewModel = ViewModel | ListViewModel | ServiceViewModel;
 
-export default defineComponent({
+defineOptions({
   name: "c-admin-methods",
+});
 
-  props: {
-    model: {
-      required: true,
-      type: Object as PropType<AnyViewModel>,
-    },
-    area: {
-      required: false,
-      type: Number as PropType<HiddenAreas>,
-    },
-    color: { required: false, type: String, default: null },
-    autoReloadModel: { required: false, type: Boolean, default: false },
-  },
+const props = defineProps<{
+  model: AnyViewModel;
+  area?: HiddenAreas;
+  color?: string;
+  autoReloadModel?: boolean;
+}>();
 
-  computed: {
-    viewModel(): AnyViewModel {
-      if (this.model instanceof ViewModel) return this.model;
-      if (this.model instanceof ListViewModel) return this.model;
-      if (this.model instanceof ServiceViewModel) return this.model;
-      throw Error(
-        "c-method: prop `model` is required, and must be a ViewModel.",
-      );
-    },
+const viewModel = computed((): AnyViewModel => {
+  const model = props.model;
+  if (model instanceof ViewModel) return model;
+  if (model instanceof ListViewModel) return model;
+  if (model instanceof ServiceViewModel) return model;
+  throw Error("c-method: prop `model` is required, and must be a ViewModel.");
+});
 
-    metadata() {
-      return this.viewModel.$metadata as ModelType;
-    },
+const metadata = computed(() => {
+  return viewModel.value.$metadata as ModelType;
+});
 
-    isStatic() {
-      return this.viewModel instanceof ListViewModel;
-    },
+const isStatic = computed(() => {
+  return viewModel.value instanceof ListViewModel;
+});
 
-    methods() {
-      if (this.viewModel instanceof ViewModel && !this.viewModel.$primaryKey) {
-        return [];
-      }
+const methods = computed(() => {
+  if (viewModel.value instanceof ViewModel && !viewModel.value.$primaryKey) {
+    return [];
+  }
 
-      return Object.values(this.metadata.methods).filter(
-        (m) =>
-          !!m.isStatic == this.isStatic &&
-          (!this.area || ((m.hidden || 0) & this.area) == 0),
-      );
-    },
-  },
+  return Object.values(metadata.value.methods).filter(
+    (m) =>
+      !!m.isStatic == isStatic.value &&
+      (!props.area || ((m.hidden || 0) & props.area) == 0),
+  );
 });
 </script>
 

@@ -140,7 +140,7 @@ import {
   computed,
   nextTick,
   onMounted,
-  ref,
+  useTemplateRef,
   watch,
 } from "vue";
 
@@ -154,16 +154,16 @@ const props = withDefaults(
     max?: Date | null;
     color?: string | null;
   }>(),
-  { step: 1, color: "secondary" }
+  { step: 1, color: "secondary" },
 );
 
 const emit = defineEmits<{ "update:modelValue": [arg: Date] }>();
 
-const root = ref<ComponentPublicInstance>();
+const root = useTemplateRef("root");
 
 const hours = computed(() => {
   return [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].filter(
-    (h) => props.step <= 60 || (h * 60) % props.step == 0
+    (h) => props.step <= 60 || (h * 60) % props.step == 0,
   );
 });
 
@@ -177,7 +177,7 @@ const meridiems = [
 ];
 
 const activeItemClass = computed(
-  () => "c-time-picker__item-active bg-" + props.color
+  () => "c-time-picker__item-active bg-" + props.color,
 );
 function getDateToModify() {
   return props.modelValue ?? startOfHour(new Date());
@@ -300,13 +300,13 @@ onMounted(() => {
             : lerp(
                 parent.scrollTop,
                 scrollTarget,
-                (new Date().valueOf() - start) / totalDuration
+                (new Date().valueOf() - start) / totalDuration,
               );
         }, 15));
         setTimeout(() => clearInterval(interval), totalDuration);
       });
     },
-    { immediate: true }
+    { immediate: true },
   );
 });
 

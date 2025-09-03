@@ -113,7 +113,7 @@
   </v-card>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   ListViewModel,
   ViewModel,
@@ -128,11 +128,11 @@ import {
 import {
   computed,
   customRef,
-  defineComponent,
-  PropType,
   ref,
   toRef,
   watch,
+  getCurrentInstance,
+  onMounted,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
@@ -140,286 +140,266 @@ import { copyParamsToNewViewModel } from "./util";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";
 
-export default defineComponent({
+defineOptions({
   name: "c-admin-table",
-  components: { CAdminCreateBtn },
+});
 
-  props: {
-    list: { required: true, type: Object as PropType<ListViewModel> },
-    pageSizes: { required: false, type: Array as PropType<number[]> },
-    color: { required: false, type: String, default: null },
-    queryBind: { type: Boolean, default: false },
-    autoSave: {
-      required: false,
-      type: [String, Boolean] as PropType<"auto" | boolean>,
-      default: "auto",
-    },
-    columns: {
-      required: false,
-      type: Array as PropType<string[]>,
-      default: undefined,
-    },
-    columnSelectionKey: {
-      required: false,
-      type: String,
-      default: undefined,
-    },
+const props = withDefaults(
+  defineProps<{
+    list: ListViewModel;
+    pageSizes?: number[];
+    color?: string;
+    queryBind?: boolean;
+    autoSave?: "auto" | boolean;
+    columns?: string[];
+    columnSelectionKey?: string;
+  }>(),
+  {
+    autoSave: "auto",
   },
+);
 
-  setup(props) {
-    const tableProps = useAdminTable(toRef(props, "list"));
-    const editable = ref(false);
-    const route = useRoute();
+const router = useRouter();
+const route = useRoute();
+const instance = getCurrentInstance()!;
+const { metadata, canEdit, canDelete, hasInstanceMethods, getItemRoute } =
+  useAdminTable(toRef(props, "list"));
 
-    // Column selection logic
-    const availableProps = computed(() => {
-      return Object.values(tableProps.metadata.value.props).filter((p) => {
-        if (p.role == "foreignKey" && p.navigationProp) {
-          return false;
+const editable = ref(false);
+
+const viewModel = computed((): ListViewModel => {
+  if (props.list instanceof ListViewModel) return props.list;
+  throw Error(
+    "c-admin-table: prop `list` is required, and must be a ListViewModel.",
+  );
+});
+
+// Column selection logic
+const availableProps = computed(() => {
+  return Object.values(metadata.value.props).filter((p) => {
+    if (p.role == "foreignKey" && p.navigationProp) {
+      return false;
+    }
+    return true;
+  });
+});
+
+const defaultColumns = computed(() => {
+  return (
+    props.columns ||
+    availableProps.value
+      .filter(
+        (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0,
+      )
+      .map((p) => p.name)
+  );
+});
+
+const storageKey = computed(() => {
+  const base = `c-admin-columns-${metadata.value.name}`;
+  if (props.columnSelectionKey) {
+    return `${base}-${props.columnSelectionKey}`;
+  }
+  return `${base}-${route.path}`;
+});
+
+const effectiveColumns = computed(() => {
+  const defaults = defaultColumns.value;
+  const saved = columnPreferences.value;
+
+  if (!saved || Object.keys(saved).length === 0) {
+    return defaults;
+  }
+
+  // Start with defaults and apply preferences
+  const result: string[] = [];
+  for (const col of availableProps.value.map((p) => p.name)) {
+    const preference = saved[col];
+    if (preference === true) {
+      // Explicitly included
+      result.push(col);
+    } else if (preference === false) {
+      // Explicitly excluded - skip
+    } else if (defaults.includes(col)) {
+      // No explicit preference, but in defaults
+      result.push(col);
+    }
+  }
+
+  return result;
+});
+
+function onColumnsUpdated(newColumns: string[] | null) {
+  if (newColumns == null) {
+    columnPreferences.value = null;
+    return;
+  }
+
+  const currentEffective = effectiveColumns.value;
+  const preferences = columnPreferences.value || {};
+
+  // IMPORTANT: Only make changes to "preferences" based on the user's explicit change.
+  // Don't capture the entire column state into preferences so that when adjustments
+  // are made to a table's defaults, they aren't preemptively excluded for the user
+  // if the user has never made an explicit decision about the column.
+
+  for (const newCol of newColumns) {
+    if (!currentEffective.includes(newCol)) {
+      // Column is newly selected.
+      preferences[newCol] = true;
+    }
+  }
+  for (const oldCol of currentEffective) {
+    if (!newColumns.includes(oldCol)) {
+      // Column is newly deselected.
+      preferences[oldCol] = false;
+    }
+  }
+
+  columnPreferences.value = preferences;
+}
+
+const columnPreferences = customRef<Record<string, boolean> | null>(
+  (track, trigger) => {
+    return {
+      get(): Record<string, boolean> | null {
+        track();
+        const saved = localStorage.getItem(storageKey.value);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (
+            typeof parsed === "object" &&
+            parsed !== null &&
+            !Array.isArray(parsed)
+          ) {
+            return parsed;
+          }
         }
-        return true;
-      });
-    });
-
-    const defaultColumns = computed(() => {
-      return (
-        props.columns ||
-        availableProps.value
-          .filter(
-            (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0,
-          )
-          .map((p) => p.name)
-      );
-    });
-
-    const storageKey = computed(() => {
-      const base = `c-admin-columns-${tableProps.metadata.value.name}`;
-      if (props.columnSelectionKey) {
-        return `${base}-${props.columnSelectionKey}`;
-      }
-      return `${base}-${route.path}`;
-    });
-
-    const effectiveColumns = computed(() => {
-      const defaults = defaultColumns.value;
-      const saved = columnPreferences.value;
-
-      if (!saved || Object.keys(saved).length === 0) {
-        return defaults;
-      }
-
-      // Start with defaults and apply preferences
-      const result: string[] = [];
-      for (const col of availableProps.value.map((p) => p.name)) {
-        const preference = saved[col];
-        if (preference === true) {
-          // Explicitly included
-          result.push(col);
-        } else if (preference === false) {
-          // Explicitly excluded - skip
-        } else if (defaults.includes(col)) {
-          // No explicit preference, but in defaults
-          result.push(col);
-        }
-      }
-
-      return result;
-    });
-
-    const onColumnsUpdated = (newColumns: string[] | null) => {
-      if (newColumns == null) {
-        columnPreferences.value = null;
-        return;
-      }
-
-      const currentEffective = effectiveColumns.value;
-      const preferences = columnPreferences.value || {};
-
-      // IMPORTANT: Only make changes to "preferences" based on the user's explicit change.
-      // Don't capture the entire column state into preferences so that when adjustments
-      // are made to a table's defaults, they aren't preemptively excluded for the user
-      // if the user has never made an explicit decision about the column.
-
-      for (const newCol of newColumns) {
-        if (!currentEffective.includes(newCol)) {
-          // Column is newly selected.
-          preferences[newCol] = true;
-        }
-      }
-      for (const oldCol of currentEffective) {
-        if (!newColumns.includes(oldCol)) {
-          // Column is newly deselected.
-          preferences[oldCol] = false;
-        }
-      }
-
-      columnPreferences.value = preferences;
-    };
-
-    const columnPreferences = customRef<Record<string, boolean> | null>(
-      (track, trigger) => {
-        return {
-          get(): Record<string, boolean> | null {
-            track();
-            const saved = localStorage.getItem(storageKey.value);
-            if (saved) {
-              const parsed = JSON.parse(saved);
-              if (
-                typeof parsed === "object" &&
-                parsed !== null &&
-                !Array.isArray(parsed)
-              ) {
-                return parsed;
-              }
-            }
-            return null;
-          },
-          set(preferences: Record<string, boolean> | null) {
-            if (preferences === null) {
-              localStorage.removeItem(storageKey.value);
-            } else {
-              localStorage.setItem(
-                storageKey.value,
-                JSON.stringify(preferences),
-              );
-            }
-            trigger();
-          },
-        };
+        return null;
       },
+      set(preferences: Record<string, boolean> | null) {
+        if (preferences === null) {
+          localStorage.removeItem(storageKey.value);
+        } else {
+          localStorage.setItem(storageKey.value, JSON.stringify(preferences));
+        }
+        trigger();
+      },
+    };
+  },
+);
+
+const effectiveAutoSave = computed(() => {
+  if (!editable.value) return false;
+
+  const value = props.autoSave;
+  if (value == null || value == "auto") {
+    const meta = metadata.value;
+    for (const propName in meta.props) {
+      if (meta.props[propName].createOnly) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return value;
+});
+
+async function deleteItemWithConfirmation(item: ViewModel<any, any>) {
+  if (confirm("Are you sure you wish to delete this item?")) {
+    await item.$delete();
+    await viewModel.value.$load();
+  }
+}
+
+function addItem(meta: ModelType) {
+  const vm = new ViewModel.typeLookup![meta.name]();
+  copyParamsToNewViewModel(vm, props.list.$params);
+  props.list.$items.push(vm);
+}
+
+onMounted(() => {
+  if (props.queryBind) {
+    // Use refs directly for bindToQueryString in script setup
+    bindToQueryString(instance, { editable }, "editable", {
+      parse: (v) => ref(v === "true"),
+    });
+
+    // Establish the baseline parameters that do not need to be represented in the query string.
+    // I.E. don't put the default values of parameters in the query string.
+    const baselineParams = mapParamsToDto(viewModel.value.$params);
+
+    // When the parameters change, put them into the query string.
+    watch(
+      () => mapParamsToDto(viewModel.value.$params),
+      (mappedParams: any, old: any) => {
+        // For any parameters that match the baseline parameters,
+        // do not put those parameters in the query string.
+        for (const key in baselineParams) {
+          if (mappedParams[key] == baselineParams[key]) {
+            delete mappedParams[key];
+          }
+        }
+
+        router
+          .replace({
+            query: {
+              // First, take all existing query params so that any that aren't handled
+              // by mapQueryToParams/mapParamsToDto don't get lost
+              ...router.currentRoute.value.query,
+              // Next, set all previous query-mapped params to undefined
+              // so that any that aren't in the new mappedParams object get unset
+              ...(typeof old == "object"
+                ? Object.fromEntries(
+                    Object.entries(old!).map((e) => [e[0], undefined]),
+                  )
+                : {}),
+              // Then layer on any new params, overwriting any that got set to undefined previously.
+              ...(mappedParams as any),
+            },
+          })
+          .catch((err) => {
+            // Ignore errors about duplicate navigations. These are annoying and useless.
+            if (err.name === "NavigationDuplicated") return;
+            throw err;
+          });
+      },
+      { deep: true },
     );
 
-    const effectiveAutoSave = computed(() => {
-      if (!editable.value) return false;
-
-      const value = props.autoSave;
-      if (value == null || value == "auto") {
-        const meta = tableProps.metadata.value;
-        for (const propName in meta.props) {
-          if (meta.props[propName].createOnly) {
-            return false;
-          }
-        }
-        return true;
-      }
-      return value;
-    });
-
-    return {
-      router: useRouter(),
-      ...tableProps,
-      editable,
-      effectiveAutoSave,
-      availableProps,
-      effectiveColumns,
-      onColumnsUpdated,
-    };
-  },
-
-  computed: {
-    viewModel(): ListViewModel {
-      if (this.list instanceof ListViewModel) return this.list;
-      throw Error(
-        "c-admin-table: prop `list` is required, and must be a ListViewModel.",
-      );
-    },
-  },
-
-  methods: {
-    async deleteItemWithConfirmation(item: ViewModel<any, any>) {
-      if (confirm("Are you sure you wish to delete this item?")) {
-        await item.$delete();
-        await this.viewModel.$load();
-      }
-    },
-
-    addItem(meta: ModelType) {
-      const viewModel = new ViewModel.typeLookup![meta.name]();
-      copyParamsToNewViewModel(viewModel, this.list.$params);
-      this.list.$items.push(viewModel);
-    },
-  },
-
-  created() {
-    if (this.queryBind) {
-      bindToQueryString(this, this, "editable", { parse: (v) => v === "true" });
-
-      // Establish the baseline parameters that do not need to be represented in the query string.
-      // I.E. don't put the default values of parameters in the query string.
-      const baselineParams = mapParamsToDto(this.viewModel.$params);
-
-      // When the parameters change, put them into the query string.
-      this.$watch(
-        () => mapParamsToDto(this.viewModel.$params),
-        (mappedParams: any, old: any) => {
-          // For any parameters that match the baseline parameters,
-          // do not put those parameters in the query string.
-          for (const key in baselineParams) {
-            if (mappedParams[key] == baselineParams[key]) {
-              delete mappedParams[key];
-            }
-          }
-
-          this.router
-            .replace({
-              query: {
-                // First, take all existing query params so that any that aren't handled
-                // by mapQueryToParams/mapParamsToDto don't get lost
-                ...this.router.currentRoute.value.query,
-                // Next, set all previous query-mapped params to undefined
-                // so that any that aren't in the new mappedParams object get unset
-                ...(typeof old == "object"
-                  ? Object.fromEntries(
-                      Object.entries(old!).map((e) => [e[0], undefined]),
-                    )
-                  : {}),
-                // Then layer on any new params, overwriting any that got set to undefined previously.
-                ...(mappedParams as any),
-              },
-            })
-            .catch((err) => {
-              // Ignore errors about duplicate navigations. These are annoying and useless.
-              if (err.name === "NavigationDuplicated") return;
-              throw err;
-            });
-        },
-        { deep: true },
-      );
-
-      // When the query changes, grab the new parameter values.
-      this.$watch(
-        () => this.router.currentRoute.value.query,
-        (v: any) => {
-          this.viewModel.$params = mapQueryToParams(
-            {
-              ...baselineParams,
-              // Overlay the query values on top of the baseline parameters.
-              ...v,
-            },
-            ListParameters,
-            this.viewModel.$metadata,
-          );
-        },
-        { immediate: true },
-      );
-    }
-
-    this.$watch(
-      () => this.effectiveAutoSave,
-      (effectiveAutoSave) => {
-        if (effectiveAutoSave && !this.viewModel.$isAutoSaveEnabled) {
-          this.viewModel.$startAutoSave(this, { wait: 500 });
-        } else if (!effectiveAutoSave && this.viewModel.$isAutoSaveEnabled) {
-          this.viewModel.$stopAutoSave();
-        }
+    // When the query changes, grab the new parameter values.
+    watch(
+      () => router.currentRoute.value.query,
+      (v: any) => {
+        viewModel.value.$params = mapQueryToParams(
+          {
+            ...baselineParams,
+            // Overlay the query values on top of the baseline parameters.
+            ...v,
+          },
+          ListParameters,
+          viewModel.value.$metadata,
+        );
       },
       { immediate: true },
     );
+  }
 
-    this.viewModel.$load.setConcurrency("debounce");
-    this.viewModel.$startAutoLoad(this, { wait: 0 });
-    this.viewModel.$load();
-  },
+  watch(
+    () => effectiveAutoSave.value,
+    (effectiveAutoSave) => {
+      if (effectiveAutoSave && !viewModel.value.$isAutoSaveEnabled) {
+        viewModel.value.$startAutoSave(instance, { wait: 500 });
+      } else if (!effectiveAutoSave && viewModel.value.$isAutoSaveEnabled) {
+        viewModel.value.$stopAutoSave();
+      }
+    },
+    { immediate: true },
+  );
+
+  viewModel.value.$load.setConcurrency("debounce");
+  viewModel.value.$startAutoLoad(instance, { wait: 0 });
+  viewModel.value.$load();
 });
 </script>
 

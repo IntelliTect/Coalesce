@@ -120,7 +120,8 @@
         variant="outlined"
         clearable
         autofocus
-        hide-details
+        :hint="getInputHint(filter.propMeta)"
+        persistent-hint
       />
     </div>
 
@@ -143,6 +144,19 @@ defineProps<{
 const emit = defineEmits<{
   clear: [];
 }>();
+
+function getInputHint(propMeta: any): string {
+  if (!propMeta) return "";
+
+  switch (propMeta.type) {
+    case "string":
+      return "Append an asterisk (*) for partial matches";
+    case "date":
+      return "Dates without time match the entire day";
+    default:
+      return "";
+  }
+}
 </script>
 
 <style lang="scss" scoped>

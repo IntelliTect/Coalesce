@@ -41,7 +41,11 @@
 
           <!-- Filter sub-menu -->
           <template #append v-if="filter">
-            <v-menu location="end" :close-on-content-click="false">
+            <v-menu
+              location="end"
+              :close-on-content-click="false"
+              content-class="c-list-filter--prop-menu"
+            >
               <template #activator="{ props: submenuProps }">
                 <v-divider vertical class="mr-1 my-n1"></v-divider>
                 <v-btn

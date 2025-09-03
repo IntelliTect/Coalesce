@@ -32,3 +32,11 @@ Controls whether auto-save is used for items when in edit mode. If `auto` (the d
 
 If true, the [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) of the provided [ListViewModel](/stacks/vue/layers/viewmodels.md) will be read from and written to the window's query string. The "Editable" state of the table will also be bound to the query string.
 
+<Prop def="columns?: string[]" lang="ts" />
+
+An optional array of property names to display as columns. If not provided, all non-hidden properties will be displayed.
+
+<Prop def="columnSelectionKey?: string" lang="ts" />
+
+A custom key for localStorage persistence of user column preferences. If not provided, the current route pathname will be used as part of the key.
+

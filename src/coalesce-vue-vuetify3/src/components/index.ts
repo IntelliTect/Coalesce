@@ -26,28 +26,28 @@ export { default as CTable } from "./display/c-table.vue";
 // Type definitions for intellisense support:
 declare module "vue" {
   interface GlobalComponents {
-    CAdminAuditLogPage: typeof import(".")["CAdminAuditLogPage"];
-    CAdminDisplay: typeof import(".")["CAdminDisplay"];
-    CAdminEditor: typeof import(".")["CAdminEditor"];
-    CAdminEditorPage: typeof import(".")["CAdminEditorPage"];
-    CAdminMethod: typeof import(".")["CAdminMethod"];
-    CAdminMethods: typeof import(".")["CAdminMethods"];
-    CAdminTable: typeof import(".")["CAdminTable"];
-    CAdminTablePage: typeof import(".")["CAdminTablePage"];
-    CAdminTableToolbar: typeof import(".")["CAdminTableToolbar"];
-    CDatetimePicker: typeof import(".")["CDatetimePicker"];
-    CDisplay: typeof import(".")["CDisplay"];
-    CInput: typeof import(".")["CInput"];
-    CListFilters: typeof import(".")["CListFilters"];
-    CListPage: typeof import(".")["CListPage"];
-    CListPageSize: typeof import(".")["CListPageSize"];
-    CListPagination: typeof import(".")["CListPagination"];
-    CListRangeDisplay: typeof import(".")["CListRangeDisplay"];
-    CLoaderStatus: typeof import(".")["CLoaderStatus"];
-    CSelect: typeof import(".")["CSelect"];
-    CSelectManyToMany: typeof import(".")["CSelectManyToMany"];
-    CSelectStringValue: typeof import(".")["CSelectStringValue"];
-    CSelectValues: typeof import(".")["CSelectValues"];
-    CTable: typeof import(".")["CTable"];
+    CAdminAuditLogPage: (typeof import("."))["CAdminAuditLogPage"];
+    CAdminDisplay: (typeof import("."))["CAdminDisplay"];
+    CAdminEditor: (typeof import("."))["CAdminEditor"];
+    CAdminEditorPage: (typeof import("."))["CAdminEditorPage"];
+    CAdminMethod: (typeof import("."))["CAdminMethod"];
+    CAdminMethods: (typeof import("."))["CAdminMethods"];
+    CAdminTable: (typeof import("."))["CAdminTable"];
+    CAdminTablePage: (typeof import("."))["CAdminTablePage"];
+    CAdminTableToolbar: (typeof import("."))["CAdminTableToolbar"];
+    CDatetimePicker: (typeof import("."))["CDatetimePicker"];
+    CDisplay: (typeof import("."))["CDisplay"];
+    CInput: (typeof import("."))["CInput"];
+    CListFilters: (typeof import("."))["CListFilters"];
+    CListPage: (typeof import("."))["CListPage"];
+    CListPageSize: (typeof import("."))["CListPageSize"];
+    CListPagination: (typeof import("."))["CListPagination"];
+    CListRangeDisplay: (typeof import("."))["CListRangeDisplay"];
+    CLoaderStatus: (typeof import("."))["CLoaderStatus"];
+    CSelect: (typeof import("."))["CSelect"];
+    CSelectManyToMany: (typeof import("."))["CSelectManyToMany"];
+    CSelectStringValue: (typeof import("."))["CSelectStringValue"];
+    CSelectValues: (typeof import("."))["CSelectValues"];
+    CTable: (typeof import("."))["CTable"];
   }
 }

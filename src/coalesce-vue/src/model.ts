@@ -140,12 +140,12 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
 
   protected abstract visitCollection(
     value: any[],
-    meta: CollectionValue
+    meta: CollectionValue,
   ): TArray;
 
   protected abstract visitPrimitiveValue(
     value: any,
-    meta: PrimitiveValue
+    meta: PrimitiveValue,
   ): TValue;
 
   protected abstract visitDateValue(value: any, meta: DateValue): TValue;
@@ -162,12 +162,12 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
 function parseError(
   value: any,
   meta: { type: string; name: string },
-  details?: string
+  details?: string,
 ) {
   return new Error(
     `Encountered unparsable ${typeof value} \`${value}\` for ${meta.type} '${
       meta.name
-    }'. ${details || ""}`
+    }'. ${details || ""}`,
   );
 }
 
@@ -185,20 +185,20 @@ export function parseValue(value: any, meta: DateValue): null | Date;
 export function parseValue(value: any, meta: FileValue): null | Blob | File;
 export function parseValue(
   value: any,
-  meta: BinaryValue
+  meta: BinaryValue,
 ): null | Uint8Array | string;
 export function parseValue(value: any, meta: ModelValue): null | object;
 export function parseValue(value: any, meta: ObjectValue): null | object;
 export function parseValue(value: any, meta: ClassType): null | object;
 export function parseValue(
   value: any,
-  meta: PrimitiveValue
+  meta: PrimitiveValue,
 ): null | string | number | boolean;
 export function parseValue(value: any, meta: UnknownValue): null | unknown;
 export function parseValue(value: any[], meta: CollectionValue): Array<any>;
 export function parseValue(
   value: any,
-  meta: Value | ClassType
+  meta: Value | ClassType,
 ): null | string | number | boolean | object | Date | Array<any> | unknown {
   if (value == null) {
     return null;
@@ -245,7 +245,7 @@ export function parseValue(
       if (type === "string") {
         if (value[0] === "[") {
           return JSON.parse(value).map((v: any) =>
-            parseValue(v, meta.itemType)
+            parseValue(v, meta.itemType),
           );
         } else if (
           meta.itemType.type != "model" &&
@@ -304,7 +304,7 @@ export function parseValue(
         throw parseError(
           value,
           meta,
-          "Value only allows base64 string representations."
+          "Value only allows base64 string representations.",
         );
       }
       if (value instanceof ArrayBuffer) return new Uint8Array(value);
@@ -325,12 +325,12 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
 
   public visitObject<TMeta extends ClassType>(
     value: object,
-    meta: TMeta
+    meta: TMeta,
   ): Model<TMeta>;
   public visitObject<TMeta extends ClassType>(value: null, meta: TMeta): null;
   public visitObject<TMeta extends ClassType>(
     value: any,
-    meta: TMeta
+    meta: TMeta,
   ): null | Model<TMeta> {
     if (value == null) return null;
 
@@ -374,7 +374,7 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
         // If there already is metadata but it doesn't match,
         // this is bad - someone passed mismatched parameters.
         throw Error(
-          `While trying to convert object, found metadata for ${value.$metadata.name} where metadata for ${meta.name} was expected.`
+          `While trying to convert object, found metadata for ${value.$metadata.name} where metadata for ${meta.name} was expected.`,
         );
       }
     }
@@ -506,7 +506,7 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
  */
 export function convertToModel<
   TModel extends Model<TMeta>,
-  TMeta extends ClassType = TModel["$metadata"]
+  TMeta extends ClassType = TModel["$metadata"],
 >(object: { [k: string]: any }, metadata: TMeta): TModel;
 /**
  * Transforms a raw value into a valid implementation of a model value.
@@ -532,7 +532,7 @@ export { convertToModel as convertValueToModel };
  */
 export function mapToModel<
   TModel extends Model<TMeta>,
-  TMeta extends ClassType = TModel["$metadata"]
+  TMeta extends ClassType = TModel["$metadata"],
 >(object: { [k: string]: any }, metadata: TMeta): TModel;
 /**
  * Maps a raw value into a valid implementation of a model value.
@@ -658,7 +658,7 @@ class MapToDtoVisitor extends Visitor<
         return formatInTimeZone(
           parsed,
           defaultTimeZone,
-          "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+          "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
         );
       }
 
@@ -720,7 +720,7 @@ class MapToDtoVisitor extends Visitor<
  * @param object The object to map.
  */
 export function mapToDto<T extends Model<ClassType>>(
-  object: T | null | undefined
+  object: T | null | undefined,
 ): null | undefined | ReturnType<MapToDtoVisitor["visitObject"]>;
 /**
  * Maps the given value to a representation suitable for JSON serialization.
@@ -730,7 +730,7 @@ export function mapToDto<T extends Model<ClassType>>(
  */
 export function mapToDto(
   value: any,
-  metadata: Value
+  metadata: Value,
 ): null | ReturnType<MapToDtoVisitor["visitValue"]>;
 export function mapToDto(value: any, metadata?: Value | ClassType): any {
   if (value == null) {
@@ -769,7 +769,7 @@ export { mapToDto as mapValueToDto };
  */
 export function mapToDtoFiltered<T extends Model<ClassType>>(
   object: T | null | undefined,
-  props?: PropNames<T["$metadata"]>[] | null
+  props?: PropNames<T["$metadata"]>[] | null,
 ): {} | null {
   var dto = mapToDto(object) as any;
 
@@ -855,7 +855,7 @@ class DisplayVisitor extends Visitor<
       // With a tweak to also not serialize the $metadata prop.
       try {
         return JSON.stringify(value, (k, v) =>
-          k === "$metadata" ? undefined : k ? "" + v : v
+          k === "$metadata" ? undefined : k ? "" + v : v,
         );
       } catch {
         return value.toLocaleString();
@@ -865,7 +865,7 @@ class DisplayVisitor extends Visitor<
 
   protected visitCollection(
     value: any[] | null,
-    meta: CollectionValue | ModelCollectionNavigationProperty
+    meta: CollectionValue | ModelCollectionNavigationProperty,
   ): string | null {
     if (value == null) return null;
     value = parseValue(value, meta);
@@ -882,13 +882,13 @@ class DisplayVisitor extends Visitor<
       if ("manyToMany" in meta) {
         itemMeta = meta.manyToMany!.farNavigationProp;
         value = value.map(
-          (i) => i[meta.manyToMany!.farNavigationProp.name as any]
+          (i) => i[meta.manyToMany!.farNavigationProp.name as any],
         );
       }
 
       return value
         .map<string>(
-          (childItem) => this.visitValue(childItem, itemMeta) || "???" // TODO: what should this be for un-displayable members of a collection?
+          (childItem) => this.visitValue(childItem, itemMeta) || "???", // TODO: what should this be for un-displayable members of a collection?
         )
         .join(enumeratedItemsSeparator);
     }
@@ -965,7 +965,7 @@ class DisplayVisitor extends Visitor<
         parsed,
         formatOptions.timeZone,
         formatString,
-        formatOptions
+        formatOptions,
       );
     }
 
@@ -1003,7 +1003,7 @@ class DisplayVisitor extends Visitor<
 
   protected visitPrimitiveValue(
     value: any,
-    meta: PrimitiveValue
+    meta: PrimitiveValue,
   ): string | null {
     const parsed = parseValue(value, meta);
     if (parsed == null) return null;
@@ -1034,7 +1034,7 @@ const defaultDisplayVisitor = new DisplayVisitor();
  */
 export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
   item: T,
-  options?: DisplayOptions
+  options?: DisplayOptions,
 ): string | null {
   const modelMeta = item.$metadata;
   if (!modelMeta) {
@@ -1055,7 +1055,7 @@ export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
 export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
   item: T,
   prop: Property | PropNames<TMeta>,
-  options?: DisplayOptions | null
+  options?: DisplayOptions | null,
 ) {
   const propMeta = resolvePropMeta(item.$metadata, prop);
 
@@ -1074,7 +1074,7 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
 export function valueDisplay(
   value: any,
   metadata: Value,
-  options?: DisplayOptions | null
+  options?: DisplayOptions | null,
 ) {
   return (
     options ? new DisplayVisitor(options) : defaultDisplayVisitor
@@ -1096,25 +1096,25 @@ export interface BindToQueryStringOptions<TValue> {
 
 export function bindToQueryString<
   T = any,
-  TKey extends keyof T & string = keyof T & string
+  TKey extends keyof T & string = keyof T & string,
 >(
   vue: VueInstance,
   obj: T,
   key: TKey,
-  options?: BindToQueryStringOptions<T[TKey]>
+  options?: BindToQueryStringOptions<T[TKey]>,
 ): void;
 
 export function bindToQueryString<TValue>(
   vue: VueInstance,
   ref: { value: TValue },
   /** The key on the query to bind to. Shorthand for specifying via options object */
-  queryKey: Exclude<string, "value">
+  queryKey: Exclude<string, "value">,
 ): void;
 
 export function bindToQueryString<TValue>(
   vue: VueInstance,
   ref: { value: TValue },
-  options: BindToQueryStringOptions<TValue> & { queryKey: string }
+  options: BindToQueryStringOptions<TValue> & { queryKey: string },
 ): void;
 
 export function bindToQueryString<T, TKey extends keyof T & string>(
@@ -1126,7 +1126,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
     mode = "replace",
     parse,
     stringify,
-  }: BindToQueryStringOptions<T[TKey]> = {}
+  }: BindToQueryStringOptions<T[TKey]> = {},
 ): void {
   if (isRef(obj) && typeof key == "string" && key !== "value") {
     return bindToQueryString(vue, obj, "value", { queryKey: key });
@@ -1164,7 +1164,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
       }
       if (!vuePublic.$router || !vuePublic.$route) {
         throw new Error(
-          "Could not find $router or $route on the component instance. Is vue-router installed?"
+          "Could not find $router or $route on the component instance. Is vue-router installed?",
         );
       }
 
@@ -1184,15 +1184,15 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
           v == null || v === ""
             ? undefined
             : stringify
-            ? stringify(v)
-            : // Use metadata to format the value if the obj has any.
-            metadata?.params?.[key]
-            ? toString(mapToDto(v, metadata.params[key]))
-            : metadata?.props?.[key]
-            ? toString(mapToDto(v, metadata.props[key]))
-            : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-              // Fallback to .toString()
-              String(v) ?? undefined,
+              ? stringify(v)
+              : // Use metadata to format the value if the obj has any.
+                metadata?.params?.[key]
+                ? toString(mapToDto(v, metadata.params[key]))
+                : metadata?.props?.[key]
+                  ? toString(mapToDto(v, metadata.props[key]))
+                  : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+                    // Fallback to .toString()
+                    (String(v) ?? undefined),
       };
 
       // Fix https://github.com/IntelliTect/Coalesce/issues/310:
@@ -1210,7 +1210,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
       vuePublic.$router[mode]({
         query: newQuery,
       }).catch((err: any) => {});
-    }
+    },
   );
 
   const updateObject = (v: string | null | undefined | (string | null)[]) => {
@@ -1223,16 +1223,16 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
       v == null
         ? defaultValue
         : // Use provided parse function, if provided.
-        parse
-        ? parse(v)
-        : // Use metadata to parse the value if the obj is a DataSource.
-        metadata?.params?.[key]
-        ? mapToModel(v, metadata.params[key])
-        : metadata?.props?.[key]
-        ? mapToModel(v, metadata.props[key])
-        : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-          // Fallback to the raw value
-          v;
+          parse
+          ? parse(v)
+          : // Use metadata to parse the value if the obj is a DataSource.
+            metadata?.params?.[key]
+            ? mapToModel(v, metadata.params[key])
+            : metadata?.props?.[key]
+              ? mapToModel(v, metadata.props[key])
+              : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+                // Fallback to the raw value
+                v;
   };
 
   // When the query changes, grab the new value.
@@ -1253,7 +1253,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
       }
 
       updateObject(v);
-    }
+    },
   );
 
   // Fix #332: circumvent the `await nextTick` above on the initial call"
@@ -1263,29 +1263,29 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
 export function useBindToQueryString<T, TKey extends keyof T & string>(
   obj: T,
   key: TKey,
-  options?: BindToQueryStringOptions<T[TKey]>
+  options?: BindToQueryStringOptions<T[TKey]>,
 ): void;
 
 export function useBindToQueryString<TValue>(
   ref: { value: TValue },
   /** The key on the query to bind to. Shorthand for specifying via options object */
-  queryKey: Exclude<string, "value">
+  queryKey: Exclude<string, "value">,
 ): void;
 
 export function useBindToQueryString<TValue>(
   ref: { value: TValue },
-  options: BindToQueryStringOptions<TValue> & { queryKey: string }
+  options: BindToQueryStringOptions<TValue> & { queryKey: string },
 ): void;
 
 export function useBindToQueryString<T, TKey extends keyof T & string>(
   obj: T,
   key: TKey,
-  options?: BindToQueryStringOptions<T[TKey]>
+  options?: BindToQueryStringOptions<T[TKey]>,
 ): void {
   const vue = getCurrentInstance()?.proxy;
   if (!vue)
     throw new Error(
-      "useBindToQueryString can only be used inside setup(). Consider using bindToQueryString if you're not using Vue composition API."
+      "useBindToQueryString can only be used inside setup(). Consider using bindToQueryString if you're not using Vue composition API.",
     );
   return bindToQueryString(vue, obj, key, options);
 }
@@ -1295,13 +1295,13 @@ export function bindKeyToRouteOnCreate(
   model: Model<ModelType>,
   routeParamName: string = "id",
   keepQuery: boolean = false,
-  routeName?: ComponentPublicInstance["$route"]["name"]
+  routeName?: ComponentPublicInstance["$route"]["name"],
 ) {
   const publicVue = getPublicInstance(vue);
 
   if (!publicVue.$router || !publicVue.$route) {
     throw new Error(
-      "Could not find $router or $route on the component instance. Is vue-router installed?"
+      "Could not find $router or $route on the component instance. Is vue-router installed?",
     );
   }
 
@@ -1327,7 +1327,7 @@ export function bindKeyToRouteOnCreate(
         // or router-view component reconstitutions.
         window.history.replaceState(history.state, "", href);
       }
-    }
+    },
   );
 }
 
@@ -1335,19 +1335,19 @@ export function useBindKeyToRouteOnCreate(
   model: Model<ModelType>,
   routeParamName: string = "id",
   keepQuery: boolean = false,
-  routeName?: ComponentPublicInstance["$route"]["name"]
+  routeName?: ComponentPublicInstance["$route"]["name"],
 ) {
   const vue = getCurrentInstance();
   if (!vue)
     throw new Error(
-      "useBindToQueryString can only be used inside setup(). Consider using bindToQueryString if you're not using Vue composition API."
+      "useBindToQueryString can only be used inside setup(). Consider using bindToQueryString if you're not using Vue composition API.",
     );
   return bindKeyToRouteOnCreate(
     vue,
     model,
     routeParamName,
     keepQuery,
-    routeName
+    routeName,
   );
 }
 

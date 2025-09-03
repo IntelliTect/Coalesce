@@ -69,7 +69,11 @@
 
       <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>
 
-      <c-list-filters :list="list" />
+      <c-list-filters
+        v-model:selected-columns="selectedColumns"
+        :list="list"
+        column-selection
+      />
 
       <v-spacer></v-spacer>
 
@@ -95,6 +99,11 @@ const props = defineProps({
 const editable = defineModel<boolean>("editable", {
   default: null,
   required: false,
+});
+
+const selectedColumns = defineModel<string[] | null>("selectedColumns", {
+  required: false,
+  default: null,
 });
 
 const { metadata } = useAdminTable(toRef(props, "list"));

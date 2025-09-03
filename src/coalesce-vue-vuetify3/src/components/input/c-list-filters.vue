@@ -1,286 +1,148 @@
 <template>
-  <v-menu class="c-list-filters--menu" :close-on-content-click="false" offset-y>
-    <template #activator="{ props }">
-      <v-btn class="c-list-filters" variant="text" v-bind="props">
+  <v-menu class="c-list-filters--menu" :close-on-content-click="false">
+    <template #activator="{ props: menuProps }">
+      <v-btn class="c-list-filters" variant="text" v-bind="menuProps">
         <v-badge
           :model-value="!!activeCount"
           location="top start"
           floating
           :content="activeCount"
-          color="accent"
+          color="secondary"
         >
-          <v-icon :start="$vuetify.display.mdAndUp">fa fa-filter</v-icon>
+          <v-icon :start="$vuetify.display.mdAndUp">
+            {{ columnSelection ? "fa fa-columns" : "fa fa-filter" }}
+          </v-icon>
         </v-badge>
-        <span class="hidden-sm-and-down">Filters</span>
+        <span class="hidden-sm-and-down">
+          {{ columnSelection ? "Columns & Filters" : "Filters" }}
+        </span>
       </v-btn>
     </template>
 
     <v-card class="c-list-filters--card">
-      <v-card-title> Active Filters </v-card-title>
-      <v-card-text>
-        <div v-if="!definedFilters.length" class="text-grey">No Filters</div>
-        <v-row
-          v-for="filter in definedFilters"
-          :key="filter.key"
-          no-gutters
-          align-items="center"
-          align="center"
-          class="py-2"
+      <v-list density="compact">
+        <v-list-item
+          v-for="{ prop, filter } in availableProps
+            .map((prop) => ({ prop, filter: getFilterInfo(prop) }))
+            .filter((x) => (columnSelection ? true : !!x.filter))"
+          :key="prop.name"
+          @click.stop="
+            toggleColumn(prop.name, !selectedColumns?.includes(prop.name))
+          "
         >
-          <v-col class="flex-grow-0 pr-4" style="max-width: 170px">
-            <span class="">
-              {{ filter.displayName }}
-            </span>
-
-            <v-btn-toggle
-              class="text-no-wrap"
-              variant="outlined"
+          <template #prepend v-if="columnSelection">
+            <v-checkbox-btn
               density="compact"
-              :modelValue="
-                filter.isNull
-                  ? 1
-                  : filter.isDefined && !filter.isNull
-                  ? 2
-                  : null
-              "
+              class="mr-2"
+              :model-value="selectedColumns?.includes(prop.name) ?? false"
+            />
+          </template>
+          <v-list-item-title>{{ prop.displayName }}</v-list-item-title>
+
+          <!-- Filter sub-menu -->
+          <template #append v-if="filter">
+            <v-menu
+              location="end"
+              :close-on-content-click="false"
+              content-class="c-list-filter--prop-menu"
             >
-              <v-btn
-                size="x-small"
-                @click="removeFilter(filter)"
-                title="Remove Filter"
-              >
-                <i class="fa fa-times"></i>
-              </v-btn>
-              <v-btn
-                size="x-small"
-                @click="filter.value = null"
-                title="Filter where value is null"
-              >
-                <pre>null</pre>
-              </v-btn>
-              <v-btn
-                size="x-small"
-                @click="filter.value = ''"
-                title="Set custom filter value"
-              >
-                <i class="fa fa-ellipsis-h"></i>
-              </v-btn>
-            </v-btn-toggle>
-          </v-col>
-          <v-col align-self="end">
-            <pre class="pl-5 py-2" v-if="filter.isNull">== null</pre>
-
-            <!-- If the filter is a foreign key, and there's zero or one value specified,
-              provide a dropdown input. -->
-            <c-select
-              v-else-if="
-                filter.propMeta &&
-                (filter.propMeta.role == 'foreignKey' ||
-                  filter.propMeta.role == 'primaryKey') &&
-                (!filter.value || filter.value.toString().indexOf(',') == -1)
-              "
-              v-model:keyValue="filter.value"
-              :for="
-                filter.propMeta.role == 'primaryKey'
-                  ? list.$metadata.name
-                  : filter.propMeta.navigationProp ??
-                    filter.propMeta.principalType
-              "
-              clearable
-              hide-details
-              density="compact"
-            >
-            </c-select>
-
-            <!-- Display an enum multiselect for enum props -->
-            <v-select
-              v-else-if="filter.propMeta && filter.propMeta.type == 'enum'"
-              v-model="filter.value"
-              :items="filter.propMeta.typeDef.values"
-              item-title="displayName"
-              item-value="value"
-              :label="filter.displayName"
-              clearable
-              hide-details
-              multiple
-              density="compact"
-            />
-
-            <!-- Display a number multiselect for number props -->
-            <v-combobox
-              v-else-if="filter.propMeta && filter.propMeta.type == 'number'"
-              v-model="filter.value"
-              :label="filter.displayName"
-              clearable
-              hide-details
-              disable-lookup
-              multiple
-              chips
-              deletable-chips
-              small-chips
-            />
-
-            <v-switch
-              v-else-if="filter.propMeta && filter.propMeta.type == 'boolean'"
-              v-model="filter.value"
-              :label="filter.displayName"
-              clearable
-              hide-details
-            />
-
-            <!-- Text field for everything else -->
-            <v-text-field
-              v-else
-              v-model="filter.value"
-              :label="filter.displayName"
-              density="compact"
-              variant="outlined"
-              clearable
-              hide-details
-            />
-          </v-col>
-        </v-row>
-      </v-card-text>
-
-      <v-card-title> Add Filters </v-card-title>
-      <v-card-text class="d-flex ga-1 flex-wrap">
-        <v-chip
-          v-for="filter in undefinedFilters"
-          :key="filter.key"
-          small
-          @click="addFilter(filter)"
-        >
-          {{ filter.displayName }}
-        </v-chip>
-      </v-card-text>
+              <template #activator="{ props: submenuProps }">
+                <v-divider vertical class="mr-1 my-n1"></v-divider>
+                <v-btn
+                  v-bind="submenuProps"
+                  size="small"
+                  height="32"
+                  :color="filter.isActive ? 'primary' : undefined"
+                  :variant="filter.isActive ? 'flat' : 'text'"
+                  class="mr-n3"
+                >
+                  <v-icon>fa fa-filter</v-icon>
+                </v-btn>
+              </template>
+              <template #default="{ isActive }">
+                <v-card class="c-column-filter-card">
+                  <v-card-title> Filter: {{ prop.displayName }} </v-card-title>
+                  <v-card-text class="py-0">
+                    <c-list-filter-input
+                      :filter="filter"
+                      :list="list"
+                      @clear="
+                        filter.remove();
+                        isActive.value = false;
+                      "
+                    />
+                  </v-card-text>
+                </v-card>
+              </template>
+            </v-menu>
+          </template>
+        </v-list-item>
+        <v-divider></v-divider>
+        <v-list-item @click="resetToDefault">
+          <template #prepend>
+            <v-icon style="margin-left: 2px; margin-right: -21px">
+              fa fa-undo
+            </v-icon>
+          </template>
+          <v-list-item-title>Reset</v-list-item-title>
+        </v-list-item>
+      </v-list>
     </v-card>
   </v-menu>
 </template>
 
-<script lang="ts">
-import type { ListViewModel, Property } from "coalesce-vue";
-import { defineComponent, PropType } from "vue";
-
-interface FilterInfo {
-  key: string;
-  displayName: string;
-  isDefined: boolean;
-  isActive: boolean;
-  isNull: boolean;
-  value?: any;
-  propMeta?: Property;
-}
-
-const filterTypes = ["string", "number", "boolean", "enum", "date"];
-
-export default defineComponent({
-  name: "c-list-filters",
-  props: {
-    list: { required: true, type: Object as PropType<ListViewModel> },
-  },
-  methods: {
-    removeFilter(filterInfo: FilterInfo) {
-      delete this.list.$params.filter![filterInfo.key];
-    },
-    addFilter(filterInfo: FilterInfo) {
-      if (filterInfo.propMeta?.type == "boolean") {
-        filterInfo.value = true;
-      } else {
-        filterInfo.value = "";
-      }
-    },
-  },
-  computed: {
-    filters(): FilterInfo[] {
-      const list = this.list;
-      const filter = this.list.$params.filter ?? {};
-      const meta = this.list.$metadata;
-
-      // Start with the set of valid filter properties
-      const filterNames = (Object.values(meta.props) as Property[])
-        .filter((p) => filterTypes.includes(p.type) && !p.dontSerialize)
-        .map((p) => p.name);
-
-      // Add in any actually existing filters that aren't represented by a prop.
-      // This is unlikely, but someone can write a custom datasource that can look for any filter prop.
-      for (const key in filter) {
-        if (!filterNames.includes(key)) filterNames.push(key);
-      }
-
-      return filterNames
-        .map((key) => {
-          const value = filter[key];
-          const propMeta = meta.props[key] ?? null;
-
-          return {
-            key,
-            get value() {
-              if (propMeta.type == "boolean") {
-                if (value === "true") return true;
-                if (value === "false") return false;
-              }
-              if (
-                (propMeta?.type == "enum" || propMeta?.type == "number") &&
-                propMeta.role == "value"
-              ) {
-                // Enums use a real enum multiselect control, so we need to get our type ducks in a row
-                return String(filter[key])
-                  .split(",")
-                  .filter((v) => v !== "")
-                  .map((v) => (isNaN(v as any) ? v : +v));
-              }
-              return filter[key];
-            },
-            set value(value) {
-              if (Array.isArray(value)) {
-                value = value.join(",");
-              }
-              (list.$params.filter ??= {})[key] = value;
-            },
-            propMeta,
-            isNull: value === null || value === "null",
-            isDefined: key in filter,
-            // Both undefined and emptystring are considered by Coalesce to be "not filtered".
-            // `null` as a value is a filter that checks that the value is `null`.
-            isActive: value !== "" && value !== undefined,
-            displayName:
-              (propMeta?.role == "foreignKey"
-                ? propMeta.navigationProp?.displayName
-                : undefined) ??
-              propMeta?.displayName ??
-              key,
-          } as FilterInfo;
-        })
-        .sort((a, b) =>
-          // a.isActive != b.isActive ? (b.isActive ? 1 : -1) :
-          a.displayName.localeCompare(b.displayName)
-        );
-    },
-
-    definedFilters(): FilterInfo[] {
-      return this.filters.filter((info) => info.isDefined);
-    },
-
-    undefinedFilters(): FilterInfo[] {
-      return this.filters.filter((info) => !info.isDefined);
-    },
-
-    activeFilters(): FilterInfo[] {
-      return this.filters.filter((info) => info.isActive);
-    },
-
-    activeCount(): number {
-      return this.activeFilters.length;
-    },
-  },
-});
-</script>
-
 <style lang="scss">
-.c-list-filters--card {
+.c-column-filter-card {
+  min-width: 350px;
   max-width: 500px;
-  .v-btn-toggle i.fa {
-    font-size: 1.1em;
-  }
 }
 </style>
+
+<script setup lang="ts">
+import { computed, PropType, toRef } from "vue";
+import { ListViewModel, ModelType, Property } from "coalesce-vue";
+import CListFilterInput from "../input/c-list-filter-input.vue";
+import { useListFilters } from "../input/use-list-filters";
+
+const props = defineProps<{
+  list: ListViewModel;
+  columnSelection?: boolean;
+}>();
+
+const selectedColumns = defineModel<string[] | null>("selectedColumns", {
+  required: false,
+});
+
+const availableProps = computed(() => {
+  return Object.values((props.list.$metadata as ModelType).props).filter(
+    (p) => {
+      if (p.role == "foreignKey" && p.navigationProp) {
+        return false;
+      }
+      return true;
+    },
+  );
+});
+
+// Use the shared filter logic
+const { getFilterInfo, activeCount } = useListFilters(toRef(props, "list"));
+
+function toggleColumn(propName: string, selected: boolean) {
+  if (!props.columnSelection) return;
+
+  if (selected && !selectedColumns.value?.includes(propName)) {
+    const newColumns = [...(selectedColumns.value || []), propName];
+    selectedColumns.value = newColumns;
+  } else if (!selected && selectedColumns.value) {
+    const newColumns = selectedColumns.value.filter((c) => c != propName);
+    selectedColumns.value = newColumns;
+  }
+}
+
+function resetToDefault() {
+  if (props.columnSelection) {
+    selectedColumns.value = null;
+  }
+  props.list.$filter = {};
+}
+</script>

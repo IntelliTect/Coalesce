@@ -6,10 +6,7 @@
       @update:editable="editable = $event"
       :editable="canEdit ? editable : undefined"
       :color="color"
-      :available-props="availableProps"
-      :selected-columns="selectedColumns"
-      :default-columns="defaultColumns"
-      :column-selection-enabled="effectiveColumnSelection"
+      :selected-columns="effectiveColumns"
       @update:selected-columns="onColumnsUpdated"
     />
 
@@ -23,7 +20,7 @@
         admin
         :editable="editable"
         :list="viewModel"
-        :props="selectedColumns"
+        :props="effectiveColumns"
         :extra-headers="[{ header: 'Actions', isFixed: true }]"
         :loaders="{
           '': list.$modelOnlyMode
@@ -128,7 +125,15 @@ import {
   HiddenAreas,
 } from "coalesce-vue";
 
-import { computed, defineComponent, PropType, ref, toRef, watch } from "vue";
+import {
+  computed,
+  customRef,
+  defineComponent,
+  PropType,
+  ref,
+  toRef,
+  watch,
+} from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
 import { copyParamsToNewViewModel } from "./util";
@@ -154,11 +159,6 @@ export default defineComponent({
       type: Array as PropType<string[]>,
       default: undefined,
     },
-    columnSelection: {
-      required: false,
-      type: Boolean,
-      default: undefined,
-    },
     columnSelectionKey: {
       required: false,
       type: String,
@@ -173,42 +173,37 @@ export default defineComponent({
 
     // Column selection logic
     const availableProps = computed(() => {
-      return Object.values(tableProps.metadata.value.props).filter(
-        (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0,
-      );
+      return Object.values(tableProps.metadata.value.props).filter((p) => {
+        if (p.role == "foreignKey" && p.navigationProp) {
+          return false;
+        }
+        return true;
+      });
     });
 
     const defaultColumns = computed(() => {
-      return availableProps.value.map((p) => p.name);
-    });
-
-    const effectiveColumnSelection = computed(() => {
-      // If columns prop is provided, disable column selection by default
-      if (props.columns !== undefined) {
-        return props.columnSelection === true;
-      }
-      // Otherwise, enable column selection by default unless explicitly disabled
-      return props.columnSelection !== false;
+      return (
+        props.columns ||
+        availableProps.value
+          .filter(
+            (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0,
+          )
+          .map((p) => p.name)
+      );
     });
 
     const storageKey = computed(() => {
+      const base = `c-admin-columns-${tableProps.metadata.value.name}`;
       if (props.columnSelectionKey) {
-        return `coalesce-admin-table-columns-${props.columnSelectionKey}`;
+        return `${base}-${props.columnSelectionKey}`;
       }
-      return `coalesce-admin-table-columns-${route.path}`;
+      return `${base}-${route.path}`;
     });
-
-    const selectedColumns = ref<string[]>([]);
 
     // Computed property to get effective columns based on preferences and defaults
     const effectiveColumns = computed(() => {
-      // If columns are explicitly provided as props, use those
-      if (props.columns) {
-        return props.columns;
-      }
-
       const defaults = defaultColumns.value;
-      const saved = getSavedColumnPreferences();
+      const saved = columnPreferences.value;
 
       if (!saved || Object.keys(saved).length === 0) {
         return defaults;
@@ -232,45 +227,19 @@ export default defineComponent({
       return result;
     });
 
-    // Get saved column preferences from localStorage
-    const getSavedColumnPreferences = (): Record<string, boolean> | null => {
-      if (!effectiveColumnSelection.value) return null;
-
-      try {
-        const saved = localStorage.getItem(storageKey.value);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (
-            typeof parsed === "object" &&
-            parsed !== null &&
-            !Array.isArray(parsed)
-          ) {
-            return parsed;
-          }
-        }
-      } catch (error) {
-        console.warn(
-          "Failed to load column preferences from localStorage:",
-          error,
-        );
-      }
-
-      return null;
-    };
-
     // Handle column updates with the new preference-based approach
-    const onColumnsUpdated = (newColumns: string[]) => {
-      if (!effectiveColumnSelection.value) {
-        selectedColumns.value = newColumns;
+    const onColumnsUpdated = (newColumns: string[] | null) => {
+      if (newColumns == null) {
+        columnPreferences.value = null;
         return;
       }
 
       const currentEffective = effectiveColumns.value;
-      const preferences = getSavedColumnPreferences() || {};
+      const preferences = columnPreferences.value || {};
 
       // IMPORTANT: Only make changes to "preferences" based on the user's explicit change.
       // Don't capture the entire column state into preferences so that when adjustments
-      // are made to a table's defaults, they aren't pre-emptively excluded for the user
+      // are made to a table's defaults, they aren't preemptively excluded for the user
       // if the user has never made an explicit decision about the column.
 
       for (const newCol of newColumns) {
@@ -286,43 +255,39 @@ export default defineComponent({
         }
       }
 
-      saveColumnPreferences(preferences);
-      selectedColumns.value = newColumns;
+      columnPreferences.value = preferences;
     };
 
-    // Save column preferences to localStorage
-    const saveColumnPreferences = (preferences: Record<string, boolean>) => {
-      if (!effectiveColumnSelection.value) return;
-
-      try {
-        localStorage.setItem(storageKey.value, JSON.stringify(preferences));
-      } catch (error) {
-        console.warn(
-          "Failed to save column preferences to localStorage:",
-          error,
-        );
-      }
-    };
-
-    // Load initial column selection
-    const loadColumnSelection = () => {
-      selectedColumns.value = effectiveColumns.value;
-    };
-
-    // Watch for changes to available props and update selected columns if needed
-    watch(
-      availableProps,
-      () => {
-        loadColumnSelection();
-      },
-      { immediate: true },
-    );
-
-    // Watch for changes to props that affect column selection
-    watch(
-      () => [props.columns, props.columnSelection, props.columnSelectionKey],
-      () => {
-        loadColumnSelection();
+    const columnPreferences = customRef<Record<string, boolean> | null>(
+      (track, trigger) => {
+        return {
+          get(): Record<string, boolean> | null {
+            track();
+            const saved = localStorage.getItem(storageKey.value);
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (
+                typeof parsed === "object" &&
+                parsed !== null &&
+                !Array.isArray(parsed)
+              ) {
+                return parsed;
+              }
+            }
+            return null;
+          },
+          set(preferences: Record<string, boolean> | null) {
+            if (preferences === null) {
+              localStorage.removeItem(storageKey.value);
+            } else {
+              localStorage.setItem(
+                storageKey.value,
+                JSON.stringify(preferences),
+              );
+            }
+            trigger();
+          },
+        };
       },
     );
 
@@ -348,9 +313,7 @@ export default defineComponent({
       editable,
       effectiveAutoSave,
       availableProps,
-      defaultColumns,
-      selectedColumns,
-      effectiveColumnSelection,
+      effectiveColumns,
       onColumnsUpdated,
     };
   },

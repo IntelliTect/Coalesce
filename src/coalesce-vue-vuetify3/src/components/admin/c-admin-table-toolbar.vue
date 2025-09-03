@@ -45,14 +45,6 @@
       </template>
     </v-btn>
 
-    <c-admin-table-column-selector
-      v-if="columnSelectionEnabled"
-      :available-props="availableProps || []"
-      :selected-columns="selectedColumns || []"
-      :default-columns="defaultColumns || []"
-      @update:selected-columns="emit('update:selectedColumns', $event)"
-    />
-
     <v-spacer></v-spacer>
 
     <span v-if="list" class="c-admin-table-toolbar--range hidden-sm-and-down">
@@ -77,7 +69,11 @@
 
       <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>
 
-      <c-list-filters :list="list" />
+      <c-list-filters
+        v-model:selected-columns="selectedColumns"
+        :list="list"
+        column-selection
+      />
 
       <v-spacer></v-spacer>
 
@@ -92,18 +88,12 @@ import { ListViewModel, ModelType, Property } from "coalesce-vue";
 import { useAdminTable } from "./useAdminTable";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";
-import CAdminTableColumnSelector from "./c-admin-table-column-selector.vue";
 import { useRouter } from "vue-router";
 
 const props = defineProps({
   list: { required: true, type: Object as PropType<ListViewModel> },
   pageSizes: { required: false, type: Array as PropType<number[]> },
   color: { required: false, type: String, default: null },
-  // Column selection props
-  availableProps: { required: false, type: Array as PropType<Property[]> },
-  selectedColumns: { required: false, type: Array as PropType<string[]> },
-  defaultColumns: { required: false, type: Array as PropType<string[]> },
-  columnSelectionEnabled: { required: false, type: Boolean, default: false },
 });
 
 const editable = defineModel<boolean>("editable", {
@@ -111,9 +101,10 @@ const editable = defineModel<boolean>("editable", {
   required: false,
 });
 
-const emit = defineEmits<{
-  "update:selectedColumns": [columns: string[]];
-}>();
+const selectedColumns = defineModel<string[] | null>("selectedColumns", {
+  required: false,
+  default: null,
+});
 
 const { metadata } = useAdminTable(toRef(props, "list"));
 

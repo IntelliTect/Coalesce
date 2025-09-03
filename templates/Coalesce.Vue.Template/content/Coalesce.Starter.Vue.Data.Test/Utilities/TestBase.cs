@@ -79,12 +79,21 @@ public class TestBase : IDisposable
     private MockerScope BeginMockScope(bool standalone = false)
     {
         var mocker = new MockerScope(standalone ? null : this);
-        var db = new AppDbContextForSqlite(DbFixture.Options);
+
+        var dbOptions = new DbContextOptionsBuilder<AppDbContext>(DbFixture.Options)
+            .UseApplicationServiceProvider(mocker).Options;
+
+        var db = new AppDbContextForSqlite(dbOptions);
 #if Tenancy
         db.TenantId = db.Tenants.OrderBy(t => t.TenantId).First().TenantId;
 #endif
 
-        mocker.Use(DbFixture.Options);
+        // Expose the current user to EF extensions (if any).
+        mocker.GetMock<IHttpContextAccessor>()
+            .SetupGet(a => a.HttpContext)
+            .Returns(() => new DefaultHttpContext { User = CurrentUser });
+
+        mocker.Use(dbOptions);
         mocker.Use<AppDbContext>(db);
 
         mocker.Use<CrudContext<AppDbContext>>(new CrudContext<AppDbContext>(
@@ -94,11 +103,11 @@ public class TestBase : IDisposable
 
         mocker.GetMock<IDbContextFactory<AppDbContext>>()
             .Setup(x => x.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => new AppDbContextForSqlite(DbFixture.Options));
+            .ReturnsAsync(() => new AppDbContextForSqlite(dbOptions));
 
         mocker.GetMock<IDbContextFactory<AppDbContext>>()
             .Setup(x => x.CreateDbContext())
-            .Returns(() => new AppDbContextForSqlite(DbFixture.Options));
+            .Returns(() => new AppDbContextForSqlite(dbOptions));
 
         mocker.Use<IMemoryCache>(new MemoryCache(new MemoryCacheOptions()));
 
@@ -121,7 +130,7 @@ public class TestBase : IDisposable
     {
         private readonly TestBase? _Parent;
 
-        public MockerScope(TestBase? parent) : base(MockBehavior.Loose)
+        public MockerScope(TestBase? parent) : base(MockBehavior.Loose, DefaultValue.Empty, callBase: true)
         {
             _Parent = parent;
             if (parent != null) parent._CurrentMocker = this;

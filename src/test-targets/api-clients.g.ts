@@ -369,6 +369,26 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
   }
   
   
+  public downloadAttachment_VaryStringCustomCache(id: number | null, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+    const $method = this.$metadata.methods.downloadAttachment_VaryStringCustomCache
+    const $params =  {
+      id,
+      etag,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public downloadAttachment_VaryStringNoCache(id: number | null, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+    const $method = this.$metadata.methods.downloadAttachment_VaryStringNoCache
+    const $params =  {
+      id,
+      etag,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
   public downloadAttachment_VaryInt(id: number | null, etag?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
     const $method = this.$metadata.methods.downloadAttachment_VaryInt
     const $params =  {
@@ -530,6 +550,21 @@ export class ComplexModelDependentApiClient extends ModelApiClient<$models.Compl
     return this.$invoke($method, $params, $config)
   }
   
+}
+
+
+export class DateOnlyPkApiClient extends ModelApiClient<$models.DateOnlyPk> {
+  constructor() { super($metadata.DateOnlyPk) }
+}
+
+
+export class DateTimeOffsetPkApiClient extends ModelApiClient<$models.DateTimeOffsetPk> {
+  constructor() { super($metadata.DateTimeOffsetPk) }
+}
+
+
+export class DateTimePkApiClient extends ModelApiClient<$models.DateTimePk> {
+  constructor() { super($metadata.DateTimePk) }
 }
 
 
@@ -718,6 +753,11 @@ export class StringIdentityApiClient extends ModelApiClient<$models.StringIdenti
 
 export class TestApiClient extends ModelApiClient<$models.Test> {
   constructor() { super($metadata.Test) }
+}
+
+
+export class TimeOnlyPkApiClient extends ModelApiClient<$models.TimeOnlyPk> {
+  constructor() { super($metadata.TimeOnlyPk) }
 }
 
 

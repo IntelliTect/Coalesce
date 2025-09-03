@@ -30,7 +30,7 @@ Creating new records in your database (via Entity Framework's `SaveChanges`/`Sav
 
 Querying tenanted data is managed by a global query filter dynamically applied to all tenanted entities in the `ConfigureTenancy` method of your `AppDbContext`. This filter applies a simple `entity.TenantId == db.TenantIdOrThrow` predicate to all queries, eliminating the need to manually filter data in your application code.
 
-Referential integrity in the database is configured to ensure that data cannot "leak" between tenants. In the `ConfigureTenancy` method, the primary key of all tenanted tables is modified to include the `TenantId` as the first ordinal column of the PK. Foreign key constraints are updated accordingly. This approach clusters tenant data together in the database (improving performance) and prevents [foreign key injection](../topics/security.md#foreign-key-injection-vulnerabilities) from linking data between tenants.
+Referential integrity in the database is configured to ensure that data cannot "leak" between tenants. In the `ConfigureTenancy` method, the primary key of all tenanted tables is modified to include the `TenantId` as the first ordinal column of the PK. Foreign key constraints are updated accordingly. This approach clusters tenant data together in the database (improving performance) and prevents [foreign key injection](/topics/security.md#foreign-key-injection-vulnerabilities) from linking data between tenants.
 
 ### Identity & Users
 

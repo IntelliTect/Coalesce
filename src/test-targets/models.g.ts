@@ -417,6 +417,81 @@ export class ComplexModelDependent {
 }
 
 
+export interface DateOnlyPk extends Model<typeof metadata.DateOnlyPk> {
+  dateOnlyPkId: Date | null
+  name: string | null
+}
+export class DateOnlyPk {
+  
+  /** Mutates the input object and its descendants into a valid DateOnlyPk implementation. */
+  static convert(data?: Partial<DateOnlyPk>): DateOnlyPk {
+    return convertToModel<DateOnlyPk>(data || {}, metadata.DateOnlyPk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid DateOnlyPk implementation. */
+  static map(data?: Partial<DateOnlyPk>): DateOnlyPk {
+    return mapToModel<DateOnlyPk>(data || {}, metadata.DateOnlyPk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.DateOnlyPk; }
+  
+  /** Instantiate a new DateOnlyPk, optionally basing it on the given data. */
+  constructor(data?: Partial<DateOnlyPk> | {[k: string]: any}) {
+    Object.assign(this, DateOnlyPk.map(data || {}));
+  }
+}
+
+
+export interface DateTimeOffsetPk extends Model<typeof metadata.DateTimeOffsetPk> {
+  dateTimeOffsetPkId: Date | null
+  name: string | null
+}
+export class DateTimeOffsetPk {
+  
+  /** Mutates the input object and its descendants into a valid DateTimeOffsetPk implementation. */
+  static convert(data?: Partial<DateTimeOffsetPk>): DateTimeOffsetPk {
+    return convertToModel<DateTimeOffsetPk>(data || {}, metadata.DateTimeOffsetPk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid DateTimeOffsetPk implementation. */
+  static map(data?: Partial<DateTimeOffsetPk>): DateTimeOffsetPk {
+    return mapToModel<DateTimeOffsetPk>(data || {}, metadata.DateTimeOffsetPk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.DateTimeOffsetPk; }
+  
+  /** Instantiate a new DateTimeOffsetPk, optionally basing it on the given data. */
+  constructor(data?: Partial<DateTimeOffsetPk> | {[k: string]: any}) {
+    Object.assign(this, DateTimeOffsetPk.map(data || {}));
+  }
+}
+
+
+export interface DateTimePk extends Model<typeof metadata.DateTimePk> {
+  dateTimePkId: Date | null
+  name: string | null
+}
+export class DateTimePk {
+  
+  /** Mutates the input object and its descendants into a valid DateTimePk implementation. */
+  static convert(data?: Partial<DateTimePk>): DateTimePk {
+    return convertToModel<DateTimePk>(data || {}, metadata.DateTimePk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid DateTimePk implementation. */
+  static map(data?: Partial<DateTimePk>): DateTimePk {
+    return mapToModel<DateTimePk>(data || {}, metadata.DateTimePk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.DateTimePk; }
+  
+  /** Instantiate a new DateTimePk, optionally basing it on the given data. */
+  constructor(data?: Partial<DateTimePk> | {[k: string]: any}) {
+    Object.assign(this, DateTimePk.map(data || {}));
+  }
+}
+
+
 export interface EnumPk extends Model<typeof metadata.EnumPk> {
   enumPkId: EnumPkId | null
   name: string | null
@@ -940,6 +1015,31 @@ export class Test {
 }
 
 
+export interface TimeOnlyPk extends Model<typeof metadata.TimeOnlyPk> {
+  timeOnlyPkId: Date | null
+  name: string | null
+}
+export class TimeOnlyPk {
+  
+  /** Mutates the input object and its descendants into a valid TimeOnlyPk implementation. */
+  static convert(data?: Partial<TimeOnlyPk>): TimeOnlyPk {
+    return convertToModel<TimeOnlyPk>(data || {}, metadata.TimeOnlyPk) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid TimeOnlyPk implementation. */
+  static map(data?: Partial<TimeOnlyPk>): TimeOnlyPk {
+    return mapToModel<TimeOnlyPk>(data || {}, metadata.TimeOnlyPk) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.TimeOnlyPk; }
+  
+  /** Instantiate a new TimeOnlyPk, optionally basing it on the given data. */
+  constructor(data?: Partial<TimeOnlyPk> | {[k: string]: any}) {
+    Object.assign(this, TimeOnlyPk.map(data || {}));
+  }
+}
+
+
 export interface ZipCode extends Model<typeof metadata.ZipCode> {
   zip: string | null
   state: string | null
@@ -1361,6 +1461,32 @@ export class PositionalRecord {
 }
 
 
+export interface SimpleModelTarget extends Model<typeof metadata.SimpleModelTarget> {
+  id: number | null
+  name: string | null
+  createdDate: Date | null
+}
+export class SimpleModelTarget {
+  
+  /** Mutates the input object and its descendants into a valid SimpleModelTarget implementation. */
+  static convert(data?: Partial<SimpleModelTarget>): SimpleModelTarget {
+    return convertToModel<SimpleModelTarget>(data || {}, metadata.SimpleModelTarget) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid SimpleModelTarget implementation. */
+  static map(data?: Partial<SimpleModelTarget>): SimpleModelTarget {
+    return mapToModel<SimpleModelTarget>(data || {}, metadata.SimpleModelTarget) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.SimpleModelTarget; }
+  
+  /** Instantiate a new SimpleModelTarget, optionally basing it on the given data. */
+  constructor(data?: Partial<SimpleModelTarget> | {[k: string]: any}) {
+    Object.assign(this, SimpleModelTarget.map(data || {}));
+  }
+}
+
+
 export interface StandaloneReadonly extends Model<typeof metadata.StandaloneReadonly> {
   id: number | null
   name: string | null
@@ -1529,6 +1655,9 @@ declare module "coalesce-vue/lib/model" {
     Company: Company
     ComplexModel: ComplexModel
     ComplexModelDependent: ComplexModelDependent
+    DateOnlyPk: DateOnlyPk
+    DateTimeOffsetPk: DateTimeOffsetPk
+    DateTimePk: DateTimePk
     EnumPk: EnumPk
     ExternalChild: ExternalChild
     ExternalChildAsInputOnly: ExternalChildAsInputOnly
@@ -1558,10 +1687,12 @@ declare module "coalesce-vue/lib/model" {
     RecursiveHierarchy: RecursiveHierarchy
     RequiredAndInitModel: RequiredAndInitModel
     Sibling: Sibling
+    SimpleModelTarget: SimpleModelTarget
     StandaloneReadonly: StandaloneReadonly
     StandaloneReadWrite: StandaloneReadWrite
     StringIdentity: StringIdentity
     Test: Test
+    TimeOnlyPk: TimeOnlyPk
     ValidationTarget: ValidationTarget
     ValidationTargetChild: ValidationTargetChild
     WeatherData: WeatherData

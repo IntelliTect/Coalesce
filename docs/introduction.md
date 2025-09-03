@@ -42,7 +42,7 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
 </tr>
 <tr>
   <td><a href="https://learn.microsoft.com/en-us/ef/core/"><img class=ext-logo src=/ef-logo.svg></a></td>
-  <td>Entity Framework provides the interface between your database and C# code. Coalesce will use your EF data model to generate an extensible, customizable CRUD API that will drive both your custom pages and the out-of-the-box <a href="./stacks/vue/admin-pages.html">admin pages</a>.</td>
+  <td>Entity Framework provides the interface between your database and C# code. Coalesce uses your EF data model to generate an extensible, customizable CRUD API that drives both your custom pages and the out-of-the-box <a href="./stacks/vue/admin-pages.html">admin pages</a>.</td>
 </tr>
 <tr>
   <td><a href="https://www.typescriptlang.org/"><img class=ext-logo src=/ts-logo-512.svg></a></td>
@@ -50,7 +50,7 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
 </tr>
 <tr>
   <td><a href="https://vuejs.org/"><img class=ext-logo src=/vue-logo.svg></a></td>
-  <td>Vue.js provides data binding and interactivity for your application as it runs in a browser. Coalesce will generate <a href="./stacks/vue/layers/viewmodels.html">TypeScript ViewModels</a> to facilitate rapid development of custom pages. </td>
+  <td>Vue.js provides data binding and interactivity for your application as it runs in a browser. Coalesce generates <a href="./stacks/vue/layers/viewmodels.html">TypeScript ViewModels</a> to facilitate rapid development of custom pages.</td>
 </tr>
 <tr>
   <td><a href="https://vitejs.dev/"><img class=ext-logo src=/vite-logo.svg></a></td>
@@ -59,7 +59,7 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
 </tbody>
 </table>
 
-## What do I do?
+## What do I build?
 
 You are responsible for the interesting parts of your application:
 
@@ -70,14 +70,14 @@ You are responsible for the interesting parts of your application:
 - Site Design
 - Custom Scripting
 
-## What is done for me?
+## What does Coalesce provide?
 
 Coalesce builds the parts of your application that are mundane and monotonous to build:
 
-- Client-side [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md) that mirror your data model for both lists and individual objects. Utilize these to rapidly build out your application's various pages.
+- Client-side [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md) that mirror your data model for both lists and individual objects. Use these to rapidly build your application's various pages.
 - APIs to interact with your models via endpoints like List, Get, Save, and more.
-- Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via drop downs, enums, etc. Dropdowns support searching and paging automatically.
-- A complete set of [Admin Pages](/stacks/vue/admin-pages.md) are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.
+- Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via dropdowns, enums, etc. Dropdowns support searching and paging automatically.
+- A complete set of [Admin Pages](/stacks/vue/admin-pages.md) that allow you to read, create, edit, and delete data immediately without writing additional code.
 - <Beta/> [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) that enable interaction with your application through an AI chat assistant or other LLM-based tool.
 
 ## Getting Started

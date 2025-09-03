@@ -5,7 +5,7 @@ title: "Config: ASP.NET Core"
 # Application Configuration
 
 
-In order for Coalesce to work in your application, you must register the needed services in your `Startup.cs` or `Program.cs`. Doing so is simple:
+For Coalesce to work in your application, you must register the needed services in your `Startup.cs` or `Program.cs`. Doing so is simple:
 
 ``` c#
 public void ConfigureServices(IServiceCollection services)
@@ -15,7 +15,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-This registers all the basic services that Coalesce needs in order to work with your EF DbContext. However, there are many more options available. Here's a more complete invocation of `AddCoalesce` that takes advantage of many of the options available:
+This registers all the basic services that Coalesce needs to work with your EF DbContext. However, many more options are available. Here's a more complete invocation of `AddCoalesce` that takes advantage of many of the options available:
 
 ``` c#
 public void ConfigureServices(IServiceCollection services)
@@ -60,7 +60,7 @@ Overrides the default behaviors used, replacing the [Standard Behaviors](/modeli
 
 <Prop def="public Builder UseTimeZone(TimeZoneInfo timeZone)" />
 
-Specify a static time zone that should be used when Coalesce is performing operations on dates/times that lack timezone information. For example, when a user inputs a search term that contains only a date, Coalesce needs to know what timezone's midnight to use when performing the search.
+Specify a static time zone that should be used when Coalesce is performing operations on dates/times that lack timezone information. For example, when a user inputs a search term that contains only a date, Coalesce needs to know which timezone's midnight to use when performing the search.
 
 <Prop def="public Builder UseTimeZone<ITimeZoneResolver>()" />
 

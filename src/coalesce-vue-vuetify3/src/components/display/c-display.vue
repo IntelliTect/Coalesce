@@ -32,10 +32,13 @@ const passwordWrapper = defineComponent({
           role: "button",
           pressed: this.shown,
           title: !this.shown ? "Reveal" : "Hide",
-          onClick: () => (this.shown = !this.shown),
+          onClick: (ev) => {
+            this.shown = !this.shown;
+            ev.stopPropagation();
+          },
         }),
         !this.shown ? "•".repeat(8) : this.value,
-      ]
+      ],
     );
   },
 });
@@ -126,7 +129,7 @@ function render() {
 
   if (!meta) {
     throw Error(
-      "Provided model has no $metadata property, and no specific value was provided via the 'for' component prop to c-display."
+      "Provided model has no $metadata property, and no specific value was provided via the 'for' component prop to c-display.",
     );
   }
 
@@ -157,7 +160,7 @@ function render() {
             ...attrs,
             style: "white-space: pre-wrap",
           },
-          valueString || slots
+          valueString || slots,
         );
 
       case "url-image":
@@ -177,12 +180,12 @@ function render() {
             h("span", {
               style: `background-color: ${valueString.replace(
                 /[^A-Fa-f0-9#]/g,
-                ""
+                "",
               )};`,
               class: "c-display--color-swatch",
             }),
             valueString || slots,
-          ] as any
+          ] as any,
         );
 
       case "url":
@@ -205,7 +208,7 @@ function render() {
                 ...attrs,
                 href,
               },
-              valueString
+              valueString,
             );
           } catch {
             /* value is not a valid url */

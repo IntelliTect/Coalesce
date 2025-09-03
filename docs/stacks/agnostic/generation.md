@@ -5,7 +5,7 @@ Coalesce's principal purpose is a code generation framework for automating the c
 
 ## Running Code Generation
 
-Coalesce's code generation is ran via a dotnet CLI tool, ``dotnet coalesce``. In order to invoke this tool, you must have the appropriate references to the package that provides it in your .csproj file:
+Coalesce's code generation is run via a dotnet CLI tool, ``dotnet coalesce``. In order to invoke this tool, you must have the appropriate references to the package that provides it in your .csproj file:
 
 ``` xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -40,6 +40,10 @@ There are a couple of extra options which are only available as CLI parameters t
 - `--verify` - Assert that the code generation does not have any pending changes to its output. Useful in CI builds when combined with `--what-if` to ensure that developers haven't forgotten to run code gen before committing changes.
 - ``-v|--verbosity <level>`` - Set the verbosity of the output. Options are ``trace``, ``debug``, ``information``, ``warning``, ``error``, ``critical``, and ``none``.
 
+### AI-triggered Generation
+
+Code generation can also be triggered through the [MCP server](/topics/mcp-server.md), which enables AI assistants to run code generation as part of development workflows. This helps prevent AI assistants from getting confused by exactly which command and which directory to run code generation from.
+
 ## Generated Code
 
 When you run `dotnet coalesce`, Coalesce will generate a full vertical stack of code for you:
@@ -64,6 +68,6 @@ For models, methods, and data sources annotated with the [[SemanticKernel]](/mod
 
 ### Frontend - Vue
 
-For your frontend Vue application, Coalesce generates TypeScript models, API clients, and feature-rich ViewModels that provide complete type safety and seamless integration with your backend. This includes reactive data models, CRUD operations, and validation that automatically stays in sync with your C# models.
+For your frontend Vue application, Coalesce generates TypeScript models, API clients, and feature-rich ViewModels that provide complete type safety and seamless integration with your backend. This includes reactive data models, CRUD operations, and validation that stay in sync with your C# models.
 
-An more in-depth look at the Vue generated code can be found at [Vue Overview](/stacks/vue/overview.md).
+A more in-depth look at the Vue generated code can be found at [Vue Overview](/stacks/vue/overview.md).

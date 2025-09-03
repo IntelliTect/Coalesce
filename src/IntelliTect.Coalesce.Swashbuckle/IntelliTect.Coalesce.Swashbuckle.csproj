@@ -2,14 +2,9 @@
   <Import Project="../Common.props" />
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
-    <Description>
-      Provides Swashbuckle SwaggerGen filters to enhance definitions of Coalesce APIs in OpenAPI documents.
-      Add using `services.AddSwaggerGen(c =&gt; c.AddCoalesce() );`.
-    </Description>
-    <!-- Don't put curly braces in the example in the description above - it will trigger https://github.com/Microsoft/msbuild/issues/1357 -->
-
     <!-- This project itself should not try to generate api defs on build. -->
     <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+    <Description>Enhanced OpenAPI documentation generation for Coalesce-generated APIs. Learn more at https://intellitect.github.io/Coalesce/topics/coalesce-swashbuckle.html</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,5 +19,4 @@
     -->
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
-
 </Project>

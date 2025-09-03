@@ -28,6 +28,18 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
     }
 
     [Fact]
+    public async Task SimpleModelWithCoalesceAttribute_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            [Coalesce, SimpleModel]
+            public class Person
+            {
+                public int Id { get; set; }
+            }
+            """);
+    }
+
+    [Fact]
     public async Task ExecuteAttributeWithCoalesceAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -98,6 +110,24 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             }
             """, """
             [Coalesce, StandaloneEntity]
+            public class Person
+            {
+                public int Id { get; set; }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task SimpleModelWithoutCoalesce_ReportsError()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
+            [{|COA0005:SimpleModel|}]
+            public class Person
+            {
+                public int Id { get; set; }
+            }
+            """, """
+            [Coalesce, SimpleModel]
             public class Person
             {
                 public int Id { get; set; }

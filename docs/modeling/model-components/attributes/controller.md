@@ -31,9 +31,9 @@ public class Person
 Determines whether or not a `[Route]` annotation will be placed on the generated API controller. Set to `false` to prevent emission of the `[Route]` attribute.
 
 Use cases include:
--  Defining your routes through IRouteBuilder in Startup.cs instead
--  Preventing API controllers from being exposed by default.
--  Routing to your own custom controller that inherits from the generated API controller in order to implement more granular or complex authorization logic.
+- Defining your routes through IRouteBuilder in Startup.cs instead
+- Preventing API controllers from being exposed by default
+- Routing to your own custom controller that inherits from the generated API controller to implement more granular or complex authorization logic
 
 <Prop def="public string ApiControllerName { get; set; } = null;" />
 

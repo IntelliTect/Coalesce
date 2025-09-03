@@ -1,0 +1,31 @@
+{
+  "servers": {
+    "Coalesce": {
+      "command": "npx",
+      "args": [
+        "coalesce-mcp@latest"
+      ]
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "microsoftdocs": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    },
+    "ESLint": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@eslint/mcp@latest"
+      ]
+    }
+  },
+}

@@ -1,10 +1,10 @@
 # Attributes
 
-Coalesce provides a number of C# attributes that can be used to decorate your model classes and their properties in order to customize behavior, appearance, security, and more. Coalesce also supports a number of annotations from `System.ComponentModel.DataAnnotations`.
+Coalesce provides a number of C# attributes that can be used to decorate your model classes and their properties to customize behavior, appearance, security, and more. Coalesce also supports a number of annotations from `System.ComponentModel.DataAnnotations`.
 
 ## Coalesce Attributes
 
-Browse the list in the sidebar to learn about the attributes that Coalesce provides that can be used to decorate your models.
+Browse the list in the sidebar to learn about the attributes that Coalesce provides for decorating your models.
 
 <!-- TODO: Is there some kind of metadata we can use to dynamically source the coalesce attribute page and list them here instead of directing the reader to the sidebar? -->
 

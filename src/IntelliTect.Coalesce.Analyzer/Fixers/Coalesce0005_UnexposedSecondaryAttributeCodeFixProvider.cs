@@ -85,7 +85,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider : CodeFixPr
         // Find the first attribute list that contains the target attribute
         var targetAttributeList = memberDeclaration.AttributeLists.FirstOrDefault(list =>
             list.Attributes.Any(attr =>
-                attr.Name.ToString() is "Execute" or "Service" or "StandaloneEntity"));
+                attr.Name.ToString() is "Execute" or "Service" or "StandaloneEntity" or "SimpleModel"));
 
         if (targetAttributeList != null)
         {

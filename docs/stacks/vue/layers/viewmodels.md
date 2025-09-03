@@ -27,7 +27,7 @@ There are a few special behaviors when assigning to different kinds of data prop
 
 #### Model Collection Properties
 - When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
-- The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and be used instead of the object(s) being pushed.
+- The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and used instead of the object(s) being pushed.
   
 #### Foreign Key Properties
 - If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
@@ -61,7 +61,7 @@ An immutable number that is unique among all ViewModel instances, regardless of 
 Useful for uniquely identifying instances with ``:key="vm.$stableId"`` in a Vue component, especially for instances that lack a primary key.
 
 
-<Prop def="$primaryKey: string | number" lang="ts" />
+<Prop def="$primaryKey: string | number | Date" lang="ts" />
 
 A getter/setter property that wraps the primary key of the model. Used to interact with the primary key of any ViewModel in a polymorphic way.
 
@@ -172,9 +172,9 @@ Configures which properties of the model are sent to the server during a save or
 
 By default, only dirty properties (and always the primary key) are sent to the server when performing a save. 
 
-This improves the handling of concurrent changes being made by multiple users against different fields of the same entity at the same time - specifically, it prevents a user with a stale value of some field X from overwriting a more recent value of X in the database when the user is only making changes to some other property Y and has no intention of changing X. 
+This improves the handling of concurrent changes made by multiple users to different fields of the same entity at the same time - specifically, it prevents a user with a stale value of field X from overwriting a more recent value of X in the database when the user is only making changes to a different property Y and has no intention of changing X. 
 
-Save mode `"surgical"` doesn't help when multiple users are editing the same field at the same time - if such a scenario is applicable to your application, you must implement [more advanced handling of concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).
+Save mode `"surgical"` doesn't help when multiple users are editing the same field at the same time - if such a scenario applies to your application, you must implement [more advanced handling of concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).
 
 ::: warning
 @[import-md "after":"MARKER:surgical-saves-warning", "before":"MARKER:end-surgical-saves-warning"](../../../modeling/model-types/dtos.md)

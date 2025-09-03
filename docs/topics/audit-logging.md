@@ -139,6 +139,26 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 }
 ```
 
+### Stored Procedures
+
+For SQL Server databases, audit logging uses stored procedures by default instead of executing the merge SQL directly. This provides better performance through compiled execution plans and easier monitoring/troubleshooting:
+
+``` c#
+public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
+{
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseCoalesceAuditLogging<AuditLog>(x => x
+            .WithAugmentation<OperationContext>()
+            // Stored procedures are enabled by default for SQL Server
+            // .WithStoredProcedures(false) // Disable if you prefer raw SQL
+        );
+    }
+}
+```
+
+When enabled, Coalesce will automatically create stored procedures with names like `AuditMerge_A1B2C3D4`, where the suffix is a short hash of the SQL content. This prevents conflicts between different application versions that might have different audit log schemas. The stored procedure is created automatically on first use and reused for subsequent operations.
+
 ### Property Descriptions
 
 The `AuditLogProperty` children of your `IAuditLog` implementation have two properties `OldValueDescription` and `NewValueDescription` that can be used to hold a description of the old and new values. By default, Coalesce will populate the descriptions of foreign key properties with the [List Text](/modeling/model-components/attributes/list-text.md) of the referenced principal entity. This greatly improves the usability of the audit logs, which would otherwise only show meaningless numbers or GUIDs for foreign keys that changed.

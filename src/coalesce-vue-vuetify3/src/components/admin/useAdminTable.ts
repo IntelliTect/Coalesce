@@ -4,6 +4,7 @@ import {
   ModelType,
   ViewModel,
   mapParamsToDto,
+  mapToDto,
 } from "coalesce-vue";
 import { MaybeRef, unref, computed } from "vue";
 import { useRouter } from "vue-router";
@@ -64,11 +65,14 @@ export function useAdminTable(list: MaybeRef<ListViewModel>) {
     // route with the same path).
     try {
       // Will throw if coalesce-admin-item is not a mapped route.
+      const itemMetadata = item?.$metadata ?? meta ?? metadata.value;
       return router.resolve({
         name: "coalesce-admin-item",
         params: {
-          type: (item?.$metadata ?? meta ?? metadata.value).name,
-          id: item?.$primaryKey,
+          type: itemMetadata.name,
+          id: item
+            ? String(mapToDto(item.$primaryKey, itemMetadata.keyProp))
+            : undefined,
         },
         query: Object.fromEntries(
           Object.entries(mapParamsToDto(unref(list).$params) || {}).filter(

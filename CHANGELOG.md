@@ -6,11 +6,13 @@
 - The types generated for inheritance hierarchies have changed significantly. If two or more models in a type hierarchy (i.e. a base type and a derived type) are both exposed by Coalesce, that relationship is now reflected throughout the generated DTOs, generated TypeScript, and admin pages. The generated ViewModels classes for abstract classes are now just proxies intended to be used only for loading one of the concrete implementation types.
 - `StandardBehaviors.AfterDelete` is now `AfterDeleteAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
 - `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
+- `IntelliTect.Coalesce.AuditLogging` now uses stored procedures by default to upsert audit log entries. You can disable this (e.g. if your application lacks permission to create/update stored procedures) by chaining `.WithStoredProcedures(false)` when you configure audit logging.
 - The CommonJS build of coalesce-vue has been dropped - only the ESM build remains. Most projects should be unaffected.
 
 ## Features
 
 - Added support for generating Semantic Kernel plugins from CRUD models and custom methods via the new `[SemanticKernel]` attribute. Semantic Kernel is a Microsoft framework that allows you to create AI Agents that can call tool functions provided by your application. This feature is in beta and may undergo breaking changes in non-major releases.
+- Added `[SimpleModel]` attribute to explicitly declare types as Simple Models, allowing TypeScript outputs to be generated for types that are otherwise unused by Coalesce endpoints.
 - Added a set of Roslyn analyzers to help avoid common issues and suggest improvements. These analyzers are included and enabled by default.
 - All endpoints with bodies are now sent as JSON instead of form data, with the exception of endpoints that have file parameter(s) and no other non-scalar parameters.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
@@ -36,6 +38,7 @@
 ## Fixes
 - Fix error in codegen when using JS reserved keywords or C# contextual keywords as parameter names.
 - Fix c-select not receiving proper disabled styling
+- Default search behavior when no SearchAttribute is present no longer splits on spaces. The old behavior would result in multi-word searches failing to match because the default search behavior is StartsWith, not Contains.
 
 # 5.3.8
 

@@ -2377,6 +2377,68 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    downloadAttachment_VaryStringCustomCache: {
+      name: "downloadAttachment_VaryStringCustomCache",
+      displayName: "Download Attachment _ Vary String Custom Cache",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.name },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+    downloadAttachment_VaryStringNoCache: {
+      name: "downloadAttachment_VaryStringNoCache",
+      displayName: "Download Attachment _ Vary String No Cache",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.name },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
     downloadAttachment_VaryInt: {
       name: "downloadAttachment_VaryInt",
       displayName: "Download Attachment _ Vary Int",
@@ -2901,6 +2963,104 @@ export const ComplexModelDependent = domain.types.ComplexModelDependent = {
         role: "value",
       },
     },
+  },
+  dataSources: {
+  },
+}
+export const DateOnlyPk = domain.types.DateOnlyPk = {
+  name: "DateOnlyPk" as const,
+  displayName: "Date Only Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "DateOnlyPk",
+  get keyProp() { return this.props.dateOnlyPkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    dateOnlyPkId: {
+      name: "dateOnlyPkId",
+      displayName: "Date Only Pk Id",
+      type: "date",
+      dateKind: "date",
+      noOffset: true,
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Date Only Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const DateTimeOffsetPk = domain.types.DateTimeOffsetPk = {
+  name: "DateTimeOffsetPk" as const,
+  displayName: "Date Time Offset Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "DateTimeOffsetPk",
+  get keyProp() { return this.props.dateTimeOffsetPkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    dateTimeOffsetPkId: {
+      name: "dateTimeOffsetPkId",
+      displayName: "Date Time Offset Pk Id",
+      type: "date",
+      dateKind: "datetime",
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Date Time Offset Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const DateTimePk = domain.types.DateTimePk = {
+  name: "DateTimePk" as const,
+  displayName: "Date Time Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "DateTimePk",
+  get keyProp() { return this.props.dateTimePkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    dateTimePkId: {
+      name: "dateTimePkId",
+      displayName: "Date Time Pk Id",
+      type: "date",
+      dateKind: "datetime",
+      noOffset: true,
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Date Time Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
   },
   dataSources: {
   },
@@ -4366,6 +4526,39 @@ export const Test = domain.types.Test = {
   dataSources: {
   },
 }
+export const TimeOnlyPk = domain.types.TimeOnlyPk = {
+  name: "TimeOnlyPk" as const,
+  displayName: "Time Only Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "TimeOnlyPk",
+  get keyProp() { return this.props.timeOnlyPkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    timeOnlyPkId: {
+      name: "timeOnlyPkId",
+      displayName: "Time Only Pk Id",
+      type: "date",
+      dateKind: "time",
+      noOffset: true,
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Time Only Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const ZipCode = domain.types.ZipCode = {
   name: "ZipCode" as const,
   displayName: "Zip Code",
@@ -4991,6 +5184,34 @@ export const PositionalRecord = domain.types.PositionalRecord = {
     },
   },
 }
+export const SimpleModelTarget = domain.types.SimpleModelTarget = {
+  name: "SimpleModelTarget" as const,
+  displayName: "Simple Model Target",
+  get displayProp() { return this.props.name }, 
+  type: "object",
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "value",
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    createdDate: {
+      name: "createdDate",
+      displayName: "Created Date",
+      type: "date",
+      dateKind: "datetime",
+      noOffset: true,
+      role: "value",
+    },
+  },
+}
 export const ValidationTarget = domain.types.ValidationTarget = {
   name: "ValidationTarget" as const,
   displayName: "Validation Target",
@@ -5197,6 +5418,9 @@ interface AppDomain extends Domain {
     Company: typeof Company
     ComplexModel: typeof ComplexModel
     ComplexModelDependent: typeof ComplexModelDependent
+    DateOnlyPk: typeof DateOnlyPk
+    DateTimeOffsetPk: typeof DateTimeOffsetPk
+    DateTimePk: typeof DateTimePk
     EnumPk: typeof EnumPk
     ExternalChild: typeof ExternalChild
     ExternalChildAsInputOnly: typeof ExternalChildAsInputOnly
@@ -5226,10 +5450,12 @@ interface AppDomain extends Domain {
     RecursiveHierarchy: typeof RecursiveHierarchy
     RequiredAndInitModel: typeof RequiredAndInitModel
     Sibling: typeof Sibling
+    SimpleModelTarget: typeof SimpleModelTarget
     StandaloneReadonly: typeof StandaloneReadonly
     StandaloneReadWrite: typeof StandaloneReadWrite
     StringIdentity: typeof StringIdentity
     Test: typeof Test
+    TimeOnlyPk: typeof TimeOnlyPk
     ValidationTarget: typeof ValidationTarget
     ValidationTargetChild: typeof ValidationTargetChild
     WeatherData: typeof WeatherData

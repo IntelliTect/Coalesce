@@ -16,6 +16,7 @@ namespace Coalesce.Web.Vue3.Models
         private int? _ProductId;
         private string _Name;
         private System.Guid? _UniqueId;
+        private System.DateOnly? _MilestoneId;
         private object _Unknown;
 
         public int? ProductId
@@ -33,6 +34,11 @@ namespace Coalesce.Web.Vue3.Models
             get => _UniqueId;
             set { _UniqueId = value; Changed(nameof(UniqueId)); }
         }
+        public System.DateOnly? MilestoneId
+        {
+            get => _MilestoneId;
+            set { _MilestoneId = value; Changed(nameof(MilestoneId)); }
+        }
         public object Unknown
         {
             get => _Unknown;
@@ -49,6 +55,7 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
             if (ShouldMapTo(nameof(UniqueId)) && (context.IsInRoleCached("Admin"))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
+            if (ShouldMapTo(nameof(MilestoneId))) entity.MilestoneId = MilestoneId;
             if (ShouldMapTo(nameof(Unknown))) entity.Unknown = Unknown;
         }
 
@@ -77,8 +84,10 @@ namespace Coalesce.Web.Vue3.Models
         public int? ProductId { get; set; }
         public string Name { get; set; }
         public System.Guid? UniqueId { get; set; }
+        public System.DateOnly? MilestoneId { get; set; }
         public object Unknown { get; set; }
         public Coalesce.Web.Vue3.Models.ProductDetailsResponse Details { get; set; }
+        public Coalesce.Web.Vue3.Models.DateOnlyPkResponse Milestone { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -91,9 +100,13 @@ namespace Coalesce.Web.Vue3.Models
             this.ProductId = obj.ProductId;
             this.Name = obj.Name;
             this.UniqueId = obj.UniqueId;
+            this.MilestoneId = obj.MilestoneId;
             this.Unknown = obj.Unknown;
 
             this.Details = obj.Details.MapToDto<Coalesce.Domain.ProductDetails, ProductDetailsResponse>(context, tree?[nameof(this.Details)]);
+
+            if (tree == null || tree[nameof(this.Milestone)] != null)
+                this.Milestone = obj.Milestone.MapToDto<Coalesce.Domain.DateOnlyPk, DateOnlyPkResponse>(context, tree?[nameof(this.Milestone)]);
 
         }
     }

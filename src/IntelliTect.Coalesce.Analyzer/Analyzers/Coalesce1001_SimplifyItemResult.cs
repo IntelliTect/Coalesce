@@ -178,6 +178,12 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
                 return;
             }
 
+            // Skip if the target type is an interface, as C# won't resolve implicit operators for interfaces
+            if (typeArgument.TypeKind == TypeKind.Interface)
+            {
+                return;
+            }
+
             // Check type compatibility
             if (context.Compilation.HasImplicitConversion(virtualResult.ObjectType, typeArgument))
             {

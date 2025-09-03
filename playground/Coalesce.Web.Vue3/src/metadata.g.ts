@@ -1598,6 +1598,42 @@ export const Company = domain.types.Company = {
     },
   },
 }
+export const DateOnlyPk = domain.types.DateOnlyPk = {
+  name: "DateOnlyPk" as const,
+  displayName: "Date Only Pk",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "DateOnlyPk",
+  get keyProp() { return this.props.dateOnlyPkId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    dateOnlyPkId: {
+      name: "dateOnlyPkId",
+      displayName: "Date Only Pk Id",
+      type: "date",
+      dateKind: "date",
+      noOffset: true,
+      role: "primaryKey",
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Date Only Pk Id is required.",
+      }
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const Log = domain.types.Log = {
   name: "Log" as const,
   displayName: "Log",
@@ -2441,6 +2477,29 @@ export const Product = domain.types.Product = {
         pattern: val => !val || /^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$/.test(val) || "Unique Id does not match expected format.",
       }
     },
+    milestoneId: {
+      name: "milestoneId",
+      displayName: "Milestone Id",
+      type: "date",
+      dateKind: "date",
+      noOffset: true,
+      role: "foreignKey",
+      get principalKey() { return (domain.types.DateOnlyPk as ModelType & { name: "DateOnlyPk" }).props.dateOnlyPkId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.DateOnlyPk as ModelType & { name: "DateOnlyPk" }) },
+      get navigationProp() { return (domain.types.Product as ModelType & { name: "Product" }).props.milestone as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+    },
+    milestone: {
+      name: "milestone",
+      displayName: "Milestone",
+      description: "Product milestone date",
+      type: "model",
+      get typeDef() { return (domain.types.DateOnlyPk as ModelType & { name: "DateOnlyPk" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.Product as ModelType & { name: "Product" }).props.milestoneId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.DateOnlyPk as ModelType & { name: "DateOnlyPk" }).props.dateOnlyPkId as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
     unknown: {
       name: "unknown",
       displayName: "Unknown",
@@ -3026,6 +3085,7 @@ interface AppDomain extends Domain {
     CaseSummary: typeof CaseSummary
     ChatResponse: typeof ChatResponse
     Company: typeof Company
+    DateOnlyPk: typeof DateOnlyPk
     DevTeam: typeof DevTeam
     Location: typeof Location
     Log: typeof Log

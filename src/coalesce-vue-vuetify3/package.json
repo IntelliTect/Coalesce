@@ -1,6 +1,7 @@
 {
   "name": "coalesce-vue-vuetify3",
   "version": "0.1.0-local",
+  "description": "Vuetify 3 components for IntelliTect's Coalesce framework.",
   "main": "./dist/coalesce-vue-vuetify.js",
   "module": "./dist/coalesce-vue-vuetify.js",
   "styles": "./dist/coalesce-vue-vuetify.css",

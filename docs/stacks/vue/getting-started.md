@@ -2,7 +2,7 @@
 
 ## Environment Setup
 
-Before you begin, ensure that you have all the requisite tools installed
+Before you begin, ensure that you have all the required tools installed:
 
 - Recent version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download). If you have Visual Studio, you already have this.
 - A recent version of [Node.js](https://nodejs.org/) (an LTS version is recommended).

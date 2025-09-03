@@ -21,6 +21,7 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
     public DbSet<CaseProduct> CaseProducts { get; set; }
     public DbSet<ZipCode> ZipCodes { get; set; }
     public DbSet<Log> Logs { get; set; }
+    public DbSet<DateOnlyPk> DateOnlyPks { get; set; }
 
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<AuditLogProperty> AuditLogProperties { get; set; }

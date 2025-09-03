@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "gray-matter": "^4.0.3",
-    "linkcheck-bin": "file:linkcheck-bin-3.0.0-1.fix-issue-56.tgz",
+    "linkcheck-bin": "3.0.0-2",
     "serve-handler": "^6.1.6",
     "vitepress": "2.0.0-alpha.5",
     "wait-on": "^8.0.4"

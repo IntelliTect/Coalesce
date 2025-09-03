@@ -3,7 +3,7 @@
 
 This page is a comprehensive overview of all the techniques that can be used in a Coalesce application to restrict the capabilities of API endpoints that Coalesce generates.
 
-The following table is a quick reference of scenarios you might encounter and how you might handle them. If you're unfamiliar with these techniques, though, then you are encouraged to read through this page to get a deeper understanding of what's available before selecting a solution.
+The following table is a quick reference of scenarios you might encounter and how you might handle them. If you're unfamiliar with these techniques, you are encouraged to read through this page to get a deeper understanding of what's available before selecting a solution.
 
 <table>
 <thead>

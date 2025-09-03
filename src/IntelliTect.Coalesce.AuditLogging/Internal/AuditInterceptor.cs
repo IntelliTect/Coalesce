@@ -8,7 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -59,7 +62,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
 
         if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
         {
-#pragma warning disable CS4014 // Executes synchonously when async: false
+#pragma warning disable CS4014 // Executes synchronously when async: false
             _audit.PopulateOldDescriptions(eventData.Context!, async: false);
 #pragma warning restore CS4014
         }
@@ -74,7 +77,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
     {
         if (_audit is null) return result;
 
-#pragma warning disable CS4014 // Executes synchonously when async: false
+#pragma warning disable CS4014 // Executes synchronously when async: false
         SaveAudit(eventData.Context!, _audit, async: false);
 #pragma warning restore CS4014
 
@@ -276,6 +279,135 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         }
     }
 
+    /// <summary>
+    /// Generates a stored procedure name based on the SQL hash to handle version conflicts.
+    /// </summary>
+    private static string GetStoredProcedureName(string sql)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(sql));
+        var shortHash = Convert.ToHexString(hash[..4]); // Use first 8 characters
+        return $"AuditMerge_{shortHash}";
+    }
+
+    /// <summary>
+    /// Generates the DDL to create the stored procedure.
+    /// </summary>
+    private static string GetStoredProcedureDdl(string procedureName, string sql)
+    {
+        return $"""
+            IF OBJECT_ID('{procedureName}', 'P') IS NOT NULL
+                DROP PROCEDURE [{procedureName}];
+
+            EXEC('CREATE PROCEDURE [{procedureName}]
+                @MergePayload NVARCHAR(MAX),
+                @MergeWindowSeconds INT
+            AS
+            BEGIN
+                {sql.Replace("'", "''")}
+            END');
+            """;
+    }
+
+    /// <summary>
+    /// Cache for stored procedure names. Size is limited in case there is an application whose Model
+    /// is not a singleton, e.g. dynamic model configuration for schema-based tenancy.
+    /// </summary>
+    private readonly MemoryCache _storedProcedureCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000 });
+
+    /// <summary>
+    /// Ensures the stored procedure exists and returns its name.
+    /// </summary>
+    private async ValueTask<string> EnsureStoredProcedureExists(DbContext db, string sql, bool async)
+    {
+        var procedureName = GetStoredProcedureName(sql);
+
+        // Check if we've already verified this procedure exists for this model
+        if (_storedProcedureCache.TryGetValue<string>(db.Model, out var cachedName) && cachedName == procedureName)
+        {
+            return procedureName;
+        }
+
+        // Check if the procedure exists and has the correct content
+        var needsCreation = await CheckProcedureNeedsCreation(db, procedureName, sql, async);
+
+        if (needsCreation)
+        {
+            // Create or update the stored procedure
+            var ddl = GetStoredProcedureDdl(procedureName, sql);
+
+            if (async)
+            {
+                await db.Database.ExecuteSqlRawAsync(ddl);
+            }
+            else
+            {
+                db.Database.ExecuteSqlRaw(ddl);
+            }
+        }
+
+        // Cache that we've verified this procedure exists with the correct content
+        _storedProcedureCache.Set(db.Model, procedureName, new MemoryCacheEntryOptions
+        {
+            Size = procedureName.Length,
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1) // Re-verify after an hour
+        });
+
+        return procedureName;
+    }
+
+    /// <summary>
+    /// Checks if a stored procedure needs to be created or updated.
+    /// </summary>
+    private async ValueTask<bool> CheckProcedureNeedsCreation(DbContext db, string procedureName, string expectedSql, bool async)
+    {
+        // Use FormattableString to ensure proper parameterization
+        FormattableString sql = $"SELECT OBJECT_DEFINITION(OBJECT_ID({procedureName}, 'P')) AS [Value]";
+        var query = db.Database.SqlQuery<string?>(sql);
+
+        string? result;
+        if (async)
+        {
+            result = await query.FirstOrDefaultAsync();
+        }
+        else
+        {
+            result = query.FirstOrDefault();
+        }
+
+        if (result == null)
+        {
+            // Procedure doesn't exist
+            return true;
+        }
+
+        // Procedure exists, check if content matches
+        var existingDefinition = result!;
+
+        // Extract the SQL from the stored procedure definition to compare with expected SQL
+        // The existing definition includes the CREATE PROCEDURE wrapper, so we need to extract just the body
+        var bodyStart = existingDefinition.IndexOf("BEGIN", StringComparison.OrdinalIgnoreCase);
+        var bodyEnd = existingDefinition.LastIndexOf("END", StringComparison.OrdinalIgnoreCase);
+
+        if (bodyStart >= 0 && bodyEnd > bodyStart)
+        {
+            var existingBody = existingDefinition.Substring(bodyStart + 5, bodyEnd - bodyStart - 5).Trim();
+            var expectedBody = expectedSql.Trim();
+
+            if (existingBody != expectedBody)
+            {
+                // Content doesn't match, needs update
+                return true;
+            }
+        }
+        else
+        {
+            // Couldn't parse the procedure body, safer to recreate
+            return true;
+        }
+
+        return false; // Procedure exists and content matches
+    }
+
     private async ValueTask SaveAudit(DbContext db, CoalesceAudit audit, bool async)
     {
         audit.PostSaveChanges();
@@ -286,8 +418,8 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         }
 
         var serviceProvider = new EntityFrameworkServiceProvider(db);
-        var operationContext = _options.OperationContextType is null 
-            ? null 
+        var operationContext = _options.OperationContextType is null
+            ? null
             : (IAuditOperationContext<TAuditLog>)ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, _options.OperationContextType);
 
         // This must be the exact same date for all items for the merge logic in the SQL to work properly.
@@ -309,8 +441,8 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                 auditLog.Date = date;
                 auditLog.State = e.State;
                 auditLog.Type = e.Entry.Metadata.ClrType.Name;
-                auditLog.KeyValue = keyProperties is null 
-                    ? null 
+                auditLog.KeyValue = keyProperties is null
+                    ? null
                     : string.Join(";", keyProperties.Select(p => e.Entry.CurrentValues[p]));
 
                 if (
@@ -360,8 +492,8 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                             }
                         };
                     })
-                    .Where(property => 
-                        property.OldValue != property.NewValue || 
+                    .Where(property =>
+                        property.OldValue != property.NewValue ||
                         property.OldValueDescription != property.NewValueDescription)
                     .ToList();
 
@@ -384,7 +516,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         List<TAuditLog> noMergeLogs = new();
 
         if (
-            _options.MergeWindow > TimeSpan.Zero && 
+            _options.MergeWindow > TimeSpan.Zero &&
             db.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer"
         )
         {
@@ -409,21 +541,28 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         {
             var conn = db.Database.GetDbConnection();
             var cmd = conn.CreateCommand();
-            cmd.CommandText = GetSqlServerSql(db.Model);
 
             var jsonParam = cmd.CreateParameter();
             jsonParam.ParameterName = "MergePayload";
             jsonParam.Value = JsonSerializer.Serialize(mergeLogs, _mergeJsonOptions);
 
-
-            // MergeWindowSeconds, in seconds, that a record can be for it to be updated (rather than inserting a new one).
-            // This is chosen to be just under a minute so that changes happening on a one-minute interval to the same record
-            // (there's nothing like this that I'm aware of currently in the application, but anyway...)
-            // will not continuously roll forward on the same AuditLog record for all time.
-
             var mergeWindowParam = cmd.CreateParameter();
             mergeWindowParam.ParameterName = "MergeWindowSeconds";
             mergeWindowParam.Value = _options.MergeWindow.TotalSeconds;
+
+            if (_options.UseStoredProcedures)
+            {
+                // Use stored procedure mode
+                var sql = GetSqlServerSql(db.Model);
+                var procedureName = await EnsureStoredProcedureExists(db, sql, async);
+
+                cmd.CommandText = $"EXEC [{procedureName}] @MergePayload, @MergeWindowSeconds";
+            }
+            else
+            {
+                // Use raw SQL mode (existing behavior)
+                cmd.CommandText = GetSqlServerSql(db.Model);
+            }
 
             if (async)
             {
@@ -462,6 +601,6 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         // 4: AuditLogProperties object
         // 5: Individual fields on AuditLogProperties (not sure why this counts as a depth layer)
         MaxDepth = 5,
-        
+
     };
 }

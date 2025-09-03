@@ -29,7 +29,7 @@
             <i class="fa fa-caret-down pl-1"></i>
           </v-btn>
         </template>
-        <v-list>
+        <v-list density="compact">
           <v-list-item
             v-for="t in Object.values($metadata.types).filter(
               (t) => t.type == 'model',

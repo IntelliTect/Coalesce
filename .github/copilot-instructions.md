@@ -12,10 +12,10 @@ The required tools and dependencies are automatically installed via the GitHub A
 
 ## Instructions
 
-- Format PR titles with Semantic Commits. The work item number should follow the colon after the commit type like `feat: #12345 added ...`
-- Always update the documentation when making changes or adding features that will affect developers who use Coalesce.
-- Always add an entry to CHANGELOG.md when adding new features or fixing non-trivial bugs.
-- Avoid making breaking changes if not necessary. A less obvious example of a breaking change would be changing an existing CSS class name.
+- YOU MUST Format PR titles with Semantic Commits. The work item number should follow the colon after the commit type like `feat: #12345 added ...`
+- YOU MUST update the documentation when making changes or adding features that will affect developers who use Coalesce.
+- YOU MUST add an entry to CHANGELOG.md when adding new features or fixing non-trivial bugs. Be concise and factual. The changelog is not a marketing document - you don't have to convince users of the value of the feature, or explain how to use it or configure it.
+- YOU MUST Avoid making breaking changes if not necessary. A less obvious example of a breaking change would be changing an existing CSS class name.
 - Consider adding or updating example files in `playground\Coalesce.Web.Vue3\src\examples` when making changes to coalesce-vue-vuetify.
 
 ## Validation Checklist
@@ -30,6 +30,7 @@ npm ci
 dotnet build
 cd src/coalesce-vue && npm run build
 cd ../coalesce-vue-vuetify3 && npm run build
+cd ../coalesce-mcp && npm run build
 ```
 
 2. **Test verification**:
@@ -39,6 +40,7 @@ cd ../coalesce-vue-vuetify3 && npm run build
 dotnet test
 cd src/coalesce-vue && npm run test
 cd ../coalesce-vue-vuetify3 && npm run test
+cd ../coalesce-mcp && npm run test
 ```
 
 3. **Template verification**:

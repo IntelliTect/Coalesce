@@ -575,6 +575,26 @@ export class CompanyListViewModel extends ListViewModel<$models.Company, $apiCli
 }
 
 
+export interface DateOnlyPkViewModel extends $models.DateOnlyPk {
+  dateOnlyPkId: Date | null;
+  name: string | null;
+}
+export class DateOnlyPkViewModel extends ViewModel<$models.DateOnlyPk, $apiClients.DateOnlyPkApiClient, Date> implements $models.DateOnlyPk  {
+  
+  constructor(initialData?: DeepPartial<$models.DateOnlyPk> | null) {
+    super($metadata.DateOnlyPk, new $apiClients.DateOnlyPkApiClient(), initialData)
+  }
+}
+defineProps(DateOnlyPkViewModel, $metadata.DateOnlyPk)
+
+export class DateOnlyPkListViewModel extends ListViewModel<$models.DateOnlyPk, $apiClients.DateOnlyPkApiClient, DateOnlyPkViewModel> {
+  
+  constructor() {
+    super($metadata.DateOnlyPk, new $apiClients.DateOnlyPkApiClient())
+  }
+}
+
+
 export interface LogViewModel extends $models.Log {
   logId: number | null;
   level: string | null;
@@ -896,6 +916,11 @@ export interface ProductViewModel extends $models.Product {
   name: string | null;
   details: $models.ProductDetails | null;
   uniqueId: string | null;
+  milestoneId: Date | null;
+  
+  /** Product milestone date */
+  get milestone(): DateOnlyPkViewModel | null;
+  set milestone(value: DateOnlyPkViewModel | $models.DateOnlyPk | null);
   unknown: unknown | null;
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
@@ -1055,6 +1080,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   CaseProduct: CaseProductViewModel,
   CaseStandalone: CaseStandaloneViewModel,
   Company: CompanyViewModel,
+  DateOnlyPk: DateOnlyPkViewModel,
   Log: LogViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
@@ -1077,6 +1103,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   CaseProduct: CaseProductListViewModel,
   CaseStandalone: CaseStandaloneListViewModel,
   Company: CompanyListViewModel,
+  DateOnlyPk: DateOnlyPkListViewModel,
   Log: LogListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,

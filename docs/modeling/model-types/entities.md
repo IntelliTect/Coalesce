@@ -6,7 +6,7 @@ Models are the core business objects of your application - they serve as the fun
 
 To start building your data model that Coalesce will generate code for, follow the best practices for [EF Core](https://docs.microsoft.com/en-us/ef/core/). Guidance on this topic is available in abundance in the [Entity Framework Core documentation](https://docs.microsoft.com/en-us/ef/core/).
 
-Don't worry about querying or saving data when you're just getting started - Coalesce will provide a lot of that functionality for you, and it is very easy to customize what Coalesce offers later. To get started, just build your entity classes and `DbContext` class. Annotate your `DbContext` class with `[Coalesce]` so that Coalesce will discover it and generate code based on your context for you. Also ensure that each entity model has a `DbSet` property on the context - this is how Coalesce discovers your entity model types.
+Don't worry about querying or saving data when you're just getting started - Coalesce will provide much of that functionality for you, and it's very easy to customize what Coalesce offers later. To get started, just build your entity classes and `DbContext` class. Annotate your `DbContext` class with `[Coalesce]` so that Coalesce will discover it and generate code based on your context. Also ensure that each entity model has a `DbSet` property on the context - this is how Coalesce discovers your entity model types.
 
 As you start building, you are highly encouraged to read the sections below. The linked pages explain in greater detail what Coalesce will build for you for each part of your data model.
 
@@ -18,7 +18,7 @@ To work with Coalesce, your model must have a single property for a primary key.
 
 ### Foreign Keys & Reference Navigation Properties
 
-While a foreign key may be defined in EF via `DbContext.OnModelCreating` or similar methods, Coalesce won't know that a property is a foreign key unless it is accompanied by a corresponding reference navigation property, and vice versa - Coalesce cannot examine your EF model metadata at generation time - it can only see the API surface of your C# code.
+While a foreign key may be defined in EF via `DbContext.OnModelCreating` or similar methods, Coalesce won't know that a property is a foreign key unless it is accompanied by a corresponding reference navigation property, and vice versa - Coalesce cannot examine your EF model metadata at generation time; it can only see the API surface of your C# code.
 
 In cases where the foreign key is not named after the navigation property with `"Id"` appended, the `[ForeignKeyAttribute]` may be used on either the key or the navigation property to denote the other property of the pair, in accordance with the recommendations set forth by [EF Core's Modeling Guidelines](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/mapping-attributes#foreignkeyattribute).
 
@@ -73,7 +73,7 @@ Read [Attributes](/modeling/model-components/attributes.md) to learn more.
 
 ### Methods
 
-You can place both static and interface methods on your model classes. Any public methods annotated with [[Coalesce]](/modeling/model-components/attributes/coalesce.md) will have a generated API endpoint and corresponding generated TypeScript members for calling this API endpoint. Read [Methods](/modeling/model-components/methods.md) to learn more.
+You can place both static and instance methods on your model classes. Any public methods annotated with [[Coalesce]](/modeling/model-components/attributes/coalesce.md) will have a generated API endpoint and corresponding generated TypeScript members for calling this API endpoint. Read [Methods](/modeling/model-components/methods.md) to learn more.
 
 ## Customizing CRUD Operations
 

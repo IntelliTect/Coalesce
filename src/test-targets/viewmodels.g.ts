@@ -648,6 +648,28 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return downloadAttachment_VaryString
   }
   
+  public get downloadAttachment_VaryStringCustomCache() {
+    const downloadAttachment_VaryStringCustomCache = this.$apiClient.$makeCaller(
+      this.$metadata.methods.downloadAttachment_VaryStringCustomCache,
+      (c) => c.downloadAttachment_VaryStringCustomCache(this.$primaryKey, this.name),
+      () => ({}),
+      (c, args) => c.downloadAttachment_VaryStringCustomCache(this.$primaryKey, this.name))
+    
+    Object.defineProperty(this, 'downloadAttachment_VaryStringCustomCache', {value: downloadAttachment_VaryStringCustomCache});
+    return downloadAttachment_VaryStringCustomCache
+  }
+  
+  public get downloadAttachment_VaryStringNoCache() {
+    const downloadAttachment_VaryStringNoCache = this.$apiClient.$makeCaller(
+      this.$metadata.methods.downloadAttachment_VaryStringNoCache,
+      (c) => c.downloadAttachment_VaryStringNoCache(this.$primaryKey, this.name),
+      () => ({}),
+      (c, args) => c.downloadAttachment_VaryStringNoCache(this.$primaryKey, this.name))
+    
+    Object.defineProperty(this, 'downloadAttachment_VaryStringNoCache', {value: downloadAttachment_VaryStringNoCache});
+    return downloadAttachment_VaryStringNoCache
+  }
+  
   public get downloadAttachment_VaryInt() {
     const downloadAttachment_VaryInt = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryInt,
@@ -870,6 +892,66 @@ export class ComplexModelDependentListViewModel extends ListViewModel<$models.Co
   
   constructor() {
     super($metadata.ComplexModelDependent, new $apiClients.ComplexModelDependentApiClient())
+  }
+}
+
+
+export interface DateOnlyPkViewModel extends $models.DateOnlyPk {
+  dateOnlyPkId: Date | null;
+  name: string | null;
+}
+export class DateOnlyPkViewModel extends ViewModel<$models.DateOnlyPk, $apiClients.DateOnlyPkApiClient, Date> implements $models.DateOnlyPk  {
+  
+  constructor(initialData?: DeepPartial<$models.DateOnlyPk> | null) {
+    super($metadata.DateOnlyPk, new $apiClients.DateOnlyPkApiClient(), initialData)
+  }
+}
+defineProps(DateOnlyPkViewModel, $metadata.DateOnlyPk)
+
+export class DateOnlyPkListViewModel extends ListViewModel<$models.DateOnlyPk, $apiClients.DateOnlyPkApiClient, DateOnlyPkViewModel> {
+  
+  constructor() {
+    super($metadata.DateOnlyPk, new $apiClients.DateOnlyPkApiClient())
+  }
+}
+
+
+export interface DateTimeOffsetPkViewModel extends $models.DateTimeOffsetPk {
+  dateTimeOffsetPkId: Date | null;
+  name: string | null;
+}
+export class DateTimeOffsetPkViewModel extends ViewModel<$models.DateTimeOffsetPk, $apiClients.DateTimeOffsetPkApiClient, Date> implements $models.DateTimeOffsetPk  {
+  
+  constructor(initialData?: DeepPartial<$models.DateTimeOffsetPk> | null) {
+    super($metadata.DateTimeOffsetPk, new $apiClients.DateTimeOffsetPkApiClient(), initialData)
+  }
+}
+defineProps(DateTimeOffsetPkViewModel, $metadata.DateTimeOffsetPk)
+
+export class DateTimeOffsetPkListViewModel extends ListViewModel<$models.DateTimeOffsetPk, $apiClients.DateTimeOffsetPkApiClient, DateTimeOffsetPkViewModel> {
+  
+  constructor() {
+    super($metadata.DateTimeOffsetPk, new $apiClients.DateTimeOffsetPkApiClient())
+  }
+}
+
+
+export interface DateTimePkViewModel extends $models.DateTimePk {
+  dateTimePkId: Date | null;
+  name: string | null;
+}
+export class DateTimePkViewModel extends ViewModel<$models.DateTimePk, $apiClients.DateTimePkApiClient, Date> implements $models.DateTimePk  {
+  
+  constructor(initialData?: DeepPartial<$models.DateTimePk> | null) {
+    super($metadata.DateTimePk, new $apiClients.DateTimePkApiClient(), initialData)
+  }
+}
+defineProps(DateTimePkViewModel, $metadata.DateTimePk)
+
+export class DateTimePkListViewModel extends ListViewModel<$models.DateTimePk, $apiClients.DateTimePkApiClient, DateTimePkViewModel> {
+  
+  constructor() {
+    super($metadata.DateTimePk, new $apiClients.DateTimePkApiClient())
   }
 }
 
@@ -1491,6 +1573,26 @@ export class TestListViewModel extends ListViewModel<$models.Test, $apiClients.T
 }
 
 
+export interface TimeOnlyPkViewModel extends $models.TimeOnlyPk {
+  timeOnlyPkId: Date | null;
+  name: string | null;
+}
+export class TimeOnlyPkViewModel extends ViewModel<$models.TimeOnlyPk, $apiClients.TimeOnlyPkApiClient, Date> implements $models.TimeOnlyPk  {
+  
+  constructor(initialData?: DeepPartial<$models.TimeOnlyPk> | null) {
+    super($metadata.TimeOnlyPk, new $apiClients.TimeOnlyPkApiClient(), initialData)
+  }
+}
+defineProps(TimeOnlyPkViewModel, $metadata.TimeOnlyPk)
+
+export class TimeOnlyPkListViewModel extends ListViewModel<$models.TimeOnlyPk, $apiClients.TimeOnlyPkApiClient, TimeOnlyPkViewModel> {
+  
+  constructor() {
+    super($metadata.TimeOnlyPk, new $apiClients.TimeOnlyPkApiClient())
+  }
+}
+
+
 export interface ZipCodeViewModel extends $models.ZipCode {
   zip: string | null;
   state: string | null;
@@ -1553,6 +1655,9 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   Company: CompanyViewModel,
   ComplexModel: ComplexModelViewModel,
   ComplexModelDependent: ComplexModelDependentViewModel,
+  DateOnlyPk: DateOnlyPkViewModel,
+  DateTimeOffsetPk: DateTimeOffsetPkViewModel,
+  DateTimePk: DateTimePkViewModel,
   EnumPk: EnumPkViewModel,
   MultipleParents: MultipleParentsViewModel,
   OneToOneChild1: OneToOneChild1ViewModel,
@@ -1571,6 +1676,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   StandaloneReadWrite: StandaloneReadWriteViewModel,
   StringIdentity: StringIdentityViewModel,
   Test: TestViewModel,
+  TimeOnlyPk: TimeOnlyPkViewModel,
   ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
@@ -1584,6 +1690,9 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Company: CompanyListViewModel,
   ComplexModel: ComplexModelListViewModel,
   ComplexModelDependent: ComplexModelDependentListViewModel,
+  DateOnlyPk: DateOnlyPkListViewModel,
+  DateTimeOffsetPk: DateTimeOffsetPkListViewModel,
+  DateTimePk: DateTimePkListViewModel,
   EnumPk: EnumPkListViewModel,
   MultipleParents: MultipleParentsListViewModel,
   OneToOneChild1: OneToOneChild1ListViewModel,
@@ -1602,6 +1711,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   StandaloneReadWrite: StandaloneReadWriteListViewModel,
   StringIdentity: StringIdentityListViewModel,
   Test: TestListViewModel,
+  TimeOnlyPk: TimeOnlyPkListViewModel,
   ZipCode: ZipCodeListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {

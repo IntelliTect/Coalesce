@@ -695,4 +695,42 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             }
             """);
     }
+
+    [Fact]
+    public async Task ItemResultGeneric_Interface_ObjectValue_NoWarning()
+    {
+        await VerifyAnalyzerAsync("""
+            public class TestClass
+            {
+                public ItemResult<IBar> GetResult()
+                {
+                    Bar bar1 = new();
+                    IBar bar2 = bar1;
+                    return new ItemResult<IBar>(bar2);
+                }
+            }
+
+            public interface IBar { }
+            public class Bar : IBar { }
+            """);
+    }
+
+    [Fact]
+    public async Task ItemResultGeneric_Interface_PropertyInitializer_ObjectValue_NoWarning()
+    {
+        await VerifyAnalyzerAsync("""
+            public class TestClass
+            {
+                public ItemResult<IBar> GetResult()
+                {
+                    Bar bar1 = new();
+                    IBar bar2 = bar1;
+                    return new ItemResult<IBar> { Object = bar2 };
+                }
+            }
+
+            public interface IBar { }
+            public class Bar : IBar { }
+            """);
+    }
 }

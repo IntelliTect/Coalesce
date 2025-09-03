@@ -1,6 +1,7 @@
 import {
   ListParameters,
   mapValueToModel,
+  mapToDto,
   Model,
   ModelReferenceNavigationProperty,
   ViewModel,
@@ -22,11 +23,12 @@ export function getRefNavRoute(
   // instead of the user-overridden one (that the user overrides by declaring another
   // route with the same path).
   try {
+    const meta = item?.$metadata ?? prop.typeDef;
     return router.resolve({
       name: "coalesce-admin-item",
       params: {
-        type: item?.$metadata.name ?? prop.typeDef.name,
-        id: fk,
+        type: meta.name,
+        id: String(mapToDto(fk, meta.keyProp)),
       },
     }).fullPath;
   } catch {

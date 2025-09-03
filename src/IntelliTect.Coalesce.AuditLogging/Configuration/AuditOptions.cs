@@ -55,6 +55,22 @@ public class AuditOptions
     public PropertyDescriptionMode PropertyDescriptions { get; internal set; } = PropertyDescriptionMode.FkListText;
 
     /// <summary>
+    /// <para>
+    /// When enabled, the audit log merge SQL will be wrapped in a stored procedure 
+    /// that is automatically created/updated as needed. The stored procedure name 
+    /// includes a hash of the SQL content to handle version conflicts.
+    /// </para>
+    /// <para>
+    /// This can provide better performance through compiled execution plans and 
+    /// easier monitoring/troubleshooting. Currently only supported for SQL Server.
+    /// </para>
+    /// <para>
+    /// The default is true.
+    /// </para>
+    /// </summary>
+    public bool UseStoredProcedures { get; internal set; } = true;
+
+    /// <summary>
     /// Internal so that it cannot be modified in a way that breaks the caching assumptions
     /// that we make in CoalesceAuditLoggingBuilder.
     /// </summary>

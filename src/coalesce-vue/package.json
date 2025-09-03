@@ -1,7 +1,7 @@
 {
   "name": "coalesce-vue",
   "version": "0.1.0-local",
-  "description": "Coalesce core scripts for Vue.js 2 and 3.",
+  "description": "Core scripts for IntelliTect's Coalesce framework.",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "sideEffects": false,

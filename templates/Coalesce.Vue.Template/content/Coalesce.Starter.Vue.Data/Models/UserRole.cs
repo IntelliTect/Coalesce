@@ -57,13 +57,42 @@ public class UserRole : IdentityUserRole<string>
         SignInManager<User> signInManager
     ) : AppBehaviors<UserRole>(context)
     {
+        public override ItemResult BeforeDelete(UserRole item)
+        {
+            // Prevent removing the last user admin
+            if (item.Role?.Permissions?.Contains(Permission.UserAdmin) == true)
+            {
+                var result = CheckWouldLeaveNoUserAdmins(item.UserId, item.RoleId);
+                if (!result.WasSuccessful) return result;
+            }
+
+            return base.BeforeDelete(item);
+        }
+
         public override async Task<ItemResult<UserRole>> AfterSaveAsync(SaveKind kind, UserRole? oldItem, UserRole item)
         {
-            if (User.GetUserId() == item.Id)
+            if (User.GetUserId() == item.UserId)
             {
                 // If the user was editing their own roles, refresh their current sign-in immediately
                 // so that it doesn't feel like nothing happened.
                 await signInManager.RefreshSignInAsync(item.User!);
+            }
+
+            return true;
+        }
+
+        private ItemResult CheckWouldLeaveNoUserAdmins(string userIdToExclude, string roleIdToExclude)
+        {
+            // Count users who have UserAdmin permission (excluding the user/role combination being removed)
+            var adminUserCount = Db.Users
+                .Where(u => u.UserRoles!.Any(ur => 
+                    !(ur.UserId == userIdToExclude && ur.RoleId == roleIdToExclude) &&
+                    ur.Role!.Permissions!.Contains(Permission.UserAdmin)))
+                .Count();
+
+            if (adminUserCount == 0)
+            {
+                return "This action would leave the system with no user administrators. At least one user admin must remain.";
             }
 
             return true;

@@ -200,7 +200,6 @@ export default defineComponent({
       return `${base}-${route.path}`;
     });
 
-    // Computed property to get effective columns based on preferences and defaults
     const effectiveColumns = computed(() => {
       const defaults = defaultColumns.value;
       const saved = columnPreferences.value;
@@ -227,7 +226,6 @@ export default defineComponent({
       return result;
     });
 
-    // Handle column updates with the new preference-based approach
     const onColumnsUpdated = (newColumns: string[] | null) => {
       if (newColumns == null) {
         columnPreferences.value = null;

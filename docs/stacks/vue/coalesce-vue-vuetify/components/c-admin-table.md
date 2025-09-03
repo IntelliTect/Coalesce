@@ -8,16 +8,6 @@ An full-featured table for a [ListViewModel](/stacks/vue/layers/viewmodels.md), 
 
 The table can be in read mode (default), or toggled into edit mode with the button provided by the [c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md). When placed into edit mode, [auto-save](/stacks/vue/layers/viewmodels.md) is enabled.
 
-## Column Selection
-
-The table includes a column selection feature that allows users to choose which columns to display. This feature:
-
-- Shows a "Columns" button in the toolbar that opens a dropdown menu
-- Displays checkboxes for all available columns with user-friendly display names
-- Provides "Select All", "Select None", and "Reset" actions
-- Persists selections to localStorage using the current route pathname as the key
-- Can be disabled or customized using the `columnSelection`, `columns`, and `columnSelectionKey` props
-
 ## Examples
 
 ``` vue-html
@@ -44,13 +34,9 @@ If true, the [Data Source Standard Parameters](/modeling/model-components/data-s
 
 <Prop def="columns?: string[]" lang="ts" />
 
-An optional array of property names to display as columns. When specified, the column selection feature is disabled by default (unless `columnSelection` is explicitly set to `true`). If not provided, all non-hidden properties will be displayed.
-
-<Prop def="columnSelection?: boolean" lang="ts" />
-
-Controls whether the column selection feature is enabled. When `undefined` (the default), column selection is enabled unless the `columns` prop is provided. Set to `true` to force enable or `false` to force disable the feature.
+An optional array of property names to display as columns. If not provided, all non-hidden properties will be displayed.
 
 <Prop def="columnSelectionKey?: string" lang="ts" />
 
-A custom key for localStorage persistence of column selections. If not provided, the current route pathname will be used as the key (e.g., `coalesce-admin-table-columns-/admin/Person`).
+A custom key for localStorage persistence of user column preferences. If not provided, the current route pathname will be used as part of the key.
 

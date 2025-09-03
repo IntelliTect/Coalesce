@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { PropType, toRef } from "vue";
-import { ListViewModel, ModelType, Property } from "coalesce-vue";
+import { ListViewModel, ModelType } from "coalesce-vue";
 import { useAdminTable } from "./useAdminTable";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";

@@ -10,14 +10,13 @@ A component that provides an interface for modifying the `filters` prop of a [Li
 
 ### Filters Only
 ``` vue-html
-<c-list-filters :list="list" :available-props="availableProps" />
+<c-list-filters :list="list" />
 ```
 
 ### Filters with Column Selection
 ``` vue-html
 <c-list-filters 
   :list="list" 
-  :available-props="availableProps"
   v-model:selected-columns="selectedColumns"
   column-selection
 />

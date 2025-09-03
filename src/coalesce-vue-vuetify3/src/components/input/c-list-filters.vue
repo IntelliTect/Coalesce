@@ -1,8 +1,8 @@
 <template>
   <v-menu class="c-list-filters--menu" :close-on-content-click="false">
     <template #activator="{ props: menuProps }">
-      <v-btn class="c-list-filters" variant="text" v-bind="menuProps"
-        ><v-badge
+      <v-btn class="c-list-filters" variant="text" v-bind="menuProps">
+        <v-badge
           :model-value="!!activeCount"
           location="top start"
           floating

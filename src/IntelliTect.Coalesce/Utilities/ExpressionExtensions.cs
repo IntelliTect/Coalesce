@@ -83,7 +83,7 @@ public static class ExpressionExtensions
             // passing the instanceTarget as the first param.
             return Expression.Call(
                 method,
-                methodParams is null ? [instanceTarget] : [instanceTarget, ..methodParams]
+                methodParams is null ? [instanceTarget] : [instanceTarget, .. methodParams]
             );
         }
 
@@ -111,10 +111,20 @@ public static class ExpressionExtensions
         => Expression.Property(instance, prop.PropertyInfo);
 
     public static Expression OrAny(this IEnumerable<Expression> expressions)
-        => expressions.Aggregate((prev, cur) => prev == null ? cur : Expression.OrElse(prev, cur));
+    {
+        var expressionList = expressions as IList<Expression> ?? expressions.ToList();
+        return expressionList.Count == 0
+            ? Expression.Constant(false)
+            : expressionList.Aggregate((prev, cur) => prev == null ? cur : Expression.OrElse(prev, cur));
+    }
 
     public static Expression AndAll(this IEnumerable<Expression> expressions)
-        => expressions.Aggregate((prev, cur) => prev == null ? cur : Expression.AndAlso(prev, cur));
+    {
+        var expressionList = expressions as IList<Expression> ?? expressions.ToList();
+        return expressionList.Count == 0
+            ? Expression.Constant(true)
+            : expressionList.Aggregate((prev, cur) => prev == null ? cur : Expression.AndAlso(prev, cur));
+    }
 
     /// <summary>
     /// Create an expression representing a constant value in a way that will
@@ -146,7 +156,7 @@ public static class ExpressionExtensions
 
     internal static Expression AsQueryParam(this object value) => Parameterize(value);
 
-    internal static Expression AsQueryParam(this object? value, TypeViewModel type) 
+    internal static Expression AsQueryParam(this object? value, TypeViewModel type)
         => Parameterize(value, type.TypeInfo);
 
     public static string? GetDebugView(this Expression exp)

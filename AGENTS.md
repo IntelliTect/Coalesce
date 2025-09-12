@@ -20,10 +20,9 @@ The required tools and dependencies are automatically installed via the GitHub A
 
 ## Validation Checklist
 
-After making changes, ALWAYS run this validation sequence:
+After making changes, use these to validate changes:
 
-1. **Build verification**:
-   From the repo root:
+### Run builds
 
 ```bash
 npm ci
@@ -33,20 +32,19 @@ cd ../coalesce-vue-vuetify3 && npm run build
 cd ../coalesce-mcp && npm run build
 ```
 
-2. **Test verification**:
-   From the repo root:
+### Run tests
 
 ```bash
 dotnet test
-cd src/coalesce-vue && npm run test
-cd ../coalesce-vue-vuetify3 && npm run test
-cd ../coalesce-mcp && npm run test
+cd src/coalesce-vue && npm test -- --run
+cd ../coalesce-vue-vuetify3 && npm test -- --run
+cd ../coalesce-mcp && npm test -- --run
 ```
 
-3. **Template verification**:
-   If you make changes to the template in the `templates` directory, validate the changes by running `TestLocal.ps1 -- "--FeatureOne --FeatureTwo"` where the FeatureOne, FeatureTwo parameters are replaced with each flag that might affect the changes you made. Run it multiple times if there are different combinations of feature flags that might interact in different ways. The flags are the variables checked by the `#if` in the template code.
+### Template tests
 
-4. **Documentation verification**:
-   If the documentation was updated, run `npm run build` in the docs folder. You can expect the link checks to fail - you do not have access to the internet to validate the links.
+If you make changes to the template in the `templates` directory, validate the changes by running `TestLocal.ps1 -- "--FeatureOne --FeatureTwo"` where the FeatureOne, FeatureTwo parameters are replaced with each flag that might affect the changes you made. Run it multiple times if there are different combinations of feature flags that might interact in different ways. The flags are the variables checked by the `#if` in the template code.
 
-REMEMBER: NEVER CANCEL long-running build operations.
+### Documentation
+
+If the documentation was updated, run `npm run build` in the docs folder.

@@ -368,6 +368,7 @@ export function registerTemplateFeatureResource(server: McpServerType) {
   server.tool(
     {
       name: "coalesce_get_template_features",
+      title: "Get Coalesce template feature",
       description:
         "Get the files for a specific Coalesce template feature, or list all available features if no feature is specified",
       schema: z.object({

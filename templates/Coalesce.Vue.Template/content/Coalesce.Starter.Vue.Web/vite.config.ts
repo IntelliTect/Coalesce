@@ -82,6 +82,12 @@ export default defineConfig({
     },
   },
 
+  server: {
+    warmup: {
+      clientFiles: ["./src/views/*.vue"],
+    },
+  },
+
   css: {
     preprocessorOptions: {
       scss: {

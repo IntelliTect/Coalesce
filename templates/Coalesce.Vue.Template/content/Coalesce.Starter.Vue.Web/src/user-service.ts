@@ -68,15 +68,6 @@ document.addEventListener(
 );
 
 // Make useful properties available in vue <template>s
-declare module "vue" {
-  interface ComponentCustomProperties {
-    //#if Identity
-    Permission: typeof Permission;
-    $can: typeof can;
-    //#endif
-    $userInfo: (typeof userInfo)["value"];
-  }
-}
 export const globalProperties = {
   //#if Identity
   Permission,
@@ -86,3 +77,9 @@ export const globalProperties = {
     return userInfo.value;
   },
 };
+
+declare module "vue" {
+  type UserProps = typeof globalProperties;
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface ComponentCustomProperties extends UserProps {}
+}

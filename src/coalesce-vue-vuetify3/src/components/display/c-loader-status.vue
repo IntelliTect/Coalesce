@@ -160,12 +160,13 @@ const props = withDefaults(
     color: "primary",
     // Prevent our flags from defaulting to `false`. We need them to default to `undefined`
     // so we can detect if they were specified at all.
-    ...Object.fromEntries(
-      Object.entries(new Flags()).flatMap((f) => [
-        [camelize(f[0]), undefined],
-        [camelize("no-" + f[0]), undefined],
-      ]),
-    ),
+    noProgress: undefined,
+    noInitialProgress: undefined,
+    noSecondaryProgress: undefined,
+    noLoadingContent: undefined,
+    noErrorContent: undefined,
+    noInitialContent: undefined,
+    showSuccess: undefined,
   },
 );
 

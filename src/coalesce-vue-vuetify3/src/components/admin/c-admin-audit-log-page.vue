@@ -76,13 +76,15 @@
               />
 
               <c-select
-                v-if="userPropMeta"
+                v-if="'foreignKey' in userPropMeta"
                 :for="userPropMeta"
                 v-model:key-value="filter[userPropMeta.foreignKey.name]"
                 clearable
                 style="width: 240px"
                 @click:clear="
-                  $nextTick(() => (filter[userPropMeta.foreignKey.name] = ''))
+                  $nextTick(
+                    () => (filter[(userPropMeta as any).foreignKey.name] = ''),
+                  )
                 "
               />
             </div>
@@ -137,7 +139,8 @@
                             timeZone: 'UTC',
                           },
                         }),
-                        (auditLog.date!.valueOf() / 1000).toFixed(3) + ' (Unix Seconds)',
+                        (auditLog.date!.valueOf() / 1000).toFixed(3) +
+                          ' (Unix Seconds)',
                       ].join('\n')
                     "
                   />
@@ -298,8 +301,9 @@ const props = withDefaults(
     type?: string;
     color?: string;
     list?: AuditLogListViewModel;
+    userProp?: string;
   }>(),
-  { color: "primary" }
+  { color: "primary" },
 );
 
 let listVm: AuditLogListViewModel;
@@ -308,11 +312,11 @@ if (props.list) {
 } else {
   if (!props.type) {
     throw Error(
-      "c-admin-audit-log-page: If prop `list` is not provided, `type` is required."
+      "c-admin-audit-log-page: If prop `list` is not provided, `type` is required.",
     );
   } else if (!ListViewModel.typeLookup![props.type]) {
     throw Error(
-      `No model named ${props.type} is registered to ListViewModel.typeLookup`
+      `No model named ${props.type} is registered to ListViewModel.typeLookup`,
     );
   }
   listVm = new ListViewModel.typeLookup![props.type]() as any;
@@ -321,21 +325,28 @@ if (props.list) {
 }
 
 const items = computed(() =>
-  listVm.$modelOnlyMode ? toRaw(listVm.$modelItems) : listVm.$items
+  listVm.$modelOnlyMode ? toRaw(listVm.$modelItems) : listVm.$items,
 );
 
 const userPropMeta = computed(() => {
+  if (props.userProp) {
+    const prop = listVm.$metadata.props[props.userProp];
+    if (prop) {
+      return prop;
+    }
+  }
+
   return (
     Object.values(listVm.$metadata.props)
       .filter(
         (p): p is ModelReferenceNavigationProperty =>
-          p.role == "referenceNavigation"
+          p.role == "referenceNavigation",
       )
       // FUTURE: Could there be other props that we detect as representing a user?
       .filter((p) =>
         ["user", "createdby", "changedby"].some((needle) =>
-          p.name.toLowerCase().includes(needle)
-        )
+          p.name.toLowerCase().includes(needle),
+        ),
       )[0]
   );
 });
@@ -354,7 +365,7 @@ const otherProps = computed(() => {
         "properties",
         "description",
       ].includes(p.name) &&
-      (p.role !== "foreignKey" || !p.navigationProp)
+      (p.role !== "foreignKey" || !p.navigationProp),
   );
 });
 
@@ -396,7 +407,7 @@ useBindToQueryString(filter, "state");
 useBindToQueryString(listVm.$params, "page", { parse: parseInt });
 useBindToQueryString(listVm.$params, "pageSize", { parse: parseInt });
 
-if (userPropMeta.value) {
+if (userPropMeta.value && "foreignKey" in userPropMeta.value) {
   const fkName = userPropMeta.value.foreignKey.name;
   filter[fkName] = "";
   useBindToQueryString(filter, fkName, { queryKey: "user" });

@@ -39,6 +39,10 @@ An optional [ListViewModel](/stacks/vue/layers/viewmodels.md) that will be used 
 
 A Vuetify color name to be applied to the toolbar at the top of the page.
 
+<Prop def="userProp?: string" lang="ts" />
+
+The name of a specific property to use for user identification in the audit logs. When provided, this property will be used for the user filter and display instead of the automatic detection which looks for properties containing "user", "createdby", or "changedby" in their names. User filtering is only enabled if the property is a reference navigation property.
+
 
 ## Slots
 

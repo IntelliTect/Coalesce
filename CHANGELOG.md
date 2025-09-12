@@ -19,12 +19,15 @@
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
 - `System.Uri` is now supported as a type, mapping to a `string` in TypeScript.
 - Interfaces used as parameters in Coalesce-exposed methods are now automatically injected from services, without the need to specify `[InjectAttribute]`. This does not include known data-like interfaces including `IEnumerable`, `ICollection`, and `IFile`.
-- `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
-- `ListViewModel` now has shorthand properties for `$search`, `$filter`, `$orderBy`, and `$orderByDescending`.
-- `ListViewModel.$orderByToggle()` method added to cycle through ascending, descending, and no ordering for a field.
 - Custom methods now support descriptions via `DescriptionAttribute`. These are displayed in the admin pages. 
 - Added `FileTypeAttribute` to control allowed file types for custom method file parameters.
 - Added `ClientCacheDurationSeconds` property to `ExecuteAttribute` to customize client-side cache duration for GET custom methods with `VaryByProperty`.
+
+### Typescript & Vue Components
+- `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
+- `ListViewModel` now has shorthand properties for `$search`, `$filter`, `$orderBy`, and `$orderByDescending`.
+- `ListViewModel.$orderByToggle()` method added to cycle through ascending, descending, and no ordering for a field.
+- `c-admin-audit-log-page`: Added `userProp` prop to allow specifying a custom property name for user identification.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
 - `c-datetime-picker`: Added prop `showTodayButton`
 - `c-input`: Added a `filter` prop for enum inputs to restrict the values available for selection.

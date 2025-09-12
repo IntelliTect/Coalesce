@@ -2,7 +2,7 @@
 applyTo: '**'
 ---
 
-# Coalesce Copilot instructions
+# Coalesce AI Agent Instructions
 
 ## Overview
 

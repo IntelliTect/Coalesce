@@ -110,8 +110,8 @@ export function createAspNetCoreHmrPlugin({
           } = await getCertPaths();
           certsExportPromise = certsExport;
 
-          httpsOptions.key ??= await readFile(keyFilePath);
-          httpsOptions.cert ??= await readFile(certFilePath);
+          httpsOptions.key = await readFile(keyFilePath);
+          httpsOptions.cert = await readFile(certFilePath);
         }
       },
 

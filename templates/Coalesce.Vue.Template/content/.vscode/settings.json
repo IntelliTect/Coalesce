@@ -8,5 +8,9 @@
   "cSpell.words": ["Vite", "unplugin", "iconsets", "viewmodels", "composables"],
   // XML element content is often whitespace sensitive.
   // Introducing wrapping breaks some csproj elements.
-  "xml.format.maxLineWidth": 0
+  "xml.format.maxLineWidth": 0,
+  "chat.tools.terminal.autoApprove": {
+    "dotnet test": true,
+    "npm test": true
+  }
 }

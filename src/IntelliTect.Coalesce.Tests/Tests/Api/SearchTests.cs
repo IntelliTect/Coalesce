@@ -458,6 +458,32 @@ public class SearchTests
         public string Field3 { get; set; }
     }
 
+    [Fact]
+    public void Search_CollectionWithNoSearchableChildren_DoesNotThrow()
+    {
+        // This test demonstrates the issue where searching on a collection 
+        // with no searchable child properties should not throw an exception.
+        // The search should simply return no matches.
+
+        SearchHelper(
+            (HasCollectionNoSearchable t) => t.Children,
+            "test query",
+            [new CollectedNoSearchable { NonSearchableField = "some value" }],
+            false); // Expect no match since there are no searchable fields
+    }
+
+    public class HasCollectionNoSearchable
+    {
+        [Search]
+        public List<CollectedNoSearchable> Children { get; set; }
+    }
+
+    public class CollectedNoSearchable
+    {
+        // No [Search] attribute - this property is not searchable
+        public string NonSearchableField { get; set; }
+    }
+
     public class SearchTestDataSource<T>(CrudContext context) : QueryableDataSourceBase<T>(context)
         where T : class
     {

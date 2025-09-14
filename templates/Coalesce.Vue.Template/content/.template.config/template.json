@@ -181,6 +181,25 @@
       "description": "Include configuration and integrations for Application Insights, both front-end and back-end.",
       "$coalesceLink": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview"
     },
+    "AppInsightsPackageDependency": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "\"@microsoft/applicationinsights-web\": \"^3.3.2\",",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          {
+            "condition": "(AppInsights)",
+            "value": "\"@microsoft/applicationinsights-web\": \"^3.3.2\","
+          },
+          {
+            "condition": "(!AppInsights)",
+            "value": ""
+          }
+        ]
+      }
+    },
     "Hangfire": {
       "type": "parameter",
       "datatype": "bool",
@@ -237,7 +256,8 @@
             "**/*.user",
             "**/*.g.cs",
             "**/*.g.ts",
-            "**/*.lock.json"
+            "**/*.lock.json",
+            "**/package-lock.json"
           ]
         },
         {
@@ -312,7 +332,7 @@
         },
         {
           "condition": "!AppInsights",
-          "exclude": ["**/AppInsightsTelemetryEnricher.cs"]
+          "exclude": ["**/useAppInsights.ts"]
         },
         {
           "condition": "!GoogleAuth",

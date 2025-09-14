@@ -23,6 +23,9 @@ export default defineConfig({
           // Workers can't be chunked with other things
           if (id.includes("worker")) return undefined;
 
+          //#if AppInsights
+          if (id.match(/applicationinsights/i)) return "applicationinsights";
+          //#endif
           if (id.match(/vuetify/)) return "vuetify";
           if (id.match(/node_modules/)) return "vendor";
           return "index";

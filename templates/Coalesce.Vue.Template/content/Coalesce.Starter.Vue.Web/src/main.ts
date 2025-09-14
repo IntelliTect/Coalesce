@@ -11,6 +11,9 @@ import {
   refreshUserInfo,
   globalProperties as userServiceProps,
 } from "./user-service";
+//#if AppInsights
+import useAppInsights from "./composables/useAppInsights";
+//#endif
 
 // Import global CSS and Fonts:
 import "typeface-roboto";
@@ -81,18 +84,7 @@ const coalesceVuetify = createCoalesceVuetify({
 
 //#if AppInsights
 // SETUP: app insights
-//@ts-expect-error AppInsights imported from backend JavaScriptSnippet; no types available.
-window.appInsights?.addTelemetryInitializer(function (envelope) {
-  if (
-    envelope.baseType === "ExceptionData" &&
-    // Filter out unactionable, junk errors:
-    envelope.data?.message?.includes(
-      "ResizeObserver loop completed with undelivered notifications",
-    )
-  ) {
-    return false;
-  }
-});
+useAppInsights();
 //#endif
 
 const app = createApp(App);

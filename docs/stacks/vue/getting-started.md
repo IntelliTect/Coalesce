@@ -58,7 +58,7 @@ font-weight: 600;
 dotnet new install IntelliTect.Coalesce.Vue.Template
 dotnet new coalescevue -n {{effectiveNamespace}} -o {{effectiveFolder}} {{templateParams}}
 cd {{effectiveFolder}}/*.Web
-npm ci
+npm i
 npm run lint:fix
 dotnet restore
 dotnet coalesce

@@ -9,13 +9,6 @@ import {
 const securityService = new SecurityServiceViewModel();
 securityService.whoAmI.setConcurrency("debounce");
 
-//#if AppInsights
-securityService.whoAmI.onFulfilled(() => {
-  //@ts-expect-error AppInsights imported from backend JavaScriptSnippet; no types available.
-  window.appInsights?.setAuthenticatedUserContext(userInfo.value.userName);
-});
-//#endif
-
 //#if Tenancy
 let initialTenantId: string | null = null;
 securityService.whoAmI.onFulfilled(() => {

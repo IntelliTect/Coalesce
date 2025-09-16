@@ -35,124 +35,153 @@ dataSource.startsWith = "A";
 
 ## Model Functions
 
-The following functions exported from ``coalesce-vue`` can be used with your models:
+The following functions exported from ``coalesce-vue`` can be used with your Models or View Models when building custom pages or components.
 
+### useBindToQueryString() {#usebindtoquerystring}
 
-<Prop def="// Vue Options API
-bindToQueryString: {
-  (vue: Vue, obj: {}, key: string, options?: BindToQueryStringOptions);
-  (vue: Vue, ref: Ref<any>, queryKey: string);
-  (vue: Vue, ref: Ref<any>, options: BindToQueryStringOptions);
-}
-&nbsp;
-// Vue Composition API
-useBindToQueryString: {
-  (obj: {}, key: string, options?: BindToQueryStringOptions);
-  (ref: Ref<any>, queryKey: string);
-  (ref: Ref<any>, options: BindToQueryStringOptions);
-}" lang="ts" idPrefix="member-bindToQuery" />
+Binds a value on an object, or the value of a ref, to the query string.
 
-@[import-md "start":"export interface BindToQueryStringOptions", "end":"\n}\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/model.ts)
+- **Type**
 
-Binds a value on an object, or the value of a ref, to the query string. When the object's value changes, the query string will be updated using [vue-router](https://router.vuejs.org/). When the query string changes, the object's value will be updated.
+  ```ts
+  function useBindToQueryString(obj: {}, key: string, options?: BindToQueryStringOptions): void
+  function useBindToQueryString(ref: Ref<any>, queryKey: string): void
+  function useBindToQueryString(ref: Ref<any>, options: BindToQueryStringOptions): void
 
-For example:
-
-
-<CodeTabs name="vue">
-<template #options>
-
-``` ts
-import { bindToQueryString } from 'coalesce-vue';
-
-// In the 'created' Vue lifecycle hook on a component:
-created() {
-  // Bind pagination information to the query string:
-  bindToQueryString(this, this.listViewModel.$params, 'pageSize', { parse: parseInt });
-
-  // Assuming the component has an 'activeTab' data member:
-  bindToQueryString(this, this, 'activeTab');
-}
-```
-
-</template>
-<template #setup>
-
-``` ts
-import { useBindToQueryString } from 'coalesce-vue';
-
-// Bind pagination information to the query string:
-const list = new PersonListViewModel();
-useBindToQueryString(list.$params, 'pageSize', { parse: parseInt });
-
-const activeTab = ref("1")
-useBindToQueryString(activeTab, 'activeTab');
-  
-```
-
-</template>
-</CodeTabs>
-
-<div>
-
-The query string will be updated using either `router.push` or `router.replace` depending on the value of parameter `mode`.
-
-If the query string contains a value when this is called, the object will be updated with that value immediately. 
-
-If the object being bound to has `$metadata`, information from that metadata will be used to serialize and parse values to and from the query string. Otherwise, the `stringify` option (default: `String(value)`) will be used to serialize the value, and the `parse` option (if provided) will be used to parse the value from the query string.
-
-</div>
-
-
-<Prop def="
-bindKeyToRouteOnCreate(vue: Vue, model: Model<ModelType>, routeParamName: string = 'id', keepQuery: boolean = false)
-&nbsp;
-useBindKeyToRouteOnCreate(model: Model<ModelType>, routeParamName: string = 'id', keepQuery: boolean = false)" lang="ts" idPrefix="member-bindKey" />
-
-When `model` is created (i.e. its primary key becomes non-null), replace the current URL with one that includes the primary key for the route parameter named by `routeParamName`.
-
-The query string will not be kept when the route is changed unless `true` is given to `keepQuery`.
-
-
-<CodeTabs name="vue">
-<template #options>
-
-``` ts
-import { bindKeyToRouteOnCreate } from 'coalesce-vue';
-
-// In the 'created' Vue lifecycle hook on a component:
-created() {
-  if (this.id) {
-    this.viewModel.$load(this.id);
-  } else {
-    bindKeyToRouteOnCreate(this, this.viewModel);
+  interface BindToQueryStringOptions {
+    mode?: 'push' | 'replace'
+    parse?: (value: string) => any
+    stringify?: (value: any) => string
   }
-}
-```
+  ```
 
-</template>
-<template #setup>
+- **Details**
 
-``` ts
-import { useBindKeyToRouteOnCreate } from 'coalesce-vue';
+  When the object's value changes, the query string will be updated using [vue-router](https://router.vuejs.org/). When the query string changes, the object's value will be updated.
 
-const props = defineProps<{id: number}>();
-const viewModel = new PersonViewModel();
-if (props.id) {
-  viewModel.$load(props.id);
-} else {
-  useBindToQueryString(viewModel);
-}
+  The query string will be updated using either `router.push` or `router.replace` depending on the value of parameter `mode`.
+
+  If the query string contains a value when this is called, the object will be updated with that value immediately.
+
+  If the object being bound to has `$metadata`, information from that metadata will be used to serialize and parse values to and from the query string. Otherwise, the `stringify` option (default: `String(value)`) will be used to serialize the value, and the `parse` option (if provided) will be used to parse the value from the query string.
+
+- **Example**
+
+  <CodeTabs name="vue">
+  <template #options>
+
+  ```ts
+  import { bindToQueryString } from 'coalesce-vue';
+
+  // In the 'created' Vue lifecycle hook on a component:
+  created() {
+    // Bind pagination information to the query string:
+    bindToQueryString(this, this.listViewModel.$params, 'pageSize', { parse: parseInt });
+
+    // Assuming the component has an 'activeTab' data member:
+    bindToQueryString(this, this, 'activeTab');
+  }
+  ```
+
+  </template>
+  <template #setup>
+
+  ```ts
+  import { useBindToQueryString } from 'coalesce-vue';
+
+  // Bind pagination information to the query string:
+  const list = new PersonListViewModel();
+  useBindToQueryString(list.$params, 'pageSize', { parse: parseInt });
+
+  const activeTab = ref("1")
+  useBindToQueryString(activeTab, 'activeTab');
+  ```
+
+  </template>
+  </CodeTabs>
+
+
+### useBindKeyToRouteOnCreate() {#usebindkeytorouteoncreate}
+
+Replace the current URL with one that includes the primary key when a model is created.
+
+- **Type**
+
+  ```ts
+  function useBindKeyToRouteOnCreate(
+    model: Model<ModelType>, 
+    routeParamName: string = 'id', 
+    keepQuery: boolean = false
+  ): void
+  ```
+
+- **Details**
+
+  When `model` is created (i.e. its primary key becomes non-null), replace the current URL with one that includes the primary key for the route parameter named by `routeParamName`.
+
+  The query string will not be kept when the route is changed unless `true` is given to `keepQuery`.
+
+  The route will be replaced directly via the [HTML5 History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) such that [vue-router](https://router.vuejs.org/) will not observe the change as an actual route change, preventing the current view from being recreated if a path-based key is being used on the application's `<router-view>` component.
+
+- **Example**
+
+  First, define your router with a route that has an optional ID parameter:
+
+  ```ts
+  // router.ts
+  const router = createRouter({
+    routes: [
+      {
+        path: '/person/:id?',
+        component: () => import('@/views/Person.vue'),
+        props: true
+      }
+    ]
+  })
+  ```
+
+  Then use `useBindKeyToRouteOnCreate` in your component:
+
+  <CodeTabs name="vue">
+  <template #options>
+
+  ```ts
+  // views/Person.vue
+  import { bindKeyToRouteOnCreate } from 'coalesce-vue';
+
+  // In the 'created' Vue lifecycle hook on a component:
+  created() {
+    if (this.id) {
+      this.person.$load(this.id);
+    } else {
+      // When a new person is saved, the URL will change from:
+      // /person → /person/123 (where 123 is the new person's ID)
+      bindKeyToRouteOnCreate(this, this.person);
+    }
+  }
+  ```
+
+  </template>
+  <template #setup>
+
+  ```ts
+  // views/Person.vue
+  import { useBindKeyToRouteOnCreate } from 'coalesce-vue';
+
+  const props = defineProps<{id?: number}>();
+  const person = new PersonViewModel();
   
-```
+  if (props.id) {
+    person.$load(props.id);
+  } else {
+    // When a new person is saved, the URL will change from:
+    // /person → /person/123 (where 123 is the new person's ID)
+    useBindKeyToRouteOnCreate(person);
+  }
+  ```
 
-</template>
-</CodeTabs>
-
-
-::: tip Note
-The route will be replaced directly via the [HTML5 History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) such that [vue-router](https://router.vuejs.org/) will not observe the change as an actual route change, preventing the current view from being recreated if a path-based key is being used on the application's `<router-view>` component.
-:::
+  </template>
+  </CodeTabs>
 
 
 ## Advanced Model Functions
@@ -165,55 +194,107 @@ These functions are used to implement the [higher-order layers](/stacks/vue/over
 While you're absolutely free to use them in your own code and can rely on their interface and behavior to remain consistent, you will find that you seldom need to use them directly - that's why we've split them into their own section here in the documentation.
 :::
 
+### convertToModel() {#converttomodel}
 
-<Prop def="convertToModel(value: any, metadata: Value | ClassType): any" lang="ts" />
+Convert any JavaScript value into a valid implementation of the value or type described by metadata.
 
-Given any JavaScript value `value`, convert it into a valid implementation of the value or type described by `metadata`.
+- **Type**
 
-For metadata describing a primitive or primitive-like value, the input will be parsed into a valid implementation of the correct JavaScript type. For example, for `metadata` that describes a boolean, a string `"true"` will return a boolean `true`, and ISO 8601 date strings will result in a JavaScript `Date` object. 
+  ```ts
+  function convertToModel(value: any, metadata: Value | ClassType): any
+  ```
 
-For metadata describing a type, the input object will be mutated into a valid implementation of the appropriate model interface. Missing properties will be set to null, and any descendent properties of the provided object will be recursively processed with `convertToModel`.
+- **Details**
 
-If any values are encountered that are fundamentally incompatible with the requested type described by the metadata, an error will be thrown.
+  Given any JavaScript value `value`, convert it into a valid implementation of the value or type described by `metadata`.
 
+  For metadata describing a primitive or primitive-like value, the input will be parsed into a valid implementation of the correct JavaScript type. For example, for `metadata` that describes a boolean, a string `"true"` will return a boolean `true`, and ISO 8601 date strings will result in a JavaScript `Date` object. 
 
-<Prop def="mapToModel(value: any, metadata: Value | ClassType): any" lang="ts" />
+  For metadata describing a type, the input object will be mutated into a valid implementation of the appropriate model interface. Missing properties will be set to null, and any descendent properties of the provided object will be recursively processed with `convertToModel`.
 
-Performs the same operations as `convertToModel`, except that any objects encountered will not be mutated - instead, a new object or array will always be created.
+  If any values are encountered that are fundamentally incompatible with the requested type described by the metadata, an error will be thrown.
 
+### mapToModel() {#maptomodel}
 
-<Prop def="mapToDto(value: any, metadata: Value | ClassType): any" lang="ts" />
+Create a new object that is a valid implementation of the value or type described by metadata.
 
-Maps the input to a representation suitable for JSON serialization.
+- **Type**
 
-Will not serialize child objects or collections whose metadata includes `dontSerialize`. Will only recurse to a maximum depth of 3.
+  ```ts
+  function mapToModel(value: any, metadata: Value | ClassType): any
+  ```
 
-<a id="vuemodeldisplayfunctions"></a>
+- **Details**
 
+  Performs the same operations as `convertToModel`, except that any objects encountered will not be mutated - instead, a new object or array will always be created.
 
-<Prop def="modelDisplay(model: Model, options?: DisplayOptions): string" lang="ts" />
+### mapToDto() {#maptodto}
 
-Returns a string representing the `model` suitable for display in a user interface.
+Map a value to a representation suitable for JSON serialization.
 
-Uses the `displayProp` defined on the object's metadata. If no `displayProp` is defined, the object will be displayed as JSON. The display prop on a model can be defined in C# with [[ListText]](/modeling/model-components/attributes/list-text.md).
+- **Type**
 
-See [DisplayOptions](#displayoptions) for available options.
+  ```ts
+  function mapToDto(value: any, metadata: Value | ClassType): any
+  ```
 
+- **Details**
 
-<Prop def="propDisplay(model: Model, prop: Property | string, options?: DisplayOptions): string" lang="ts" />
+  Maps the input to a representation suitable for JSON serialization.
 
-Returns a string representing the specified property of the given object suitable for display in a user interface.
+  Will not serialize child objects or collections whose metadata includes `dontSerialize`. Will only recurse to a maximum depth of 3.
 
-The property can either be a string, representing one of the model's properties, or the actual `Property` metadata object of the property.
+### modelDisplay() {#modeldisplay}
 
-See [DisplayOptions](#displayoptions) for available options.
-    
+Return a string representing a model suitable for display in a user interface.
 
-<Prop def="valueDisplay(value: any, metadata: Value, options?: DisplayOptions): string" lang="ts" />
+- **Type**
 
-Returns a string representing the given value (described by the given metadata).
+  ```ts
+  function modelDisplay(model: Model, options?: DisplayOptions): string
+  ```
 
-See [DisplayOptions](#displayoptions) for available options.
+- **Details**
+
+  Returns a string representing the `model` suitable for display in a user interface.
+
+  Uses the `displayProp` defined on the object's metadata. If no `displayProp` is defined, the object will be displayed as JSON. The display prop on a model can be defined in C# with [[ListText]](/modeling/model-components/attributes/list-text.md).
+
+  See [DisplayOptions](#displayoptions) for available options.
+
+### propDisplay() {#propdisplay}
+
+Return a string representing a property of a model suitable for display.
+
+- **Type**
+
+  ```ts
+  function propDisplay(model: Model, prop: Property | string, options?: DisplayOptions): string
+  ```
+
+- **Details**
+
+  Returns a string representing the specified property of the given object suitable for display in a user interface.
+
+  The property can either be a string, representing one of the model's properties, or the actual `Property` metadata object of the property.
+
+  See [DisplayOptions](#displayoptions) for available options.
+
+### valueDisplay() {#valuedisplay}
+
+Return a string representing a value suitable for display.
+
+- **Type**
+
+  ```ts
+  function valueDisplay(value: any, metadata: Value, options?: DisplayOptions): string
+  ```
+
+- **Details**
+
+  Returns a string representing the given value (described by the given metadata).
+
+  See [DisplayOptions](#displayoptions) for available options.
 
 
 ## DisplayOptions
@@ -236,15 +317,35 @@ Fields with a type of `DateTime` are agnostic to time zone and UTC offset and so
 
 For comprehensive information about working with dates and timezones, see [Working with Dates](/topics/working-with-dates.md).
 
-<Prop def="setDefaultTimeZone(timeZoneName: string | null): void" lang="ts" />
+### setDefaultTimeZone() {#setdefaulttimezone}
 
-Gets or sets the default time zone used by Coalesce. The time zone should be an [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) name, e.g. `"America/Los_Angeles"`.
+Set the default time zone used by Coalesce.
 
-The time zone provided here is used in the following ways:
-- It will be used as `DisplayOptions.format.timeZone` if no other value was provided for this option. This is used by functions [modelDisplay](#member-modeldisplay), [propDisplay](#member-propdisplay), and [valueDisplay](#member-valuedisplay), as well as the [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) component.
-- It will be used by [c-datetime-picker](/stacks/vue/coalesce-vue-vuetify/components/c-datetime-picker.md), used to both interpret the user input and display the selected date. This can also be set on individual component usages via the `timeZone` prop.
-- It will be used when serializing DateTimeOffset fields into JSON DTOs, representing the ISO 8601 date string in the specified time zone rather than in the user's computer's system time zone.
+- **Type**
 
-<Prop def="getDefaultTimeZone(): string | null" lang="ts" />
+  ```ts
+  function setDefaultTimeZone(timeZoneName: string | null): void
+  ```
 
-Returns the current configured default time zone. Default is `null`, falling back on the user's computer's system time zone.
+- **Details**
+
+  Sets the default time zone used by Coalesce. The time zone should be an [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) name, e.g. `"America/Los_Angeles"`.
+
+  The time zone provided here is used in the following ways:
+  - It will be used as `DisplayOptions.format.timeZone` if no other value was provided for this option. This is used by functions [modelDisplay](#modeldisplay), [propDisplay](#propdisplay), and [valueDisplay](#valuedisplay), as well as the [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) component.
+  - It will be used by [c-datetime-picker](/stacks/vue/coalesce-vue-vuetify/components/c-datetime-picker.md), used to both interpret the user input and display the selected date. This can also be set on individual component usages via the `timeZone` prop.
+  - It will be used when serializing DateTimeOffset fields into JSON DTOs, representing the ISO 8601 date string in the specified time zone rather than in the user's computer's system time zone.
+
+### getDefaultTimeZone() {#getdefaulttimezone}
+
+Get the current configured default time zone.
+
+- **Type**
+
+  ```ts
+  function getDefaultTimeZone(): string | null
+  ```
+
+- **Details**
+
+  Returns the current configured default time zone. Default is `null`, falling back on the user's computer's system time zone.

@@ -1,67 +1,66 @@
 {
-    "version": "0.2",
-    "language": "en",
-    "words": [
-        "appsettings",
-        "ASPNETCORE",
-        "autosave",
-        "autosaving",
-        "Axios",
-        "bootstrap-datetimepicker",
-        "Coalesce",
-        "coalesceko",
-        "coalescevue",
-        "discoverability",
-        "dontSerialize",
-        "dtos",
-        "EF",
-        "enumerables",
-        "IIFE",
-        "instanceof",
-        "IntelliTect",
-        "mkdir",
-        "msword",
-        "nameof",
-        "netcoreapp",
-        "netstandard",
-        "officedocument",
-        "openxmlformats",
-        "overridable",
-        "POCOs",
-        "queryable",
-        "queryables",
-        "querystring",
-        "readonly",
-        "snapshotted",
-        "Stampable",
-        "swashbuckle",
-        "Swashbuckle",
-        "TPCT",
-        "treeshaken",
-        "typeof",
-        "unplugin",
-        "viewmodels",
-        "vite",
-        "vitest",
-        "Vitest",
-        "Vuetify",
-        "webp",
-        "westus",
-        "wordprocessingml",
-        "wwwroot"
-    ],
-    "ignorePaths": [
-        "node_modules"
-    ],
-    "languageSettings": [
-        {
-            "languageId": "markdown",
-            "ignoreRegExpList": [
-                // Hashes in URLs, which for PascalCase headers get transformed into lowercase 
-                // (which then to cspell looks like a single word.)
-                "/(\\.md|\\()#[-\\w]+/mig",
-                "/viewmodel\\.ts/mig"
-            ]
-        }
-    ]
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "appsettings",
+    "ASPNETCORE",
+    "autosave",
+    "autosaving",
+    "Axios",
+    "bootstrap-datetimepicker",
+    "Coalesce",
+    "coalesceko",
+    "coalescevue",
+    "discoverability",
+    "dontSerialize",
+    "dtos",
+    "EF",
+    "enumerables",
+    "IIFE",
+    "instanceof",
+    "IntelliTect",
+    "mkdir",
+    "msword",
+    "nameof",
+    "netcoreapp",
+    "netstandard",
+    "officedocument",
+    "openxmlformats",
+    "overridable",
+    "POCOs",
+    "queryable",
+    "queryables",
+    "querystring",
+    "readonly",
+    "snapshotted",
+    "Stampable",
+    "swashbuckle",
+    "Swashbuckle",
+    "TPCT",
+    "treeshaken",
+    "typeof",
+    "unplugin",
+    "viewmodels",
+    "vite",
+    "vitest",
+    "Vitest",
+    "Vuetify",
+    "webp",
+    "westus",
+    "wordprocessingml",
+    "wwwroot"
+  ],
+  "ignorePaths": ["node_modules"],
+  "languageSettings": [
+    {
+      "languageId": "markdown",
+      "ignoreRegExpList": [
+        // Hashes in URLs, which for PascalCase headers get transformed into lowercase
+        // (which then to cspell looks like a single word.)
+        "/(\\.md|\\()#[-\\w]+/mig",
+        "/#[a-z]+/mig",
+        "/viewmodel\\.ts/mig"
+      ]
+    }
+  ]
 }

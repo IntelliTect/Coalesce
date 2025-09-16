@@ -254,3 +254,31 @@ table td {
 .vp-doc div[class*="language-"] + div[class*="language-"] {
   margin-top: -30px;
 }
+
+// Borders above h3, except when immediately after an h2
+.vp-doc h3 {
+  margin: 4rem 0 1.8rem;
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 1.8rem;
+  letter-spacing: -0.02em;
+}
+.vp-doc h2 + h3 {
+  border-top: none !important;
+  padding-top: 0;
+  margin-top: 2rem;
+}
+
+// Always show header anchors, use more sensible position logic
+.vp-doc .header-anchor {
+  float: left;
+  position: static;
+}
+.vp-doc {
+  h2,
+  h3,
+  h4 {
+    .header-anchor {
+      opacity: 1 !important;
+    }
+  }
+}

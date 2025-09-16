@@ -241,8 +241,8 @@ jobs:
           cat $filePath
 
           cd ./content/*.Web
-          npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue/*.tgz").FullName --save --force
-          npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue-vuetify3/*.tgz").FullName --save --force
+          npm i file://$(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue/*.tgz").FullName --save --force
+          npm i file://$(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue-vuetify3/*.tgz").FullName --save --force
 
           cat package.json
 

@@ -86,7 +86,7 @@ Does not impact time selection.
 <Prop def="timeZone?: string" lang="ts" />
 
 The [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) name that the user will pick the date/time value in.
-Defaults to the value configured with [`setDefaultTimeZone`](/stacks/vue/layers/models.md#member-setdefaulttimezone) if the value bound to with `model`/`for` is a `DateTimeOffset`.
+Defaults to the value configured with [`setDefaultTimeZone`](/stacks/vue/layers/models.md#setdefaulttimezone) if the value bound to with `model`/`for` is a `DateTimeOffset`.
 
 <Prop def="native?: boolean" lang="ts" />
 

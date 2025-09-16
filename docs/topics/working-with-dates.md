@@ -85,7 +85,7 @@ You can also use directly with a JavaScript `Date` object:
 
 ### Display Functions
 
-The [modelDisplay](/stacks/vue/layers/models.md#member-modeldisplay), [propDisplay](/stacks/vue/layers/models.md#member-propdisplay), and [valueDisplay](/stacks/vue/layers/models.md#member-valuedisplay) functions from the model layer also support the same date handling options as the `c-display` component if you need to format a date on a model programmatically.
+The [modelDisplay](/stacks/vue/layers/models.md#modeldisplay), [propDisplay](/stacks/vue/layers/models.md#propdisplay), and [valueDisplay](/stacks/vue/layers/models.md#valuedisplay) functions from the model layer also support the same date handling options as the `c-display` component if you need to format a date on a model programmatically.
 
 You can also use [date-fns `format` function](https://date-fns.org/docs/format) directly.
 

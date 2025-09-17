@@ -18,6 +18,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -136,6 +137,8 @@ public class ApiActionFilter : IApiActionFilter
                 {
                     ReferenceHandler = new CoalesceJsonReferenceHandler()
                 };
+                newOptions.Encoder ??= JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+
                 result.Formatters.Add(new SystemTextJsonOutputFormatter(newOptions));
             }
 

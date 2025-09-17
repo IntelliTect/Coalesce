@@ -70,6 +70,22 @@
       append-inner (slot)
     </v-col>
   </v-row>
+
+  <h1>Native</h1>
+  <v-row>
+    <v-col>
+      <c-datetime-picker
+        :model="vm"
+        for="lastBath"
+        color="purple"
+        native
+        showTodayButton
+      ></c-datetime-picker>
+    </v-col>
+    <v-col>
+      {{ vm.lastBath }}
+    </v-col>
+  </v-row>
 </template>
 
 <script setup lang="ts">

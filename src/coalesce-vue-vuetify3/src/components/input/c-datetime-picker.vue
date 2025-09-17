@@ -6,8 +6,8 @@
       internalDateKind == 'time'
         ? 'time'
         : internalDateKind == 'date'
-        ? 'date'
-        : 'datetime-local'
+          ? 'date'
+          : 'datetime-local'
     "
     :modelValue="nativeValue"
     v-bind="inputBindAttrs"
@@ -20,8 +20,8 @@
     v-model:focused="focused"
     @change="textInputChanged($event, true)"
   >
-    <template v-for="(_, slot) of ($slots as {})" v-slot:[slot]="scope">
-      <slot :name="slot" v-bind="(scope as any)" />
+    <template v-for="(_, slot) of $slots as {}" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope as any" />
     </template>
   </v-text-field>
 
@@ -46,11 +46,12 @@
     v-model:focused="focused"
     @keydown.enter="focused = false"
     @keydown.escape="focused = false"
+    @keydown.tab="close()"
     @update:model-value="textInputChanged($event, false)"
     @click="menu = !menu"
   >
-    <template v-for="(_, slot) of ($slots as {})" v-slot:[slot]="scope">
-      <slot :name="slot" v-bind="(scope as any)" />
+    <template v-for="(_, slot) of $slots as {}" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope as any" />
     </template>
     <template #default>
       <!-- TODO: Consider fullscreen modal on small devices -->
@@ -82,7 +83,7 @@
             density="comfortable"
             scrollable
             :rounded="false"
-            :allowedDates="(allowedDates as any)"
+            :allowedDates="allowedDates as any"
             :min="min ? startOfDay(min) : undefined"
             :max="max ? endOfDay(max) : undefined"
             v-bind="datePickerProps"
@@ -288,7 +289,7 @@ const props = withDefaults(
       showTodayButton?: boolean;
     } & /* @vue-ignore */ InheritedProps
   >(),
-  { closeOnDatePicked: null, color: "secondary" }
+  { closeOnDatePicked: null, color: "secondary" },
 );
 
 defineSlots<InheritedSlots>();
@@ -337,7 +338,7 @@ const displayedTime = computed(() => {
         "h:mm a" + (internalTimeZone.value ? " z" : ""),
         {
           timeZone: internalTimeZone.value || undefined,
-        }
+        },
       )
     : null;
 });
@@ -461,7 +462,7 @@ function parseUserInput(val: string) {
       value = parse(
         val.replace(separatorRegex, "-"),
         internalFormat.value.replace(separatorRegex, "-"),
-        referenceDate
+        referenceDate,
       );
     }
 

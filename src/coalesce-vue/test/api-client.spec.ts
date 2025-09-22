@@ -1493,4 +1493,83 @@ describe("ModelApiClient", () => {
       },
     );
   });
+
+  describe("refResponse functionality", () => {
+    test("$useRefResponse sets Accept header on ApiClient", async () => {
+      const mock = (AxiosClient.defaults.adapter = vitest
+        .fn()
+        .mockResolvedValue(<AxiosResponse<any>>{
+          data: { wasSuccessful: true, object: {} },
+          status: 200,
+        }));
+
+      const client = new PersonApiClient().$useRefResponse();
+
+      await client.get(1);
+
+      expect(mock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Accept: ["application/json+ref", "application/json"],
+          }),
+        }),
+      );
+    });
+
+    test("useRefResponse on API caller sets Accept header", async () => {
+      const mock = (AxiosClient.defaults.adapter = vitest
+        .fn()
+        .mockResolvedValue(<AxiosResponse<any>>{
+          data: { wasSuccessful: true, object: {} },
+          status: 200,
+        }));
+
+      const client = new PersonApiClient();
+      const caller = client
+        .$makeCaller("item", (c) => c.get(1))
+        .useRefResponse();
+
+      await caller();
+
+      expect(mock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Accept: ["application/json+ref", "application/json"],
+          }),
+        }),
+      );
+    });
+
+    test("refResponse returns this for method chaining", () => {
+      const client = new PersonApiClient();
+      const result = client.$useRefResponse();
+      expect(result).toBe(client);
+
+      const caller = client.$makeCaller("item", (c) => c.get(1));
+      const callerResult = caller.useRefResponse();
+      expect(callerResult).toBe(caller);
+    });
+
+    test("refResponse is ignored for file-returning methods", async () => {
+      const mock = (AxiosClient.defaults.adapter = vitest.fn().mockResolvedValue(<AxiosResponse<any>>{
+        data: new Blob(),
+        status: 200,
+      }));
+
+      const client = new ComplexModelApiClient();
+      
+      // Create a caller with refResponse enabled for a file-returning method
+      const caller = client.$makeCaller("item", (c) => c.downloadAttachment(1)).useRefResponse();
+
+      await caller();
+
+      expect(mock).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          headers: expect.objectContaining({
+            Accept: ["application/json+ref", "application/json"],
+          }),
+        }),
+      );
+    });
+  });
 });

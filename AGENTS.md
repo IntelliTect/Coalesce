@@ -36,9 +36,9 @@ cd ../coalesce-mcp && npm run build
 
 ```bash
 dotnet test
-cd src/coalesce-vue && npm test -- --run
-cd ../coalesce-vue-vuetify3 && npm test -- --run
-cd ../coalesce-mcp && npm test -- --run
+cd src/coalesce-vue && npm test run
+cd ../coalesce-vue-vuetify3 && npm test run
+cd ../coalesce-mcp && npm test run
 ```
 
 ### Template tests

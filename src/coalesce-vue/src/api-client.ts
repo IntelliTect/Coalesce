@@ -737,6 +737,19 @@ export class ApiClient<T extends ApiRoutedType> {
   }
 
   /** @internal */
+  _refResponse?: boolean;
+
+  /** Enable or disable ref response handling for the API client.
+   * When enabled, requests will include the Accept header 'application/json+ref'
+   * to use System.Text.Json reference preservation handling, which can significantly
+   * reduce response sizes by deduplicating identical objects.
+   */
+  public $useRefResponse(enable: boolean = true): this {
+    this._refResponse = enable;
+    return this;
+  }
+
+  /** @internal */
   _cancelToken?: AxiosRequestConfig["cancelToken"];
 
   /** Clones the API client and its config.
@@ -895,12 +908,13 @@ export class ApiClient<T extends ApiRoutedType> {
     let query: any;
 
     let headers = config?.headers ?? {};
-    if (standardParameters?.refResponse) {
+    if (
+      (standardParameters?.refResponse || this._refResponse) &&
+      method.return.type !== "file"
+    ) {
       headers = {
         ...config?.headers,
-        Accept: standardParameters?.refResponse
-          ? ["application/json+ref", "application/json"]
-          : ["application/json"],
+        Accept: ["application/json+ref", "application/json"],
       };
     }
 
@@ -1457,6 +1471,19 @@ export abstract class ApiState<
     return this;
   }
 
+  protected _refResponse?: boolean;
+
+  /** Enable or disable ref response handling for the API caller.
+   * When enabled, requests will include the Accept header 'application/json+ref'
+   * to use System.Text.Json reference preservation handling, which can significantly
+   * reduce response sizes by deduplicating identical objects.
+   * @param enable Whether to enable ref response handling. Default is true.
+   */
+  public useRefResponse(enable: boolean = true): this {
+    this._refResponse = enable;
+    return this;
+  }
+
   private _concurrencyMode: ApiCallerConcurrency = "disallow";
 
   /**
@@ -1610,6 +1637,10 @@ export abstract class ApiState<
 
       if (this._simultaneousGetCaching) {
         apiClient.$useSimultaneousRequestCaching();
+      }
+
+      if (this._refResponse !== undefined) {
+        apiClient.$useRefResponse(this._refResponse);
       }
 
       const responseCacheConfig = this.__responseCacheConfig;

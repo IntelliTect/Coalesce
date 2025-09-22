@@ -22,6 +22,26 @@ For the methods that correspond to the standard set of CRUD endpoints that Coale
 
 Each method returns a `Promise<AxiosResponse<TApiResult>>` where `TApiResult` is either `ItemResult`, `ItemResult<T>`, or `ListResult<T>`, depending on the return type of the API endpoint. `AxiosResponse` is the [response object from axios](https://axios-http.com/docs/res_schema), containing the `TApiResult` in its `data` property, as well as other properties like `headers`. The returned type `T` is automatically converted into valid [Model implementations](/stacks/vue/layers/models.md) for you.
 
+#### API Client Configuration Methods
+
+API Clients also provide configuration methods that can be chained to modify the behavior of all requests made through that client instance:
+
+<Prop def="$useSimultaneousRequestCaching()" lang="ts" />
+
+Enables simultaneous request caching for all requests made through this API Client instance. When multiple identical GET requests are made at the same time, they will be handled with the same AJAX request instead of making duplicate HTTP calls.
+
+<Prop def="$useRefResponse(enable: boolean = true)" lang="ts" />
+
+Enables or disables reference response handling for all requests made through this API Client instance. When enabled, requests will include the `Accept: application/json+ref` header to use System.Text.Json reference preservation handling, which can significantly reduce response sizes by deduplicating identical objects.
+
+These methods return the API Client instance, allowing for method chaining:
+
+``` ts
+const client = new PersonApiClient()
+  .$useSimultaneousRequestCaching()
+  .$useRefResponse();
+```
+
 ### API Callers/API States
 
 A stateful function for invoking an API endpoint, created with the `$makeCaller` function on an API Client. API Callers provide a wide array of functionality that is useful for working with API endpoints that are used by a user interface.
@@ -238,6 +258,24 @@ When a cached response is loaded, `result` is populated with that response's dat
 Enables response caching on the API Caller. Only [HTTP GET methods](/modeling/model-components/attributes/controller-action.md) are supported, and [file-returning methods](/modeling/model-components/methods.md#file-downloads) are not supported. Call with `false` to disable caching after it was previously enabled. The available options are as follows:
 
 @[import-md "start":"export type ResponseCachingConfiguration", "end":"\n};\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/api-client.ts)
+
+### Simultaneous Request Caching
+
+<Prop def="useSimultaneousRequestCaching()" lang="ts" />
+
+Enables simultaneous request caching on the API Caller. When multiple identical GET requests are made at the same time across all API Client instances, they will be handled with the same AJAX request instead of making duplicate HTTP calls to the server. This can improve performance and reduce server load when the same endpoint is called multiple times in quick succession.
+
+This feature only applies to HTTP GET methods and works across all instances of API clients and callers that have this feature enabled.
+
+### Reference Response Handling
+
+<Prop def="useRefResponse(enable: boolean = true)" lang="ts" />
+
+Enables or disables reference response handling on the API Caller. When enabled, requests will include the `Accept: application/json+ref` header to use System.Text.Json reference preservation handling, which can significantly reduce response sizes by deduplicating identical objects in the response payload.
+
+This is particularly useful for endpoints that return complex object graphs with repeated references to the same entities. The resulting `Model` and `ViewModel` instances on the client will be automatically deduplicated.
+
+Call with `false` to disable reference response handling after it was previously enabled.
 
 ### Other Methods
 

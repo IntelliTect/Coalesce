@@ -14,7 +14,7 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         category: "Style",
         defaultSeverity: DiagnosticSeverity.Info,
         isEnabledByDefault: true,
-        description: "ItemResult and ItemResult<T> have implicit conversions from boolean, string, and object values. Use the implicit conversion for cleaner, more readable code.");
+        description: "ItemResult and ItemResult<T> constructors can often be replaced with implicit conversions from boolean, string, and object values. This provides cleaner, more readable code while maintaining the same functionality.");
 
     public static readonly DiagnosticDescriptor _UnnecessaryRule = new(
         id: "COA1002",
@@ -24,7 +24,7 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         defaultSeverity: DiagnosticSeverity.Hidden,
         isEnabledByDefault: true,
         customTags: [WellKnownDiagnosticTags.Unnecessary],
-        description: "ItemResult and ItemResult<T> have implicit conversions from boolean, string, and object values. Use the implicit conversion for cleaner, more readable code.");
+        description: "Marks the unnecessary parts of ItemResult constructor calls that can be removed when using implicit conversions. This diagnostic helps identify to IDE syntax highlighting which portions of the code will be simplified by the COA1001 code fix.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(_Rule, _UnnecessaryRule);

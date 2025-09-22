@@ -11,8 +11,6 @@ Model Context Protocol (MCP) is an open standard for connecting AI assistants to
 
 ## Installation
 
-### VS Code
-
 For projects created from the Coalesce template, MCP server configuration is included in the VS Code workspace settings. If you're looking to add this to an existing project, or to your user settings, choose from the command palette either `MCP: Open Workspace Folder MCP Configuration` or `MCP: Open User Configuration` and add the following to the file:
 
 ```json
@@ -26,23 +24,7 @@ For projects created from the Coalesce template, MCP server configuration is inc
 }
 ```
 
-### Visual Studio
-
-New projects also include configuration for Visual Studio. To add to existing projects, add a file `.mcp.json` next to your `.sln` file and provide the following content:
-
-```json
-{
-  "inputs": [],
-  "servers": {
-    "coalesce": {
-      "command": "npx",
-      "args": ["coalesce-mcp@latest"]
-    }
-  }
-}
-```
-
-You can also add this interactively in Visual Studio with the green "plus" button in the Select Tools menu in the Copilot interface.
+This configuration will be used by both VS Code and Visual Studio.
 
 ## Available Tools
 

@@ -74,7 +74,8 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         messageFormat: "{0} has no effect in this location",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true);
+        isEnabledByDefault: true,
+        description: "Detects Coalesce attributes that have no effect when applied in certain contexts and should be removed for cleaner code.");
 
     public static readonly DiagnosticDescriptor MutuallyExclusiveCoalesceTypesRule = new(
         id: "COA0013",

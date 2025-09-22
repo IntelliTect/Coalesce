@@ -204,6 +204,7 @@ export default defineConfig({
           autoTitle("/concepts/include-tree"),
           autoTitle("/concepts/includes"),
 
+          autoTitle("/topics/analyzers"),
           autoTitle("/topics/coalesce-json"),
           autoTitle("/topics/immutability"),
           autoTitle("/topics/startup"),

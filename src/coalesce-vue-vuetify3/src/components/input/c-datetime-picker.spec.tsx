@@ -165,7 +165,7 @@ describe("CDatetimePicker", () => {
 
   test("validation rules are passed date, not string", async () => {
     const rule = vitest.fn(
-      (v) => !v || v.getFullYear() > 2017 || "Year must be > 2017"
+      (v) => !v || v.getFullYear() > 2017 || "Year must be > 2017",
     );
 
     const wrapper = mount(() => (
@@ -185,5 +185,35 @@ describe("CDatetimePicker", () => {
     expect(wrapper.text()).not.toContain("Year must be > 2017");
     expect(model.systemDateOnly?.getFullYear()).toBe(2018);
     expect(rule).toHaveBeenLastCalledWith(model.systemDateOnly);
+  });
+
+  test("pressing tab closes menu and updates bound value", async () => {
+    const wrapper = mountApp(() => (
+      <CDatetimePicker model={model} for="systemDateOnly" />
+    )).findComponent(CDatetimePicker);
+
+    // Open the menu by clicking on the input field
+    const overlay = await openMenu(wrapper);
+    expect(overlay.exists()).toBeTruthy();
+
+    // Set a value in the text input
+    const input = wrapper.find("input");
+    await input.setValue("1/15/2024");
+    await delay(1);
+
+    // Press tab to close the menu
+    await input.trigger("keydown.tab");
+    await delay(1);
+
+    // Menu should be closed - check that overlay content is no longer visible
+    const menuContent = document.querySelector(
+      ".v-overlay__content",
+    ) as HTMLElement;
+    expect(menuContent?.style.display).toBe("none");
+
+    // Value should be updated
+    expect(model.systemDateOnly?.getFullYear()).toBe(2024);
+    expect(model.systemDateOnly?.getMonth()).toBe(0); // January is 0
+    expect(model.systemDateOnly?.getDate()).toBe(15);
   });
 });

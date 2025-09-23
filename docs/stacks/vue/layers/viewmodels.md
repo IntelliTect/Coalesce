@@ -1,12 +1,14 @@
-# ViewModels
+# View Models
 
 <!-- MARKER:summary -->
 
-Coalesce's generated TypeScript ViewModels provide rich, stateful wrappers around your data model types that handle common UI concerns like loading, saving, validation, and auto-save functionality. They serve as the primary interface between your Vue components and your backend APIs, offering features like automatic dirty tracking on property changes, API callers with loading/error states, and transactional bulk save operations. 
+Coalesce's generated TypeScript ViewModels provide rich, stateful wrappers around your [CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md) that handle common UI concerns like loading, saving, validation, and auto-save functionality. They serve as the primary interface between your Vue components and your backend APIs, offering features like automatic dirty tracking on property changes, API callers with loading/error states, and transactional bulk save operations. 
 
-The ViewModels are generated as `viewmodels.g.ts` and export a ViewModel class for each API-backed type in your data model ([CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md)), as well as a ListViewModel type for [CRUD Models](/modeling/model-types/crud.md).
+The ViewModels are generated as `viewmodels.g.ts` and export the following:
 
-These classes provide a wide array of functionality that is useful when interacting with your data model through a user interface. The generated ViewModels are the primary way that Coalesce is used when developing a Vue application.
+- A [ViewModel](#viewmodels) type for each [CRUD Model](/modeling/model-types/crud.md).
+- A [ListViewModel](#listviewmodels) type for each [CRUD Model](/modeling/model-types/crud.md).
+- A [ServiceViewModel](#service-viewmodels) for each [Service](/modeling/model-types/services.md).
 
 <!-- MARKER:summary-end -->
 
@@ -22,34 +24,38 @@ Changing the value of a property will automatically flag that property as dirty.
 
 There are a few special behaviors when assigning to different kinds of data properties on View Models as well:
 
-#### Model Object Properties
-- If the object being assigned to the property is not a ViewModel instance, a new instance will be created automatically and used instead of the incoming object. 
-- If the model property is a reference navigation, the corresponding foreign key property will automatically be set to the primary key of that object. If the incoming value was null, the foreign key will be set to null.
-- If deep auto-saves are enabled on the instance being assigned to, auto-save will be spread to the incoming object, and to all other objects reachable from that object.
+- **Model Object Properties**
 
-#### Model Collection Properties
-- When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
-- The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and used instead of the object(s) being pushed.
+  If the object being assigned to the property is not a ViewModel instance, a new instance will be created and used instead of the incoming object. 
+  If model property is a reference navigation, the corresponding foreign key property will be set to the primary key of that object.
+
+- **Model Collection Properties**
+
+  When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
+  The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and used instead of the object(s) being pushed.
   
-#### Foreign Key Properties
-- If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
+- **Foreign Key Properties**
+
+  If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
 
 
+In addition to the getters and setters for the model's basic data properties, the following are also generated:
 
-### Other Generated Members
+- **API Callers**
 
-#### API Callers
-- For each of the instance [Methods](/modeling/model-components/methods.md) of the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
+  For each of the instance [Methods](/modeling/model-components/methods.md) of the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
 
-#### `addTo*()` Functions
-- For each [collection navigation property](/modeling/model-components/properties.md), a method is generated that will create a new instance of the ViewModel for the collected type, add it to the collection, and then return the new object.
+- **`addTo*()` Functions**
+
+  For each [collection navigation property](/modeling/model-components/properties.md), a method is generated that will create a new instance of the ViewModel for the collected type, add it to the collection, and then return the new object.
     
-#### Many-to-many helper collections
-- For each [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md) [collection navigation property](/modeling/model-components/properties.md), a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
+- **Many-to-many helper collections**
+
+  For each [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md) [collection navigation property](/modeling/model-components/properties.md), a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
 
 
 
-### Data Properties & Functions
+### Data & Display
 
 <Prop def="readonly $metadata: ModelType" lang="ts" />
 
@@ -68,7 +74,7 @@ Useful for uniquely identifying instances with ``:key="vm.$stableId"`` in a Vue 
 A getter/setter property that wraps the primary key of the model. Used to interact with the primary key of any ViewModel in a polymorphic way.
 
 
-<Prop def="$display(prop?: string | Property): string" lang="ts" />
+<Prop def="$display(prop?: string | Property, options?: DisplayOptions): string" lang="ts" />
 
 Returns a string representation of the object, or one of its properties if specified, suitable for display.
 
@@ -105,7 +111,7 @@ Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data 
 Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts/includes.md) for more information.
 
 
-<Prop def="$loadCleanData(source: {} | TModel, purgeUnsaved = false)" lang="ts" />
+<Prop def="$loadCleanData(source: DeepPartial<TModel>, purgeUnsaved = false)" lang="ts" />
 
 Loads data from the provided model into the current ViewModel, and then clears all dirty flags.
 
@@ -116,11 +122,11 @@ If auto-save is enabled, only non-dirty properties are updated. This prevents us
 If `purgeUnsaved` is true, items without a primary key will be dropped from collection navigation properties. This is used by the `$load` caller in order to fully reset the object graph with the state from the server.
     
 
-<Prop def="$loadDirtyData(source: {} | TModel)" lang="ts" />
+<Prop def="$loadDirtyData(source: DeepPartial<TModel>)" lang="ts" />
 
 Same as `$loadCleanData`, but does not clear any existing dirty flags, nor does it clear any dirty flags that will be set while mutating the data properties of any ViewModel instance that gets loaded.
 
-<Prop def="constructor(initialDirtyData?: {} | TModel | null)" lang="ts" />
+<Prop def="constructor(initialDirtyData?: DeepPartial<TModel> | null)" lang="ts" />
 
 Create a new instance of the ViewModel, loading the given initial data with `$loadDirtyData()` if provided.
 

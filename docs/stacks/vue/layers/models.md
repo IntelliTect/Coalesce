@@ -1,36 +1,70 @@
-# Vue Model Layer
+# Models
 
 <!-- MARKER:summary -->
 
-The model layer, generated as `models.g.ts`, contains a set of TypeScript interfaces that represent each client-exposed type in your data model. Each interface contains all the [Properties](/modeling/model-components/properties.md) of that type, as well as a `$metadata` property that references the [metadata](/stacks/vue/layers/metadata.md) object for that type. Enums and [Data Sources](/modeling/model-components/data-sources.md) are also represented in the model layer.
+Coalesce generates TypeScript interfaces for each of your exposed C# data model types. These interfaces are pure data representations and have no functionality of their own. These model interfaces are generated in `models.g.ts`, with each one containing all the [Properties](/modeling/model-components/properties.md) of that type, as well as a `$metadata` property that references the [metadata](/stacks/vue/layers/metadata.md) object for that type. Enums and [Data Sources](/modeling/model-components/data-sources.md) are also generated here.
 
 <!-- MARKER:summary-end -->
 
-The model layer also includes a TypeScript class for each type that can be used to easily instantiate a valid implementation of its corresponding interface. However, it is not necessary for the classes to be used, and all parts of Coalesce that interact with the model layer don't perform any `instanceof` checks against models - the `$metadata` property is used to determine type identity.
+The generated model interfaces are also each accompanied by a generated TypeScript class that can be used to easily instantiate a valid implementation of its corresponding interface. However, it is not necessary for these classes to be used.
 
+## Model Interfaces
 
-## Concepts 
+An example of a generated model interface, along with its corresponding enum dependency, is as follows:
 
-The model layer is fairly simple - the only main concept it introduces on top of the [Metadata Layer](/stacks/vue/layers/metadata.md) is the notion of interfaces and enums that mirror the C# types in your data model. As with the [Metadata Layer](/stacks/vue/layers/metadata.md), the [source code of coalesce-vue](https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/model.ts) is a great documentation supplement to this page.
+``` ts
+export interface Person extends Model<typeof metadata.Person> {
+  personId: number | null
+  title: Titles | null
+  name: string | null
+  email: string | null
+  birthDate: Date | null
+}
 
-### Model
+export enum Titles {
+  Mr = 0,
+  Ms = 1,
+  Mrs = 2,
+  Miss = 4,
+}
+```
 
-An interface describing an instance of a class type from your application's data model. All Model interfaces contain members for all the [Properties](/modeling/model-components/properties.md) of that type, as well as a `$metadata` property that references the metadata object for that type.
+You can then use the interface in the type signatures of your custom code to accept instances obtained from API calls, or those you instantiated yourself.
 
+``` ts
+import { Person } from '@/models.g'
 
+const person = new Person({ name: 'Bob' });
+```
 
-### DataSource
+## Data Sources
 
-A class-based representation of a [Data Source](/modeling/model-components/data-sources.md) containing properties for any of the [Custom Parameters](/modeling/model-components/data-sources.md#custom-parameters) of the data source, as well as a `$metadata` property that references the metadata object for the data source.
+For each custom [Data Source](/modeling/model-components/data-sources.md) you define for your C# models, a corresponding TypeScript class is generated that includes the [Custom Parameters](/modeling/model-components/data-sources.md#custom-parameters) of the data source.
 
-Data sources are generated as concrete classes in a namespace named `DataSources` that is nested inside a namespace named after their parent model type. For example:
+These classes are generated in a namespace named `DataSources` that is nested inside a namespace named after their parent model type. As a convenience, and unlike the regular model interfaces, their instances are automatically reactive with Vue since they are commonly instantiated and bound to as top-level objects in Vue components. 
+
+An example usage:
 
 ``` ts
 import { Person } from '@/models.g'
 
 const dataSource = new Person.DataSources.NamesStartingWith;
 dataSource.startsWith = "A";
-// Provide the dataSource to an API Client or a ViewModel...
+```
+
+``` vue
+<c-input :model="dataSource" for="startsWith" />
+```
+
+These generated data source classes are also available through the generated [ViewModel](./viewmodels.md) classes for convenience:
+
+``` ts
+import { PersonListViewModel } from '@/models.g'
+
+const list = new PersonListViewModel();
+list.$dataSource 
+  = new PersonListViewModel.DataSources.NamesStartingWith({startsWith: 'A'});
+list.$load();
 ```
 
 ## Model Functions
@@ -103,7 +137,7 @@ Binds a value on an object, or the value of a ref, to the query string.
 
 ### useBindKeyToRouteOnCreate() {#usebindkeytorouteoncreate}
 
-Replace the current URL with one that includes the primary key when a model is created.
+When a model is created, add the new primary key to the current page URL.
 
 - **Type**
 

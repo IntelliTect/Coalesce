@@ -95,7 +95,7 @@ All methods on `IDataSource<T>` take a parameter that contains all the client-sp
 
 An additional parameter on `DataSourceParameters` is available on the client only - `refResponse`. If set to true - e.g., `listVm.$params.refResponse = true;`, Coalesce will pass a header value of `Accept: application/json+ref` with the API request. This will instruct the server to use [System.Text.Json's PreserveReferences handling](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/preserve-references#preserve-references-and-handle-circular-references) when serializing the response. This allows identical objects that occur multiple times in the response to have only one copy sent across the wire. This also results in only a single, shared instance of this object on the client in the results from the API clients, cascading through to the ViewModels as well. This can significantly reduce response sizes by deduplicating multiple copies of the same data, as well as CPU and memory load on both the client and server.
 
-Alternative to setting this parameter directly, you can also use the `useRefResponse()` method on [API callers](/stacks/vue/layers/api-clients.md#reference-response-handling) or the `$useRefResponse()` method on [API clients](/stacks/vue/layers/api-clients.md#api-client-configuration-methods) to enable this functionality.
+Alternative to setting this parameter directly, you can also use the `useRefResponse()` method on [API callers](/stacks/vue/layers/api-clients.md#userefresponse-caller) or the `$useRefResponse()` method on [API clients](/stacks/vue/layers/api-clients.md#userefresponse) to enable this functionality.
 
 ## Custom Parameters
 

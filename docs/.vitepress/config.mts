@@ -65,6 +65,53 @@ export default defineConfig({
       registerImportMdPlugin(md);
     },
     theme: "dark-plus",
+    codeTransformers: [
+      // Remove code lines annotated with [!code hide]
+      {
+        name: "remove-code-hide",
+        code(hast: any) {
+          const getTextContent = (element: any): string => {
+            if (element.type === "text") return element.value;
+            if (element.type === "element" && element.tagName === "span")
+              return element.children.map(getTextContent).join("");
+            return "";
+          };
+
+          const linesToKeep = [];
+          for (let i = 0; i < hast.children.length; i++) {
+            const child = hast.children[i];
+
+            if (getTextContent(child).includes("[!code hide]")) {
+              i++; // Skip the next element too (newline)
+              continue;
+            }
+
+            linesToKeep.push(child);
+          }
+
+          hast.children = linesToKeep;
+        },
+      },
+      // Wrap a code block in a `class` declaration so that TS class members highlight correctly.
+      // This looks for blocks like ``` ts class-wrap ... ```
+      {
+        name: "wrap-transformer",
+        preprocess(code: string, options: any) {
+          // Check if the code block has the 'class-wrap' attribute
+          if (options.meta?.__raw?.includes("class-wrap")) {
+            // Inject class wrapper at the beginning and end
+            const lines = code.split("\n");
+            const wrappedCode = [
+              "class x { // [!code hide]",
+              ...lines,
+              "} // [!code hide]",
+            ].join("\n");
+            return wrappedCode;
+          }
+          return code;
+        },
+      },
+    ],
   },
 
   themeConfig: {

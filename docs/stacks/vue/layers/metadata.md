@@ -1,18 +1,18 @@
-# Vue Metadata Layer
+# Metadata
 
 <!-- MARKER:summary -->
 
-The metadata layer, generated as `metadata.g.ts`, contains information about the types, properties, methods, and other components of your data model. Because Vue applications are typically compiled into a set of static assets, it is necessary for the frontend code to have a representation of your data model as an analog to the `ReflectionRepository` that is available at runtime in your .NET app.
+The generated metadata provides a client-side representation of your backend data model's structure and behavior, enabling type-aware operations and dynamic interfaces in your Vue application. Since Vue applications are compiled to static assets and can't perform runtime reflection like .NET applications, the metadata serves as a static analog to the `ReflectionRepository` available in your .NET backend. The metadata is generated as `metadata.g.ts` and contains comprehensive information about the types, properties, methods, and other components of your data model.
 
 <!-- MARKER:summary-end -->
 
 ## Concepts 
 
-The following is a non-exhaustive list of the general concepts used by the metadata layer. The [source code of coalesce-vue](https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/metadata.ts) provides the most exhaustive set of documentation about the metadata layer: 
+The following is a non-exhaustive list of the general concepts used by the metadata. The [source code of coalesce-vue](https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/metadata.ts) provides the most exhaustive set of documentation about the metadata: 
 
 ### Metadata
 
-All objects in the metadata layer that represent any kind of metadata have, at the very least, a `name`, the name of the metadata element in code (type names, property names, parameter names, etc). and a `displayName`, the human-readable form of the name that is suitable for presentation when needed. Names follow the casing convention of their corresponding language elements - types are PascalCased, while other things like properties, methods, and parameters are camelCased.
+All objects in the metadata that represent any kind of metadata have, at the very least, a `name`, the name of the metadata element in code (type names, property names, parameter names, etc). and a `displayName`, the human-readable form of the name that is suitable for presentation when needed. Names follow the casing convention of their corresponding language elements - types are PascalCased, while other things like properties, methods, and parameters are camelCased.
 
 ### Type
 
@@ -20,7 +20,7 @@ All custom types exposed by your application's data model will have a Type metad
 
 ### Value
 
-In the metadata layer, a Value is the usage of a type. This could be any type - strings, numbers, enums, classes, or even void. Values can be found in the collection of an object's properties, a method's parameters or return value, or as a data source's parameters.
+In the metadata, a Value is the usage of a type. This could be any type - strings, numbers, enums, classes, or even void. Values can be found in the collection of an object's properties, a method's parameters or return value, or as a data source's parameters.
 
 All values have the following properties:
 

@@ -1,8 +1,10 @@
-# Vue ViewModel Layer
+# ViewModels
 
 <!-- MARKER:summary -->
 
-The ViewModel layer, generated as `viewmodels.g.ts`, exports a ViewModel class for each API-backed type in your data model ([CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md)). It also exports a ListViewModel type for [CRUD Models](/modeling/model-types/crud.md).
+Coalesce's generated TypeScript ViewModels provide rich, stateful wrappers around your data model types that handle common UI concerns like loading, saving, validation, and auto-save functionality. They serve as the primary interface between your Vue components and your backend APIs, offering features like automatic dirty tracking on property changes, API callers with loading/error states, and transactional bulk save operations. 
+
+The ViewModels are generated as `viewmodels.g.ts` and export a ViewModel class for each API-backed type in your data model ([CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md)), as well as a ListViewModel type for [CRUD Models](/modeling/model-types/crud.md).
 
 These classes provide a wide array of functionality that is useful when interacting with your data model through a user interface. The generated ViewModels are the primary way that Coalesce is used when developing a Vue application.
 
@@ -14,7 +16,7 @@ The following members can be found on the generated [CRUD Model](/modeling/model
 
 ### Generated Members
 
-Each ViewModel class implements the corresponding interface from the [Model Layer](/stacks/vue/layers/models.md), meaning that the ViewModel has a data property for each [Property](/modeling/model-components/properties.md) on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
+Each ViewModel class implements the corresponding [Model](/stacks/vue/layers/models.md) interface, meaning that the ViewModel has a data property for each [Property](/modeling/model-components/properties.md) on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
 
 Changing the value of a property will automatically flag that property as dirty. See [Auto-save & Dirty Flags](/stacks/vue/layers/viewmodels.md) below for information on how property dirty flags are used.
 
@@ -51,7 +53,7 @@ There are a few special behaviors when assigning to different kinds of data prop
 
 <Prop def="readonly $metadata: ModelType" lang="ts" />
 
-The metadata object from the [Metadata Layer](/stacks/vue/layers/metadata.md) layer for the type represented by the ViewModel.
+The [Metadata](/stacks/vue/layers/metadata.md) object for the type represented by the ViewModel.
 
 
 <Prop def="readonly $stableId: number" lang="ts" />
@@ -95,7 +97,7 @@ An object containing the [Standard Parameters](/modeling/model-components/data-s
 
 <Prop def="$dataSource: DataSource" lang="ts" idPrefix="member-item" />
 
-Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data Source](/modeling/model-components/data-sources.md) class [generated in the Model Layer](/stacks/vue/layers/models.md).
+Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data Source](/modeling/model-components/data-sources.md)'s generated [Model](/stacks/vue/layers/models.md) class.
 
 
 <Prop def="$includes: string | null" lang="ts" idPrefix="member-item" />
@@ -305,7 +307,7 @@ Any failing validation rules on a ViewModel will prevent that ViewModel's `$save
 
 Remove a validation rule from the ViewModel for the specified property and rule identifier.
 
-This can be used to remove either a rule that was provided by the generated [Metadata Layer](/stacks/vue/layers/metadata.md), or a custom rule that was added by `$addRule`. Reference your generated metadata file `metadata.g.ts` to see any generated rules and the identifiers they use.
+This can be used to remove either a rule that was provided by the generated [Metadata](/stacks/vue/layers/metadata.md), or a custom rule that was added by `$addRule`. Reference your generated metadata file `metadata.g.ts` to see any generated rules and the identifiers they use.
 
 
 <Prop def="$getRules(prop: string | Property): ((val: any) => string | true)[]" lang="ts" />
@@ -355,7 +357,8 @@ An object containing the [Standard Parameters](/modeling/model-components/data-s
 
 <Prop def="$dataSource: DataSource" lang="ts" idPrefix="member-list" />
 
-Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data Source](/modeling/model-components/data-sources.md) class [generated in the Model Layer](/stacks/vue/layers/models.md).
+
+Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data Source](/modeling/model-components/data-sources.md)'s generated [Model](/stacks/vue/layers/models.md) class.
 
 
 <Prop def="$includes: string | null" lang="ts" idPrefix="member-list" />

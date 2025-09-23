@@ -1103,7 +1103,7 @@ export abstract class ViewModel<
     }
 
     const {
-      wait = 1000,
+      wait = 300,
       predicate = undefined,
       debounce: debounceOptions,
     } = options;
@@ -1790,7 +1790,7 @@ export abstract class ListViewModel<
     vue = getPublicInstance(vue);
 
     const {
-      wait = 1000,
+      wait = 300,
       predicate = undefined,
       debounce: debounceOptions,
     } = options;

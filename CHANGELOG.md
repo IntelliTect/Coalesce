@@ -7,6 +7,7 @@
 - `StandardBehaviors.AfterDelete` is now `AfterDeleteAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
 - `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
 - `IntelliTect.Coalesce.AuditLogging` now uses stored procedures by default to upsert audit log entries. You can disable this (e.g. if your application lacks permission to create/update stored procedures) by chaining `.WithStoredProcedures(false)` when you configure audit logging.
+- The default debounce timer for auto-saves and auto-loads on ViewModels has changed from 1000ms to 300ms.
 - The CommonJS build of coalesce-vue has been dropped - only the ESM build remains. Most projects should be unaffected.
 
 ## Features

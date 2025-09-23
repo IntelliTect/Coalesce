@@ -389,7 +389,7 @@ onMounted(() => {
     () => effectiveAutoSave.value,
     (effectiveAutoSave) => {
       if (effectiveAutoSave && !viewModel.value.$isAutoSaveEnabled) {
-        viewModel.value.$startAutoSave(instance, { wait: 500 });
+        viewModel.value.$startAutoSave(instance);
       } else if (!effectiveAutoSave && viewModel.value.$isAutoSaveEnabled) {
         viewModel.value.$stopAutoSave();
       }

@@ -414,7 +414,7 @@ if (userPropMeta.value && "foreignKey" in userPropMeta.value) {
 }
 
 listVm.$load();
-listVm.$useAutoLoad({ wait: 100 });
+listVm.$useAutoLoad();
 
 defineExpose({
   /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */

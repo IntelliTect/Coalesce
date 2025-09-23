@@ -12,7 +12,7 @@ public sealed class CoalesceConfigurationAttribute : Attribute
     /// <para>
     /// If true, models defined in the targeted assembly will not be loaded by Coalesce's 
     /// <see cref="QueryableExtensions.IncludeChildren"/> method, 
-    /// nor by the <a href="https://intellitect.github.io/Coalesce/modeling/model-components/data-sources.html#default-loading-behavior">Default Loading Behavior</a>, 
+    /// nor by the <a href="https://coalesce.intellitect.com/modeling/model-components/data-sources.html#default-loading-behavior">Default Loading Behavior</a>, 
     /// which normally automatically includes the first level of navigation properties of any entity returned from a Coalesce-generated /get, /list, or /save API endpoint.
     /// </para>
     /// <para>

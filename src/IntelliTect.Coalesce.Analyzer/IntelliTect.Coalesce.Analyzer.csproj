@@ -5,7 +5,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ImplicitUsings>true</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Description>Code analyzers and fixers for Coalesce applications that help identify security issues, API design problems, and other code quality concerns. Learn more at https://intellitect.github.io/Coalesce/</Description>
+    <Description>Code analyzers and fixers for Coalesce applications that help identify security issues, API design problems, and other code quality concerns. Learn more at https://coalesce.intellitect.com/</Description>
 
     <!-- RS1038: This compiler extension should not be implemented in an assembly containing a
     reference to Microsoft.CodeAnalysis.Workspaces -->

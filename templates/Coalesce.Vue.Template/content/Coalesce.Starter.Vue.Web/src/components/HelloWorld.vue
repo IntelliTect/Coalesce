@@ -107,8 +107,8 @@
             <v-list density="compact" class="doc-links">
               <v-list-item
                 title="Coalesce Documentation"
-                href="https://intellitect.github.io/Coalesce"
-                prepend-avatar="https://intellitect.github.io/Coalesce/coalesce-icon-color.svg"
+                href="https://coalesce.intellitect.com"
+                prepend-avatar="https://coalesce.intellitect.com/coalesce-icon-color.svg"
               >
               </v-list-item>
               <v-list-item
@@ -146,7 +146,6 @@
         <v-card>
           <v-card-title> Development Recommended Tooling: </v-card-title>
           <v-card-text>
-            
             <div>
               <p>
                 <b>Visual Studio</b> is recommended for back-end C# work, but

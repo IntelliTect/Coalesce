@@ -2,7 +2,7 @@
   <Import Project="../Common.props" />
   <PropertyGroup>
     <Nullable>enable</Nullable>
-    <Description>Automatic change tracking and audit trail functionality for Entity Framework models. Learn more at https://intellitect.github.io/Coalesce/topics/audit-logging.html</Description>
+    <Description>Automatic change tracking and audit trail functionality for Entity Framework models. Learn more at https://coalesce.intellitect.com/topics/audit-logging.html</Description>
 
     <!-- CS1591: Missing XML comment for publicly visible type or member -->
     <!--<NoWarn>$([System.String]::Copy("$(NoWarn)").Replace(";CS1591",""))</NoWarn>-->

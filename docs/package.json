@@ -8,7 +8,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "dev": "vitepress dev",
-    "build-only": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist/Coalesce",
+    "build-only": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist",
     "linkcheck": "node check-links.mjs",
     "build": "npm run build-only && npm run linkcheck"
   },

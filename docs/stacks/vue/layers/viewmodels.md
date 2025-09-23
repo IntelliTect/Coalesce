@@ -4,13 +4,14 @@
 
 Coalesce's generated TypeScript ViewModels provide rich, stateful wrappers around your [CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md) that handle common UI concerns like loading, saving, validation, and auto-save functionality. They serve as the primary interface between your Vue components and your backend APIs, offering features like automatic dirty tracking on property changes, API callers with loading/error states, and transactional bulk save operations. 
 
+<!-- MARKER:summary-end -->
+
 The ViewModels are generated as `viewmodels.g.ts` and export the following:
 
 - A [ViewModel](#viewmodels) type for each [CRUD Model](/modeling/model-types/crud.md).
 - A [ListViewModel](#listviewmodels) type for each [CRUD Model](/modeling/model-types/crud.md).
 - A [ServiceViewModel](#service-viewmodels) for each [Service](/modeling/model-types/services.md).
 
-<!-- MARKER:summary-end -->
 
 ## ViewModels 
 

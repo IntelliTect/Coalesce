@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
-    <Description>Generates frontend Vue.js metadata, models, api clients, and view models for Coalesce projects. Learn more at https://intellitect.github.io/Coalesce/stacks/vue/overview.html</Description>
+    <Description>Generates frontend Vue.js metadata, models, api clients, and view models for Coalesce projects. Learn more at https://coalesce.intellitect.com/stacks/vue/overview.html</Description>
   </PropertyGroup>
 
   <ItemGroup>

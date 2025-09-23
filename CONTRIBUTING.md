@@ -22,7 +22,7 @@ The following can be used to debug code generation against your own Coalesce pro
 
 1. Navigate to `src/IntelliTect.Coalesce.DotnetTool/Properties` (on disk) or `cli/IntelliTect.Coalesce.DotnetTool/Properties` (Visual Studio Solution Explorer).
 1. Create a launchSettings.json file.
-1. Add a launch profile similar to the following, updating the workingDirectory to point at the directory that contains your coalesce.json. [Additional CLI parameters](https://intellitect.github.io/Coalesce/stacks/agnostic/generation.html#cli-options) may be passed as desired.
+1. Add a launch profile similar to the following, updating the workingDirectory to point at the directory that contains your coalesce.json. [Additional CLI parameters](https://coalesce.intellitect.com/stacks/agnostic/generation.html#cli-options) may be passed as desired.
 
 ```json
 {
@@ -37,7 +37,7 @@ The following can be used to debug code generation against your own Coalesce pro
 
 ### From the command line:
 
-Run the following command from the `src/IntelliTect.Coalesce.DotnetTool` project directory. [Additional CLI parameters](https://intellitect.github.io/Coalesce/stacks/agnostic/generation.html#cli-options) may be passed as desired.
+Run the following command from the `src/IntelliTect.Coalesce.DotnetTool` project directory. [Additional CLI parameters](https://coalesce.intellitect.com/stacks/agnostic/generation.html#cli-options) may be passed as desired.
 
 ```bash
 dotnet run -- <path-to-coalesce.json> --debug

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>$(TargetFrameworks);netstandard2.0</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <Description>Core components and utilities for the Coalesce framework. This package should not be consumed or used directly. Its APIs should not be expected to be stable and could change in any minor or patch release. Learn more at https://intellitect.github.io/Coalesce/</Description>
+    <Description>Core components and utilities for the Coalesce framework. This package should not be consumed or used directly. Its APIs should not be expected to be stable and could change in any minor or patch release. Learn more at https://coalesce.intellitect.com/</Description>
   </PropertyGroup>
 
   <ItemGroup>

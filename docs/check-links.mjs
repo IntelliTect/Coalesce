@@ -41,12 +41,7 @@ try {
   console.log(`Running linkcheck with skip file: ${skipFile} (CI: ${isCI})`);
 
   // Run linkcheck
-  await run("linkcheck", [
-    "localhost:8087/Coalesce",
-    "-e",
-    "--skip-file",
-    skipFile,
-  ]);
+  await run("linkcheck", ["localhost:8087", "-e", "--skip-file", skipFile]);
 
   process.exit(0);
 } catch (err) {

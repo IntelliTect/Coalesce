@@ -2,7 +2,7 @@
   <Import Project="../Common.props" />
   <PropertyGroup>
     <Nullable>enable</Nullable>
-    <Description>ASP.NET Core services and middleware for Vue.js SPA integration in Coalesce applications. Learn more at https://intellitect.github.io/Coalesce/topics/vite-integration.html</Description>
+    <Description>ASP.NET Core services and middleware for Vue.js SPA integration in Coalesce applications. Learn more at https://coalesce.intellitect.com/topics/vite-integration.html</Description>
   </PropertyGroup>
 
   <ItemGroup>

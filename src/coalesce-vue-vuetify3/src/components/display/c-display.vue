@@ -57,7 +57,7 @@ export type CDisplayProps<TModel extends Model | AnyArgCaller | undefined> = {
   element?: string;
 
   /** Options for formatting the output.
-   * See [DisplayOptions](https://intellitect.github.io/Coalesce/stacks/vue/layers/models.html#displayoptions). */
+   * See [DisplayOptions](https://coalesce.intellitect.com/stacks/vue/layers/models.html#displayoptions). */
   options?: DisplayOptions;
 
   /** Shorthand for `:options="{ format: ... }"` */

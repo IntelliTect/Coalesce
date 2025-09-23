@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
-    <Description>Core code generation engine and services for Coalesce. Learn more at https://intellitect.github.io/Coalesce/</Description>
+    <Description>Core code generation engine and services for Coalesce. Learn more at https://coalesce.intellitect.com/</Description>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Analysis/MsBuild/Targets/**" />

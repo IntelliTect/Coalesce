@@ -13,7 +13,7 @@
       .NET global/local tool for Coalesce code generation. For the `DotNetCliToolReference`-style
       tool, see https://www.nuget.org/packages/IntelliTect.Coalesce.Tools.
 
-      Learn more at https://intellitect.github.io/Coalesce/
+      Learn more at https://coalesce.intellitect.com/
     </Description>
 
     <AssemblyName>dotnet-coalesce</AssemblyName>

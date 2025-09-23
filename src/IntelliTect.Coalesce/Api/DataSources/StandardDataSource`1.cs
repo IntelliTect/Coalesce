@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce;
 
-public abstract class StandardDataSource<T> 
-    : QueryableDataSourceBase<T>, 
+public abstract class StandardDataSource<T>
+    : QueryableDataSourceBase<T>,
       IDataSource<T>, IResultTransformer<T>, IStandardCrudStrategy
     where T : class
 {
@@ -113,7 +113,7 @@ public abstract class StandardDataSource<T>
     /// <param name="query">The query that may be used to get the IncludeTree from.</param>
     /// <param name="parameters">The parameters by which to query.</param>
     /// <returns>The IncludeTree that will be used to shape the serialized DTOs.</returns>
-    /// <see href="https://intellitect.github.io/Coalesce/concepts/include-tree/"/>
+    /// <see href="https://coalesce.intellitect.com/concepts/include-tree/"/>
     public virtual IncludeTree? GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => query.GetIncludeTree();
 
     /// <summary>

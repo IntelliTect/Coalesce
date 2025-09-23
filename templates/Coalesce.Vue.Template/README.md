@@ -3,4 +3,4 @@
 
 This template will set up a new Coalesce Vue solution which you can build your app upon.
 
-For instructions and additional information, visit [the Coalesce Documentation](https://intellitect.github.io/Coalesce/stacks/vue/getting-started.html).
+For instructions and additional information, visit [the Coalesce Documentation](https://coalesce.intellitect.com/stacks/vue/getting-started.html).

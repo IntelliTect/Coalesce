@@ -58,8 +58,7 @@ const attributes = fs
 export default defineConfig({
   title: "Coalesce",
   description: "Documentation for Coalesce by IntelliTect",
-  base: "/Coalesce/",
-  head: [["link", { rel: "shortcut icon", href: "/Coalesce/favicon.ico" }]],
+  head: [["link", { rel: "shortcut icon", href: "/favicon.ico" }]],
   markdown: {
     config(md) {
       registerImportMdPlugin(md);
@@ -137,9 +136,9 @@ export default defineConfig({
     search: {
       provider: "algolia",
       options: {
-        appId: "SDGLJOI8GP",
-        apiKey: "7aac3b70e2be40bd6bb55bc603e7bf46",
-        indexName: "coalesce",
+        appId: "NV8KF7QVGD",
+        apiKey: "b44fafadc065e1db9f555d3349fcc1cf",
+        indexName: "Coalesce Crawler",
       },
     },
 

@@ -115,7 +115,7 @@
 ## Features
 
 - Added support for .NET 9.
-- Added a `reset` method to all [API caller objects](https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#api-callers). This method resets all stateful fields on the object to default values.
+- Added a `reset` method to all [API caller objects](https://coalesce.intellitect.com/stacks/vue/layers/api-clients.html#api-callers). This method resets all stateful fields on the object to default values.
 - Template: Added username/password auth option (aka individual user accounts, aka local accounts)
 
 ## Fixes
@@ -205,7 +205,7 @@
 
 ## Deprecations
 
-- Support for Vue 2 is officially deprecated. `coalesce-vue-vuetify2` will receive critical bugfixes, but will no longer receive new features that Vue 3 receives. If your application is still on Vue 2, you should [migrate ASAP](https://intellitect.github.io/Coalesce/stacks/vue/vue2-to-vue3.html).
+- Support for Vue 2 is officially deprecated. `coalesce-vue-vuetify2` will receive critical bugfixes, but will no longer receive new features that Vue 3 receives. If your application is still on Vue 2, you should [migrate ASAP](https://coalesce.intellitect.com/stacks/vue/vue2-to-vue3.html).
 - `ControllerActionAttribute` has been merged into `ExecuteAttribute`.
 - `LoadFromDataSourceAttribute` has been merged into `ExecuteAttribute`.
 - `CreateControllerAttribute` deprecated in favor of using either `[InternalUse]` or `[Create]`/`[Read]`/`[Edit]`/`[Delete]` to preclude the API endpoints of types.

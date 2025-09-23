@@ -526,7 +526,7 @@ const props = withDefaults(
       modelValue?: PrimaryBindType | null;
 
       /** Response caching configuration for the `/get` and `/list` API calls made by the component.
-       * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
+       * See https://coalesce.intellitect.com/stacks/vue/layers/api-clients.html#response-caching. */
       cache?: ResponseCachingConfiguration | boolean;
 
       rules?: Array<TypedValidationRule<SelectedPkType>>;

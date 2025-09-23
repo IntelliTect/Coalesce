@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
-    <Description>Generates ASP.NET Core API controllers, DTOs, and Semantic Kernel plugins for Coalesce projects. Learn more at https://intellitect.github.io/Coalesce/</Description>
+    <Description>Generates ASP.NET Core API controllers, DTOs, and Semantic Kernel plugins for Coalesce projects. Learn more at https://coalesce.intellitect.com/</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -26,6 +26,7 @@ import {
   DataSourceParameters,
   ServiceApiClient,
   mapParamsToDto,
+  mapQueryToParams,
   type BulkSaveRequestItem,
   ItemApiState,
 } from "./api-client.js";
@@ -2934,6 +2935,99 @@ const watcherFinalizationRegistry =
         heldValue();
       })
     : undefined;
+
+/**
+ * A Vue composable that sets up two-way binding between a list view model's parameters
+ * and the browser's query string. This captures baseline parameters and sets up
+ * watchers to synchronize changes between the view model parameters and the router's
+ * query parameters.
+ *
+ * Automatically cleans up watchers when the component is unmounted.
+ *
+ * Consider using `useBindToQueryString()` on individual parameters instead if you need
+ * greater control or want to limit which parameters are bound. Since this allows control
+ * over the data source, filters, and includes string, it can affect the data retrieved
+ * from your server in a way that might break your application's pages. It can also
+ * populate the `filter` parameter with unexpected data types - values pulled from the
+ * URL will always be strings, but your code may expect numbers, bools, or other types.
+ * This is why unlike all other ViewModel functionality, it is not exposed as a method
+ * on the ListViewModel class.
+ *
+ * @param viewModel The view model whose parameters should be bound to the query string
+ */
+export function useBindListParametersToQueryString(viewModel: ListViewModel) {
+  const router = getCurrentInstance()?.proxy?.$router;
+
+  if (!router) {
+    throw new Error(
+      "Could not find $router on the component instance. Is vue-router installed?",
+    );
+  }
+
+  // Establish the baseline parameters that do not need to be represented in the query string.
+  // I.E. don't put the default values of parameters in the query string.
+  const baselineParams = mapParamsToDto(viewModel.$params);
+
+  // When the parameters change, put them into the query string.
+  const stopParamsWatcher = watch(
+    () => mapParamsToDto(viewModel.$params),
+    (mappedParams: any, old: any) => {
+      // For any parameters that match the baseline parameters,
+      // do not put those parameters in the query string.
+      for (const key in baselineParams) {
+        if (mappedParams[key] == baselineParams[key]) {
+          delete mappedParams[key];
+        }
+      }
+
+      router
+        .replace({
+          query: {
+            // First, take all existing query params so that any that aren't handled
+            // by mapQueryToParams/mapParamsToDto don't get lost
+            ...router.currentRoute.value.query,
+            // Next, set all previous query-mapped params to undefined
+            // so that any that aren't in the new mappedParams object get unset
+            ...(typeof old == "object"
+              ? Object.fromEntries(
+                  Object.entries(old!).map((e) => [e[0], undefined]),
+                )
+              : {}),
+            // Then layer on any new params, overwriting any that got set to undefined previously.
+            ...(mappedParams as any),
+          },
+        })
+        .catch((err: any) => {
+          // Ignore errors about duplicate navigations. These are annoying and useless.
+          if (err.name === "NavigationDuplicated") return;
+          throw err;
+        });
+    },
+    { deep: true },
+  );
+
+  // When the query changes, grab the new parameter values.
+  const stopQueryWatcher = watch(
+    () => router.currentRoute.value.query,
+    (v: any) => {
+      viewModel.$params = mapQueryToParams(
+        {
+          ...baselineParams,
+          // Overlay the query values on top of the baseline parameters.
+          ...v,
+        },
+        ListParameters,
+        viewModel.$metadata,
+      );
+    },
+    { immediate: true },
+  );
+
+  return () => {
+    stopParamsWatcher();
+    stopQueryWatcher();
+  };
+}
 
 declare module "@vue/reactivity" {
   export interface RefUnwrapBailTypes {

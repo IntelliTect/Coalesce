@@ -30,6 +30,7 @@
 - `ListViewModel.$orderByToggle()` method added to cycle through ascending, descending, and no ordering for a field.
 - `ApiCaller.useRefResponse()` and `ApiClient.$useRefResponse()` methods added to enable System.Text.Json reference preservation handling, which can significantly reduce response payload sizes by deduplicating identical objects.
 - `useBindToQueryString` now automatically handles parsing of all properties of `ListParameters`, as well as their aliases on `ListViewModel`. Parsing no longer needs to be manually specified when binding to these properties.
+- `useBindListParametersToQueryString`: new composable for binding all of a list's parameters to the query. Use with caution, see documentation for details.
 - `c-admin-audit-log-page`: Added `userProp` prop to allow specifying a custom property name for user identification.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
 - `c-datetime-picker`: Added prop `showTodayButton`

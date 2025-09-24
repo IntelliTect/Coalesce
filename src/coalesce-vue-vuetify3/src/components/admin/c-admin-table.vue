@@ -117,12 +117,10 @@
 import {
   ListViewModel,
   ViewModel,
-  ListParameters,
-  mapQueryToParams,
-  mapParamsToDto,
-  bindToQueryString,
+  useBindListParametersToQueryString,
   ModelType,
   HiddenAreas,
+  useBindToQueryString,
 } from "coalesce-vue";
 
 import {
@@ -320,69 +318,13 @@ function addItem(meta: ModelType) {
 
 onMounted(() => {
   if (props.queryBind) {
-    // Use refs directly for bindToQueryString in script setup
-    bindToQueryString(instance, { editable }, "editable", {
-      parse: (v) => ref(v === "true"),
+    useBindToQueryString(editable, {
+      queryKey: "editable",
+      parse: (v) => v === "true",
     });
 
-    // Establish the baseline parameters that do not need to be represented in the query string.
-    // I.E. don't put the default values of parameters in the query string.
-    const baselineParams = mapParamsToDto(viewModel.value.$params);
-
-    // When the parameters change, put them into the query string.
-    watch(
-      () => mapParamsToDto(viewModel.value.$params),
-      (mappedParams: any, old: any) => {
-        // For any parameters that match the baseline parameters,
-        // do not put those parameters in the query string.
-        for (const key in baselineParams) {
-          if (mappedParams[key] == baselineParams[key]) {
-            delete mappedParams[key];
-          }
-        }
-
-        router
-          .replace({
-            query: {
-              // First, take all existing query params so that any that aren't handled
-              // by mapQueryToParams/mapParamsToDto don't get lost
-              ...router.currentRoute.value.query,
-              // Next, set all previous query-mapped params to undefined
-              // so that any that aren't in the new mappedParams object get unset
-              ...(typeof old == "object"
-                ? Object.fromEntries(
-                    Object.entries(old!).map((e) => [e[0], undefined]),
-                  )
-                : {}),
-              // Then layer on any new params, overwriting any that got set to undefined previously.
-              ...(mappedParams as any),
-            },
-          })
-          .catch((err) => {
-            // Ignore errors about duplicate navigations. These are annoying and useless.
-            if (err.name === "NavigationDuplicated") return;
-            throw err;
-          });
-      },
-      { deep: true },
-    );
-
-    // When the query changes, grab the new parameter values.
-    watch(
-      () => router.currentRoute.value.query,
-      (v: any) => {
-        viewModel.value.$params = mapQueryToParams(
-          {
-            ...baselineParams,
-            // Overlay the query values on top of the baseline parameters.
-            ...v,
-          },
-          ListParameters,
-          viewModel.value.$metadata,
-        );
-      },
-      { immediate: true },
-    );
+    // Set up two-way binding between list parameters and query string
+    useBindListParametersToQueryString(viewModel.value);
   }
 
   watch(
@@ -398,7 +340,7 @@ onMounted(() => {
   );
 
   viewModel.value.$load.setConcurrency("debounce");
-  viewModel.value.$startAutoLoad(instance, { wait: 0 });
+  viewModel.value.$startAutoLoad(instance);
   viewModel.value.$load();
 });
 </script>

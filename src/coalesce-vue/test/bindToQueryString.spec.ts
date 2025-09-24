@@ -8,10 +8,12 @@ import {
   type Router,
 } from "vue-router";
 import { bindToQueryString, type VueInstance } from "../src";
+import { ListParameters } from "../src/api-client";
 import { mount } from "@vue/test-utils";
 import { delay } from "./test-utils";
 import { reactive } from "vue";
 import { Person, PersonCriteria } from "@test-targets/models.g";
+import { ComplexModelListViewModel } from "@test-targets/viewmodels.g";
 
 describe("bindToQueryString", () => {
   async function runTest(func: (v: VueInstance, router: Router) => void) {
@@ -329,5 +331,80 @@ describe("bindToQueryString", () => {
     await delay(1);
     expect(router.currentRoute.value.query.boundValue).toBe(undefined);
     expect(router.currentRoute.value.query.boundValue2).toBe(undefined);
+  });
+
+  test("auto-detects ListParameters and parses numeric fields", async () => {
+    const listParams = reactive(new ListParameters());
+
+    await runTest(async (v, router) => {
+      // Bind page and pageSize to query string without specifying parse functions
+      bindToQueryString(v, listParams, "page");
+      bindToQueryString(v, listParams, "pageSize");
+
+      // Navigate to a URL with string values in query
+      router.push("/?page=5&pageSize=25");
+      await delay(1);
+
+      // Values should be automatically parsed to numbers
+      expect(listParams.page).toStrictEqual(5);
+      expect(listParams.pageSize).toStrictEqual(25);
+
+      // Test with invalid numeric values
+      router.push("/?page=invalid&pageSize=notanumber");
+      await delay(1);
+
+      // Invalid values should revert to defaults
+      expect(listParams.page).toStrictEqual(1);
+      expect(listParams.pageSize).toStrictEqual(10);
+
+      // Test setting values programmatically
+      listParams.page = 3;
+      listParams.pageSize = 50;
+      await delay(1);
+
+      expect(router.currentRoute.value.query.page).toBe("3");
+      expect(router.currentRoute.value.query.pageSize).toBe("50");
+    });
+  });
+
+  test.only("auto-detects ListViewModel $ properties with query key transformation and numeric parsing", async () => {
+    // Create a mock ListViewModel-like object with $ properties
+    const listViewModel = new ComplexModelListViewModel();
+
+    await runTest(async (v, router) => {
+      // Bind $ properties to query string without specifying options
+      bindToQueryString(v, listViewModel, "$page");
+      bindToQueryString(v, listViewModel, "$pageSize");
+      bindToQueryString(v, listViewModel, "$search");
+
+      // Navigate to a URL with values - query keys should drop the $ prefix
+      router.push("/?page=7&pageSize=30&search=test");
+      await delay(1);
+
+      // Numeric values should be automatically parsed
+      expect(listViewModel.$page).toStrictEqual(7);
+      expect(listViewModel.$pageSize).toStrictEqual(30);
+      expect(listViewModel.$search).toStrictEqual("test");
+
+      // Test with invalid numeric values
+      router.push("/?page=invalid&pageSize=notanumber&search=valid");
+      await delay(1);
+
+      // Invalid numeric values should revert to defaults, strings should work
+      expect(listViewModel.$page).toStrictEqual(1);
+      expect(listViewModel.$pageSize).toStrictEqual(10);
+      expect(listViewModel.$search).toStrictEqual("valid");
+
+      // Test setting values programmatically
+      listViewModel.$page = 5;
+      listViewModel.$pageSize = 100;
+      listViewModel.$search = "programmatic";
+      await delay(1);
+
+      // Query should use keys without $ prefix
+      expect(router.currentRoute.value.query.page).toBe("5");
+      expect(router.currentRoute.value.query.pageSize).toBe("100");
+      expect(router.currentRoute.value.query.search).toBe("programmatic");
+    });
   });
 });

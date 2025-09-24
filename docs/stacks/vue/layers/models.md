@@ -97,6 +97,14 @@ Binds a value on an object, or the value of a ref, to the query string.
 
   If the query string contains a value when this is called, the object will be updated with that value immediately.
 
+  **Auto-detection features:**
+  - **ListParameters**: When binding to a `ListParameters` object (or any object with `page` and `pageSize` properties), numeric fields are automatically parsed using `parseInt` without needing to specify a `parse` function.
+  - **ListViewModel $ properties**: When binding to properties starting with `$` (e.g., `$page`, `$pageSize`, `$search`), the query key automatically drops the `$` prefix (e.g., `$page` becomes `page` in the URL). Numeric properties are automatically parsed using `parseInt`.
+
+  ::: tip Migration Note
+  Existing code using `{ parse: parseInt }` for `ListParameters` properties or manual `queryKey` specification for `$` properties can be simplified by removing these options - the auto-detection will handle them automatically.
+  :::
+
   If the object being bound to has `$metadata`, information from that metadata will be used to serialize and parse values to and from the query string. Otherwise, the `stringify` option (default: `String(value)`) will be used to serialize the value, and the `parse` option (if provided) will be used to parse the value from the query string.
 
 - **Example**
@@ -109,8 +117,12 @@ Binds a value on an object, or the value of a ref, to the query string.
 
   // In the 'created' Vue lifecycle hook on a component:
   created() {
-    // Bind pagination information to the query string:
-    bindToQueryString(this, this.listViewModel.$params, 'pageSize', { parse: parseInt });
+    // Bind pagination information to the query string (auto-detects numeric parsing):
+    bindToQueryString(this, this.listViewModel.$params, 'pageSize');
+
+    // Bind ListViewModel shorthand parameters (auto-detects query key and numeric parsing):
+    bindToQueryString(this, this.listViewModel, '$page');
+    bindToQueryString(this, this.listViewModel, '$search');
 
     // Assuming the component has an 'activeTab' data member:
     bindToQueryString(this, this, 'activeTab');
@@ -123,9 +135,13 @@ Binds a value on an object, or the value of a ref, to the query string.
   ```ts
   import { useBindToQueryString } from 'coalesce-vue';
 
-  // Bind pagination information to the query string:
+  // Bind pagination information to the query string (auto-detects numeric parsing):
   const list = new PersonListViewModel();
-  useBindToQueryString(list.$params, 'pageSize', { parse: parseInt });
+  useBindToQueryString(list.$params, 'pageSize');
+
+  // Bind ListViewModel shorthand parameters (auto-detects query key and numeric parsing):
+  useBindToQueryString(list, '$page');
+  useBindToQueryString(list, '$search');
 
   const activeTab = ref("1")
   useBindToQueryString(activeTab, 'activeTab');

@@ -1122,7 +1122,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
   obj: T,
   key: TKey,
   {
-    queryKey = key,
+    queryKey,
     mode = "replace",
     parse,
     stringify,
@@ -1137,6 +1137,35 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
     //@ts-expect-error
     return bindToQueryString(vue, obj, "value", key);
   }
+
+  // Auto-detection logic
+  if (
+    queryKey === undefined &&
+    parse === undefined &&
+    typeof obj === "object" &&
+    obj != null
+  ) {
+    const defaultValue = (obj as any)[key];
+
+    // Auto-detect ListParameters and parse numeric fields
+    if (
+      "page" in obj &&
+      "pageSize" in obj &&
+      typeof defaultValue === "number"
+    ) {
+      parse = parseInt as any;
+    }
+    // Auto-detect ListViewModel $ properties - drop $ from query key and parse numbers
+    else if (key.startsWith("$") && key in obj) {
+      queryKey = key.substring(1) as any; // Remove $ prefix
+      // Check if it's a numeric property by looking at the default value
+      if (typeof defaultValue === "number") {
+        parse = parseInt as any;
+      }
+    }
+  }
+
+  queryKey ??= key;
 
   const vuePublic = getPublicInstance(vue);
   const vueInternal = getInternalInstance(vue);
@@ -1177,22 +1206,24 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
         }
         return v?.toString();
       }
+      let queryValue: string | undefined;
+
+      if (v == null || v === "") {
+        queryValue = undefined;
+      } else if (stringify) {
+        queryValue = stringify(v) ?? undefined;
+      } else if (metadata?.params?.[key]) {
+        queryValue = toString(mapToDto(v, metadata.params[key]));
+      } else if (metadata?.props?.[key]) {
+        queryValue = toString(mapToDto(v, metadata.props[key]));
+      } else {
+        queryValue = String(v);
+      }
+
       const newQuery = {
         ...//@ts-expect-error
         (vue.$router[coalescePendingQuery] || vue.$route.query),
-        [queryKey]:
-          v == null || v === ""
-            ? undefined
-            : stringify
-              ? stringify(v)
-              : // Use metadata to format the value if the obj has any.
-                metadata?.params?.[key]
-                ? toString(mapToDto(v, metadata.params[key]))
-                : metadata?.props?.[key]
-                  ? toString(mapToDto(v, metadata.props[key]))
-                  : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-                    // Fallback to .toString()
-                    (String(v) ?? undefined),
+        [queryKey]: queryValue,
       };
 
       // Fix https://github.com/IntelliTect/Coalesce/issues/310:
@@ -1218,21 +1249,22 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
     // (bindToQueryString doesn't support multiple same-named binds).
     v = Array.isArray(v) ? v[0] : v;
 
-    obj[key] =
-      // Use the default value if null or undefined
-      v == null
-        ? defaultValue
-        : // Use provided parse function, if provided.
-          parse
-          ? parse(v)
-          : // Use metadata to parse the value if the obj is a DataSource.
-            metadata?.params?.[key]
-            ? mapToModel(v, metadata.params[key])
-            : metadata?.props?.[key]
-              ? mapToModel(v, metadata.props[key])
-              : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-                // Fallback to the raw value
-                v;
+    // Use the default value if null or undefined
+    if (v == null) {
+      obj[key] = defaultValue;
+    } else if (parse) {
+      const parsed = parse(v);
+      obj[key] =
+        typeof parsed == "number" && isNaN(parsed as any)
+          ? defaultValue
+          : parsed;
+    } else if (metadata?.params?.[key]) {
+      obj[key] = mapToModel(v, metadata.params[key]);
+    } else if (metadata?.props?.[key]) {
+      obj[key] = mapToModel(v, metadata.props[key]);
+    } else {
+      (obj as any)[key] = v;
+    }
   };
 
   // When the query changes, grab the new value.

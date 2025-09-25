@@ -184,4 +184,8 @@ internal static class MethodInfos
 
     internal static readonly MethodInfo StringStartsWith
         = typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [typeof(string)])!;
+
+    internal static readonly MethodInfo EnumerableContains
+        = typeof(Enumerable).GetMethods()
+            .Single(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2);
 }

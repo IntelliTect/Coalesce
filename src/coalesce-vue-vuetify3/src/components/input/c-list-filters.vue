@@ -48,7 +48,7 @@
               content-class="c-list-filter--prop-menu"
             >
               <template #activator="{ props: submenuProps }">
-                <v-divider vertical class="mr-1 my-n1"></v-divider>
+                <v-divider vertical class="mr-1 ml-1 my-n1"></v-divider>
                 <v-btn
                   v-bind="submenuProps"
                   size="small"

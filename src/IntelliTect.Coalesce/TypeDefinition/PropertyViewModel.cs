@@ -788,8 +788,13 @@ public abstract class PropertyViewModel : ValueViewModel
     /// If true, this property should be filterable on the URL line via "filter.{UrlParameterName}. 
     /// </summary>
     public bool IsUrlFilterParameter =>
-        IsClientProperty && !HasNotMapped && (Type.IsPrimitive || Type.IsDate || Type.IsValidKeyType || 
-            (Type.IsCollection && Type.PureType != null && (Type.PureType.IsPrimitive || Type.PureType.IsDate || Type.PureType.IsValidKeyType)));
+        IsClientProperty && !HasNotMapped && (
+            Type.IsPrimitive ||
+            Type.IsValidKeyType ||
+            (Type.IsCollection && PureType is { } pure && (
+                pure.IsPrimitive ||
+                pure.IsValidKeyType
+            )));
 
 
     /// <summary>

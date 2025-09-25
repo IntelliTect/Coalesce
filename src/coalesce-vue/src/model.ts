@@ -199,6 +199,10 @@ export function parseValue(value: any[], meta: CollectionValue): Array<any>;
 export function parseValue(
   value: any,
   meta: Value | ClassType,
+): null | string | number | boolean | object | Date | Array<any> | unknown;
+export function parseValue(
+  value: any,
+  meta: Value | ClassType,
 ): null | string | number | boolean | object | Date | Array<any> | unknown {
   if (value == null) {
     return null;
@@ -251,10 +255,10 @@ export function parseValue(
           meta.itemType.type != "model" &&
           meta.itemType.type != "object"
         ) {
-          return value
+          return (value as string)
             .split(",")
-            .filter((v: any) => v)
-            .map((v: any) => parseValue(v, meta.itemType));
+            .filter((v) => v)
+            .map((v) => parseValue(v, meta.itemType));
         }
       }
 

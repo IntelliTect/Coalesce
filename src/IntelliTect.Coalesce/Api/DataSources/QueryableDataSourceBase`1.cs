@@ -108,7 +108,7 @@ public abstract class QueryableDataSourceBase<T>
                         Expression.Equal(it.Prop(prop), Expression.Constant(null))
                     );
                 }
-                
+
                 return query.Where(_ => false);
             }
 
@@ -168,7 +168,7 @@ public abstract class QueryableDataSourceBase<T>
             }
             else
             {
-                return query.WhereExpression(it => 
+                return query.WhereExpression(it =>
                     Expression.Equal(it.Prop(prop), value.AsQueryParam())
                 );
             }
@@ -177,7 +177,7 @@ public abstract class QueryableDataSourceBase<T>
         {
             // Handle primitive collections (e.g., List<int>, List<string>)
             var elementType = propType.PureType;
-            
+
             var values = value
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(item =>
@@ -242,11 +242,9 @@ public abstract class QueryableDataSourceBase<T>
             // For primitive collections, we need to check if the collection contains any of the specified values
             return query.WhereExpression(it =>
                 values.Select(v => it.Prop(prop).Call(
-                    typeof(Enumerable).GetMethods()
-                        .Single(m => m.Name == nameof(Enumerable.Contains) && m.GetParameters().Length == 2)
-                        .MakeGenericMethod(elementType.TypeInfo),
+                    MethodInfos.EnumerableContains.MakeGenericMethod(elementType.TypeInfo),
                     v.AsQueryParam(elementType)
-                )).OrAny()
+                )).AndAll()
             );
         }
         else
@@ -498,11 +496,11 @@ public abstract class QueryableDataSourceBase<T>
                 // Emit all the default orderings of that object.
                 foreach (var info in lastProp.Object!.DefaultOrderBy)
                 {
-                    yield return info with 
+                    yield return info with
                     {
-                        Properties = [..props, ..info.Properties],
+                        Properties = [.. props, .. info.Properties],
                         // Override the direction specified by the user's input.
-                        SortDirection = direction 
+                        SortDirection = direction
                     };
                 }
             }

@@ -18,7 +18,7 @@ public class StandardDataSourceTests : TestDbContextFixture
     private StandardDataSource<T, AppDbContext> Source<T>()
         where T : class, new()
         => new StandardDataSource<T, AppDbContext>(CrudContext);
-    
+
     [Theory]
     [InlineData("none")]
     [InlineData("NONE")]
@@ -47,15 +47,15 @@ public class StandardDataSourceTests : TestDbContextFixture
         var tree = query.GetIncludeTree();
         Assert.NotNull(tree[nameof(Case.AssignedTo)]);
         Assert.NotNull(tree[nameof(Case.ReportedBy)]);
-        Assert.NotNull(tree[nameof(Case.CaseProducts)][nameof(CaseProduct.Product)]); 
+        Assert.NotNull(tree[nameof(Case.CaseProducts)][nameof(CaseProduct.Product)]);
     }
-    
+
 
     private (PropertyViewModel, IQueryable<TModel>) PropertyFiltersTestHelper<TModel, TProp>(
         Expression<Func<TModel, TProp>> propSelector,
         TProp propValue,
         string filterValue
-    ) 
+    )
         where TModel : class, new()
     {
         var filterParams = new FilterParameters();
@@ -67,7 +67,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         filterParams.Filter[propInfo.JsonName] = filterValue;
         Db.Set<TModel>().Add(model);
         Db.SaveChanges();
-        
+
         var query = source.ApplyListFiltering(Db.Set<TModel>(), filterParams);
 
         return (propInfo, query);
@@ -81,7 +81,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Precondition
         Assert.True(prop.IsInternalUse);
-        
+
         Assert.Single(query);
     }
 
@@ -97,7 +97,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Precondition
         Assert.True(prop.HasNotMapped);
-        
+
         Assert.Single(query);
     }
 
@@ -140,7 +140,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Precondition
         Assert.Collection(prop.SecurityInfo.Read.RoleList, r => Assert.Equal(role, r));
-        
+
         Assert.Empty(query);
     }
 
@@ -619,5 +619,116 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Since this search term doesn't match the property's value, the results should be empty.
         query.AssertMatched(false);
+    }
+
+    [Fact]
+    public void ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_ContainsFilter()
+    {
+        var source = Source<ComplexModel>();
+        var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
+
+        // Test with models that either contain or don't contain the filter value
+        var model1 = new ComplexModel { IntCollection = new List<int> { 1, 2, 3 } }; // Contains 2
+        var model2 = new ComplexModel { IntCollection = new List<int> { 4, 5, 6 } }; // Doesn't contain 2
+
+        Db.Set<ComplexModel>().AddRange(model1, model2);
+        Db.SaveChanges();
+
+        var filterParams = new FilterParameters();
+        filterParams.Filter[prop.JsonName] = "2";
+
+        var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
+
+        // Should match only model1 (contains 2)
+        Assert.True(prop.IsUrlFilterParameter);
+        Assert.Single(query);
+        Assert.Equal(model1.ComplexModelId, query.Single().ComplexModelId);
+    }
+
+    [Fact]
+    public void ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_MultipleValues()
+    {
+        var source = Source<ComplexModel>();
+        var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
+
+        var model1 = new ComplexModel { IntCollection = new List<int> { 1, 2, 3 } };
+        var model2 = new ComplexModel { IntCollection = new List<int> { 4, 5, 3 } };
+        var model3 = new ComplexModel { IntCollection = new List<int> { 2, 7, 8 } };
+
+        Db.Set<ComplexModel>().AddRange(model1, model2, model3);
+        Db.SaveChanges();
+
+        var filterParams = new FilterParameters();
+        filterParams.Filter[prop.JsonName] = "3,2";
+
+        var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
+
+        // Should match model1 only (only one with both 2 and 3)
+        Assert.Equal(1, query.Count());
+    }
+
+    [Fact]
+    public void ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_NoMatch()
+    {
+        var source = Source<ComplexModel>();
+        var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
+
+        var model1 = new ComplexModel { IntCollection = new List<int> { 1, 2, 3 } };
+        var model2 = new ComplexModel { IntCollection = new List<int> { 4, 5, 6 } };
+
+        Db.Set<ComplexModel>().AddRange(model1, model2);
+        Db.SaveChanges();
+
+        var filterParams = new FilterParameters();
+        filterParams.Filter[prop.JsonName] = "9"; // Value not in any collection
+
+        var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
+
+        // Should match no models
+        Assert.Empty(query);
+    }
+
+    [Fact]
+    public void ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_EmptyCollection()
+    {
+        var source = Source<ComplexModel>();
+        var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
+
+        var model1 = new ComplexModel { IntCollection = new List<int>() }; // Empty collection
+        var model2 = new ComplexModel { IntCollection = new List<int> { 1, 2, 3 } };
+
+        Db.Set<ComplexModel>().AddRange(model1, model2);
+        Db.SaveChanges();
+
+        var filterParams = new FilterParameters();
+        filterParams.Filter[prop.JsonName] = "2";
+
+        var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
+
+        // Should match only model2 (model1 has empty collection)
+        Assert.Single(query);
+        Assert.Equal(model2.ComplexModelId, query.Single().ComplexModelId);
+    }
+
+    [Fact]
+    public void ApplyListPropertyFilters_WhenPropertyIsEnumCollection_ContainsFilter()
+    {
+        var source = Source<ComplexModel>();
+        var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.EnumCollection));
+
+        var model1 = new ComplexModel { EnumCollection = new List<Case.Statuses> { Case.Statuses.Open, Case.Statuses.InProgress } };
+        var model2 = new ComplexModel { EnumCollection = new List<Case.Statuses> { Case.Statuses.Resolved, Case.Statuses.ClosedNoSolution } };
+        var model3 = new ComplexModel { EnumCollection = new List<Case.Statuses> { Case.Statuses.Open, Case.Statuses.Resolved } };
+
+        Db.Set<ComplexModel>().AddRange(model1, model2, model3);
+        Db.SaveChanges();
+
+        var filterParams = new FilterParameters();
+        filterParams.Filter[prop.JsonName] = "0"; // Open = 0
+
+        var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
+
+        // Should match model1 and model3 (both contain Open status)
+        Assert.Equal(2, query.Count());
     }
 }

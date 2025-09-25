@@ -69,8 +69,8 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
 
         await Task.WhenAll(
             Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5")),
-            Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5.2")),
             Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5.5")),
+            Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5.9")),
             Task.Run(() => AssertSuiteCSharpOutputCompiles(suite))
         );
     }

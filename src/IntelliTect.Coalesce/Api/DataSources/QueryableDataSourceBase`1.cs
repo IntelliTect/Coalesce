@@ -108,7 +108,7 @@ public abstract class QueryableDataSourceBase<T>
                         Expression.Equal(it.Prop(prop), Expression.Constant(null))
                     );
                 }
-                
+
                 return query.Where(_ => false);
             }
 
@@ -168,10 +168,84 @@ public abstract class QueryableDataSourceBase<T>
             }
             else
             {
-                return query.WhereExpression(it => 
+                return query.WhereExpression(it =>
                     Expression.Equal(it.Prop(prop), value.AsQueryParam())
                 );
             }
+        }
+        else if (propType.IsCollection && propType.PureType != null)
+        {
+            // Handle primitive collections (e.g., List<int>, List<string>)
+            var elementType = propType.PureType;
+
+            var values = value
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(item =>
+                {
+                    var type = elementType.NullableValueUnderlyingType.TypeInfo;
+
+                    // The exact value "null" should match null values exactly.
+                    if (item.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (elementType.IsReferenceOrNullableValue) return (Success: true, Result: (object?)null);
+                        else return (Success: false, Result: null);
+                    }
+
+                    if (elementType.IsEnum)
+                    {
+                        var isLong = long.TryParse(item, out long longVal);
+                        var integralValue = elementType.EnumValues.SingleOrDefault(ev =>
+                            isLong
+                                // Match user input as the enum's numeric value
+                                ? longVal.Equals(Convert.ToInt64(ev.Value))
+                                // Match user input as the enum's string value.
+                                : ev.Name.Equals(item.Trim(), StringComparison.InvariantCultureIgnoreCase)
+                            )?.Value;
+
+                        if (integralValue == null)
+                        {
+                            // Parsing the user input to an enum value failed
+                            return (Success: false, Result: null);
+                        }
+
+                        return (Success: true, Result: Enum.ToObject(type, integralValue));
+                    }
+
+                    try
+                    {
+                        var typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(type);
+                        if (!typeConverter.IsValid(item))
+                        {
+                            return (Success: false, Result: null);
+                        }
+
+                        object result = type == typeof(Guid)
+                            ? Guid.Parse(item)
+                            : typeConverter.ConvertFromString(item)!;
+
+                        return (Success: true, Result: result);
+                    }
+                    catch { return (Success: false, Result: null); }
+                })
+                .Where(conversion => conversion.Success)
+                .Select(conversion => conversion.Result)
+                .ToList();
+
+            // Something was specified (since we didnt return early), but we couldn't parse it.
+            // Make our query return nothing since the targeted field could never equal an 
+            // unparsable value.
+            if (values.Count == 0)
+            {
+                return query.Where(_ => false);
+            }
+
+            // For primitive collections, we need to check if the collection contains any of the specified values
+            return query.WhereExpression(it =>
+                values.Select(v => it.Prop(prop).Call(
+                    MethodInfos.EnumerableContains.MakeGenericMethod(elementType.TypeInfo),
+                    v.AsQueryParam(elementType)
+                )).AndAll()
+            );
         }
         else
         {
@@ -422,11 +496,11 @@ public abstract class QueryableDataSourceBase<T>
                 // Emit all the default orderings of that object.
                 foreach (var info in lastProp.Object!.DefaultOrderBy)
                 {
-                    yield return info with 
+                    yield return info with
                     {
-                        Properties = [..props, ..info.Properties],
+                        Properties = [.. props, .. info.Properties],
                         // Override the direction specified by the user's input.
-                        SortDirection = direction 
+                        SortDirection = direction
                     };
                 }
             }

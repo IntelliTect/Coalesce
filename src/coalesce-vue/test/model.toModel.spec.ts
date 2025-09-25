@@ -117,7 +117,7 @@ const dtoToModelMappings = <MappingData[]>[
     {},
     [],
     true,
-    new Date("!!Invalid")
+    new Date("!!Invalid"),
   ),
 
   // Collection
@@ -140,6 +140,11 @@ const dtoToModelMappings = <MappingData[]>[
     meta: $metadata2.ComplexModel.props.intCollection,
     dto: "1,2,3",
     model: [1, 2, 3],
+  },
+  {
+    meta: $metadata2.ComplexModel.props.intCollection,
+    dto: "0",
+    model: [0],
   },
   ...unparsable(studentProps.courses, "abc", 123, {}, true),
 
@@ -218,7 +223,7 @@ dtoToModelMappings.forEach(
         });
       });
     });
-  }
+  },
 );
 
 // Test both `map` and `convert` cases
@@ -272,7 +277,7 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
     // should be the same reference as the root object - the circular relationship
     // should be preserved.
     expect((mapped as Indexable<typeof mapped>).parent.children[0]).toBe(
-      mapped
+      mapped,
     );
   });
 
@@ -282,7 +287,7 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
         id: 1,
         impl1OnlyField: "foo",
       }),
-      $metadata2.AbstractModel // request base type
+      $metadata2.AbstractModel, // request base type
     );
 
     expect(mapped).toBeInstanceOf($models.AbstractImpl1);
@@ -294,7 +299,7 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
         $id: 1,
         tests: [{ $id: 2, testName: "foo" }, { $ref: 2 }],
       },
-      $metadata2.ComplexModel
+      $metadata2.ComplexModel,
     ) as $models.ComplexModel;
 
     expect(mapped.tests![0]).toStrictEqual(mapped.tests![1]);
@@ -314,7 +319,7 @@ describe("mapToModel", () => {
         studentId: 1,
         $metadata: $metadata.Advisor, // intentionally mismatched.
       },
-      $metadata.Student
+      $metadata.Student,
     );
 
     // Because we're mapping to a new object, we don't care
@@ -350,10 +355,10 @@ describe("convertToModel", () => {
           studentId: 1,
           $metadata: $metadata.Advisor, // intentionally mismatched.
         },
-        $metadata.Student
+        $metadata.Student,
       );
     }).toThrowError(
-      /found metadata for advisor where metadata for student was expected/i
+      /found metadata for advisor where metadata for student was expected/i,
     );
   });
 

@@ -70,45 +70,25 @@
                 filter.propMeta.principalType)
         "
         clearable
-        multiple
+        :multiple="filter.propMeta.type != 'string'"
         autofocus
         hide-details
         density="compact"
         variant="outlined"
       />
 
-      <!-- Enum multiselect -->
-      <v-select
-        v-else-if="filter.propMeta && filter.propMeta.type == 'enum'"
+      <c-input
+        v-else-if="filter.propMeta"
+        :for="filter.propMeta"
         v-model="filter.value"
-        :items="filter.propMeta.typeDef.values"
-        item-title="displayName"
-        item-value="value"
-        placeholder="Select values..."
-        clearable
-        autofocus
-        hide-details
-        multiple
+        label=""
+        placeholder="Enter filter value..."
         density="compact"
         variant="outlined"
-        chips
-        closable-chips
-      />
-
-      <!-- Number multiselect -->
-      <v-combobox
-        v-else-if="filter.propMeta && filter.propMeta.type == 'number'"
-        v-model="filter.value"
-        placeholder="Enter numbers..."
         clearable
         autofocus
-        hide-details
-        disable-lookup
-        multiple
-        chips
-        closable-chips
-        density="compact"
-        variant="outlined"
+        :hint="getInputHint(filter.propMeta)"
+        persistent-hint
       />
 
       <!-- Text field for everything else -->

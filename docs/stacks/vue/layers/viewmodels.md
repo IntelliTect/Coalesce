@@ -335,7 +335,15 @@ Indicates if any properties have validation errors.
 
 ## ListViewModels
 
+ListViewModels provide functionality for loading and managing collections of data from your [CRUD Models](/modeling/model-types/crud.md). They handle pagination, filtering, searching, and sorting, with built-in support for auto-loading when parameters change.
+
 The following members can be found on the generated ListViewModels, exported from `viewmodels.g.ts` as `<TypeName>ListViewModel`.
+
+### Generated Members
+
+- **API Callers**
+
+  For each of the static [Methods](/modeling/model-components/methods.md) on the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
 
 ### Data Properties
 
@@ -356,6 +364,21 @@ When model-only mode is enabled, `$items` will not be populated with ViewModel i
 
 ### Parameters & API Callers
 
+<Prop def="$load: ListApiState;
+$load() => ListResultPromise<TModel>" lang="ts" idPrefix="member-list" />
+
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/list`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
+
+Results are available in the `$items` property. The `result` property of the `$load` API Caller contains the raw results and is not recommended for use in general development - `$items` should always be preferred.
+
+
+<Prop def="$count: ItemApiState;
+$count() => ItemResultPromise<number>" lang="ts" />
+
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/count`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
+
+The result is available in `$count.result` - this API Caller does not interact with other properties on the ListViewModel like `$pageSize` or `$pageCount`.
+
 
 <Prop def="$params: ListParameters" lang="ts" idPrefix="member-list" />
 
@@ -371,22 +394,6 @@ Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data 
 <Prop def="$includes: string | null" lang="ts" idPrefix="member-list" />
 
 Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts/includes.md) for more information.
-
-
-<Prop def="$load: ListApiState;
-$load() => ListResultPromise<TModel>" lang="ts" idPrefix="member-list" />
-
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/list`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
-
-Results are available in the `$items` property. The `result` property of the `$load` API Caller contains the raw results and is not recommended for use in general development - `$items` should always be preferred.
-
-
-<Prop def="$count: ItemApiState;
-$count() => ItemResultPromise<number>" lang="ts" />
-
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/count`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
-
-The result is available in `$count.result` - this API Caller does not interact with other properties on the ListViewModel like `$pageSize` or `$pageCount`.
 
 
 <Prop def="readonly $hasPreviousPage: boolean 
@@ -511,20 +518,67 @@ Returns true if auto-save is currently active on the instance.
 
 
 
-### Generated Members
-
-#### API Callers
-    
-For each of the static [Methods](/modeling/model-components/methods.md) on the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be created.
-
-
-
 ## Service ViewModels
 
 The following members can be found on the generated Service ViewModels, exported from `viewmodels.g.ts` as `<ServiceName>ViewModel`.
 
 ### Generated Members
 
-#### API Callers
-    
-For each method of the [Service](/modeling/model-types/services.md), an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be created.
+Service ViewModels are lightweight wrappers around your [Services](/modeling/model-types/services.md) that provide API calling functionality with loading states and error handling.
+
+The following are generated:
+
+- **API Callers**
+
+  For each method of the [Service](/modeling/model-types/services.md), an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
+
+
+## Utility Functions
+
+The following functions exported from `coalesce-vue` can be used with your ViewModels when building custom pages or components.
+
+### useBindListParametersToQueryString() {#usebindlistparameterstoquerystring}
+
+A Vue composable that sets up two-way binding between a ListViewModel's parameters and the browser's query string.
+
+- **Type**
+
+  ```ts
+  function useBindListParametersToQueryString(viewModel: ListViewModel): () => void
+  ```
+
+- **Details**
+
+  This composable establishes bidirectional synchronization between all of a ListViewModel's `$params` and the browser's query string. It captures baseline parameters (default values) and ensures only non-default values appear in the URL.
+
+  Consider using `useBindToQueryString()` on individual parameters instead if you need greater control or want to limit which parameters are bound. Since this allows control over the data source, filters, and includes string, it can affect the data retrieved from your server in a way that might break your application's pages. It can also populate the `filter` parameter with unexpected data types - values pulled from the URL will always be strings, but your code may expect numbers, bools, or other types. This is why unlike all other ViewModel functionality, it is not exposed as a method on the ListViewModel class.
+
+  Returns a cleanup function that can be called manually to stop the binding. It will be automatically stopped on unmount.
+  
+  ```ts
+  const list = new PersonListViewModel();
+  useBindListParametersToQueryString(list);
+  list.$useAutoLoad();
+  ```
+
+- **Example**
+
+  ```vue
+  <script setup>
+  import { PersonListViewModel } from '@/viewmodels.g';
+  import { useBindListParametersToQueryString } from 'coalesce-vue';
+
+  const list = new PersonListViewModel();
+  
+  // Set up automatic query string binding
+  useBindListParametersToQueryString(list);
+  
+  // Now any changes to list parameters will update the URL:
+  list.$page = 2;              // URL becomes ?page=2
+  list.$search = "John";       // URL becomes ?page=2&search=John
+  list.$filter.isActive = true; // URL becomes ?page=2&search=John&filter.isActive=true
+  
+  // And navigating to URLs will update the list:
+  // Navigating to ?page=3&search=Jane updates list.$page and list.$search
+  </script>
+  ```

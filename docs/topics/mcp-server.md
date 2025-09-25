@@ -47,3 +47,5 @@ Retrieves information about available template features or lists all features.
 Provides access to Coalesce template files by path.
 
 **Usage**: You can add individual source files from the Coalesce template as context to your session and ask the agent to use them to upgrade your project. This can be useful if you want to apply newer code patterns from the project template to your project that are not part of any specific feature.
+
+In VS Code, click "Add Context..." -> "MCP Resources..." -> "Coalesce" and browse the list that appears.

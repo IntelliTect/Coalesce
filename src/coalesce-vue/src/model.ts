@@ -196,10 +196,7 @@ export function parseValue(
 ): null | string | number | boolean;
 export function parseValue(value: any, meta: UnknownValue): null | unknown;
 export function parseValue(value: any[], meta: CollectionValue): Array<any>;
-export function parseValue(
-  value: any,
-  meta: Value | ClassType,
-): null | string | number | boolean | object | Date | Array<any> | unknown;
+export function parseValue(value: any, meta: Value | ClassType): any;
 export function parseValue(
   value: any,
   meta: Value | ClassType,

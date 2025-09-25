@@ -652,19 +652,19 @@ public class StandardDataSourceTests : TestDbContextFixture
         var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
 
         var model1 = new ComplexModel { IntCollection = new List<int> { 1, 2, 3 } };
-        var model2 = new ComplexModel { IntCollection = new List<int> { 4, 5, 6 } };
+        var model2 = new ComplexModel { IntCollection = new List<int> { 4, 5, 3 } };
         var model3 = new ComplexModel { IntCollection = new List<int> { 2, 7, 8 } };
 
         Db.Set<ComplexModel>().AddRange(model1, model2, model3);
         Db.SaveChanges();
 
         var filterParams = new FilterParameters();
-        filterParams.Filter[prop.JsonName] = "2,5";
+        filterParams.Filter[prop.JsonName] = "3,2";
 
         var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
 
-        // Should match model1 (contains 2) and model2 (contains 5) and model3 (contains 2)
-        Assert.Equal(3, query.Count());
+        // Should match model1 only (only one with both 2 and 3)
+        Assert.Equal(1, query.Count());
     }
 
     [Fact]

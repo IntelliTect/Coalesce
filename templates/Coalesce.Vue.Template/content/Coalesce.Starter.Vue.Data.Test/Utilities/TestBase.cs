@@ -2,17 +2,12 @@
 using Coalesce.Starter.Vue.Data.Auth;
 using Microsoft.AspNetCore.Identity;
 #endif
-using Coalesce.Starter.Vue.Data.Models;
-using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Moq;
 using Moq.AutoMock;
 using Moq.Protected;
-using System.Security.Claims;
 
 namespace Coalesce.Starter.Vue.Data.Test;
 
@@ -69,8 +64,8 @@ public class TestBase : IDisposable
 
         CurrentUser = await principalFactory.CreateAsync(user);
     }
-#endif
 
+#endif
     /// <summary>
     /// <para>
     /// Create a new <see cref="Mocker"/>, allowing for new instances of all services

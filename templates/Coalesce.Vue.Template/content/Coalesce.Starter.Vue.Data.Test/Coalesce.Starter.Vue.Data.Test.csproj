@@ -26,10 +26,4 @@
     <ProjectReference Include="..\Coalesce.Starter.Vue.Data\Coalesce.Starter.Vue.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Using Include="Xunit" />
-    <Using Include="Coalesce.Starter.Vue.Data" />
-    <Using Include="Coalesce.Starter.Vue.Data.Models" />
-  </ItemGroup>
-
 </Project>

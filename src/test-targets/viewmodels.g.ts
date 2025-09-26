@@ -277,6 +277,9 @@ export interface CaseProductViewModel extends $models.CaseProduct {
   productId: number | null;
   get product(): ProductViewModel | null;
   set product(value: ProductViewModel | $models.Product | null);
+  createdById: number | null;
+  get createdBy(): PersonViewModel | null;
+  set createdBy(value: PersonViewModel | $models.Person | null);
 }
 export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, number> implements $models.CaseProduct  {
   

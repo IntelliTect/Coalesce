@@ -288,7 +288,7 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
                         b.Line($"get inverseNavigation() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.JsVariable} as ModelReferenceNavigationProperty }},");
                     }
 
-                    if (prop.IsManytoManyCollection)
+                    if (prop.IsManyToManyCollection)
                     {
                         using (b.Block("manyToMany:", ","))
                         {

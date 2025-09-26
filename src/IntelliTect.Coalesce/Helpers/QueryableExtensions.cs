@@ -19,12 +19,12 @@ public static class QueryableExtensions
     /// </summary>
     public static IQueryable<T> IncludeChildren<T>(this IQueryable<T> query, ReflectionRepository? reflectionRepository = null) where T : class
     {
-        var model = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() 
+        var model = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>()
             ?? throw new ArgumentException("Queried type is not a class");
 
         foreach (var prop in model.ClientProperties.Where(f => f.CanAutoInclude))
         {
-            if (prop.IsManytoManyCollection && prop.ManyToManyFarNavigationProperty.CanAutoInclude)
+            if (prop.IsManyToManyCollection && prop.ManyToManyFarNavigationProperty.CanAutoInclude)
             {
                 query = query.Include(prop.Name + "." + prop.ManyToManyFarNavigationProperty!.Name);
             }
@@ -42,10 +42,10 @@ public static class QueryableExtensions
     /// <returns>The filtered query.</returns>
     public static IQueryable<T> WherePrimaryKeyIs<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
     {
-        var classViewModel = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() 
+        var classViewModel = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>()
             ?? throw new ArgumentException("Queried type is not a class");
 
-        var pkProp = classViewModel.PrimaryKey 
+        var pkProp = classViewModel.PrimaryKey
             ?? throw new ArgumentException("Unable to determine primary key of the queried type");
 
         return query.WhereExpression(it => Expression.Equal(it.Prop(pkProp), id.AsQueryParam(pkProp.Type)));

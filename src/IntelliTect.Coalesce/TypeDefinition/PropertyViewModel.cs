@@ -126,7 +126,7 @@ public abstract class PropertyViewModel : ValueViewModel
     /// Returns true if this property is a collection and has the ManyToMany Attribute 
     /// </summary>
     [MemberNotNullWhen(true, nameof(ManyToManyFarNavigationProperty))]
-    public bool IsManytoManyCollection => Type.IsCollection && this.HasAttribute<ManyToManyAttribute>();
+    public bool IsManyToManyCollection => Type.IsCollection && this.HasAttribute<ManyToManyAttribute>();
 
     /// <summary>
     /// Returns the name of the collection to map as a direct many-to-many collection
@@ -146,35 +146,37 @@ public abstract class PropertyViewModel : ValueViewModel
     {
         get
         {
-            if (!IsManytoManyCollection || Object is null) return null;
+            if (!IsManyToManyCollection || Object is null) return null;
 
             string? propName = this.GetAttributeValue<ManyToManyAttribute>(a => a.FarNavigationProperty);
             if (propName != null && propName == ManyToManyNearNavigationProperty?.Name)
             {
                 throw new CoalesceModelException(
-                    "ManyToManyAtttribute.FarNavigationProperty is referencing the near side of " +
+                    "ManyToManyAttribute.FarNavigationProperty is referencing the near side of " +
                     "the many-to-many relationship, which is not allowed. " +
                     "To configure the near side of the many-to-many relationship, use [InverseProperty].");
             }
 
-            PropertyViewModel? firstCandidate = null;
             var candidates = Object.ClientProperties.Where(p =>
                 p.Role == PropertyRole.ReferenceNavigation &&
                 propName is null
-                    ? !p.Equals(ManyToManyNearNavigationProperty)
-                    : propName == p.Name);
+                    ? (
+                        !p.Equals(ManyToManyNearNavigationProperty) &&
+                        // Only writable nav/fk props are a reasonable guess,
+                        // since otherwise it would not be possible to actually use it on the client.
+                        p.IsClientWritable
+                    )
+                    : propName == p.Name
+                ).ToList();
 
-            foreach (var prop in candidates)
+            if (candidates.Count > 1)
             {
-                if (firstCandidate != null)
-                {
-                    throw new CoalesceModelException(
-                        "Found more than one candidate far navigation property for [ManyToMany] collection. To fix this, set ManyToManyAtttribute.FarNavigationProperty to the name of one of these candidate properties: " +
-                        string.Concat(candidates.Select(p => $"\n    {Object}.{p.Name}")));
-                }
-                firstCandidate = prop;
+                throw new CoalesceModelException(
+                    "Found more than one candidate far navigation property for [ManyToMany] collection. To fix this, set ManyToManyAttribute.FarNavigationProperty to the name of one of these candidate properties: " +
+                    string.Concat(candidates.Select(p => $"\n    {Object}.{p.Name}")));
             }
-            return firstCandidate;
+
+            return candidates.FirstOrDefault();
         }
     }
 
@@ -234,7 +236,7 @@ public abstract class PropertyViewModel : ValueViewModel
     /// <summary>
     /// If true, there is an API controller that is serving this type of data.
     /// </summary>
-    public bool HasValidValues => IsManytoManyCollection || ((Object?.IsDbMappedType ?? false) && IsPOCO);
+    public bool HasValidValues => IsManyToManyCollection || ((Object?.IsDbMappedType ?? false) && IsPOCO);
 
     /// <summary>
     /// For the specified area, returns true if the property has a hidden attribute.

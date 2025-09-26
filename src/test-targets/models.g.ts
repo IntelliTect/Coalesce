@@ -236,6 +236,8 @@ export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
   case: Case | null
   productId: number | null
   product: Product | null
+  createdById: number | null
+  createdBy: Person | null
 }
 export class CaseProduct {
   

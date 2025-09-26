@@ -138,7 +138,7 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
                         b.Line($"return this.$addChild('{prop.JsVariable}', initialData) as {propVmName}");
                     }
 
-                    if (prop.IsManytoManyCollection)
+                    if (prop.IsManyToManyCollection)
                     {
                         b.Line();
                         var manyToManyType = new VueType(prop.ManyToManyFarNavigationProperty.Type).TsType(viewModel: true);

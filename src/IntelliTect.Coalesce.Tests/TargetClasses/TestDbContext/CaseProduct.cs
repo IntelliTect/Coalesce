@@ -18,4 +18,9 @@ public class CaseProduct
     [Search]
     [DefaultOrderBy(FieldOrder = 1)]
     public Product Product { get; set; }
+
+    [Read]
+    public int? CreatedById { get; set; }
+    [ForeignKey(nameof(CreatedById))]
+    public Person CreatedBy { get; set; }
 }

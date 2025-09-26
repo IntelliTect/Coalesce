@@ -142,7 +142,7 @@ internal static class ValidateContext
                                 $"Add an InverseProperty attribute on {prop.Parent.Name}.{prop.Name} to specify the actual name of the inverse property.", isWarning: true);
                         }
                     }
-                    if (prop.IsManytoManyCollection &&
+                    if (prop.IsManyToManyCollection &&
                         assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist") &&
                         assert.IsTrue(prop.PureTypeOnContext, $"ManyToManyAttribute cannot be used on {prop.PureType} because the type is not DB-mapped.")
                     )

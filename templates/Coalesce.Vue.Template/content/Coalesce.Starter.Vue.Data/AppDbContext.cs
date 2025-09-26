@@ -123,7 +123,7 @@ public class AppDbContext
 #if Identity
                     .Format<User>(x => x.PasswordHash, x => "<password changed/rehashed>")
                     .Format<User>(x => x.SecurityStamp, x => "<stamp changed>")
-                    .Exclude<IdentityUserToken<string>>() 
+                    .Exclude<IdentityUserToken<string>>()
                     .ExcludeProperty<User>(x => new { x.ConcurrencyStamp })
 #endif
 #if Tenancy
@@ -165,7 +165,7 @@ public class AppDbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        builder.Entity<User>(e => 
+        builder.Entity<User>(e =>
         {
             e.Property(e => e.Id).HasMaxLength(36);
         });
@@ -240,14 +240,13 @@ public class AppDbContext
                 var oldPkGenerated = pkProp.ValueGenerated;
 
                 if (
-                    Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite" && 
-                    new ReflectionTypeViewModel(pkProp.ClrType).PureType.IsNumber && 
+                    Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite" &&
+                    new ReflectionTypeViewModel(pkProp.ClrType).PureType.IsNumber &&
                     pkProp.ValueGenerated is ValueGenerated.OnAdd &&
                     pkProp.GetValueGeneratorFactory() is null
                 )
                 {
-                    
-                    // Unfortunately for Sqlite and unit testing, we can't have composite keys where part of the key is autoincrement.
+                    // Unfortunately for Sqlite and unit testing, we can't have composite keys where part of the key is auto-increment.
                     // See https://stackoverflow.com/questions/49592274/how-to-create-autoincrement-column-in-sqlite-using-ef-core
                     // So, do the next best thing and add a second FK that includes the tenantID.
 

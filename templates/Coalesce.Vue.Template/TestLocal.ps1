@@ -45,7 +45,7 @@ foreach ($testCase in $testCases) {
         npm run build
         npm run lint:fix # ensure all lint issues are auto-fixable
         # CS9113: Parameter '<param>' is unread. (too annoying to fix this for every possible combination of template params)
-        dotnet build /nowarn:CS9113
+        dotnet build .. /nowarn:CS9113
     }
     finally {
         Pop-Location

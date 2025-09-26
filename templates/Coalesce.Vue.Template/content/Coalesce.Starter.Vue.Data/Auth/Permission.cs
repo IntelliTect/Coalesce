@@ -7,7 +7,7 @@
 /// </summary>
 public enum Permission
 {
-    // Note: Enum values/numbers are not used for persistance - roles are stored as strings in the database.
+    // Note: Enum values/numbers are not used for persistence - roles are stored as strings in the database.
 
     [Display(Name = "Admin - General", Description = "Modify application configuration and other administrative functions excluding user/role management.")]
     Admin = 1,

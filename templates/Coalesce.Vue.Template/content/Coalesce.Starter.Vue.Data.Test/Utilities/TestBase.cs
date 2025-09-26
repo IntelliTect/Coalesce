@@ -1,10 +1,17 @@
-﻿using Coalesce.Starter.Vue.Data.Models;
+﻿#if Identity
+using Coalesce.Starter.Vue.Data.Auth;
+using Microsoft.AspNetCore.Identity;
+#endif
+using Coalesce.Starter.Vue.Data.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
+using Moq.Protected;
 using System.Security.Claims;
 
 namespace Coalesce.Starter.Vue.Data.Test;
@@ -31,6 +38,38 @@ public class TestBase : IDisposable
     {
         _CurrentMocker = BeginMockScope(standalone: false);
     }
+
+#if Identity
+    public async Task SetCurrentUserAsync(User? user)
+    {
+        if (user is null)
+        {
+            CurrentUser = new ClaimsPrincipal();
+            return;
+        }
+
+        // Mock the part of ClaimsPrincipalFactory that depends on Identity infrastructure,
+        // because setting up all the mocks to make that work for real is heavy.
+        using var mocker = BeginMockScope(standalone: true);
+        mocker.Use(Options.Create(new IdentityOptions()));
+        var principalFactory = mocker.CreateSelfMock<ClaimsPrincipalFactory>(callBase: true);
+        Mock.Get(principalFactory)
+            .Protected()
+            .Setup<Task<ClaimsIdentity>>("GenerateClaimsAsync", user)
+            .ReturnsAsync(() => new ClaimsIdentity(
+                [
+                    new Claim(AppClaimTypes.UserId, user.Id),
+                    new Claim(AppClaimTypes.UserName, user.UserName!),
+                    new Claim(AppClaimTypes.Email, user.Email!),
+                ],
+                "Test",
+                AppClaimTypes.UserName,
+                AppClaimTypes.Role
+            ));
+
+        CurrentUser = await principalFactory.CreateAsync(user);
+    }
+#endif
 
     /// <summary>
     /// <para>

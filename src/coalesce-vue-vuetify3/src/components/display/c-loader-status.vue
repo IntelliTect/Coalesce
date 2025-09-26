@@ -16,6 +16,8 @@
           <v-alert
             :modelValue="true"
             :type="errorMessages.length ? 'error' : 'success'"
+            :title="title"
+            :density="density"
             :class="[
               'c-loader-status--messages',
               errorMessages.length
@@ -23,6 +25,9 @@
                 : 'c-loader-status--success',
             ]"
           >
+            <template v-if="$slots.prepend" #prepend>
+              <slot name="prepend"></slot>
+            </template>
             <ul>
               <li
                 v-for="(message, i) in errorMessages"
@@ -37,6 +42,18 @@
                 v-text="message"
               ></li>
             </ul>
+            <template v-if="$slots.append || retryLoaders.length" #append>
+              <slot name="append"></slot>
+              <v-btn
+                v-if="retryLoaders.length"
+                @click="handleRetry"
+                variant="outlined"
+                class="ml-2"
+                prepend-icon="$loading"
+              >
+                Retry
+              </v-btn>
+            </template>
           </v-alert>
         </div>
       </v-expand-transition>
@@ -83,6 +100,7 @@ class Flags {
   "error-content" = true;
   "initial-content" = true;
   "show-success" = false;
+  "show-retry" = false;
 }
 </script>
 
@@ -107,7 +125,7 @@ type CamelFlags =
   | "noErrorContent"
   | "noInitialContent";
 
-type CamelYesFlags = "showSuccess";
+type CamelYesFlags = "showSuccess" | "showRetry";
 
 type YesFlags = keyof Flags;
 type NoFlags = `no-${YesFlags}`;
@@ -126,6 +144,12 @@ type Camelize<S extends string> = S extends `${infer F}-${infer R}`
 defineOptions({
   name: "c-loader-status",
 });
+
+defineSlots<{
+  default(): any;
+  prepend(): any;
+  append(): any;
+}>();
 
 const props = withDefaults(
   defineProps<
@@ -152,6 +176,10 @@ const props = withDefaults(
       height?: number;
       /** The color of the progress bar */
       color?: string;
+      /** Title to display in the alert */
+      title?: string;
+      /** Density of the alert (compact, comfortable, default) */
+      density?: "compact" | "comfortable" | "default";
     } & { [K in CamelFlags]?: boolean } & { [K in CamelYesFlags]?: boolean }
   >(),
   {
@@ -167,6 +195,7 @@ const props = withDefaults(
     noErrorContent: undefined,
     noInitialContent: undefined,
     showSuccess: undefined,
+    showRetry: undefined,
   },
 );
 
@@ -248,6 +277,22 @@ const successMessages = computed(() => {
     .filter((f) => f[0].wasSuccessful === true && f[1]["show-success"])
     .map((f) => f[0].message || "Success");
 });
+
+const retryLoaders = computed(() => {
+  return loaderFlags.value
+    .filter((f) => f[0].wasSuccessful === false && f[1]["show-retry"])
+    .map((f) => f[0]);
+});
+
+const handleRetry = () => {
+  retryLoaders.value.forEach((loader) => {
+    if (typeof (loader as any).invokeWithArgs === "function") {
+      (loader as any).invokeWithArgs();
+    } else {
+      loader.invoke();
+    }
+  });
+};
 
 const showLoading = computed(() => {
   return loaderFlags.value.some((f) => {
@@ -399,7 +444,7 @@ defineExpose({ loaderFlags });
 
   .c-loader-status--messages {
     ul {
-      padding-left: 24px;
+      padding-left: 20px;
     }
   }
 

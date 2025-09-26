@@ -3,9 +3,20 @@
     <h1>c-loader-status show-success</h1>
 
     <v-row>
+      <v-col>
+        <h3>Plain Alert (style comparison)</h3>
+        <v-alert type="success" title="Title">Text</v-alert>
+      </v-col>
+    </v-row>
+
+    <v-row>
       <v-col cols="6">
         <h3>Success alerts enabled</h3>
-        <c-loader-status :loaders="person1.$save" show-success>
+        <c-loader-status
+          :loaders="person1.$save"
+          show-success
+          title="Title Text!"
+        >
           <v-btn
             color="primary"
             @click="simulateSuccessWithMessage"
@@ -55,10 +66,10 @@
 
       <v-col cols="6">
         <h3>Error for comparison</h3>
-        <c-loader-status :loaders="person4.$save">
+        <c-loader-status :loaders="person4.$save" show-retry>
           <v-btn
             color="error"
-            @click="simulateError"
+            @click="person4.$save()"
             :loading="person4.$save.isLoading"
           >
             Trigger Error
@@ -73,7 +84,10 @@
     <v-row>
       <v-col>
         <h3>Using flags string syntax</h3>
-        <c-loader-status :loaders="{ 'show-success': [person5.$save] }">
+        <c-loader-status
+          :loaders="{ 'show-success': [person5.$save] }"
+          density="compact"
+        >
           <v-btn
             color="primary"
             @click="simulateSuccessFlags"
@@ -85,6 +99,41 @@
         <p class="text-caption mt-2">
           Using the object syntax:
           <code>:loaders="{ 'show-success': [person.$save] }"</code>
+        </p>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col>
+        <h3>Using prepend and append slots</h3>
+        <c-loader-status
+          :loaders="person6.$save"
+          show-success
+          no-loading-content
+        >
+          <template #prepend>
+            <v-icon>fa fa-user</v-icon>
+          </template>
+          <template #append>
+            <v-btn
+              variant="outlined"
+              prepend-icon="fa fa-refresh"
+              @click="simulateSuccessWithSlots"
+              :disabled="person6.$save.isLoading"
+            >
+              Retry
+            </v-btn>
+          </template>
+          <v-btn
+            color="primary"
+            @click="simulateSuccessWithSlots"
+            :loading="person6.$save.isLoading"
+          >
+            Save with Slots
+          </v-btn>
+        </c-loader-status>
+        <p class="text-caption mt-2">
+          Demonstrates prepend icon and append retry button for alerts.
         </p>
       </v-col>
     </v-row>
@@ -108,6 +157,7 @@ const person2 = new PersonViewModel();
 const person3 = new PersonViewModel();
 const person4 = new PersonViewModel();
 const person5 = new PersonViewModel();
+const person6 = new PersonViewModel();
 
 async function simulateSuccessWithMessage() {
   person1.$save.isLoading = true;
@@ -165,8 +215,20 @@ async function simulateSuccessFlags() {
   person5.$save.message = "Success using flags string syntax!";
 }
 
+async function simulateSuccessWithSlots() {
+  person6.$save.isLoading = true;
+  person6.$save.wasSuccessful = null;
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  person6.$save.isLoading = false;
+  person6.$save.wasSuccessful = true;
+  person6.$save.message =
+    "Success with custom prepend and append slots!\nand some other message too";
+}
+
 function resetAll() {
-  [person1, person2, person3, person4, person5].forEach((person) => {
+  [person1, person2, person3, person4, person5, person6].forEach((person) => {
     person.$save.isLoading = false;
     person.$save.wasSuccessful = null;
     person.$save.message = null;

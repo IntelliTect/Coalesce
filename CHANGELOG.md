@@ -40,6 +40,8 @@
 - `c-select`: The `create` prop now supports a `position` property to control whether the create item appears at the start ('start', default) or end ('end') of the dropdown list.
 - `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
 - `c-loader-status`: Added `show-success` prop and flag to display success messages when operations complete successfully.
+- `c-loader-status`: Added `show-retry` prop and flag to display retry button for failed operations.
+- `c-loader-status`: Added `prepend` and `append` slots, and `title` and `density` props.
 - `c-list-filters`: Improved the UX of adding and modifying filters. Added the capability to show/hide columns alongside setting filters.
 
 ## Fixes

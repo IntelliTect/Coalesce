@@ -26,7 +26,9 @@ internal class EventedStreamStringReader : IDisposable
 
     public string ReadAsString() => _stringBuilder.ToString();
 
-    private void OnReceivedLine(string line) => _stringBuilder.AppendLine(line);
+    public string ReadAsPlainString() => EventedStreamReader.AnsiColorRegex.Replace(ReadAsString(), "");
+
+    private void OnReceivedLine(string line) => _stringBuilder.AppendLine(line.TrimEnd('\r', '\n'));
 
     public void Dispose()
     {

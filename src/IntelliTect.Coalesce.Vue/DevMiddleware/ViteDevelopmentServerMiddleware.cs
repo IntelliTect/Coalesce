@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -48,8 +49,9 @@ internal static class ViteDevelopmentServerMiddleware
         {
             portNumber = FindAvailablePort();
         }
-        
+
         Task<int> portTask = new TaskCompletionSource<int>().Task;
+        StrongBox<string> errorMessage = new();
         NodeScriptRunner? currentRunner = null;
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) => currentRunner?.Dispose();
@@ -108,8 +110,8 @@ internal static class ViteDevelopmentServerMiddleware
                 {
                     throw new InvalidOperationException(
                         $"The {pkgManagerCommand} script '{options.NpmScriptName}' exited without indicating that the " +
-                        "server was listening for requests. The error output was: " +
-                        $"{stdErrReader.ReadAsString()}", ex);
+                        "server was listening for requests. The error output was: \n\n" +
+                        $"{stdErrReader.ReadAsPlainString()}", ex);
                 }
 
                 return portNumber.Value;

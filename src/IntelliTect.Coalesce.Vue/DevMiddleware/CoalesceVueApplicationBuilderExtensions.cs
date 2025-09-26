@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.Vue.DevMiddleware;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SpaServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -21,13 +22,13 @@ public static class CoalesceVueApplicationBuilderExtensions
         return app.UseViteDevelopmentServer(options);
     }
 
-    public static IApplicationBuilder UseViteDevelopmentServer(this IApplicationBuilder app, ViteServerOptions options) 
+    public static IApplicationBuilder UseViteDevelopmentServer(this IApplicationBuilder app, ViteServerOptions options)
     {
         return app
-            .UseWhen(c => 
-                c.Request.Path.StartsWithSegments(options.PathBase) || 
+            .UseWhen(c =>
+                c.Request.Path.StartsWithSegments(options.PathBase) ||
                 // Vite does not prefix the import of '@vite/env' that is emitted into web worker scripts...
-                c.Request.Path.StartsWithSegments("/@vite"), 
+                c.Request.Path.StartsWithSegments("/@vite"),
             filteredApp =>
             {
                 filteredApp.UseSpa(spa =>
@@ -41,7 +42,9 @@ public static class CoalesceVueApplicationBuilderExtensions
                         // to start before serving requests for HTML files (e.g. our SPA fallback route).
                         app.Use(async (context, next) =>
                         {
-                            if (getPortTask().IsCompleted)
+                            var portTask = getPortTask();
+
+                            if (portTask.IsCompletedSuccessfully)
                             {
                                 await next();
                                 return;
@@ -55,7 +58,17 @@ public static class CoalesceVueApplicationBuilderExtensions
                                 ViteDevelopmentServerMiddleware
                                     .GetOrCreateLogger(app)
                                     .LogInformation($"Waiting for vite server to start listening...");
-                                await getPortTask();
+                                try
+                                {
+                                    await portTask;
+                                }
+                                catch (Exception ex)
+                                {
+                                    await Results
+                                        .Content($"Coalesce UseViteDevelopmentServer failed to start: \n\n{ex.Message}", statusCode: 500)
+                                        .ExecuteAsync(context);
+                                    return;
+                                }
                             }
 
                             await next();

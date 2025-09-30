@@ -431,6 +431,7 @@ import {
   ModelCollectionNavigationProperty,
 } from "coalesce-vue";
 import { VField, VInput } from "vuetify/components";
+import { Intersect } from "vuetify/directives";
 
 /* DEV NOTES:
  * - Experimented with moving this back to be based on v-autocomplete on 2024 Nov 22. Found issues:
@@ -451,6 +452,7 @@ defineOptions({
   // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
   // on the root element rather than on the search field in Vuetify component.
   inheritAttrs: false,
+  directives: { Intersect },
 });
 
 type SelectedModelType = _SelectedModelType<TModel, TFor, TMultiple>;

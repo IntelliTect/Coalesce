@@ -76,6 +76,13 @@
     </v-col>
   </v-row>
 
+  <h1>readonly multiple</h1>
+  <v-row>
+    <v-col cols="6">
+      <c-input :model="caseVm" for="caseProducts" readonly variant="outlined" />
+    </v-col>
+  </v-row>
+
   <h1>autofocus in v-dialog</h1>
   <v-dialog v-model="dialogOpen" max-width="500">
     <template #activator="{ props }">

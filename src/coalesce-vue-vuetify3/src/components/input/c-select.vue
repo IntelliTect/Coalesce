@@ -51,7 +51,7 @@
                   <v-chip
                     v-if="effectiveMultiple"
                     size="small"
-                    :closable="!!canDeselect"
+                    :closable="!!canDeselect && isInteractive"
                     @click:close="onInput(item)"
                   >
                     {{ itemTitle(item) }}
@@ -1000,6 +1000,8 @@ function onInput(
   value: SelectedModelTypeSingle | null,
   dontFocus = false,
 ): void {
+  if (!isInteractive.value) return;
+
   value = value ?? null;
 
   if (value === null && !props.canDeselect) {

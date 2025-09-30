@@ -57,7 +57,7 @@ describe("CSelect", () => {
           (c, i) =>
             (!config.params.search ||
               c.testName?.startsWith(config.params.search)) &&
-            (!config.params.pageSize || i < config.params.pageSize)
+            (!config.params.pageSize || i < config.params.pageSize),
         );
         return {
           wasSuccessful: true,
@@ -67,7 +67,7 @@ describe("CSelect", () => {
           pageSize: 10,
           totalCount: items.length,
         };
-      })
+      }),
     );
 
     get303Mock = mockEndpoint(
@@ -75,7 +75,7 @@ describe("CSelect", () => {
       vitest.fn((config) => ({
         wasSuccessful: true,
         object: new Test({ testId: 303, testName: "baz 303" }),
-      }))
+      })),
     );
   });
 
@@ -372,7 +372,7 @@ describe("CSelect", () => {
       expect(
         //@ts-expect-error We're asserting this prop doesn't have a required rule,
         // but our types are so good that this even gets caught by typescript.
-        model.$metadata.props.referenceNavigationId.rules?.required
+        model.$metadata.props.referenceNavigationId.rules?.required,
       ).toBeFalsy();
 
       expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
@@ -397,7 +397,7 @@ describe("CSelect", () => {
       expect(
         // @ts-expect-error We're asserting this prop doesn't have a required rule,
         // but our types are so good that this even gets caught by typescript.
-        methodMeta.params.optionalObject.rules?.required
+        methodMeta.params.optionalObject.rules?.required,
       ).toBeFalsy();
 
       expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
@@ -449,7 +449,7 @@ describe("CSelect", () => {
   describe("validation", () => {
     async function assertValidation(
       TargetComponent: FunctionalComponent,
-      message: string
+      message: string,
     ) {
       const wrapper = mountApp(() => (
         <VForm>
@@ -470,7 +470,7 @@ describe("CSelect", () => {
       test("pulls validation from fk metadata", async () => {
         await assertValidation(
           () => <CSelect model={model} for={propName}></CSelect>,
-          "Single Test is required."
+          "Single Test is required.",
         );
       });
 
@@ -479,11 +479,11 @@ describe("CSelect", () => {
         model.$addRule(
           "singleTestId",
           "required",
-          (v: any) => !!v || "Custom rule from VM."
+          (v: any) => !!v || "Custom rule from VM.",
         );
         await assertValidation(
           () => <CSelect model={model} for={propName}></CSelect>,
-          "Custom rule from VM."
+          "Custom rule from VM.",
         );
       });
 
@@ -496,7 +496,7 @@ describe("CSelect", () => {
               rules={[(v: any) => !!v || "Custom rule"]}
             ></CSelect>
           ),
-          "Custom rule"
+          "Custom rule",
         );
       });
     });
@@ -589,10 +589,10 @@ describe("CSelect", () => {
       // Assert: Emits events
       expect(onUpdateKey).toHaveBeenCalledWith(101);
       expect(onUpdateObject).toHaveBeenCalledWith(
-        new Test({ testId: 101, testName: "foo 101" })
+        new Test({ testId: 101, testName: "foo 101" }),
       );
       expect(onUpdateModel).toHaveBeenCalledWith(
-        new Test({ testId: 101, testName: "foo 101" })
+        new Test({ testId: 101, testName: "foo 101" }),
       );
 
       // Assert: Menu closes after selection
@@ -657,7 +657,7 @@ describe("CSelect", () => {
 
       // Assert
       expect(onUpdate).toHaveBeenCalledWith(
-        new Test({ testId: 101, testName: "foo 101" })
+        new Test({ testId: 101, testName: "foo 101" }),
       );
     });
   });
@@ -721,7 +721,7 @@ describe("CSelect", () => {
         expect(onSelectionChanged.mock.calls[0][0][0]).toBe(selectedItem);
         expect(onSelectionChanged.mock.calls[1][0][0]).toBe(selectedItem);
         expect(selectedItem).toBeInstanceOf(TestViewModel);
-      }
+      },
     );
 
     test("collectionNavigation binding sets inverse nav on select", async () => {
@@ -925,14 +925,14 @@ describe("CSelect", () => {
 
         expect(model.singleTest?.testName).toBe("Create new item");
         expect(wrapper.vm.menuOpen).toBeFalsy();
-      }
+      },
     );
 
     describe.each(["disabled", "readonly"])("%s", (prop) => {
       async function assertNonInteractive(
         wrapper: VueWrapper<
           BetterComponentInstance<typeof CSelect<ComplexModel>>
-        >
+        >,
       ) {
         // Clearable is ignored when disabled/readonly
         expect(wrapper.find(".v-field__clearable").exists()).toBeFalsy();
@@ -972,6 +972,22 @@ describe("CSelect", () => {
 
         assertNonInteractive(wrapper);
       });
+
+      test("chips not removable in multiple select", async () => {
+        const model = new ComplexModelViewModel();
+        model.tests = [new Test({ testId: 101, testName: "foo 101" })];
+        const wrapper = mountApp(() => (
+          <CSelect model={model} for="tests" {...{ [prop]: true }}></CSelect>
+        )).findComponent(CSelect);
+
+        // Assert chip close buttons are not present or not clickable
+        const closeButtons = wrapper.findAll(".v-chip__close");
+        expect(closeButtons).toHaveLength(0);
+
+        // Ensure selection remains unchanged
+        expect(model.tests).toHaveLength(1);
+        expect(model.tests[0].testId).toBe(101);
+      });
     });
   });
 
@@ -999,7 +1015,7 @@ describe("CSelect", () => {
       )).findComponent(CSelect);
       await flushPromises();
       expect(model.singleTestId).toBe(expected);
-    }
+    },
   );
 
   test("create", async () => {
@@ -1045,7 +1061,7 @@ describe("CSelect", () => {
       vitest.fn(() => ({
         wasSuccessful: true,
         object: { testId: 1, testName: "foo" },
-      }))
+      })),
     );
 
     const wrapper = mountApp(() => (

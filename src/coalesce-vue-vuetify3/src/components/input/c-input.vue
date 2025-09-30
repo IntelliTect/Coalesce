@@ -207,30 +207,40 @@ defineOptions({
   },
 });
 
-const props = defineProps<
-  {
-    /** An object owning the value to be edited that is specified by the `for` prop. */
-    model?: TModel | null;
+const props = withDefaults(
+  defineProps<
+    {
+      /** An object owning the value to be edited that is specified by the `for` prop. */
+      model?: TModel | null;
 
-    /** A metadata specifier for the value being bound. One of:
-     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
-     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
-     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
-     */
-    for: TFor;
+      /** A metadata specifier for the value being bound. One of:
+       * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
+       * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
+       * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
+       */
+      for: TFor;
 
-    rules?: Array<TypedValidationRule<ValueType>>;
+      rules?: Array<TypedValidationRule<ValueType>>;
 
-    modelValue?: ValueType | null;
+      modelValue?: ValueType | null;
 
-    /** For enum inputs, a function that can be used to filter the values available for selection. */
-    filter?: SelectSlotItemType<TModel, TFor> extends never
-      ? never
-      : SelectSlotItemType<TModel, TFor> extends EnumMember
-        ? (value: EnumMember) => boolean
-        : never;
-  } & /* @vue-ignore */ InheritedProps
->();
+      /** For string inputs, renders a textarea instead of a single-line input if specified. */
+      textarea?: boolean | null;
+
+      /** For boolean inputs, renders a v-checkbox instead of a v-switch if specified. */
+      checkbox?: boolean | null;
+
+      /** For enum inputs, a function that can be used to filter the values available for selection. */
+      filter?: SelectSlotItemType<TModel, TFor> extends never
+        ? never
+        : SelectSlotItemType<TModel, TFor> extends EnumMember
+          ? (value: EnumMember) => boolean
+          : never;
+    } & /* @vue-ignore */ InheritedProps
+  >(),
+  // Have to detect if textarea has been explicitly specified - can't let it default false
+  { textarea: undefined },
+);
 
 const { valueMeta: valueMetaRef, valueOwner: valueOwnerRef } =
   useMetadataProps(props);
@@ -329,10 +339,7 @@ function render() {
   // attributes via c-metadata-component's inputBindAttrs.
   // We now need to compute them in order to render components
   // that delegate directly to vuetify components.
-  data = {
-    ...buildVuetifyAttrs(valueMeta, props.model, data),
-    ...data,
-  };
+  data = buildVuetifyAttrs(valueMeta, props.model, data);
 
   const onInput = (value: any) => {
     const parsed = parseValue(value, valueMeta);
@@ -376,8 +383,8 @@ function render() {
       }
 
       if (
-        ("textarea" in data || valueMeta.subtype == "multiline") &&
-        data.textarea !== false
+        (props.textarea || valueMeta.subtype == "multiline") &&
+        props.textarea !== false
       ) {
         return h(VTextarea, data, vuetifySlots);
       }
@@ -412,7 +419,7 @@ function render() {
 
     case "boolean":
       addHandler(data, "update:modelValue", onInput);
-      if ("checkbox" in data && data.checkbox !== false) {
+      if (props.checkbox) {
         return h(VCheckbox, data, vuetifySlots);
       }
       return h(VSwitch, data, vuetifySlots);

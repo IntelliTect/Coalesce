@@ -9,6 +9,23 @@
     </v-col>
   </v-row>
 
+  <h1>Bool</h1>
+  <v-row>
+    <v-col>
+      <c-input :model="company" for="isDeleted" hide-details />
+      <c-input
+        :model="company"
+        for="isDeleted"
+        hide-details
+        checkbox
+        label="checkbox"
+      />
+    </v-col>
+    <v-col>
+      <c-display :model="company" for="isDeleted" />
+    </v-col>
+  </v-row>
+
   <h1>Enum</h1>
   <v-row>
     <v-col>

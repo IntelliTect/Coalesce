@@ -25,7 +25,7 @@ String
 <td>
 
 - Single: 
-  - [v-textarea](https://vuetifyjs.com/en/components/textarea/) if attribute ``textarea`` is provided to ``c-input`` or if `[DataType(DataType.MultilineText)]` is present in C#.
+  - [v-textarea](https://vuetifyjs.com/en/components/textarea/) if prop ``textarea`` is provided to ``c-input`` or if `[DataType(DataType.MultilineText)]` is present in C#.
   - [v-text-field](https://vuetifyjs.com/en/components/text-fields/) otherwise. Additionally, `[DataTypeAttribute]` values of `DataType.EmailAddress`, `DataType.PhoneNumber`, `DataType.Password`, or `"Color"` on the field will apply appropriate adjustments to the field.
 - Multiple: [c-select-values](/stacks/vue/coalesce-vue-vuetify/components/c-select-values.md)
 
@@ -55,7 +55,7 @@ Boolean
 </td>
 <td>
 
-[v-switch](https://vuetifyjs.com/en/components/selection-controls/), or [v-checkbox](https://vuetifyjs.com/en/components/selection-controls/) if flag attribute ``checkbox`` is provided to ``c-input``
+[v-switch](https://vuetifyjs.com/en/components/selection-controls/), or [v-checkbox](https://vuetifyjs.com/en/components/selection-controls/) if prop ``checkbox`` is provided to ``c-input``
 
 </td>
 </tr>
@@ -207,7 +207,15 @@ If binding the component with ``v-model``, accepts the ``modelValue`` part of ``
 
 <Prop def="filter?: (value: EnumMember)" lang="ts" />
 
-If binding to an enum, filters the enum members that are available for selection.
+For enum inputs, filters the enum members that are available for selection.
+
+<Prop def="textarea?: boolean | null" lang="ts" />
+
+For string inputs, renders a textarea instead of a single-line input if specified.
+
+<Prop def="checkbox?: boolean | null" lang="ts" />
+
+For boolean inputs, renders a v-checkbox instead of a v-switch if specified.
 
 
 ## Slots

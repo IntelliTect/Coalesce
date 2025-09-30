@@ -75,6 +75,19 @@
       <v-select :model="caseVm" for="assignedTo" readonly variant="outlined" />
     </v-col>
   </v-row>
+
+  <h1>autofocus in v-dialog</h1>
+  <v-dialog v-model="dialogOpen" max-width="500">
+    <template #activator="{ props }">
+      <v-btn v-bind="props">Open Dialog</v-btn>
+    </template>
+    <v-card>
+      <v-card-title>Select Person</v-card-title>
+      <v-card-text>
+        <c-select :model="caseVm" for="assignedTo" autofocus></c-select>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -86,4 +99,6 @@ import { ref } from "vue";
 const caseVm = new CaseViewModel();
 caseVm.$load(15);
 caseVm.$useAutoSave();
+
+const dialogOpen = ref(false);
 </script>

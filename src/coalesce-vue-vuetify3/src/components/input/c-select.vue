@@ -80,6 +80,7 @@
               "
               @focus="focused = true"
               @blur="focused = false"
+              v-intersect="onIntersect"
               :autofocus="autofocus ?? false"
               :disabled="isDisabled"
               :readonly="isReadonly"
@@ -1208,6 +1209,14 @@ async function createItem(): Promise<void> {
   } finally {
     createItemLoading.value = false;
   }
+}
+
+function onIntersect(isIntersecting: boolean) {
+  if (!props.autofocus || !isIntersecting) return;
+  // Doesn't work reliably without a small delay
+  setTimeout(() => {
+    mainInputRef.value?.focus();
+  }, 10);
 }
 
 async function openMenu(select?: boolean): Promise<void> {

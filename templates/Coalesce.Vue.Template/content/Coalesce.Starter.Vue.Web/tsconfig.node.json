@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "composite": true,
+    "allowSyntheticDefaultImports": true,
     "module": "esnext",
     "moduleResolution": "node",
     "types": ["node", "vitest"]

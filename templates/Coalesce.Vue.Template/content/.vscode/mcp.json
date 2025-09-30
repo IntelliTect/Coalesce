@@ -2,9 +2,7 @@
   "servers": {
     "Coalesce": {
       "command": "npx",
-      "args": [
-        "coalesce-mcp@latest"
-      ]
+      "args": ["coalesce-mcp@latest"]
     },
     "context7": {
       "type": "http",
@@ -16,16 +14,7 @@
     },
     "playwright": {
       "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
-    },
-    "ESLint": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "@eslint/mcp@latest"
-      ]
+      "args": ["@playwright/mcp@latest"]
     }
-  },
+  }
 }

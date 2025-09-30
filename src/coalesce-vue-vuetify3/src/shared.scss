@@ -1,15 +1,16 @@
 .hide-non-error-details {
-  .v-input {
+  .v-input:not(.keep-non-error-details) {
     .v-input__details,
     .v-messages,
     &.v-input--switch .v-input__slot,
     &.v-input--checkbox .v-input__slot {
-      transition: min-height 0.3s cubic-bezier(0.25, 0.8, 0.5, 1),
+      transition:
+        min-height 0.3s cubic-bezier(0.25, 0.8, 0.5, 1),
         margin-bottom 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
     }
   }
 
-  .v-input {
+  .v-input:not(.keep-non-error-details) {
     // Make the messages area have a margin and min height when not empty.
     // Otherwise, collapse it when empty. Min-height is important for smooth animation here.
     .v-messages {

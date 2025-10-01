@@ -341,7 +341,7 @@ describe("CInput", () => {
 
       expect(wrapper.find(".v-input--error").exists()).toBeTruthy();
       expect(wrapper.find(".v-messages").text()).toEqual(
-        "Guid does not match expected format."
+        "Guid does not match expected format.",
       );
     });
 
@@ -366,7 +366,7 @@ describe("CInput", () => {
     test("number - rule receives number, not string", async () => {
       const model = new ComplexModelViewModel({ intNullable: 7 });
       const rule = vitest.fn(
-        (v: number | null | undefined) => v === 7 || "Custom Rule Failure"
+        (v: number | null | undefined) => v === 7 || "Custom Rule Failure",
       );
       const wrapper = mountApp(() => (
         <VForm>
@@ -384,6 +384,48 @@ describe("CInput", () => {
       expect(rule).lastCalledWith(42);
       expect(rule).not.toHaveBeenCalledWith("7");
       expect(rule).not.toHaveBeenCalledWith("42");
+    });
+
+    test("string - empty string becomes null", async () => {
+      const model = new ComplexModelViewModel({ name: "initial value" });
+      const wrapper = mount(() => <CInput model={model} for="name" />);
+
+      // Verify initial state
+      expect(model.name).toBe("initial value");
+      expect(wrapper.find("input").element.value).toBe("initial value");
+
+      // Clear the input - this should set the value to null, not empty string
+      await wrapper.find("input").setValue("");
+      expect(model.name).toBe(null);
+
+      // Type something new
+      await wrapper.find("input").setValue("new value");
+      expect(model.name).toBe("new value");
+
+      // Clear again - should go back to null
+      await wrapper.find("input").setValue("");
+      expect(model.name).toBe(null);
+    });
+
+    test("number - empty string becomes null", async () => {
+      const model = new ComplexModelViewModel({ intNullable: 42 });
+      const wrapper = mount(() => <CInput model={model} for="intNullable" />);
+
+      // Verify initial state
+      expect(model.intNullable).toBe(42);
+      expect(wrapper.find("input").element.value).toBe("42");
+
+      // Clear the input - this should set the value to null, not 0
+      await wrapper.find("input").setValue("");
+      expect(model.intNullable).toBe(null);
+
+      // Type a new number
+      await wrapper.find("input").setValue("123");
+      expect(model.intNullable).toBe(123);
+
+      // Clear again - should go back to null, not 0
+      await wrapper.find("input").setValue("");
+      expect(model.intNullable).toBe(null);
     });
   });
 });

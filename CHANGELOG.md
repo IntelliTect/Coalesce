@@ -34,7 +34,8 @@
 - `c-admin-audit-log-page`: Added `userProp` prop to allow specifying a custom property name for user identification.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
 - `c-datetime-picker`: Added prop `showTodayButton`
-- `c-input`: Added a `filter` prop for enum inputs to restrict the values available for selection.
+- `c-input` (enum): Added a `filter` prop for enum inputs to restrict the values available for selection.
+- `c-input` (string): When the input's value changes to empty string, the value is instead emitted as `null`. This allows a user to return a field to its default, uninitialized state as if they had never typed in the field at all, which alleviates some validation edge cases like `[PhoneAttribute]` not treating `null` and `""` the same.
 - `c-select`: When bound to a `ViewModel` or `ViewModelCollection`, selected items are converted to `ViewModel` instances before being emitted so that event handlers will receive the final object instance, rather than the intermediate plain model instance.
 - `c-select`: Now supports binding to a non-many-to-many collection navigation property. Selecting an item will populate the foreign key of the dependent item, and deselecting an item will clear the foreign key. This mechanism is only available when using c-select directly - it is not delegated by c-input.
 - `c-select`: The `create` prop now supports a `position` property to control whether the create item appears at the start ('start', default) or end ('end') of the dropdown list.

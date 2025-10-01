@@ -342,11 +342,22 @@ function render() {
   data = buildVuetifyAttrs(valueMeta, props.model, data);
 
   const onInput = (value: any) => {
-    const parsed = parseValue(value, valueMeta);
-    if (valueOwner && valueMeta) {
-      valueOwner[valueMeta.name] = parsed;
+    // For string inputs, convert empty strings to null since they are
+    // visually indistinct to users and null is the baseline default value.
+    // This is consistent with how number inputs handle empty values.
+    // If we don't do this, then a field that starts null, then the user types,
+    // and then they delete all characters would end back at emptystring instead of the initial null value.
+    // This then breaks some validation like PhoneAttribute and others that don't allow emptystring.
+    if (value === "" && valueMeta.type === "string") {
+      value = null;
+    } else {
+      value = parseValue(value, valueMeta);
     }
-    emit("update:modelValue", parsed);
+
+    if (valueOwner && valueMeta) {
+      valueOwner[valueMeta.name] = value;
+    }
+    emit("update:modelValue", value);
   };
 
   // Handle components that delegate immediately to Vuetify

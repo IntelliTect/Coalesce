@@ -146,6 +146,10 @@ describe("CSelect", () => {
     //@ts-expect-error invalid `for` type
     () => <CSelect model={complexVm} for={123} />;
 
+    // menuProps:
+    () => <CSelect model={model} for="singleTest" menuProps={{contentClass: 'test'}} />;
+    //@ts-expect-error invalid `location` type
+    () => <CSelect model={model} for="singleTest" menuProps={{location: 'invalid'}} />;
 
 
     // ********
@@ -1169,23 +1173,27 @@ describe("CSelect", () => {
     // First select the last item (Test 3)
     await input.trigger("keydown", { key: "ArrowLeft" });
     await nextTick();
-    
+
     // Verify we have 3 items initially and Test 3 is selected
     expect(model.tests).toHaveLength(3);
     expect(model.tests[2].testName).toBe("Test 3");
-    const selectedBeforeDelete = wrapper.findAll(".v-select__selection--selected");
+    const selectedBeforeDelete = wrapper.findAll(
+      ".v-select__selection--selected",
+    );
     expect(selectedBeforeDelete).toHaveLength(1);
     expect(selectedBeforeDelete[0].text()).toContain("Test 3");
-    
+
     // Press Delete to remove Test 3
     await input.trigger("keydown", { key: "Delete" });
     await nextTick();
-    
+
     // Should now have 2 items (Test 1 and Test 2) and Test 2 should be selected
     expect(model.tests).toHaveLength(2);
     expect(model.tests[0].testName).toBe("Test 1");
     expect(model.tests[1].testName).toBe("Test 2");
-    const selectedAfterDelete = wrapper.findAll(".v-select__selection--selected");
+    const selectedAfterDelete = wrapper.findAll(
+      ".v-select__selection--selected",
+    );
     expect(selectedAfterDelete).toHaveLength(1);
     expect(selectedAfterDelete[0].text()).toContain("Test 2");
   });

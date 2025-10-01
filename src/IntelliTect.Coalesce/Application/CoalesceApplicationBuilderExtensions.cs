@@ -4,12 +4,15 @@ using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce;
 
@@ -19,19 +22,41 @@ public static partial class CoalesceApplicationBuilderExtensions
     /// Add static file middleware, and configure it to place a long client cache duration (30 days)
     /// on any files that contain a cache-busting hash as produced by Vite's build output.
     /// </summary>
-    public static IApplicationBuilder UseViteStaticFiles(this IApplicationBuilder app)
+    /// <param name="app">The application builder</param>
+    /// <param name="options">Options for configuring the Vite static file middleware</param>
+    public static IApplicationBuilder UseViteStaticFiles(this IApplicationBuilder app, ViteStaticFilesOptions? options = null)
     {
         return app.UseStaticFiles(new StaticFileOptions
         {
-            OnPrepareResponse = ctx =>
+            OnPrepareResponseAsync = async ctx =>
             {
+                // Check if unauthorized response should be returned
+                if (options?.OnAuthorizeAsync is not null && !await options.OnAuthorizeAsync(ctx))
+                {
+                    ctx.Context.Response.Clear();
+                    ctx.Context.Response.Body = new MemoryStream();
+                    ctx.Context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return;
+                }
+
                 if (ContainsFileHashRegex().IsMatch(ctx.File.Name))
                 {
                     ctx.Context.Response.Headers.CacheControl = "max-age=2592000, public";
                 }
+
+                // Call the passthrough OnPrepareResponse hook
+                if (options?.OnPrepareResponseAsync is not null)
+                {
+                    await options.OnPrepareResponseAsync(ctx);
+                }
             }
         });
     }
+
+    // vite puts 8-hex-char hashes before the file extension.
+    // Use this to determine if we can send a long-term cache duration.
+    [GeneratedRegex(@"\.[0-9a-fA-F]{8}\.[^\.]*$", RegexOptions.Compiled)]
+    private static partial Regex ContainsFileHashRegex();
 
     /// <summary>
     /// Add a CacheControl: no-cache, no-store header to all responses that reach this point in the pipeline.
@@ -244,9 +269,22 @@ public static partial class CoalesceApplicationBuilderExtensions
         };
     }
 
-    // vite puts 8-hex-char hashes before the file extension.
-    // Use this to determine if we can send a long-term cache duration.
-    [GeneratedRegex(@"\.[0-9a-fA-F]{8}\.[^\.]*$", RegexOptions.Compiled)]
-    private static partial Regex ContainsFileHashRegex();
+}
 
+/// <summary>
+/// Options for configuring Vite static file middleware.
+/// </summary>
+public class ViteStaticFilesOptions
+{
+    /// <summary>
+    /// A delegate that determines if a request should return an unauthorized response.
+    /// If this delegate returns false, an unauthorized response will be returned.
+    /// </summary>
+    public Func<StaticFileResponseContext, ValueTask<bool>>? OnAuthorizeAsync { get; set; }
+
+    /// <summary>
+    /// Additional logic to execute when preparing the response.
+    /// This is called at the end of the response preparation process.
+    /// </summary>
+    public Func<StaticFileResponseContext, ValueTask>? OnPrepareResponseAsync { get; set; }
 }

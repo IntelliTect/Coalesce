@@ -10,6 +10,8 @@
       >
       </c-select>
 
+      <v-btn @click="caseVm.$load()">Load</v-btn>
+      <v-btn @click="caseVm.downloadImage()">Load</v-btn>
       <v-card class="my-2">
         <v-row>
           <v-col>
@@ -62,7 +64,7 @@
           :min="new Date(1722627824331)"
           :max="new Date(1725034169880)"
           :allowedDates="(v: Date) => v.getDay() > 0 && v.getDay() < 6"
-          step="10"
+          :step="10"
           v-model="date"
           clearable
         />

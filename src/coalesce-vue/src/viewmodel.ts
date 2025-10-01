@@ -433,6 +433,7 @@ export abstract class ViewModel<
           this.$loadFromModel(result, startTime, true);
         }
       });
+    $load._name = `/${this.$metadata.controllerRoute}/get`;
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -555,6 +556,7 @@ export abstract class ViewModel<
           this.updateRelatedForeignKeysWithCurrentPrimaryKey();
         }
       });
+    $save._name = `/${this.$metadata.controllerRoute}/save`;
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -635,6 +637,8 @@ export abstract class ViewModel<
         return ret;
       },
     );
+
+    $bulkSave._name = `/${this.$metadata.controllerRoute}/bulkSave`;
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -1006,6 +1010,8 @@ export abstract class ViewModel<
       .onFulfilled(() => {
         this._removeFromParentCollection();
       });
+
+    $delete._name = `/${this.$metadata.controllerRoute}/delete`;
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -1743,6 +1749,8 @@ export abstract class ListViewModel<
         }
       });
 
+    $load._name = `/${this.$metadata.controllerRoute}/list`;
+
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
     Object.defineProperty(this, "$load", { value: $load });
@@ -1757,6 +1765,8 @@ export abstract class ListViewModel<
     const $count = this.$apiClient.$makeCaller("item", (c) =>
       c.count(this.$params),
     );
+
+    $count._name = `/${this.$metadata.controllerRoute}/count`;
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.

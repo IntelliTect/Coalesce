@@ -1307,7 +1307,7 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
   /** Invokes a call to this API endpoint. */
   public readonly invoke!: this;
 
-  protected readonly apiClient!: ApiClient<any>;
+  protected readonly apiClient!: ApiClient<ApiRoutedType>;
   protected readonly invoker!: ApiCallerInvoker<
     TArgs,
     ApiResultPromise<TResult> | undefined | void,
@@ -1460,6 +1460,10 @@ export abstract class ApiState<
     return this;
   }
 
+  /** The name of this caller to be used in debugging/error messages.
+   * @internal */
+  _name?: string;
+
   protected _simultaneousGetCaching = false;
 
   /** Enable simultaneous request caching for the API caller,
@@ -1591,7 +1595,7 @@ export abstract class ApiState<
       switch (this._concurrencyMode) {
         case "disallow":
           throw Error(
-            `Request is already pending for invoker ${this.invoker.toString()}`,
+            `Request is already pending for API Caller ${this.$metadata ? `/${this.apiClient.$metadata.controllerRoute}/${this.$metadata.name}` : (this._name ?? this.invoker.toString())}`,
           );
 
         case "cancel":

@@ -73,7 +73,11 @@
   <h1>for non-many-to-many collection navigation</h1>
   <v-row v-if="person">
     <v-col>
-      <c-select :model="person" for="casesAssigned" />
+      <c-select :model="person" for="casesAssigned">
+        <template #list-item="{ item }">
+          {{ item.title }} ({{ item.caseKey }})
+        </template>
+      </c-select>
       Via c-input (this SHOULD NOT produce an input):
       <c-input :model="person" for="casesAssigned" />
     </v-col>

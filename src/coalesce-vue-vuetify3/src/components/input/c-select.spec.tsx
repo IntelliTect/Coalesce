@@ -1110,6 +1110,86 @@ describe("CSelect", () => {
     expect(wrapper.text()).not.toContain("Single Test is required");
   });
 
+  test("left/right arrow navigation through selected items in multiple mode", async () => {
+    const model = new ComplexModelViewModel();
+    const wrapper = mountApp(() => (
+      <CSelect model={model} for="tests" multiple />
+    ));
+
+    // Add multiple items to the selection
+    model.tests = [
+      new TestViewModel({ testId: 101, testName: "Test 1" }),
+      new TestViewModel({ testId: 202, testName: "Test 2" }),
+      new TestViewModel({ testId: 303, testName: "Test 3" }),
+    ];
+
+    await nextTick();
+
+    // Find the text field input
+    const input = wrapper.find("input");
+
+    // Initially no item should be selected (selectionIndex = -1)
+    expect(wrapper.findAll(".v-select__selection--selected")).toHaveLength(0);
+
+    // Press ArrowLeft to select the last item
+    await input.trigger("keydown", { key: "ArrowLeft" });
+    await nextTick();
+
+    // Last item (index 2, Test 3) should be selected
+    const selectedItems = wrapper.findAll(".v-select__selection--selected");
+    expect(selectedItems).toHaveLength(1);
+    expect(selectedItems[0].text()).toContain("Test 3");
+
+    // Press ArrowLeft again to move to previous item
+    await input.trigger("keydown", { key: "ArrowLeft" });
+    await nextTick();
+
+    // Second item (index 1, Test 2) should now be selected
+    const selectedItems2 = wrapper.findAll(".v-select__selection--selected");
+    expect(selectedItems2).toHaveLength(1);
+    expect(selectedItems2[0].text()).toContain("Test 2");
+
+    // Press ArrowRight to move to next item
+    await input.trigger("keydown", { key: "ArrowRight" });
+    await nextTick();
+
+    // Third item (index 2, Test 3) should be selected again
+    const selectedItems3 = wrapper.findAll(".v-select__selection--selected");
+    expect(selectedItems3).toHaveLength(1);
+    expect(selectedItems3[0].text()).toContain("Test 3");
+
+    // Press ArrowRight again to deselect (should go to selectionIndex = -1)
+    await input.trigger("keydown", { key: "ArrowRight" });
+    await nextTick();
+
+    // No items should be selected
+    expect(wrapper.findAll(".v-select__selection--selected")).toHaveLength(0);
+
+    // Test deleting selected item with Delete key
+    // First select the last item (Test 3)
+    await input.trigger("keydown", { key: "ArrowLeft" });
+    await nextTick();
+    
+    // Verify we have 3 items initially and Test 3 is selected
+    expect(model.tests).toHaveLength(3);
+    expect(model.tests[2].testName).toBe("Test 3");
+    const selectedBeforeDelete = wrapper.findAll(".v-select__selection--selected");
+    expect(selectedBeforeDelete).toHaveLength(1);
+    expect(selectedBeforeDelete[0].text()).toContain("Test 3");
+    
+    // Press Delete to remove Test 3
+    await input.trigger("keydown", { key: "Delete" });
+    await nextTick();
+    
+    // Should now have 2 items (Test 1 and Test 2) and Test 2 should be selected
+    expect(model.tests).toHaveLength(2);
+    expect(model.tests[0].testName).toBe("Test 1");
+    expect(model.tests[1].testName).toBe("Test 2");
+    const selectedAfterDelete = wrapper.findAll(".v-select__selection--selected");
+    expect(selectedAfterDelete).toHaveLength(1);
+    expect(selectedAfterDelete[0].text()).toContain("Test 2");
+  });
+
   describe("vuetify props passthrough", () => {
     beforeEach(() => {
       mockEndpoint("/Person/list", () => ({

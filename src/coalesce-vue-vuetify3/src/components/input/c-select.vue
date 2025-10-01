@@ -22,7 +22,7 @@
     append-inner-icon="$dropdown"
     @click:clear.stop.prevent="onInput(null, true)"
     @keydown="onInputKey($event)"
-    @click.stop.prevent="openMenu()"
+    @click:control.stop.prevent="openMenu()"
     v-intersect="onIntersect"
   >
     <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
@@ -35,6 +35,10 @@
         v-for="(item, index) in internalModelValue"
         :key="item[modelObjectMeta.keyProp.name]"
         class="v-select__selection"
+        :class="{
+          'v-select__selection--selected':
+            index === selectionIndex && effectiveMultiple,
+        }"
       >
         <slot
           name="selected-item"
@@ -44,12 +48,20 @@
           :remove="() => onInput(item)"
         >
           <slot name="item" :item="item" :search="search">
-            <v-chip
-              v-if="effectiveMultiple"
-              size="small"
-              :closable="!!canDeselect && isInteractive"
-              @click:close="onInput(item)"
-            >
+            <v-chip v-if="effectiveMultiple" size="small">
+              <template #append>
+                <button
+                  v-if="!!canDeselect && isInteractive"
+                  class="v-chip__close"
+                  type="button"
+                  data-testid="close-chip"
+                  aria-label="Remove Item"
+                  tabindex="-1"
+                  @click.stop.prevent="onInput(item)"
+                >
+                  <VIcon icon="$delete" size="x-small" />
+                </button>
+              </template>
               {{ itemTitle(item) }}
             </v-chip>
             <span v-else class="v-select__selection-text">
@@ -69,6 +81,7 @@
         :disabled="isInteractive"
         origin="top"
         location="bottom"
+        v-bind="menuProps"
       >
         <v-sheet
           ref="menuContentRef"
@@ -159,7 +172,7 @@
               v-for="(item, i) in listItems"
               :key="item.key"
               @click="onInput(item.model)"
-              :value="i"
+              :value="item.key"
               :class="{
                 'pending-selection': pendingSelection === i,
               }"
@@ -244,6 +257,15 @@
   }
   &.c-select--is-menu-active .v-field__append-inner > .v-icon {
     transform: rotate(180deg);
+  }
+
+  :has(.v-select__selection--selected) {
+    .v-field__input {
+      caret-color: transparent;
+    }
+    .v-select__selection:not(.v-select__selection--selected) {
+      opacity: var(--v-medium-emphasis-opacity);
+    }
   }
 }
 
@@ -402,7 +424,7 @@ import {
   ViewModelCollection,
   ModelCollectionNavigationProperty,
 } from "coalesce-vue";
-import { VTextField } from "vuetify/components";
+import { VMenu, VTextField } from "vuetify/components";
 import { Intersect } from "vuetify/directives";
 
 /* DEV NOTES:
@@ -507,6 +529,10 @@ const props = withDefaults(
       rules?: Array<TypedValidationRule<SelectedPkType>>;
 
       itemTitle?: (item: SelectedModelTypeSingle) => string | null;
+
+      /** Props to pass to the underlying v-menu component */
+      menuProps?: VMenu["$props"];
+
       create?: {
         getLabel: (
           search: string,
@@ -595,6 +621,7 @@ const mainValue = ref("");
 const createItemLoading = ref(false);
 const createItemError = ref("" as string | null);
 const pendingSelection = ref(0);
+const selectionIndex = ref(-1);
 
 /** The models representing the current selected item(s)
  * in the case that only the PK was provided to the component.
@@ -1113,15 +1140,32 @@ function onMenuContentBlur(event: FocusEvent): void {
 function onInputKey(event: KeyboardEvent): void {
   if (!isInteractive.value) return;
 
+  const input = mainInputRef.value;
+  const selectionStart = input?.selectionStart;
+  const value = internalModelValue.value;
+  const length = value.length;
+
   switch (event.key.toLowerCase()) {
     case "delete":
     case "backspace":
       if (!menuOpen.value) {
         if (effectiveMultiple.value) {
-          // Delete only the last item when deleting items with multi-select
-          const lastItem = internalModelValue.value.at(-1);
-          if (lastItem) {
-            onInput(lastItem, true);
+          if (length == 1) {
+            onInput(value[0], true);
+          } else if (selectionIndex.value >= 0) {
+            // If we have a selection index, remove that specific item
+            const itemToRemove = value[selectionIndex.value];
+            if (itemToRemove) {
+              onInput(itemToRemove, true);
+              // Adjust selection index after removal
+              const originalSelectionIndex = selectionIndex.value;
+              selectionIndex.value =
+                originalSelectionIndex >= length - 1
+                  ? length - 2
+                  : originalSelectionIndex;
+            }
+          } else if (event.key.toLowerCase() === "backspace") {
+            selectionIndex.value = length - 1;
           }
         } else {
           onInput(null, true);
@@ -1130,11 +1174,57 @@ function onInputKey(event: KeyboardEvent): void {
         event.preventDefault();
       }
       return;
-    case "esc":
-    case "escape":
+    case "arrowleft":
+    case "left":
+      if (!effectiveMultiple.value || menuOpen.value) return;
+
+      if (
+        selectionIndex.value < 0 &&
+        selectionStart != null &&
+        selectionStart > 0
+      )
+        return;
+
+      const prev =
+        selectionIndex.value > -1 ? selectionIndex.value - 1 : length - 1;
+
+      if (internalModelValue.value[prev]) {
+        selectionIndex.value = prev;
+      } else {
+        const searchLength = search.value?.length ?? 0;
+        selectionIndex.value = -1;
+        input?.setSelectionRange(searchLength, searchLength);
+      }
       event.stopPropagation();
       event.preventDefault();
-      closeMenu(true);
+      return;
+    case "arrowright":
+    case "right":
+      if (!effectiveMultiple.value || menuOpen.value) return;
+
+      if (selectionIndex.value < 0) return;
+
+      const next = selectionIndex.value + 1;
+
+      if (internalModelValue.value[next]) {
+        selectionIndex.value = next;
+      } else {
+        selectionIndex.value = -1;
+        input?.setSelectionRange(0, 0);
+      }
+      event.stopPropagation();
+      event.preventDefault();
+      return;
+    case "esc":
+    case "escape":
+      if (!menuOpen.value && selectionIndex.value >= 0) {
+        selectionIndex.value = -1;
+        mainInputRef.value?.focus();
+      } else {
+        closeMenu(true);
+      }
+      event.stopPropagation();
+      event.preventDefault();
       return;
     case " ":
     case "enter":
@@ -1208,7 +1298,7 @@ function onIntersect(isIntersecting: boolean) {
   // Doesn't work reliably without a small delay
   setTimeout(() => {
     mainInputRef.value?.focus();
-  }, 10);
+  }, 50);
 }
 
 async function openMenu(select?: boolean): Promise<void> {
@@ -1223,6 +1313,7 @@ async function openMenu(select?: boolean): Promise<void> {
 
   if (menuOpen.value) return;
   menuOpen.value = true;
+  selectionIndex.value = -1; // Reset selection index when menu opens
 
   if (props.reloadOnOpen) listCaller();
 
@@ -1267,6 +1358,7 @@ function closeMenu(force = false): void {
 
   menuOpenForced.value = false;
   menuOpen.value = false;
+  selectionIndex.value = -1;
   mainInputRef.value?.focus();
 }
 

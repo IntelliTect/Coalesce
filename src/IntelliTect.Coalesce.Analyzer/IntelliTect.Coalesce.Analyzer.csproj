@@ -48,7 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" />
+    <!-- 4.5.0 is what's referenced by Microsoft.EntityFrameworkCore.Analyzers for net8. -->
+    <!-- Choose a number here that isn't too high, because otherwise it'll cause warnings when consumed by older SDKs -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" VersionOverride="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>

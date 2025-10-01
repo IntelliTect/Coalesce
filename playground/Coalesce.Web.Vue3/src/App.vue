@@ -65,7 +65,7 @@ const darkMode = computed({
     return theme.global.name.value == "dark";
   },
   set(v) {
-    theme.global.name.value = v ? "dark" : "light";
+    theme.change(v ? "dark" : "light");
     localStorage.setItem("dark", v.toString());
   },
 });

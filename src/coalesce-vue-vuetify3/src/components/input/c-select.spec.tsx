@@ -468,6 +468,7 @@ describe("CSelect", () => {
       { p: "singleTestId", d: "fk" },
     ] as const)("when bound by $d", ({ p: propName }) => {
       test("pulls validation from fk metadata", async () => {
+        const model = new ComplexModelViewModel();
         await assertValidation(
           () => <CSelect model={model} for={propName}></CSelect>,
           "Single Test is required.",
@@ -488,6 +489,7 @@ describe("CSelect", () => {
       });
 
       test("overrides via rules prop", async () => {
+        const model = new ComplexModelViewModel();
         await assertValidation(
           () => (
             <CSelect
@@ -938,6 +940,14 @@ describe("CSelect", () => {
         expect(wrapper.find(".v-field__clearable").exists()).toBeFalsy();
         // Main input that grabs search query when focused is disabled/readonly
         expect(wrapper.find("input").attributes()[prop]).not.toBeUndefined();
+
+        // Assert correct CSS classes are applied
+        if (prop === "disabled") {
+          expect(wrapper.find(".v-field--disabled").exists()).toBe(true);
+          expect(wrapper.find(".v-input--disabled").exists()).toBe(true);
+        } else if (prop === "readonly") {
+          expect(wrapper.find(".v-input--readonly").exists()).toBe(true);
+        }
 
         // Clicking the component doesn't open the menu
         const menuContents = await openMenu(wrapper);

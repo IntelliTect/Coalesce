@@ -28,6 +28,11 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import $metadata from "@test-targets/metadata.g";
 
+// https://github.com/vuetifyjs/vuetify/issues/21692
+if (!globalThis.visualViewport) {
+  vi.stubGlobal("visualViewport", new EventTarget());
+}
+
 global.matchMedia ??= function (str: string) {
   return {
     matches: false,
@@ -75,23 +80,23 @@ declare function betterMount<
           : Props
       >
     : // END MODIFICATION
-    T extends ((...args: any) => any) | (new (...args: any) => any)
-    ? T
-    : T extends {
-        props?: infer Props;
-      }
-    ? DefineComponent<
-        Props extends Readonly<(infer PropNames)[]> | (infer PropNames)[]
-          ? {
-              [key in PropNames extends string ? PropNames : string]?: any;
-            }
-          : Props
-      >
-    : DefineComponent,
-  P extends ComponentProps<C> = ComponentProps<C>
+      T extends ((...args: any) => any) | (new (...args: any) => any)
+      ? T
+      : T extends {
+            props?: infer Props;
+          }
+        ? DefineComponent<
+            Props extends Readonly<(infer PropNames)[]> | (infer PropNames)[]
+              ? {
+                  [key in PropNames extends string ? PropNames : string]?: any;
+                }
+              : Props
+          >
+        : DefineComponent,
+  P extends ComponentProps<C> = ComponentProps<C>,
 >(
   originalComponent: T,
-  options?: ComponentMountingOptions<T>
+  options?: ComponentMountingOptions<T>,
 ): VueWrapper<
   ComponentProps<C> & ComponentData<C> & ComponentExposed<C>,
   ComponentPublicInstance<
@@ -107,18 +112,18 @@ export type BetterComponentInstance<T> = T extends new (
 ) => infer R
   ? R
   : T extends (...args: any[]) => infer R
-  ? R extends { __ctx?: infer K }
-    ? Exclude<K, void> extends { expose: (...args: infer K2) => void }
-      ? K2[0] & ComponentInstance<T>
+    ? R extends { __ctx?: infer K }
+      ? Exclude<K, void> extends { expose: (...args: infer K2) => void }
+        ? K2[0] & ComponentInstance<T>
+        : any
       : any
-    : any
-  : any;
+    : any;
 
 // HACK: https://github.com/vuejs/test-utils/issues/2254
 declare module "@vue/test-utils" {
   interface BaseWrapper<ElementType extends Node> {
     findComponent<T extends (...args: any) => any>(
-      selector: T
+      selector: T,
     ): VueWrapper<
       T extends (props: infer Props, ...args: any) => infer C
         ? BetterComponentInstance<T>
@@ -138,7 +143,7 @@ declare module "vue/jsx-runtime" {
 
 const mountVuetify = function (
   component: ArgumentsType<typeof betterMount>[0],
-  options: ArgumentsType<typeof betterMount>[1]
+  options: ArgumentsType<typeof betterMount>[1],
 ) {
   const wrapper = mount(component, {
     ...options,
@@ -176,7 +181,7 @@ const mountVuetify = function (
 
 const mountApp = function (
   component: ArgumentsType<typeof betterMount>[0],
-  options: ArgumentsType<typeof betterMount>[1]
+  options: ArgumentsType<typeof betterMount>[1],
 ) {
   const appWrapper = mount(
     defineComponent({
@@ -194,7 +199,7 @@ const mountApp = function (
       global: {
         plugins: [vuetify, coalesceVuetify],
       },
-    }
+    },
   );
 
   return appWrapper;

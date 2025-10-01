@@ -74,7 +74,7 @@
   <v-row v-if="person">
     <v-col>
       <c-select :model="person" for="casesAssigned" />
-      <h3>Via c-input</h3>
+      Via c-input (this SHOULD NOT produce an input):
       <c-input :model="person" for="casesAssigned" />
     </v-col>
     <v-col>

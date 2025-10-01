@@ -170,7 +170,7 @@ const theme = useLocalStorage(
   "theme",
   usePreferredDark().value ? "dark" : "light",
 );
-watch(theme, (v) => (vuetifyTheme.global.name.value = v), { immediate: true });
+watch(theme, (v) => vuetifyTheme.change(v), { immediate: true });
 //#endif
 
 //#if Identity

@@ -51,6 +51,7 @@
 - `c-select` now receives proper disabled styling.
 - `c-select` with `autoselect` now works reliably `c-select` in dialogs.
 - `c-select` multiple chips are no longer removable when the input is non-interactive.
+- `c-select` with custom tabindex no longer focuses the outer wrapper.
 
 # 5.3.8
 

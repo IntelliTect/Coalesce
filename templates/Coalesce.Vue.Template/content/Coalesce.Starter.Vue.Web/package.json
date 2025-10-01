@@ -21,7 +21,7 @@
     "typeface-roboto": "1.1.13",
     "vue": "^3.5.11",
     "vue-router": "^4.4.5",
-    "vuetify": "^3.8.5"
+    "vuetify": "^3.10.3"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",

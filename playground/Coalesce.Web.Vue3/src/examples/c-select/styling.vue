@@ -39,8 +39,7 @@
   <h1>compact/outlined via v-defaults-provider</h1>
   <v-defaults-provider
     :defaults="{
-      VInput: { density: 'compact' },
-      VField: { variant: 'outlined' },
+      VTextField: { density: 'compact', variant: 'outlined' },
     }"
   >
     <c-select :model="caseVm" for="assignedTo"> </c-select>
@@ -80,6 +79,25 @@
   <v-row>
     <v-col cols="6">
       <c-input :model="caseVm" for="caseProducts" readonly variant="outlined" />
+    </v-col>
+  </v-row>
+
+  <h1>manual tabindex</h1>
+  <v-row>
+    <v-col cols="6">
+      <c-input
+        :model="caseVm"
+        for="assignedTo"
+        variant="outlined"
+        tabindex="1"
+      />
+      <v-text-field tabindex="2" label="plain text field"></v-text-field>
+      <c-input
+        :model="caseVm"
+        for="assignedTo"
+        variant="outlined"
+        tabindex="3"
+      />
     </v-col>
   </v-row>
 

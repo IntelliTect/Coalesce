@@ -1,103 +1,72 @@
 <template>
-  <v-input
+  <v-text-field
     ref="rootRef"
     class="c-select"
+    role="combobox"
     :class="{
       'c-select--is-menu-active': menuOpen,
       'c-select--multiple': effectiveMultiple,
     }"
-    :focused="focused"
+    v-model="mainValue"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
-    :modelValue="effectiveMultiple ? internalModelValue : internalModelValue[0]"
+    :validationValue="
+      effectiveMultiple ? internalModelValue : internalModelValue[0]
+    "
+    :dirty="!!selectedKeysSet.size || menuOpen"
     :disabled="isDisabled"
     :readonly="isReadonly"
+    :autofocus="autofocus"
+    :clearable="isInteractive && isClearable"
+    :placeholder="selectedKeysSet.size ? undefined : placeholder"
+    append-inner-icon="$dropdown"
+    @click:clear.stop.prevent="onInput(null, true)"
+    @keydown="onInputKey($event)"
+    @click.stop.prevent="openMenu()"
+    v-intersect="onIntersect"
   >
     <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
       <slot :name="slot" v-bind="scope" />
     </template>
-    <template #default="{ isValid }">
-      <v-field
-        :error="isValid.value === false"
-        append-inner-icon="$dropdown"
-        v-bind="fieldAttrs"
-        :clearable="isInteractive && isClearable"
-        :active="!!selectedKeysSet.size || focused || !!placeholder"
-        :dirty="!!selectedKeysSet.size"
-        :disabled="isDisabled"
-        :focused="focused"
-        @click:clear.stop.prevent="onInput(null, true)"
-        @keydown="onInputKey($event)"
+
+    <template #default>
+      <!-- Selected items display -->
+      <span
+        v-for="(item, index) in internalModelValue"
+        :key="item[modelObjectMeta.keyProp.name]"
+        class="v-select__selection"
       >
-        <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
-          <slot :name="slot" v-bind="scope" />
-        </template>
-
-        <template #default>
-          <div class="v-field__input">
-            <span
-              v-for="(item, index) in internalModelValue"
-              :key="item[modelObjectMeta.keyProp.name]"
-              class="v-select__selection"
+        <slot
+          name="selected-item"
+          :item="item"
+          :search="search"
+          :index
+          :remove="() => onInput(item)"
+        >
+          <slot name="item" :item="item" :search="search">
+            <v-chip
+              v-if="effectiveMultiple"
+              size="small"
+              :closable="!!canDeselect && isInteractive"
+              @click:close="onInput(item)"
             >
-              <slot
-                name="selected-item"
-                :item="item"
-                :search="search"
-                :index
-                :remove="() => onInput(item)"
-              >
-                <slot name="item" :item="item" :search="search">
-                  <v-chip
-                    v-if="effectiveMultiple"
-                    size="small"
-                    :closable="!!canDeselect && isInteractive"
-                    @click:close="onInput(item)"
-                  >
-                    {{ itemTitle(item) }}
-                  </v-chip>
-                  <span v-else class="v-select__selection-text">
-                    {{ itemTitle(item) }}
-                  </span>
-                </slot>
-              </slot>
+              {{ itemTitle(item) }}
+            </v-chip>
+            <span v-else class="v-select__selection-text">
+              {{ itemTitle(item) }}
             </span>
-
-            <input
-              type="text"
-              ref="mainInputRef"
-              v-model="mainValue"
-              @mousedown.stop.prevent="
-                // Intercept direct clicks on the input to short circuit `focused`
-                // and v-menu's activator handler, which introduce some latency before the menu opens
-                // if we allow the menu opening to be handled that way.
-                // Mousedown is needed to prevent `focused` from happening.
-                openMenu()
-              "
-              @click.stop.prevent="
-                // Prevent v-menu's activator handler from running (which is a click handler, not mousedown).
-                openMenu()
-              "
-              @focus="focused = true"
-              @blur="focused = false"
-              v-intersect="onIntersect"
-              :autofocus="autofocus ?? false"
-              :disabled="isDisabled"
-              :readonly="isReadonly"
-              :placeholder="
-                selectedKeysSet.size ? undefined : (placeholder ?? undefined)
-              "
-            />
-          </div>
-        </template>
-      </v-field>
+          </slot>
+        </slot>
+      </span>
 
       <v-menu
         :modelValue="menuOpen"
         @update:modelValue="!$event ? closeMenu() : openMenu()"
         activator="parent"
         :close-on-content-click="false"
+        :open-on-click="false"
         contentClass="c-select__menu-content"
+        :disabled="isInteractive"
         origin="top"
         location="bottom"
       >
@@ -235,7 +204,7 @@
         </v-sheet>
       </v-menu>
     </template>
-  </v-input>
+  </v-text-field>
 </template>
 
 <style lang="scss">
@@ -270,6 +239,9 @@
     }
   }
 
+  .v-field__append-inner > .v-icon {
+    cursor: pointer;
+  }
   &.c-select--is-menu-active .v-field__append-inner > .v-icon {
     transform: rotate(180deg);
   }
@@ -356,7 +328,7 @@ type FindPk<TModel extends Model> = ExtractValuesOfType<
 type ModelToPkType<TModel extends Model> = MetadataToModelType<FindPk<TModel>>;
 
 type InheritedProps = Omit<
-  VInput["$props"] & VField["$props"],
+  VTextField["$props"],
   | InheritExcludePropNames
   | "readonly"
   | "disabled"
@@ -364,12 +336,12 @@ type InheritedProps = Omit<
   | "direction"
   | "rules"
   | "clearable"
-  | "focused"
   | "dirty"
   | "active"
+  | "modelValue"
 >;
 
-type _InheritedSlots = Omit<VInput["$slots"] & VField["$slots"], "default">;
+type _InheritedSlots = Omit<VTextField["$slots"], "default">;
 // This extra mapped type prevents vue-tsc from getting confused
 // and failing to emit any types at all. When it encountered the mapped type,
 // it doesn't know how to handle it and so leaves it un-transformed.
@@ -430,7 +402,7 @@ import {
   ViewModelCollection,
   ModelCollectionNavigationProperty,
 } from "coalesce-vue";
-import { VField, VInput } from "vuetify/components";
+import { VTextField } from "vuetify/components";
 import { Intersect } from "vuetify/directives";
 
 /* DEV NOTES:
@@ -574,19 +546,36 @@ const passthroughSlots = computed(() => {
 });
 
 const rootRef = useTemplateRef("rootRef");
-const mainInputRef = useTemplateRef("mainInputRef");
 const menuContentRef = useTemplateRef("menuContentRef");
 const searchRef = useTemplateRef("searchRef");
 
-const fieldAttrs = computed(() =>
-  VField.filterProps(
-    Object.fromEntries(
-      // We have to perform prop name normalization ourselves here
-      // because vuetify's filterProps doesn't support the non-camelized names.
-      Object.entries(inputBindAttrs.value).map(([k, v]) => [camelize(k), v]),
-    ),
-  ),
-);
+// For VTextField, we need to access the internal input element
+const mainInputRef = computed(() => {
+  return rootRef.value?.$el?.querySelector("input") as
+    | HTMLInputElement
+    | undefined;
+});
+
+watch(mainInputRef, (el) => {
+  el?.addEventListener("mousedown", (e) => {
+    // Intercept direct clicks on the input to short circuit `focused`
+    // and v-menu's activator handler, which introduce some latency before the menu opens
+    // if we allow the menu opening to be handled that way.
+    // Mousedown is needed to prevent `focused` from happening.
+    e.stopPropagation();
+    e.preventDefault();
+    openMenu();
+  });
+
+  el?.addEventListener("click", (e) => {
+    // Prevent v-text-field's click handler from running, which focuses mainInputRef.
+    // We always want this to open our menu, rather than momentarily focusing mainInputRef
+    // before we then re-focus searchRef.
+    e.stopPropagation();
+    e.preventDefault();
+    openMenu();
+  });
+});
 
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
@@ -599,7 +588,6 @@ const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
 );
 
 const search = ref(null as string | null);
-const focused = ref(false);
 const menuOpen = ref(false);
 const menuOpenForced = ref(false);
 const searchChanged = ref(new Date());

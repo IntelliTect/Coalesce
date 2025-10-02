@@ -19,7 +19,7 @@ public static class TracerProviderBuilderExtensions
     /// </param>
     /// <returns>The instance of <see cref="TracerProviderBuilder"/> to chain the calls.</returns>
     public static TracerProviderBuilder AddHangfireSqlServerNoiseFilter(
-        this TracerProviderBuilder builder, 
+        this TracerProviderBuilder builder,
         string sqlCommandPropertyName
     ) => builder.AddProcessor(new HangfireSqlServerNoiseFilterProcessor(sqlCommandPropertyName));
 }
@@ -39,7 +39,7 @@ internal sealed class HangfireSqlServerNoiseFilterProcessor(string sqlCommandPro
 
         if (commandText is not null &&
             activity.Status != ActivityStatusCode.Error &&
-            IsHangfireThread(Thread.CurrentThread) && 
+            IsHangfireThread(Thread.CurrentThread) &&
             (
                 commandText?.Contains("[HangFire]") == true ||
                 commandText?.StartsWith("exec sp_getapplock ", StringComparison.InvariantCultureIgnoreCase) == true ||
@@ -71,8 +71,16 @@ internal sealed class HangfireSqlServerNoiseFilterProcessor(string sqlCommandPro
                 at System.Threading.Thread.StartHelper.Callback(Object state)
                 at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
                 at System.Threading.Thread.StartCallback()
+
+                or this:
+                at Hangfire.Processing.BackgroundDispatcher.DispatchLoop()
+                at System.Threading.Thread+StartHelper.RunWorker(...) ## DANGER - THIS FRAME IS HIDDEN IN StackTrace.ToString()
+                at System.Threading.Thread+StartHelper.Callback(...)
+                at System.Threading.ExecutionContext.RunInternal(...)
+                at System.Threading.Thread+StartHelper.Run(...) ## DANGER - THIS FRAME IS HIDDEN IN StackTrace.ToString()
+                at System.Threading.Thread.StartCallback()
             */
-            const int numBottomFramesToSearch = 5;
+            const int numBottomFramesToSearch = 15;
             for (int i = stackTrace.FrameCount - 1; i >= 0 && i >= stackTrace.FrameCount - numBottomFramesToSearch; i--)
             {
                 var frame = stackTrace.GetFrame(i);

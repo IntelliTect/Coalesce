@@ -68,14 +68,10 @@ public static class ProgramServiceDefaults
                     };
                 })
                 .AddHttpClientInstrumentation()
-                .AddSqlClientInstrumentation(tracing =>
-                {
-                    tracing.SetDbStatementForText = true;
-                    tracing.Enrich = (activity, _, cmd) => activity.SetCustomProperty("sqlCommand", cmd);
-                })
+                .AddSqlClientInstrumentation()
 #if Hangfire
                 .AddHangfireInstrumentation()
-                .AddHangfireSqlServerNoiseFilter("sqlCommand")
+                .AddHangfireSqlServerNoiseFilter()
 #endif
         );
 
@@ -94,7 +90,7 @@ public static class ProgramServiceDefaults
 #if AppInsights
         if (builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"] is string { Length: > 0 } aiConnStr)
         {
-            builder.Services.AddOpenTelemetry().UseAzureMonitor(opt => opt.ConnectionString = aiConnStr );
+            builder.Services.AddOpenTelemetry().UseAzureMonitor(opt => opt.ConnectionString = aiConnStr);
         }
 #endif
 

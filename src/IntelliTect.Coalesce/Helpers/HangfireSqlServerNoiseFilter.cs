@@ -13,26 +13,20 @@ public static class TracerProviderBuilderExtensions
     /// Errors are not disabled and will still be logged.
     /// </summary>
     /// <param name="builder"><see cref="TracerProviderBuilder"/> being configured.</param>
-    /// <param name="sqlCommandPropertyName">
-    ///   The name of a custom property attached to the Activity that holds the original <see cref="DbCommand" />. 
-    ///   This can be attached by the Enrich option of AddSqlClientInstrumentation.
-    /// </param>
     /// <returns>The instance of <see cref="TracerProviderBuilder"/> to chain the calls.</returns>
     public static TracerProviderBuilder AddHangfireSqlServerNoiseFilter(
-        this TracerProviderBuilder builder,
-        string sqlCommandPropertyName
-    ) => builder.AddProcessor(new HangfireSqlServerNoiseFilterProcessor(sqlCommandPropertyName));
+        this TracerProviderBuilder builder
+    ) => builder.AddProcessor<HangfireSqlServerNoiseFilterProcessor>();
 }
 
-internal sealed class HangfireSqlServerNoiseFilterProcessor(string sqlCommandPropertyName) : BaseProcessor<Activity>
+internal sealed class HangfireSqlServerNoiseFilterProcessor : BaseProcessor<Activity>
 {
     private ConditionalWeakTable<Thread, StrongBox<bool>> isHangfireThread = new();
 
     public override void OnEnd(Activity activity)
     {
-        DbCommand? command = activity.GetCustomProperty(sqlCommandPropertyName) as DbCommand;
         string? commandText =
-            command?.CommandText ??
+            // Could be either db.statement or db.query.text, depending on whether using old or new conventions.
             activity.GetTagItem("db.statement") as string ??
             activity.GetTagItem("db.query.text") as string ??
             activity.GetTagItem("db.stored_procedure.text") as string;

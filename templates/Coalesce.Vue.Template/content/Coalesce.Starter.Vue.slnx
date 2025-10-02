@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="coalesce.json" />
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Project Path="Coalesce.Starter.Vue.AppHost/Coalesce.Starter.Vue.AppHost.csproj" />
+  <Project Path="Coalesce.Starter.Vue.Data/Coalesce.Starter.Vue.Data.csproj" />
+  <Project Path="Coalesce.Starter.Vue.Web/Coalesce.Starter.Vue.Web.csproj" />
+  <Project Path="Coalesce.Starter.Vue.Data.Test/Coalesce.Starter.Vue.Data.Test.csproj" />
+</Solution>

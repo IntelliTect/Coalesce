@@ -33,6 +33,7 @@
     "queryables",
     "querystring",
     "readonly",
+    "slnx",
     "snapshotted",
     "Stampable",
     "swashbuckle",

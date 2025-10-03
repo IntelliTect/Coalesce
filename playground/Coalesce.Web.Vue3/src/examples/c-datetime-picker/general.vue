@@ -18,6 +18,23 @@
     </v-col>
   </v-row>
 
+  <h1>Date Only (plain)</h1>
+  <v-row>
+    <v-col>
+      <c-datetime-picker
+        :model="vm"
+        for="nextUpgrade"
+        date-kind="date"
+        clearable
+        :step="15"
+        color="pink"
+      ></c-datetime-picker>
+    </v-col>
+    <v-col>
+      {{ vm.nextUpgrade }}
+    </v-col>
+  </v-row>
+
   <h1>Time Only</h1>
   <v-row>
     <v-col>

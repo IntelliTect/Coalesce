@@ -216,4 +216,360 @@ describe("CDatetimePicker", () => {
     expect(model.systemDateOnly?.getMonth()).toBe(0); // January is 0
     expect(model.systemDateOnly?.getDate()).toBe(15);
   });
+
+  describe("date picker keyboard navigation", () => {
+    test("arrow keys navigate dates in date picker", async () => {
+      model.dateTime = new Date("2024-01-15T12:00:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const datePicker = overlay.find(".v-date-picker");
+
+      // Arrow Right - next day
+      await datePicker.trigger("keydown", { key: "ArrowRight" });
+      await delay(1);
+      expect(model.dateTime?.getDate()).toBe(16);
+
+      // Arrow Left - previous day
+      await datePicker.trigger("keydown", { key: "ArrowLeft" });
+      await delay(1);
+      expect(model.dateTime?.getDate()).toBe(15);
+
+      // Arrow Down - next week
+      await datePicker.trigger("keydown", { key: "ArrowDown" });
+      await delay(1);
+      expect(model.dateTime?.getDate()).toBe(22);
+
+      // Arrow Up - previous week
+      await datePicker.trigger("keydown", { key: "ArrowUp" });
+      await delay(1);
+      expect(model.dateTime?.getDate()).toBe(15);
+    });
+
+    test("tab from date picker focuses time picker hour column", async () => {
+      model.dateTime = new Date("2024-01-15T12:00:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const datePicker = overlay.find(".v-date-picker");
+
+      // Tab from date picker
+      await datePicker.trigger("keydown", { key: "Tab" });
+      await delay(1);
+
+      // Check that the hour column is focused
+      const hourColumn = overlay.find(
+        '.c-time-picker__column-hour',
+      );
+      expect(document.activeElement).toBe(hourColumn.element);
+    });
+
+    test("shift+tab from date picker closes menu", async () => {
+      model.dateTime = new Date("2024-01-15T12:00:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const datePicker = overlay.find(".v-date-picker");
+
+      // Shift+Tab from date picker
+      await datePicker.trigger("keydown", { key: "Tab", shiftKey: true });
+      await delay(1);
+
+      // Menu should be closed
+      const menuContent = document.querySelector(
+        ".v-overlay__content",
+      ) as HTMLElement;
+      expect(menuContent?.style.display).toBe("none");
+    });
+
+    test("tab from date-only picker closes menu", async () => {
+      model.systemDateOnly = new Date("2024-01-15T00:00:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const datePicker = overlay.find(".v-date-picker");
+
+      // Tab from date picker when there's no time picker
+      await datePicker.trigger("keydown", { key: "Tab" });
+      await delay(1);
+
+      // Menu should be closed
+      const menuContent = document.querySelector(
+        ".v-overlay__content",
+      ) as HTMLElement;
+      expect(menuContent?.style.display).toBe("none");
+    });
+  });
+
+  describe("time picker keyboard navigation", () => {
+    test("arrow left/right navigates between time picker columns", async () => {
+      model.dateTime = new Date("2024-01-15T12:30:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const hourColumn = overlay.find(
+        '.c-time-picker__column-hour',
+      );
+      const minuteColumn = overlay.find(
+        '.c-time-picker__column-minute',
+      );
+      const meridiemColumn = overlay.find(
+        '.c-time-picker__column-meridiem',
+      );
+
+      // Start at hour column
+      (hourColumn.element as HTMLElement).focus();
+      expect(document.activeElement).toBe(hourColumn.element);
+
+      // Arrow Right - to minute column
+      await hourColumn.trigger("keydown", { key: "ArrowRight" });
+      await delay(1);
+      expect(document.activeElement).toBe(minuteColumn.element);
+
+      // Arrow Right - to meridiem column
+      await minuteColumn.trigger("keydown", { key: "ArrowRight" });
+      await delay(1);
+      expect(document.activeElement).toBe(meridiemColumn.element);
+
+      // Arrow Left - back to minute column
+      await meridiemColumn.trigger("keydown", { key: "ArrowLeft" });
+      await delay(1);
+      expect(document.activeElement).toBe(minuteColumn.element);
+
+      // Arrow Left - back to hour column
+      await minuteColumn.trigger("keydown", { key: "ArrowLeft" });
+      await delay(1);
+      expect(document.activeElement).toBe(hourColumn.element);
+    });
+
+    test("arrow left from hour column navigates to date picker", async () => {
+      model.dateTime = new Date("2024-01-15T12:30:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const hourColumn = overlay.find(
+        '.c-time-picker__column-hour',
+      );
+      const datePicker = overlay.find(".v-date-picker");
+
+      (hourColumn.element as HTMLElement).focus();
+
+      // Arrow Left from hour column
+      await hourColumn.trigger("keydown", { key: "ArrowLeft" });
+      await delay(1);
+
+      // Should focus the date picker
+      expect(document.activeElement).toBe(datePicker.element);
+    });
+
+    test("arrow right from meridiem column closes menu", async () => {
+      model.dateTime = new Date("2024-01-15T12:30:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const meridiemColumn = overlay.find(
+        '.c-time-picker__column-meridiem',
+      );
+
+      (meridiemColumn.element as HTMLElement).focus();
+
+      // Arrow Right from meridiem column
+      await meridiemColumn.trigger("keydown", { key: "ArrowRight" });
+      await delay(1);
+
+      // Menu should be closed
+      const menuContent = document.querySelector(
+        ".v-overlay__content",
+      ) as HTMLElement;
+      expect(menuContent?.style.display).toBe("none");
+    });
+
+    test("arrow up/down navigates items within time picker columns", async () => {
+      model.dateTime = new Date("2024-01-15 12:30:00"); // Using local time
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+
+      // Test hour column navigation
+      const hourColumn = overlay.find(
+        '.c-time-picker__column-hour',
+      );
+      (hourColumn.element as HTMLElement).focus();
+
+      await hourColumn.trigger("keydown", { key: "ArrowDown" });
+      await delay(1);
+      expect(model.dateTime?.getHours()).toBe(13); // 12 PM -> 1 PM
+
+      await hourColumn.trigger("keydown", { key: "ArrowUp" });
+      await delay(1);
+      expect(model.dateTime?.getHours()).toBe(12); // back to 12 PM
+
+      // Test minute column navigation
+      const minuteColumn = overlay.find(
+        '.c-time-picker__column-minute',
+      );
+      (minuteColumn.element as HTMLElement).focus();
+
+      await minuteColumn.trigger("keydown", { key: "ArrowDown" });
+      await delay(1);
+      expect(model.dateTime?.getMinutes()).toBe(31);
+
+      await minuteColumn.trigger("keydown", { key: "ArrowUp" });
+      await delay(1);
+      expect(model.dateTime?.getMinutes()).toBe(30);
+
+      // Test meridiem column navigation
+      const meridiemColumn = overlay.find(
+        '.c-time-picker__column-meridiem',
+      );
+      (meridiemColumn.element as HTMLElement).focus();
+
+      await meridiemColumn.trigger("keydown", { key: "ArrowDown" });
+      await delay(1);
+      expect(model.dateTime?.getHours()).toBe(0); // 12 PM -> 12 AM
+
+      await meridiemColumn.trigger("keydown", { key: "ArrowUp" });
+      await delay(1);
+      expect(model.dateTime?.getHours()).toBe(12); // back to 12 PM
+    });
+
+    test("tab from meridiem column closes menu", async () => {
+      model.dateTime = new Date("2024-01-15T12:30:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const meridiemColumn = overlay.find(
+        '.c-time-picker__column-meridiem',
+      );
+
+      (meridiemColumn.element as HTMLElement).focus();
+
+      // Tab from meridiem column
+      await meridiemColumn.trigger("keydown", { key: "Tab" });
+      await delay(1);
+
+      // Menu should be closed
+      const menuContent = document.querySelector(
+        ".v-overlay__content",
+      ) as HTMLElement;
+      expect(menuContent?.style.display).toBe("none");
+    });
+
+    test("shift+tab from hour column navigates to date picker", async () => {
+      model.dateTime = new Date("2024-01-15T12:30:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const hourColumn = overlay.find(
+        '.c-time-picker__column-hour',
+      );
+      const datePicker = overlay.find(".v-date-picker");
+
+      (hourColumn.element as HTMLElement).focus();
+
+      // Shift+Tab from hour column
+      await hourColumn.trigger("keydown", { key: "Tab", shiftKey: true });
+      await delay(1);
+
+      // Should focus the date picker
+      expect(document.activeElement).toBe(datePicker.element);
+    });
+
+    test("shift+tab from hour column in time-only picker closes menu", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" dateKind="time" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const hourColumn = overlay.find(
+        '.c-time-picker__column-hour',
+      );
+
+      (hourColumn.element as HTMLElement).focus();
+
+      // Shift+Tab from hour column when there's no date picker
+      await hourColumn.trigger("keydown", { key: "Tab", shiftKey: true });
+      await delay(1);
+
+      // Menu should be closed
+      const menuContent = document.querySelector(
+        ".v-overlay__content",
+      ) as HTMLElement;
+      expect(menuContent?.style.display).toBe("none");
+    });
+
+    test("arrow navigation wraps around at boundaries", async () => {
+      model.dateTime = new Date("2024-01-15 01:00:00"); // 1 AM, using local time
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const hourColumn = overlay.find(
+        '.c-time-picker__column-hour',
+      );
+
+      (hourColumn.element as HTMLElement).focus();
+
+      // Arrow Up from 1 should wrap to 12
+      await hourColumn.trigger("keydown", { key: "ArrowUp" });
+      await delay(1);
+      expect(model.dateTime?.getHours()).toBe(0); // 12 AM
+
+      // Arrow Down from 12 should wrap to 1
+      await hourColumn.trigger("keydown", { key: "ArrowDown" });
+      await delay(1);
+      expect(model.dateTime?.getHours()).toBe(1); // 1 AM
+    });
+
+    test("arrow navigation in minute column with step prop", async () => {
+      model.dateTime = new Date("2024-01-15T12:00:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" step={15} />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      const minuteColumn = overlay.find(
+        '.c-time-picker__column-minute',
+      );
+
+      (minuteColumn.element as HTMLElement).focus();
+
+      // Arrow Down should jump by the first available minute (0 -> 15)
+      await minuteColumn.trigger("keydown", { key: "ArrowDown" });
+      await delay(1);
+      expect(model.dateTime?.getMinutes()).toBe(15);
+
+      // Arrow Down again (15 -> 30)
+      await minuteColumn.trigger("keydown", { key: "ArrowDown" });
+      await delay(1);
+      expect(model.dateTime?.getMinutes()).toBe(30);
+
+      // Arrow Up (30 -> 15)
+      await minuteColumn.trigger("keydown", { key: "ArrowUp" });
+      await delay(1);
+      expect(model.dateTime?.getMinutes()).toBe(15);
+    });
+  });
 });
+

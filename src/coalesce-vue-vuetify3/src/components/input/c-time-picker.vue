@@ -6,13 +6,19 @@
       </slot>
     </v-sheet>
     <div class="c-time-picker__columns">
-      <div class="c-time-picker__column" aria-label="Hour">
+      <div
+        class="c-time-picker__column c-time-picker__column-hour"
+        aria-label="Hour"
+        ref="hourColumn"
+        tabindex="0"
+        @keydown="handleKeyDown($event, 'hour')"
+      >
         <button
           v-for="i in hours"
           :key="'h-' + i"
           @click="setHour(i)"
           :disabled="!testHourValid(i)"
-          tabindex="0"
+          tabindex="-1"
           class="c-time-picker__item c-time-picker__item-hour"
           :class="{
             [activeItemClass]:
@@ -22,12 +28,19 @@
           {{ i }}
         </button>
       </div>
-      <div class="c-time-picker__column" aria-label="Minute">
+      <div
+        class="c-time-picker__column c-time-picker__column-minute"
+        aria-label="Minute"
+        ref="minuteColumn"
+        tabindex="0"
+        @keydown="handleKeyDown($event, 'minute')"
+      >
         <button
           v-for="i in minutes"
           :key="'m-' + i"
           @click="setMinute(i)"
           :disabled="!testValid({ minutes: i })"
+          tabindex="-1"
           class="c-time-picker__item c-time-picker__item-minute"
           :class="{
             [activeItemClass]: modelValue?.getMinutes() == i,
@@ -36,13 +49,20 @@
           {{ i.toString().padStart(2, "0") }}
         </button>
       </div>
-      <div class="c-time-picker__column" aria-label="AM/PM">
+      <div
+        class="c-time-picker__column c-time-picker__column-meridiem"
+        aria-label="AM/PM"
+        ref="meridiemColumn"
+        tabindex="0"
+        @keydown="handleKeyDown($event, 'meridiem')"
+      >
         <button
           v-for="(item, i) in meridiems"
           :key="item"
-          class="c-time-picker__item c-time-picker__item-meridiam"
+          class="c-time-picker__item c-time-picker__item-meridiem"
           @click="setAM(i == 0)"
-          :disabled="!testMeridiamValid(i == 0)"
+          :disabled="!testMeridiemValid(i == 0)"
+          tabindex="-1"
           :class="{
             [activeItemClass]:
               modelValue && (i == 0) == modelValue.getHours() < 12,
@@ -77,7 +97,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 9px;
-  border-radius: 8px;
   background-color: rgba(var(--v-theme-surface), 0.3);
 
   &::-webkit-scrollbar {
@@ -157,9 +176,15 @@ const props = withDefaults(
   { step: 1, color: "secondary" },
 );
 
-const emit = defineEmits<{ "update:modelValue": [arg: Date] }>();
+const emit = defineEmits<{
+  "update:modelValue": [arg: Date];
+  "navigate-out": [direction: "left" | "right"];
+}>();
 
 const root = useTemplateRef("root");
+const hourColumn = useTemplateRef("hourColumn");
+const minuteColumn = useTemplateRef("minuteColumn");
+const meridiemColumn = useTemplateRef("meridiemColumn");
 
 const hours = computed(() => {
   return [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].filter(
@@ -202,7 +227,7 @@ function testValid(parts: DateValues) {
   return true;
 }
 
-function testMeridiamValid(isAM: boolean) {
+function testMeridiemValid(isAM: boolean) {
   let value = props.modelValue;
   if (!value || (!props.min && !props.max)) return true;
 
@@ -253,6 +278,106 @@ function setAM(isAM: boolean) {
 
 function emitInput(value: Date) {
   emit("update:modelValue", value);
+}
+
+type ColumnType = "hour" | "minute" | "meridiem";
+
+function handleKeyDown(event: KeyboardEvent, columnType: ColumnType) {
+  const key = event.key;
+
+  if (key == "Tab" && columnType == "meridiem" && !event.shiftKey) {
+    event.stopPropagation();
+    event.preventDefault();
+    emit("navigate-out", "right");
+    return;
+  }
+  if (key == "Tab" && columnType == "hour" && event.shiftKey) {
+    event.stopPropagation();
+    event.preventDefault();
+    emit("navigate-out", "left");
+    return;
+  }
+
+  if (key === "ArrowLeft" || key === "ArrowRight") {
+    event.preventDefault();
+    const direction = key === "ArrowRight" ? 1 : -1;
+
+    // If we're on the hour column and trying to go left, emit event to navigate to date picker
+    if (columnType === "hour" && direction === -1) {
+      emit("navigate-out", "left");
+    } else if (columnType === "meridiem" && direction === 1) {
+      // If we're on the meridiem column and trying to go right, emit event to navigate out
+      emit("navigate-out", "right");
+    } else {
+      navigateColumns(columnType, direction);
+    }
+  } else if (key === "ArrowUp" || key === "ArrowDown") {
+    event.preventDefault();
+    navigateItems(columnType, key === "ArrowDown" ? 1 : -1);
+  }
+}
+
+function navigateColumns(currentColumn: ColumnType, direction: 1 | -1) {
+  const columns: ColumnType[] = ["hour", "minute", "meridiem"];
+  const currentIndex = columns.indexOf(currentColumn);
+  const nextIndex = currentIndex + direction;
+
+  if (nextIndex >= 0 && nextIndex < columns.length) {
+    const nextColumn = columns[nextIndex];
+    const columnRef = getColumnRef(nextColumn);
+    columnRef?.focus();
+  }
+}
+
+function navigateItems(columnType: ColumnType, direction: 1 | -1) {
+  const value = getDateToModify();
+
+  if (columnType === "hour") {
+    const currentHour = value.getHours() % 12 || 12;
+    const availableHours = hours.value.filter((h) => testHourValid(h));
+    const currentIndex = availableHours.indexOf(currentHour);
+
+    if (availableHours.length > 0) {
+      const nextIndex =
+        (currentIndex + direction + availableHours.length) %
+        availableHours.length;
+      setHour(availableHours[nextIndex]);
+    }
+  } else if (columnType === "minute") {
+    const currentMinute = value.getMinutes();
+    const availableMinutes = minutes.value.filter((m) =>
+      testValid({ minutes: m }),
+    );
+    const currentIndex = availableMinutes.indexOf(currentMinute);
+
+    if (availableMinutes.length > 0) {
+      const nextIndex =
+        (currentIndex + direction + availableMinutes.length) %
+        availableMinutes.length;
+      setMinute(availableMinutes[nextIndex]);
+    }
+  } else if (columnType === "meridiem") {
+    const isCurrentlyAM = value.getHours() < 12;
+    const canSwitchToAM = testMeridiemValid(true);
+    const canSwitchToPM = testMeridiemValid(false);
+
+    if (isCurrentlyAM && canSwitchToPM) {
+      setAM(false);
+    } else if (!isCurrentlyAM && canSwitchToAM) {
+      setAM(true);
+    }
+  }
+}
+
+function getColumnRef(columnType: ColumnType): HTMLElement | undefined {
+  switch (columnType) {
+    case "hour":
+      return hourColumn.value as HTMLElement | undefined;
+    case "minute":
+      return minuteColumn.value as HTMLElement | undefined;
+    case "meridiem":
+      return meridiemColumn.value as HTMLElement | undefined;
+  }
 }
 
 onMounted(() => {

@@ -27,6 +27,7 @@
 
   <v-text-field
     v-else
+    ref="rootRef"
     class="c-datetime-picker"
     :class="{ 'has-today-btn': showTodayButton }"
     :placeholder="internalFormat"
@@ -44,9 +45,9 @@
     :disabled="isDisabled"
     autocomplete="off"
     v-model:focused="focused"
-    @keydown.enter="focused = false"
-    @keydown.escape="focused = false"
-    @keydown.tab="close()"
+    @keydown.enter="acceptInput()"
+    @keydown.escape="acceptInput()"
+    @keydown.tab="closeMenu()"
     @update:model-value="textInputChanged($event, false)"
     @click="menu = !menu"
   >
@@ -57,36 +58,30 @@
       <!-- TODO: Consider fullscreen modal on small devices -->
       <v-menu
         v-if="isInteractive"
-        v-model="menu"
+        :modelValue="menu"
+        @update:modelValue="!$event ? closeMenu() : openMenu()"
         activator="parent"
         content-class="c-datetime-picker__menu"
         :close-on-content-click="false"
         :open-on-click="false"
         min-width="1px"
       >
-        <v-fab
-          app
-          location="bottom right"
-          :color="color"
-          size="x-small"
-          icon="$complete"
-          @click="menu = false"
-          :title="$vuetify.locale.t('$vuetify.close')"
-        >
-        </v-fab>
-        <v-card class="d-flex">
+        <v-card class="d-flex" @keydown.enter="closeMenu()">
           <v-date-picker
             v-if="showDate"
+            ref="datePickerRef"
             :color="color!"
             :modelValue="internalValueZoned"
             @update:modelValue="dateChanged"
             density="comfortable"
             scrollable
+            tabindex="0"
             :rounded="false"
             :allowedDates="allowedDates as any"
             :min="min ? startOfDay(min) : undefined"
             :max="max ? endOfDay(max) : undefined"
             v-bind="datePickerProps"
+            @keydown="handleDateKeydown"
           >
             <template v-slot:actions v-if="showTodayButton">
               <v-btn @click="setToday"> Today </v-btn>
@@ -98,8 +93,10 @@
 
           <c-time-picker
             v-if="showTime"
+            ref="timePickerRef"
             :model-value="internalValueZoned"
             @update:model-value="timeChanged"
+            @navigate-out="handleTimePickerNavigateOut"
             :step="step ?? undefined"
             :min="min"
             :max="max"
@@ -109,6 +106,17 @@
               {{ displayedTime || "&nbsp;" }}
             </template>
           </c-time-picker>
+          <v-fab
+            app
+            location="bottom right"
+            :color="color"
+            size="x-small"
+            icon="$complete"
+            @click="menu = false"
+            tabindex="-1"
+            :title="$vuetify.locale.t('$vuetify.close')"
+          >
+          </v-fab>
         </v-card>
       </v-menu>
     </template>
@@ -211,6 +219,7 @@ import {
   startOfDay,
   endOfDay,
   startOfHour,
+  addDays,
 } from "date-fns";
 import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
@@ -221,7 +230,7 @@ import {
   Model,
   DateValue,
 } from "coalesce-vue";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, useTemplateRef } from "vue";
 import {
   ForSpec,
   InheritExcludePropNames,
@@ -293,6 +302,10 @@ const props = withDefaults(
 );
 
 defineSlots<InheritedSlots>();
+
+const rootRef = useTemplateRef("rootRef");
+const datePickerRef = useTemplateRef("datePickerRef");
+const timePickerRef = useTemplateRef("timePickerRef");
 
 const modelValue = defineModel<Date | null | undefined>();
 
@@ -553,10 +566,11 @@ function timeChanged(input: Date) {
     value = fromZonedTime(value, internalTimeZone.value);
   }
 
+  internalTextValue.value = undefined;
   emitInput(value);
 }
 
-function dateChanged(input: unknown) {
+function dateChanged(input: unknown, close = true) {
   // Typed as unknown because of bad types in vuetify
   if (!input || !(input instanceof Date)) return;
 
@@ -575,16 +589,18 @@ function dateChanged(input: unknown) {
     value = fromZonedTime(value, internalTimeZone.value);
   }
 
+  internalTextValue.value = undefined;
   emitInput(value);
 
   // If closeOnDatePicked isn't specified, auto-close if only picking a date.
   // Otherwise, respect closeOnDatePicked.
   if (
-    props.closeOnDatePicked == null
+    close &&
+    (props.closeOnDatePicked == null
       ? internalDateKind.value == "date"
-      : props.closeOnDatePicked
+      : props.closeOnDatePicked)
   ) {
-    close();
+    closeMenu();
   }
 }
 
@@ -643,8 +659,85 @@ function setToday() {
   dateChanged(new Date());
 }
 
-function close() {
+function openMenu() {
+  menu.value = true;
+}
+
+function closeMenu() {
   menu.value = false;
+  rootRef.value?.focus();
+}
+
+function acceptInput() {
+  if (
+    internalTextValue.value &&
+    !isValid(parseUserInput(internalTextValue.value))
+  ) {
+    // TODO: i18n
+    error.value = [
+      'Invalid value. Try formatting like "' +
+        format(new Date(), internalFormat.value) +
+        '"',
+    ];
+  } else {
+    internalTextValue.value = undefined;
+  }
+}
+
+function handleTimePickerNavigateOut(direction: "left" | "right") {
+  if (direction === "left" && showDate.value) {
+    // Navigate back to date picker
+    datePickerRef.value?.$el.focus();
+  } else {
+    // Navigate out of the menu entirely (Tab from rightmost column, or Shift+Tab when no date picker)
+    closeMenu();
+  }
+}
+
+function handleDateKeydown(event: KeyboardEvent) {
+  if (event.key === "Tab") {
+    if (event.shiftKey) {
+      // Shift+Tab from date picker - close menu
+      event.preventDefault();
+      event.stopPropagation();
+      closeMenu();
+    } else {
+      // Tab from date picker
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (showTime.value && timePickerRef.value) {
+        // Focus the first column of the time picker
+        const hourColumn = (
+          timePickerRef.value.$el as HTMLElement
+        )?.querySelector(".c-time-picker__column-hour") as HTMLElement;
+        hourColumn?.focus();
+      } else {
+        // No time picker, close the menu
+        closeMenu();
+      }
+    }
+  } else {
+    // Handle arrow key navigation for date picker
+    const currentValue = internalValueZoned.value || createDefaultDate();
+    let newValue: Date | null = null;
+
+    if (event.key === "ArrowRight") {
+      newValue = addDays(currentValue, 1);
+    } else if (event.key === "ArrowLeft") {
+      newValue = addDays(currentValue, -1);
+    } else if (event.key === "ArrowDown") {
+      newValue = addDays(currentValue, 7);
+    } else if (event.key === "ArrowUp") {
+      newValue = addDays(currentValue, -7);
+    }
+
+    if (newValue) {
+      event.preventDefault();
+      event.stopPropagation();
+      dateChanged(newValue, false);
+    }
+  }
 }
 
 watch(focused, (focused) => {
@@ -652,19 +745,7 @@ watch(focused, (focused) => {
   // clear the temporary value that stores exactly what they typed
   // so that the text field can fall back to the nicely formatted date.
   if (!focused) {
-    if (
-      internalTextValue.value &&
-      !isValid(parseUserInput(internalTextValue.value))
-    ) {
-      // TODO: i18n
-      error.value = [
-        'Invalid value. Try formatting like "' +
-          format(new Date(), internalFormat.value) +
-          '"',
-      ];
-    } else {
-      internalTextValue.value = undefined;
-    }
+    acceptInput();
   }
 });
 </script>

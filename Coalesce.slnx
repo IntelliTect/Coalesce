@@ -1,0 +1,42 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path=".lutignore" />
+    <File Path="CHANGELOG.md" />
+    <File Path="Coalesce.lutconfig" />
+    <File Path="Directory.Packages.props" />
+    <File Path="src/Common.props" />
+    <File Path="src/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/cli/">
+    <File Path="src/Cli.Common.props" />
+    <Project Path="src/IntelliTect.Coalesce.DotnetCliTool/IntelliTect.Coalesce.DotnetCliTool.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.DotnetTool/IntelliTect.Coalesce.DotnetTool.csproj" />
+  </Folder>
+  <Folder Name="/playground/">
+    <File Path="coalesce-vue3.json" />
+    <File Path="playground/Directory.Build.props" />
+    <Project Path="playground/Coalesce.Domain/Coalesce.Domain.csproj" />
+    <Project Path="playground/Coalesce.Web.Vue3/Coalesce.Web.Vue3.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
+    <Project Path="src/IntelliTect.Coalesce.Analyzer/IntelliTect.Coalesce.Analyzer.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.AuditLogging/IntelliTect.Coalesce.AuditLogging.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.CodeGeneration.Api/IntelliTect.Coalesce.CodeGeneration.Api.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.CodeGeneration.Vue/IntelliTect.Coalesce.CodeGeneration.Vue.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.CodeGeneration/IntelliTect.Coalesce.CodeGeneration.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.Core/IntelliTect.Coalesce.Core.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.Swashbuckle/IntelliTect.Coalesce.Swashbuckle.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.Vue/IntelliTect.Coalesce.Vue.csproj" />
+    <Project Path="src/IntelliTect.Coalesce/IntelliTect.Coalesce.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="src/IntelliTect.Coalesce.Analyzer.Tests/IntelliTect.Coalesce.Analyzer.Tests.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.AuditLogging.Tests/IntelliTect.Coalesce.AuditLogging.Tests.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.CodeGeneration.Tests/IntelliTect.Coalesce.CodeGeneration.Tests.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.Swashbuckle.Tests/IntelliTect.Coalesce.Swashbuckle.Tests.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.Tests/IntelliTect.Coalesce.Tests.csproj" />
+  </Folder>
+</Solution>

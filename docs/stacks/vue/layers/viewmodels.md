@@ -28,7 +28,7 @@ There are a few special behaviors when assigning to different kinds of data prop
 - **Model Object Properties**
 
   If the object being assigned to the property is not a ViewModel instance, a new instance will be created and used instead of the incoming object. 
-  If model property is a reference navigation, the corresponding foreign key property will be set to the primary key of that object.
+  If the property is a reference navigation, the corresponding foreign key property will be set to the primary key of that object.
 
 - **Model Collection Properties**
 

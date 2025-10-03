@@ -1,5 +1,5 @@
 {
-  "dotnet.defaultSolution": "Coalesce.sln",
+  "dotnet.defaultSolution": "Coalesce.slnx",
   "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
   "editor.formatOnType": true,

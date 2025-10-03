@@ -88,7 +88,7 @@ public class CodeGenTestBase
 
         var validationResult = ValidateContext.Validate(suite.Model);
         Assert.False(
-            validationResult.Any(r => r.IsError), 
+            validationResult.Any(r => r.IsError),
             string.Join("\n", validationResult.Where(r => r.IsError))
         );
 
@@ -144,8 +144,8 @@ public class CodeGenTestBase
     }
 
     protected static async Task AssertTypescriptProjectCompiles(
-        string tsConfigPath, 
-        string workingDirectory, 
+        string tsConfigPath,
+        string workingDirectory,
         string tsVersion
     )
     {
@@ -193,10 +193,10 @@ public class CodeGenTestBase
 
     protected DirectoryInfo GetRepoRoot()
     {
-        return 
+        return
             // Normal usage (e.g. executing out of a /bin folder
             new DirectoryInfo(Directory.GetCurrentDirectory())
-                .FindFileInAncestorDirectory("Coalesce.sln")
+                .FindFileInAncestorDirectory("Coalesce.slnx")
                 ?.Directory
         ??
             // For Live Unit Testing, which makes a copy of the whole repo elsewhere.

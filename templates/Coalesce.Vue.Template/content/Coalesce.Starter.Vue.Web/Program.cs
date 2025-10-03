@@ -101,8 +101,9 @@ services.AddSwaggerGen(c =>
 services.AddScoped<SecurityService>();
 
 #if (LocalAuth || TenantMemberInvites || TenantCreateAdmin)
-// Register IUrlHelper to allow for invite link generation.
 services.AddUrlHelper();
+#endif
+#if (TenantMemberInvites || TenantCreateAdmin)
 services.AddScoped<InvitationService>();
 #endif
 

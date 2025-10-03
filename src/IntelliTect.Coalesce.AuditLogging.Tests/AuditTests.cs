@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 
@@ -445,6 +446,7 @@ public class AuditTests
     {
         var builder = WebApplication.CreateBuilder();
         builder.Host.UseDefaultServiceProvider(sp => sp.ValidateScopes = true);
+        builder.Logging.ClearProviders();
         return builder;
     }
 
@@ -461,8 +463,8 @@ public class AuditTests
     }
 
     private static async Task RunBasicTest(
-        TestDbContext db, 
-        bool async, 
+        TestDbContext db,
+        bool async,
         string? expectedCustom1,
         string? expectedCustom2
     )

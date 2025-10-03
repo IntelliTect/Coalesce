@@ -239,7 +239,7 @@
       "type": "parameter",
       "datatype": "bool",
       "displayName": "CI: Github Actions",
-      "description": "Include an build-test-and-deploy.yml github action file template.",
+      "description": "Include a build-test-and-deploy.yml github action file template.",
       "$coalesceLink": "https://docs.github.com/actions/use-cases-and-examples/deploying/deploying-net-to-azure-app-service"
     }
   },

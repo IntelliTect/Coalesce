@@ -31,7 +31,6 @@ steps:
   - task: DotNetCoreCLI@2
     inputs:
       command: "restore"
-      projects: "**/*.sln"
     displayName: Restore Nuget packages
 
   - task: PowerShell@2
@@ -61,14 +60,12 @@ steps:
     displayName: dotnet build
     inputs:
       command: "build"
-      projects: "**/*.sln"
       arguments: "--configuration Release --no-restore --no-incremental -p:CodeAnalysisTreatWarningsAsErrors=true -p:TreatWarningsAsErrors=true"
 
   - task: DotNetCoreCLI@2
     displayName: dotnet test
     inputs:
       command: "test"
-      projects: "**/*.sln"
       arguments: "--no-build --configuration Release"
 
   - task: DotNetCoreCLI@2

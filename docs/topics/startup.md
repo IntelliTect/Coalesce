@@ -94,15 +94,13 @@ app.UseViteStaticFiles();
 
 ``` c#
 // With custom authorization:
-app.UseViteStaticFiles(new ViteStaticFilesOptions
+app.UseViteStaticFiles(new()
 {
-    OnAuthorizeAsync = async ctx =>
-    {
-        if (ctx.Context.User?.Identity?.IsAuthenticated == true) return true;
-        // Return false to deny access to specific files.
-        // You can control file names with `manualChunks` in vite.config.ts.
-        return !ctx.File.Name.Contains("private");
-    }
+    OnAuthorizeAsync = ctx => ctx.Context.Request.Path.StartsWithSegments("/assets") == true
+        // Vite compiled assets require authentication
+        ? ValueTask.FromResult(ctx.Context.User.Identity?.IsAuthenticated == true)
+        // Anything else (e.g. `arc/public` directory) do not.
+        : ValueTask.FromResult(true)
 });
 ```
 

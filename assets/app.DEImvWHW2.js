@@ -3,7 +3,6 @@ if (typeof window !== 'undefined' && window.location.hostname === 'intellitect.g
   const newPath = window.location.pathname.replace('/Coalesce', '');
   const newUrl = 'https://coalesce.intellitect.com' + newPath + window.location.search + window.location.hash;
   window.location.replace(newUrl);
-  return;
 }
 
 import { R as p } from "./chunks/theme.Dbfa4Io4.js";

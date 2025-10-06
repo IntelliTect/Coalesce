@@ -2,6 +2,7 @@
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -164,7 +165,7 @@ public abstract class StandardDataSource<T>
     /// <returns>The requested list.</returns>
     protected virtual Task<List<T>> EvaluateListQueryAsync(IQueryable<T> query, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(query.ToList());
+        return query.ToListAsync(cancellationToken);
     }
 
     /// <summary>

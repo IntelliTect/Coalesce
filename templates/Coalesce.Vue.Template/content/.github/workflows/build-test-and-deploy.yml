@@ -10,17 +10,12 @@ on:
 
 # CONFIGURATION
 # For help, go to https://github.com/Azure/Actions
-#
+
 # 1. Set up the production Environment in the GitHub Repository Settings.
 #   Environment Protection Rules are recommended to prevent accidental deployments.
 #   https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment#deployment-protection-rules
-#
-# 2. Set up the following secrets in your repository - https://docs.github.com/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-an-environment
-#   AZURE_WEBAPP_PUBLISH_PROFILE
-#
-# 3. Change these variables for your configuration:
-env:
-  AZURE_WEBAPP_NAME: MY_WEBAPP_NAME # set this to your app service name
+
+# 2. Set up the `AZURE_WEBAPP_PUBLISH_PROFILE` secret in your repository - https://docs.github.com/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-an-environment
 
 jobs:
   build-and-test:
@@ -98,7 +93,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-name: null
           slot-name: "production"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .

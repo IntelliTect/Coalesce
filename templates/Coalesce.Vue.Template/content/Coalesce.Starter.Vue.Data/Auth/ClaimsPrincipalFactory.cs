@@ -20,7 +20,6 @@ public class ClaimsPrincipalFactory(
             // User doesn't have a selected tenant. Pick one for them.
             var membership = await db.TenantMemberships
                 .IgnoreTenancy()
-                .AsNoTracking()
 #if TrackingBase
                 .OrderBy(m => m.CreatedOn) // Prefer oldest membership
 #endif
@@ -60,7 +59,7 @@ public class ClaimsPrincipalFactory(
         }
 
         identity.AddClaim(new Claim(AppClaimTypes.TenantId, tenantId));
-        
+
 #endif
         // Store all the permissions in a dedicated identity
         // whose RoleClaimType is Permission so that they can still be treated like roles

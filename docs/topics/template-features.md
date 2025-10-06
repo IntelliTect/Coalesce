@@ -22,7 +22,7 @@ The short version is that a `TenantId` column is added to all tenanted data in y
 
 All entity classes that belong to a tenant must implement the provided `ITenanted` interface. In most cases, this is achieved by inheriting from `TenantedBase`, which includes recommended configuration attributes for the `Tenant` and `TenantId` properties.
 
-The `TenantId` property on `AppDbContext` serves as the single source of truth for determining which tenant your application code operates against. When handling authenticated HTTP requests, this property is set in the `OnValidatePrincipal` hook that fires after the incoming authentication cookie is read. For other scenarios, you'll need to assign this some other way while keeping security in mind.
+The `TenantId` property on `AppDbContext` serves as the single source of truth for determining which tenant your application code operates against. When handling HTTP requests authenticated with AspNetCore.Identity cookies, this property is set in the `OnValidatePrincipal` hook that fires after the incoming authentication cookie is read. For other scenarios, you'll need to assign this some other way while keeping security in mind.
 
 `ClaimsPrincipalFactory` determines which tenant a user is signed into via the `TenantId` claim. By default, this will be the existing authenticated tenant when refreshing claims, or the user's oldest tenant membership when handling a new sign-in. It can also reject a user from accessing any real tenant by signing them into the `NullTenantId`.
 

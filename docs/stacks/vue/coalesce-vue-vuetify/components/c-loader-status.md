@@ -186,7 +186,7 @@ The available flags are as follows, all of which default to `true` except for `s
 
 ``default`` - Accepts the content whose visibility is controlled by the state of the supplied [API Callers](/stacks/vue/layers/api-clients.md#api-callers). It will be shown or hidden according to the flags defined for each caller.
 
-``prepend`` - Content to be placed in the [prepend slot](https://vuetifyjs.com/en/components/alerts/#slots) of the [v-alert](https://vuetifyjs.com/en/components/alerts/) used to display error and success messages.
+``prepend`` - Content to be placed in the `prepend` slot of the [v-alert](https://vuetifyjs.com/en/components/alerts/) used to display error and success messages.
 
-``append`` - Content to be placed in the [append slot](https://vuetifyjs.com/en/components/alerts/#slots) of the [v-alert](https://vuetifyjs.com/en/components/alerts/) used to display error and success messages.
+``append`` - Content to be placed in the `append` slot of the [v-alert](https://vuetifyjs.com/en/components/alerts/) used to display error and success messages.
 

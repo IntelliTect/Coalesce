@@ -4,45 +4,49 @@ title: "Config: ASP.NET Core"
 
 # Application Configuration
 
+::: tip
+The easiest way to get started with Coalesce is to use the [Coalesce project template](/stacks/vue/getting-started.md), which includes all the necessary configuration out of the box.
+:::
 
-For Coalesce to work in your application, you must register the needed services in your `Startup.cs` or `Program.cs`. Doing so is simple:
+## Basic Setup
+
+For Coalesce to work in your application, you must register the needed services in your `Program.cs`. Doing so is simple:
 
 ``` c#
-public void ConfigureServices(IServiceCollection services)
-{
-    services.AddCoalesce<AppDbContext>();
-    ...
-}
+// Program.cs
+builder.Services.AddCoalesce<AppDbContext>();
 ```
+
+## Advanced Configuration
 
 This registers all the basic services that Coalesce needs to work with your EF DbContext. However, many more options are available. Here's a more complete invocation of `AddCoalesce` that takes advantage of many of the options available:
 
 ``` c#
-public void ConfigureServices(IServiceCollection services)
-{
-    services.AddCoalesce(builder => builder
-        .AddContext<AppDbContext>()
-        .UseDefaultDataSource(typeof(MyDataSource<,>))
-        .UseDefaultBehaviors(typeof(MyBehaviors<,>))
-        .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
-        .Configure(o =>
+// Program.cs
+builder.Services.AddCoalesce(b => b
+    .AddContext<AppDbContext>()
+    .UseDefaultDataSource(typeof(MyDataSource<,>))
+    .UseDefaultBehaviors(typeof(MyBehaviors<,>))
+    .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
+    .Configure(o =>
+    {
+        o.ValidateAttributesForMethods = true; // note: true is the default
+        o.ValidateAttributesForSaves = true; // note: true is the default
+        o.DetailedExceptionMessages = true;
+        o.ExceptionResponseFactory = ctx =>
         {
-            o.ValidateAttributesForMethods = true; // note: true is the default
-            o.ValidateAttributesForSaves = true; // note: true is the default
-            o.DetailedExceptionMessages = true;
-            o.ExceptionResponseFactory = ctx =>
+            if (ctx.Exception is FileNotFoundException)
             {
-                if (ctx.Exception is FileNotFoundException)
-                {
-                    ctx.HttpContext.Response.StatusCode = 404; // Optional - set a specific response code.
-                    return new IntelliTect.Coalesce.Models.ApiResult(false, "File not found");
-                }
-                return null;
-            };
-        });
-    );
-}
+                ctx.HttpContext.Response.StatusCode = 404; // Optional - set a specific response code.
+                return new IntelliTect.Coalesce.Models.ApiResult(false, "File not found");
+            }
+            return null;
+        };
+    })
+);
 ```
+
+## Builder Methods
 
 Available builder methods include:
 
@@ -69,5 +73,64 @@ Specify a service implementation to use to resolve the current timezone. This sh
 <Prop def="public Builder Configure(Action<CoalesceOptions> setupAction)" />
 
 Configure additional options for Coalesce runtime behavior. Current options include options for server-side validation, and options for exception handling. See individual members for details.
+
+## Middleware & Helpers
+
+Coalesce provides several helper extension methods to simplify common application setup tasks:
+
+<Prop def="public static IApplicationBuilder UseViteStaticFiles(this IApplicationBuilder app, ViteStaticFilesOptions? options = null)" />
+
+Configures static file middleware with optimizations for Vite build output. This middleware:
+
+- Serves static files from `wwwroot`
+- Applies long-term caching (30 days) to files with cache-busting hashes in their filenames (as produced by Vite)
+- Supports optional authorization and response customization hooks
+
+This calls `UseStaticFiles` internally, so it should be used in place of, not in addition to, a call to UseStaticFiles. If you need more advanced control, you should instead use UseStaticFiles directly.
+
+``` c#
+app.UseViteStaticFiles();
+```
+
+``` c#
+// With custom authorization:
+app.UseViteStaticFiles(new ViteStaticFilesOptions
+{
+    OnAuthorizeAsync = async ctx =>
+    {
+        if (ctx.Context.User?.Identity?.IsAuthenticated == true) return true;
+        // Return false to deny access to specific files.
+        // You can control file names with `manualChunks` in vite.config.ts.
+        return !ctx.File.Name.Contains("private");
+    }
+});
+```
+
+<Prop def="public static IApplicationBuilder UseNoCacheResponseHeader(this IApplicationBuilder app)" />
+
+Adds a `Cache-Control: no-cache, no-store` header to all responses that reach this point in the pipeline. This middleware acts as a pre-hook, so the resulting `Cache-Control` header can be overridden by other middleware or individual endpoints.
+
+This is useful for preventing browsers from unexpectedly caching API responses. Usually this is placed just after `.UseViteStaticFiles()`.
+
+``` c#
+app.UseNoCacheResponseHeader();
+```
+
+<Prop def="public static IEndpointConventionBuilder MapCoalesceSecurityOverview(this IEndpointRouteBuilder builder, string pattern)" />
+
+Maps a route that presents an HTML page with a comprehensive overview of all types exposed by Coalesce and their effective security rules. This page displays:
+
+- Class-level security attributes (`[Read]`, `[Create]`, `[Edit]`, `[Delete]`)
+- Property-level security and restrictions
+- Custom data sources and behaviors
+- Method security rules
+- Service endpoints
+
+See the [Security Overview](/topics/security.md#security-overview-page) documentation for more details.
+
+``` c#
+app.MapCoalesceSecurityOverview("coalesce-security")
+    .RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
+```
 
 

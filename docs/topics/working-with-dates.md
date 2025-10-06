@@ -142,7 +142,7 @@ Avoid using built-in JavaScript Date formatting and manipulation functions, whic
 For example, here some common Date operations with date-fns:
 
 ```typescript
-import { format, parseISO, addDays, subWeeks, isAfter } from 'date-fns';
+import { format, parseISO, addDays, subMonths, isAfter } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
 // Format dates

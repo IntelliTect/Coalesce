@@ -26,13 +26,13 @@ features:
     details: Customization of type-level, row-level, and property-level security are all built-in.
     link: /topics/security.md
     linkText: Learn More
-  - title: ✨ AI-Ready
-    details: With a single C# attribute, integrate your application functions with AI agents.
-    link: /modeling/model-components/attributes/semantic-kernel.md
-    linkText: Learn More
   - title: 🖨 Code Generated
     details: Design your data model and build awesome user experiences. Coalesce generates the boring parts in the middle.
     link: /stacks/agnostic/generation.md#generated-code
+    linkText: Learn More
+  - title: ✨ AI-Ready
+    details: With a single C# attribute, integrate your application functions with AI agents.
+    link: /modeling/model-components/attributes/semantic-kernel.md
     linkText: Learn More
 ---
 

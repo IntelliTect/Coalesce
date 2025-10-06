@@ -6,7 +6,7 @@ Used to mark a class as a [Simple Model](/modeling/model-types/simple-models.md)
 
 ## Usage
 
-The `[SimpleModel]` attribute is used alongside the `[Coalesce]` attribute to explicitly include a standalone class as a Simple Model in your Coalesce application. This is particularly useful for data transfer objects, configuration objects, or other data classes that are not naturally discovered through the typical Coalesce discovery process.
+The `[SimpleModel]` attribute is used alongside the `[Coalesce]` attribute to explicitly include a standalone class as a Simple Model in your Coalesce application. This is particularly useful for data classes like JSON objects that are not naturally discovered through the typical Coalesce discovery process.
 
 ``` c#
 [Coalesce]

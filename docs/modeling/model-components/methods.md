@@ -123,7 +123,7 @@ On the other hand, services have some benefits that instance and static methods 
 The following parameters can be added to your methods:
 
 <table>
-<thead><tr><td>Type</td><td>Description</td></tr></thead>
+<thead><tr><td>Type</td><td>Description</td></tr></thead><tbody>
 <tr><td>
 
 Primitives, Dates, and other Scalars
@@ -223,14 +223,14 @@ Parameters with the [[Inject]](/modeling/model-components/attributes/inject.md) 
 Deprecated. If you need to return an [Include Tree](/concepts/include-tree.md) to shape the serialization of the method's return value, you should use an `ItemResult<T>` return value and populate the `IncludeTree` property on the `ItemResult` object.
 
 </td></tr>
-</table>
+</tbody></table>
 
 ## Return Values
 
 You can return virtually anything from these methods:
 
 <table>
-<thead><tr><td>Type</td><td>Description</td></tr></thead>
+<thead><tr><td>Type</td><td>Description</td></tr></thead><tbody>
 <tr><td>
 
 Primitives, Dates, and other Scalars
@@ -312,7 +312,7 @@ Use an `ItemResult` whenever you might need to signal failure and return an erro
 An [Include Tree](/concepts/include-tree.md) can be set on the object's `IncludeTree` property to shape the serialization of the method's returned value.
 
 </td></tr>
-</table>
+</tbody></table>
 
 ## Security
 
@@ -361,8 +361,6 @@ Coalesce supports exposing file downloads via custom methods. Simply return a `I
 
 There are a few conveniences for easily consuming downloaded files from your custom pages.
 
-<CodeTabs>
-<template #vue>
 
 The [API Callers](/stacks/vue/layers/api-clients.md#api-callers) have a property `url`. This can be provided directly to your HTML template, with the browser invoking the endpoint automatically.
 
@@ -373,8 +371,8 @@ var viewModel = new PersonViewModel();
 viewModel.$load(1);
 ```
 
-```html
-<img :src="downloadPicture.url" />
+```vue-html
+<img :src="viewModel.downloadPicture.url" />
 ```
 
 ---
@@ -389,12 +387,10 @@ await viewModel.$load(1);
 await viewModel.downloadPicture();
 ```
 
-```html
-<img :src="downloadPicture.getResultObjectUrl()" />
+```vue-html
+<img :src="viewModel.downloadPicture.getResultObjectUrl()" />
 ```
 
-</template>
-</CodeTabs>
 
 ### Database-stored Files
 
@@ -442,7 +438,7 @@ public class Case
     public string AttachmentType { get; set; }
 
     [Read, MaxLength(32)] // Adjust max length based on chosen hash algorithm.
-    public byte[] AttachmentHash { get; set; } // Could also be a base64 string if so desired.
+    public byte[] AttachmentHash { get; set; } // Could also be a base64 string.
 
     [InternalUse]
     public CaseAttachmentContent AttachmentContent { get; set; } = new();

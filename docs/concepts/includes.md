@@ -1,9 +1,9 @@
 # Includes String
 Coalesce provides extension points for loading and serialization that use a concept called an "includes string" (also referred to as "include string" or just "includes").
 
-    
-## Includes String
-The includes string is simply a string that can be set to any arbitrary value. It is passed from the client to the server to customize data loading and serialization. It can be set on both the TypeScript ViewModels and the ListViewModels.
+The includes string is simply an arbitrary string that is passed from the client to the server to customize data loading and serialization. It can be set on both the TypeScript ViewModels and the ListViewModels.
+
+It is available for use in your [custom data sources](/modeling/model-components/data-sources.md) via [IDataSourceParameters](/modeling/model-components/data-sources.md#standard-parameters) and its derived types. It can also be used in [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) attributes.
 
 <CodeTabs>
 <template #vue>
@@ -32,8 +32,6 @@ There are a few values of `includes` that are either set by default in the auto-
 | `'none'` | Setting `includes` to ``none`` suppresses the [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior) provided by the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) - The resulting data will be the requested object (or list of objects) and nothing more. |
 | `'admin-list'` | Used when loading a list of objects in the [Vue admin list page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md). |
 | `'admin-editor'` | Used when loading an object in the [Vue admin editor component](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md). |
-| `'Editor'` | Legacy. Used when loading an object in the generated Knockout CreateEdit views.  |
-| `'<ModelName>ListGen'` | Legacy. Used when loading a list of objects in the generated Knockout Table and Cards views. For example, `PersonListGen` |
 
 
 ## DtoIncludes & DtoExcludes

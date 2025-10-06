@@ -104,7 +104,7 @@ During development, no special effort is required to build your frontend code. C
 
 ## Building Pages & Features
 
-Let's say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, and we've ran code generation with `dotnet coalesce`:
+Let's say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, added a corresponding `DbSet` property to our EF DbContext, and we've ran code generation with `dotnet coalesce`:
 
 ```c#
 namespace MyApplication.Data.Models
@@ -118,7 +118,7 @@ namespace MyApplication.Data.Models
 }
 ```
 
-We can create a details page for a Person by creating a [Single File Component](https://vuejs.org/guide/scaling-up/sfc.html) in `MyApplication.Web/src/views/person-details.vue`:
+We can create a details page for a Person by creating a [Single File Component](https://vuejs.org/guide/scaling-up/sfc.html) in `MyApplication.Web/src/views/PersonDetails.vue`:
 
 ```vue
 <template>
@@ -158,7 +158,7 @@ We then need to add a route to this new view. In `MyApplication.Web/src/router.t
 {
   path: '/person/:id',
   name: 'person-details',
-  component: () => import('@/views/person-details.vue'),
+  component: () => import('@/views/PersonDetails.vue'),
   props: route => ({ id: +route.params.id }),
 },
 ```

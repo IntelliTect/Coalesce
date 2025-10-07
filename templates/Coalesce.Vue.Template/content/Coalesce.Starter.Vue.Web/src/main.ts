@@ -102,6 +102,7 @@ refreshUserInfo()
     app.mount("#app");
   })
   .catch((e) => {
+    console.error(e);
     alert(
       "Unable to contact the application server. Please refresh the page to try again.",
     );

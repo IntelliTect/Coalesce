@@ -94,7 +94,9 @@
 
   &:hover {
     background-color: var(--vp-code-bg);
-    transition: color 0.25s, background-color 0.5s;
+    transition:
+      color 0.25s,
+      background-color 0.5s;
   }
 }
 </style>
@@ -109,7 +111,7 @@ type Parameter = {
   displayName: string;
   description?: string;
   meetsReqs: boolean;
-  requires: Parameter[];
+  requires: string;
   onlyIf?: string[];
   link?: string;
 };
@@ -155,33 +157,35 @@ watch(
       .map((x) => "--" + x)
       .join(" ");
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 type Requirements = ["and" | "or", ...(Requirements | string)[]];
-function evalReq(req: Requirements) {
+function evalReq(req: Requirements): boolean {
   if (req[0] == "and") {
     return req
       .slice(1)
       .every((req) =>
-        typeof req == "string" ? selections.value.includes(req) : evalReq(req)
+        typeof req == "string" ? selections.value.includes(req) : evalReq(req),
       );
   } else if (req[0] == "or") {
     return req
       .slice(1)
       .some((req) =>
-        typeof req == "string" ? selections.value.includes(req) : evalReq(req)
+        typeof req == "string" ? selections.value.includes(req) : evalReq(req),
       );
+  } else {
+    return false;
   }
 }
-function displayReq(req: Requirements) {
+function displayReq(req: Requirements): string | null {
   if (req[0] == "and") {
     return req
       .slice(1)
       .map((req) =>
         typeof req == "string"
           ? parameters.find((p) => p.key == req)?.displayName
-          : "(" + displayReq(req) + ")"
+          : "(" + displayReq(req) + ")",
       )
       .join(" and ");
   } else if (req[0] == "or") {
@@ -190,9 +194,11 @@ function displayReq(req: Requirements) {
       .map((req) =>
         typeof req == "string"
           ? parameters.find((p) => p.key == req)?.displayName
-          : "(" + displayReq(req) + ")"
+          : "(" + displayReq(req) + ")",
       )
       .join(" or ");
+  } else {
+    return null;
   }
 }
 </script>

@@ -99,7 +99,7 @@ app.UseViteStaticFiles(new()
     OnAuthorizeAsync = ctx => ctx.Context.Request.Path.StartsWithSegments("/assets") == true
         // Vite compiled assets require authentication
         ? ValueTask.FromResult(ctx.Context.User.Identity?.IsAuthenticated == true)
-        // Anything else (e.g. `arc/public` directory) do not.
+        // Anything else (e.g. `src/public` directory) do not.
         : ValueTask.FromResult(true)
 });
 ```

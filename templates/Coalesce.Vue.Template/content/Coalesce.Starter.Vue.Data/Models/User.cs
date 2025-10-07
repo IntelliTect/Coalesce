@@ -238,8 +238,8 @@ public class User : IdentityUser
 #if Tenancy
             // Since users exist across tenants, a user may only edit their own profile.
             // Admins within a particular tenant cannot edit the properties of a user
-            // that will affect other tenants.
-            if (item.Id != User.GetUserId()) return "Forbidden.";
+            // that will affect other tenants. Global Admins are an exception.
+            if (item.Id != User.GetUserId() && !User.IsInRole(AppClaimValues.GlobalAdminRole)) return "Forbidden";
 #else
             // Users who aren't user admins can only edit their own profile.
             if (item.Id != User.GetUserId() && !User.Can(Permission.UserAdmin)) return "Forbidden.";

@@ -59,9 +59,7 @@ export default defineConfig({
     }),
 
     // Integrations with UseViteDevelopmentServer from IntelliTect.Coalesce.Vue
-    createAspNetCoreHmrPlugin({
-      checkPackageVersions: false,
-    }),
+    createAspNetCoreHmrPlugin(),
   ],
 
   resolve: {

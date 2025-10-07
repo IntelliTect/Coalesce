@@ -189,17 +189,25 @@ export function createAspNetCoreHmrPlugin({
             ];
           })().then((data) => {
             for (const results of data) {
-              const packageProblems = Object.entries(
-                results.results?.dependencies ?? {},
-              )
-                .map(([packageName, data]) => {
+              const packageProblems: Array<{
+                packageName: string;
+                requiredVersion: string;
+                actualVersion: string;
+              }> = [];
+
+              function collectProblems(dependencies: Record<string, any>) {
+                for (const [packageName, data] of Object.entries(
+                  dependencies,
+                )) {
                   if (data.invalid) {
-                    return `<tr>
-                      <td>${escapeHTML(packageName)}</td>
-                      <td>${data.invalid
-                        .replace(" from the root project", "")
-                        .replace(/"/g, "")}</td>
-                      <td>${escapeHTML(data.version)}</td></tr>`;
+                    const requiredVersion = data.invalid
+                      .replace(" from the root project", "")
+                      .replace(/"/g, "");
+                    packageProblems.push({
+                      packageName,
+                      requiredVersion,
+                      actualVersion: data.version,
+                    });
                   }
 
                   if (data.missing) {
@@ -209,41 +217,75 @@ export function createAspNetCoreHmrPlugin({
                         ?.find((p: string) => p.startsWith("missing"))
                         ?.match(/@([^\s,]+)/)?.[1] ||
                       "";
-                    return `<tr>
-                      <td>${escapeHTML(packageName)}</td>
-                      <td>${missingVersion}</td>
-                      <td>missing</td></tr>`;
+                    packageProblems.push({
+                      packageName,
+                      requiredVersion: missingVersion,
+                      actualVersion: "missing",
+                    });
                   }
-                })
-                .filter((x) => x);
+
+                  // Recursively check nested dependencies (e.g., in NPM workspaces)
+                  if (data.dependencies) {
+                    collectProblems(data.dependencies);
+                  }
+                }
+              }
+
+              collectProblems(results.results?.dependencies ?? {});
 
               if (packageProblems.length) {
-                return {
-                  wasSuccessful: false,
-                  message:
-                    `<p>NPM packages in <b>${results.description}</b> don't match the versions in <b>package.json</b>.</p>
+                // Calculate column widths based on actual data
+                const col1Header = "Package Name";
+                const col2Header = results.description;
+                const col3Header = "package.json";
 
-                  <div class="cta-box">
-                    Stop the application and run <code>${results.resolution}</code> in <strong>${path.basename(path.dirname(process.env.npm_package_json!))}</strong>
-                  </div>
-                  
-                  <table class=packages-table>
-                    <thead><tr>
-                    <td>Package</td>
-                    <td>package.json</td>
-                    <td>${results.description}</td>
-                    </tr></thead>` +
-                    packageProblems.join("") +
-                    " </table>",
-                };
+                const col1Width = Math.max(
+                  col1Header.length,
+                  ...packageProblems.map((p) => p.packageName.length),
+                );
+                const col2Width = Math.max(
+                  col2Header.length,
+                  ...packageProblems.map((p) => p.actualVersion.length),
+                );
+                const col3Width = Math.max(
+                  col3Header.length,
+                  ...packageProblems.map((p) => p.requiredVersion.length),
+                );
+
+                const header = `  ${col1Header.padEnd(col1Width)}  ${col2Header.padEnd(col2Width)}  ${col3Header}`;
+                const separator = `  ${"-".repeat(col1Width)}  ${"-".repeat(col2Width)}  ${"-".repeat(col3Width)}`;
+                const rows = packageProblems.map(
+                  (p) =>
+                    `  ${p.packageName.padEnd(col1Width)}  ${p.actualVersion.padEnd(col2Width)}  ${p.requiredVersion}`,
+                );
+
+                const ret =
+                  `NPM packages in ${results.description} don't match the versions in package.json.\n\n` +
+                  `Stop the application and run '${results.resolution}' in ${path.basename(path.dirname(process.env.npm_package_json!))}\n\n` +
+                  header +
+                  "\n" +
+                  separator +
+                  "\n" +
+                  rows.join("\n");
+                console.error(ret);
+                return ret;
               }
             }
-            return { wasSuccessful: true };
+            return null;
           });
 
-          server.ws.on("coalesce:npm-check", async (data, client) => {
-            const results = await packageVersions;
-            client.send("coalesce:npm-check-result", results);
+          server.ws.on("connection", async (data, client) => {
+            const message = await packageVersions;
+            if (message) {
+              server.ws.send({
+                type: "error",
+                err: {
+                  message: "\n" + message,
+                  stack: "",
+                  plugin: "coalesce-vite-hmr",
+                },
+              });
+            }
           });
         }
       },
@@ -256,16 +298,6 @@ export function createAspNetCoreHmrPlugin({
           // Rewrite the index.html file whenever it changes.
           writeHtml(ctx.server);
         }
-      },
-
-      transformIndexHtml: {
-        order: "pre",
-        handler(html) {
-          return {
-            html,
-            tags: [...(checkPackageVersions ? getPackageCheckTag() : [])],
-          };
-        },
       },
     },
   ];
@@ -434,19 +466,6 @@ function createAssetBypassPlugins(
   // });
 
   return plugins;
-}
-
-function getPackageCheckTag(): HtmlTagDescriptor[] {
-  return [
-    {
-      tag: "script",
-      attrs: {
-        type: "module",
-        src: "/node_modules/coalesce-vue/src/plugin-npm-package-check-client.ts",
-      },
-      injectTo: "body",
-    },
-  ];
 }
 
 function getConfigurationSuggestionTag(

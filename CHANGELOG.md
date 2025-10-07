@@ -1,4 +1,5 @@
 # 6.0.1
+* `createAspNetCoreHmrPlugin` now displays NPM package mismatches with the standard vite overlay instead of a custom overlay.
 
 # 6.0.0
 

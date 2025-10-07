@@ -35,8 +35,8 @@ internal sealed class HangfireSqlServerNoiseFilterProcessor : BaseProcessor<Acti
             activity.Status != ActivityStatusCode.Error &&
             IsHangfireThread(Thread.CurrentThread) &&
             (
-                commandText?.Contains("[HangFire]") == true ||
-                commandText?.StartsWith("exec sp_getapplock ", StringComparison.InvariantCultureIgnoreCase) == true ||
+                commandText.Contains("[HangFire]") ||
+                commandText.StartsWith("exec sp_getapplock ", StringComparison.InvariantCultureIgnoreCase) ||
                 commandText is
                     "Commit" or
                     "sp_getapplock" or

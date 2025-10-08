@@ -1,5 +1,6 @@
 # 6.0.1
 * `createAspNetCoreHmrPlugin` now displays NPM package mismatches with the standard vite overlay instead of a custom overlay.
+* `coalesce-mcp` now handles comments in `coalesce.json` files.
 
 # 6.0.0
 
@@ -20,6 +21,7 @@
 - Added a set of Roslyn analyzers to help avoid common issues and suggest improvements. These analyzers are included and enabled by default.
 - All endpoints with bodies are now sent as JSON instead of form data, with the exception of endpoints that have file parameter(s) and no other non-scalar parameters.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
+- Added MCP server (`coalesce-mcp`) to enable AI assistants to interact with Coalesce projects through code generation tools and template resources.
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
 - `System.Uri` is now supported as a type, mapping to a `string` in TypeScript.
 - Interfaces used as parameters in Coalesce-exposed methods are now automatically injected from services, without the need to specify `[InjectAttribute]`. This does not include known data-like interfaces including `IEnumerable`, `ICollection`, and `IFile`.
@@ -57,6 +59,11 @@
 - `c-select` with `autoselect` now works reliably in dialogs.
 - `c-select` multiple chips are no longer removable when the input is non-interactive.
 - `c-select` with custom tabindex no longer focuses the outer wrapper.
+
+## Template
+- Added Aspire host project.
+- Added option for Hangfire.
+- Added option for other OAuth providers.
 
 # 5.3.8
 

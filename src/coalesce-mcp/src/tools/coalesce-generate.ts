@@ -11,7 +11,11 @@ async function runCoalesceGeneration(
 ): Promise<{ output: string; exitCode: number }> {
   // Read and parse the coalesce.json file
   const configContent = await fs.readFile(configPath, "utf8");
-  const config = JSON.parse(configContent);
+  // Strip comments from JSON before parsing (supports // and /* */ style comments)
+  const jsonWithoutComments = configContent
+    .replace(/\/\*[\s\S]*?\*\//g, "") // Remove multi-line comments
+    .replace(/\/\/.*/g, ""); // Remove single-line comments
+  const config = JSON.parse(jsonWithoutComments);
 
   // Get the web project configuration
   const webProject = config.webProject;

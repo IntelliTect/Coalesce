@@ -666,6 +666,23 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
     }
 
     [Fact]
+    public async Task ArgumentToObjectParameter_NoWarning()
+    {
+        await VerifyAnalyzerAsync("""
+            public class TestClass
+            {
+                public object GetResult()
+                {
+                    string error = "error";
+                    return BadRequest(new ItemResult(error));
+                }
+
+                private object BadRequest(object obj) => obj;
+            }
+            """);
+    }
+
+    [Fact]
     public async Task ItemResultGeneric_PropertyInitializer_ErrorMessageWithObjectNull_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""

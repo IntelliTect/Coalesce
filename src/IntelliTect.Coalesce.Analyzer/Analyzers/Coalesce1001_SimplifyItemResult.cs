@@ -291,14 +291,29 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
             return false;
         }
 
-        return parent switch
+        // Sometimes the object creation is wrapped in a conversion operation
+        // (e.g., when passing ItemResult to a parameter of type object)
+        if (parent is IConversionOperation conversion)
         {
-            // Don't suggest when the ItemResult is used as an argument to another method
-            // where implicit conversion might not work if the target method is generic
-            IArgumentOperation => false,
+            parent = conversion.Parent;
+        }
 
-            // For all other cases, suggest simplification
-            _ => true
-        };
+        if (parent is IArgumentOperation argOp)
+        {
+            if (argOp.Parameter?.OriginalDefinition.Type.TypeKind == TypeKind.TypeParameter)
+            {
+                // Don't suggest simplification for generic type parameters
+                // E.g., Task.FromResult(new ItemResult(error))
+                return false;
+            }
+
+            // Only suggest simplification if the parameter is ItemResult
+            if (argOp.Parameter?.Type is { } type && !IsItemResultType(type))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

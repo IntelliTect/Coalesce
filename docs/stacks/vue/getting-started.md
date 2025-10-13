@@ -67,7 +67,7 @@ dotnet coalesce
 
 </div>
 
-You now have a new Coalesce project! For the recommended development experience, open the `.Web` project in VS Code and open the root `.slnx` file in Visual Studio.
+You now have a new Coalesce project! You can open your project's root folder in VS Code, and/or open the root `.slnx` file in Visual Studio to begin development.
 
 If any of the options you chose above require external integrations, you'll need to configure those - follow the instructions for each section that have been placed into `appsettings.json`.
 

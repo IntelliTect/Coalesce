@@ -8,6 +8,8 @@ on:
 jobs:
   npm:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 
     steps:
       - name: Download all workflow run artifacts
@@ -17,20 +19,17 @@ jobs:
         with:
           registry-url: "https://registry.npmjs.org"
 
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: npm publish coalesce-vue
         run: npm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: npm publish coalesce-mcp
         run: npm publish ./coalesce-mcp/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: npm publish coalesce-vue-vuetify
         run: for f in ./coalesce-vue-vuetify*/*.tgz; do npm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public; done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   nuget:
     runs-on: ubuntu-latest

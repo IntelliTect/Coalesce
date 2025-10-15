@@ -1139,13 +1139,14 @@ function onMenuContentBlur(event: FocusEvent): void {
 /** When a key is pressed on the top level input */
 function onInputKey(event: KeyboardEvent): void {
   if (!isInteractive.value) return;
+  const key = event.key?.toLowerCase();
 
   const input = mainInputRef.value;
   const selectionStart = input?.selectionStart;
   const value = internalModelValue.value;
   const length = value.length;
 
-  switch (event.key.toLowerCase()) {
+  switch (key) {
     case "delete":
     case "backspace":
       if (!menuOpen.value) {
@@ -1164,7 +1165,7 @@ function onInputKey(event: KeyboardEvent): void {
                   ? length - 2
                   : originalSelectionIndex;
             }
-          } else if (event.key.toLowerCase() === "backspace") {
+          } else if (key === "backspace") {
             selectionIndex.value = length - 1;
           }
         } else {

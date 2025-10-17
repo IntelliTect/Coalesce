@@ -13,6 +13,7 @@ import {
   type ListResultPromise,
   mapParamsToDto,
   mapQueryToParams,
+  getMessageForError,
 } from "../src/api-client";
 import { getInternalInstance } from "../src/util";
 import { delay, mountData, mockEndpoint } from "./test-utils";
@@ -70,6 +71,125 @@ describe("error handling", () => {
     await expect(new StudentApiClient().get(1)).rejects.toThrow(
       "Unexpected text/html string response from server.",
     );
+  });
+});
+
+describe("getMessageForError", () => {
+  test("returns string error as-is", () => {
+    expect(getMessageForError("Custom error message")).toBe(
+      "Custom error message",
+    );
+  });
+
+  test("returns standard Error message", () => {
+    expect(getMessageForError(new Error("Error occurred"))).toBe(
+      "Error occurred",
+    );
+  });
+
+  test("returns message from standard Coalesce API response", () => {
+    const axiosError = new AxiosError("Request failed");
+    axiosError.response = {
+      data: { wasSuccessful: false, message: "Validation failed" },
+      status: 400,
+      statusText: "Bad Request",
+      headers: {},
+      config: {} as any,
+    };
+
+    expect(getMessageForError(axiosError)).toBe("Validation failed");
+  });
+
+  test("returns 'Unknown Error' when Coalesce response has empty message", () => {
+    const axiosError = new AxiosError("Request failed");
+    axiosError.response = {
+      data: { wasSuccessful: false, message: "" },
+      status: 400,
+      statusText: "Bad Request",
+      headers: {},
+      config: {} as any,
+    };
+
+    expect(getMessageForError(axiosError)).toBe("Unknown Error");
+  });
+
+  test("returns detail from application/problem+json response", () => {
+    const axiosError = new AxiosError("Request failed");
+    axiosError.response = {
+      data: {
+        type: "https://example.com/probs/out-of-credit",
+        title: "You do not have enough credit.",
+        detail: "Your current balance is 30, but that costs 50.",
+        status: 403,
+      },
+      status: 403,
+      statusText: "Forbidden",
+      headers: { "content-type": "application/problem+json; charset=utf-8" },
+      config: {} as any,
+    };
+
+    expect(getMessageForError(axiosError)).toBe(
+      "Your current balance is 30, but that costs 50.",
+    );
+  });
+
+  test("returns title from application/problem+json when detail is missing", () => {
+    const axiosError = new AxiosError("Request failed");
+    axiosError.response = {
+      data: {
+        type: "https://example.com/probs/forbidden",
+        title: "Access denied",
+        status: 403,
+      },
+      status: 403,
+      statusText: "Forbidden",
+      headers: { "content-type": "application/problem+json" },
+      config: {} as any,
+    };
+
+    expect(getMessageForError(axiosError)).toBe("Access denied");
+  });
+
+  test("returns axios message with status text appended", () => {
+    const axiosError = new AxiosError("Request failed with status code 403");
+    axiosError.response = {
+      data: {},
+      status: 403,
+      statusText: "Forbidden",
+      headers: {},
+      config: {} as any,
+    };
+
+    expect(getMessageForError(axiosError)).toBe(
+      "Request failed with status code 403 (Forbidden)",
+    );
+  });
+
+  test("does not append status text if already in message", () => {
+    const axiosError = new AxiosError("Request failed: Forbidden");
+    axiosError.response = {
+      data: {},
+      status: 403,
+      statusText: "Forbidden",
+      headers: {},
+      config: {} as any,
+    };
+
+    expect(getMessageForError(axiosError)).toBe("Request failed: Forbidden");
+  });
+
+  test("returns generic message for axios error without response", () => {
+    const axiosError = new AxiosError("Network Error");
+    // No response set
+    expect(getMessageForError(axiosError)).toBe("Network Error");
+  });
+
+  test("returns 'An unknown error occurred' for null", () => {
+    expect(getMessageForError(null)).toBe("An unknown error occurred");
+  });
+
+  test("returns 'An unknown error occurred' for undefined", () => {
+    expect(getMessageForError(undefined)).toBe("An unknown error occurred");
   });
 });
 
@@ -1551,15 +1671,19 @@ describe("ModelApiClient", () => {
     });
 
     test("refResponse is ignored for file-returning methods", async () => {
-      const mock = (AxiosClient.defaults.adapter = vitest.fn().mockResolvedValue(<AxiosResponse<any>>{
-        data: new Blob(),
-        status: 200,
-      }));
+      const mock = (AxiosClient.defaults.adapter = vitest
+        .fn()
+        .mockResolvedValue(<AxiosResponse<any>>{
+          data: new Blob(),
+          status: 200,
+        }));
 
       const client = new ComplexModelApiClient();
-      
+
       // Create a caller with refResponse enabled for a file-returning method
-      const caller = client.$makeCaller("item", (c) => c.downloadAttachment(1)).useRefResponse();
+      const caller = client
+        .$makeCaller("item", (c) => c.downloadAttachment(1))
+        .useRefResponse();
 
       await caller();
 

@@ -46,7 +46,7 @@ public static class QueryableExtensions
             ?? throw new ArgumentException("Queried type is not a class");
 
         var pkProp = classViewModel.PrimaryKey
-            ?? throw new ArgumentException("Unable to determine primary key of the queried type");
+            ?? throw new ArgumentException($"Unable to determine primary key of {classViewModel.FullyQualifiedName}");
 
         return query.WhereExpression(it => Expression.Equal(it.Prop(pkProp), id.AsQueryParam(pkProp.Type)));
     }

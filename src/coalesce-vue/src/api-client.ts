@@ -400,12 +400,25 @@ export function getMessageForError(error: unknown): string {
         | AxiosResponse<ListResult<any> | ItemResult<any>>
         | undefined;
 
-      if (
-        result &&
-        typeof result.data === "object" &&
-        "message" in result.data
-      ) {
-        return result.data.message || "Unknown Error";
+      if (result && typeof result.data === "object") {
+        // Check for standard Coalesce ApiResult object
+        if ("message" in result.data) {
+          return result.data.message || "Unknown Error";
+        }
+
+        // Check for RFC 7807 Problem Details (application/problem+json)
+        if (
+          result.headers?.["content-type"]?.includes("application/problem+json")
+        ) {
+          const problemDetails = result.data as any;
+          // Prefer detail over title, as detail is typically more specific
+          if (problemDetails.detail) {
+            return problemDetails.detail;
+          }
+          if (problemDetails.title) {
+            return problemDetails.title;
+          }
+        }
       }
 
       // Axios normally returns a message like "Request failed with status code 403".

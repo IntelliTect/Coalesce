@@ -392,7 +392,7 @@ function timeDiff(current: AuditLogBase, older?: AuditLogBase) {
 function timeDiffClass(current: AuditLogBase, older?: AuditLogBase) {
   if (!older) return "";
   const diff = current.date!.valueOf() - (older?.date ?? 0).valueOf();
-  return diff == 0 ? "grey--text" : diff > 0 ? "text-success" : "text-error";
+  return diff == 0 ? "text-grey" : diff > 0 ? "text-success" : "text-error";
 }
 
 const filter = (listVm.$params.filter = reactive({

@@ -53,6 +53,9 @@ const effectivePage = computed(() => {
   // This is done in this component and not in the ListViewModel itself
   // because if we modify $page when we get a response from the server,
   // autoload lists will perform a duplicate load.
+  if (props.list.$pageCount == -1) {
+    return props.list.$page;
+  }
   return Math.min(props.list.$page, props.list.$pageCount ?? props.list.$page);
 });
 </script>

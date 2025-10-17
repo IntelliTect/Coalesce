@@ -1,5 +1,7 @@
 <template>
   <v-container grid-list-lg>
+    <c-list-pagination :list="personList"></c-list-pagination>
+
     <c-loader-status :loaders="{ 'no-initial-content': [caseVm.$load] }">
       <c-select
         for="Person"

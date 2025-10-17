@@ -1,6 +1,7 @@
 # 6.0.2
 - Fix error in c-select when keypress event has no key.
 - Accept problem details error messages in API Callers.
+- Fix `c-list-page` not correctly handling `noCount: true` lists.
 
 # 6.0.1
 - `createAspNetCoreHmrPlugin` now displays NPM package mismatches with the standard vite overlay instead of a custom overlay.

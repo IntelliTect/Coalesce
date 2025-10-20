@@ -72,7 +72,53 @@ Specify a service implementation to use to resolve the current timezone. This sh
 
 <Prop def="public Builder Configure(Action<CoalesceOptions> setupAction)" />
 
-Configure additional options for Coalesce runtime behavior. Current options include options for server-side validation, and options for exception handling. See individual members for details.
+Configure additional options for Coalesce runtime behavior. Current options include options for server-side validation, and options for exception handling. See [CoalesceOptions Properties](#coalesceoptions-properties) below for details.
+
+## CoalesceOptions Properties
+
+The following properties are available on `CoalesceOptions` when using the `.Configure()` builder method:
+
+<Prop def="public bool DetailedExceptionMessages { get; set; }" lang="c#" />
+
+Determines whether API controllers will return the `Exception.Message` of unhandled exceptions or not. 
+
+Defaults to `true` if `IHostingEnvironment.EnvironmentName` is "Development"; otherwise `false`.
+
+<Prop def="public Func<ActionExecutedContext, ApiResult?>? ExceptionResponseFactory { get; set; }" lang="c#" />
+
+A function that will transform an unhandled exception in API controllers into a custom `ApiResult` object that will be sent to the client. Return `null` to use the default response handling.
+
+This allows you to customize error responses for specific exception types, such as returning a 404 status code for `FileNotFoundException`.
+
+<Prop def="public bool DetailedEfMigrationExceptionMessages { get; set; }" lang="c#" />
+
+Determines whether detailed error messages about EF model/migration errors are returned in error responses. 
+
+Requires `DetailedExceptionMessages` to be enabled, and defaults to that value.
+
+<Prop def="public bool DetailedEfConstraintExceptionMessages { get; set; }" lang="c#" />
+
+If `true`, Coalesce will transform some database exceptions into user-friendly messages when these exceptions occur in Save and Delete operations through `StandardBehaviors<T>`. For SQL Server, this includes foreign key constraint violations and unique index violations.
+
+These messages respect the security configuration of your models. These messages only serve as a fallback to produce a more acceptable user experience in cases where the developer neglects to add appropriate validation or other handling of related entities.
+
+Defaults to `true`.
+
+<Prop def="public bool ValidateAttributesForSaves { get; set; }" lang="c#" />
+
+If `true`, Coalesce will perform validation of incoming data using `ValidationAttribute`s present on your models during save operations (in `StandardBehaviors<T>.ValidateDto(SaveKind, IParameterDto<T>)`).
+
+This can be overridden on individual Behaviors instances by setting `StandardBehaviors<T>.ValidateAttributesForSaves`.
+
+Defaults to `true`.
+
+<Prop def="public bool ValidateAttributesForMethods { get; set; }" lang="c#" />
+
+If `true`, Coalesce will perform validation of incoming parameters using `ValidationAttribute`s present on your parameters and for custom methods.
+
+This can be overridden on individual custom methods using `ExecuteAttribute.ValidateAttributes`.
+
+Defaults to `true`.
 
 ## Middleware & Helpers
 

@@ -1,16 +1,19 @@
 {
   "compilerOptions": {
-    "target": "es2023",
+    "target": "es2021",
     "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": true,
     "jsx": "preserve",
-    "moduleResolution": "bundler",
+    "jsxImportSource": "vue",
+    "importHelpers": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/.tsbuildinfo",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@test/*": ["test/*"],
@@ -23,10 +26,6 @@
       "vue-router": ["node_modules/vue-router"],
       "@vue/reactivity": ["node_modules/@vue/reactivity/dist/reactivity"]
     },
-    "jsxImportSource": "vue",
-    "importHelpers": true,
-    "sourceMap": true,
-    "resolveJsonModule": true,
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "types": ["vue-router", "vuetify", "vitest/globals"]
   },

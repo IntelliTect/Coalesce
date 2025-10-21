@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2021",
+    "target": "es2023",
     "module": "esnext",
     "strict": true,
     "jsx": "preserve",
-    "jsxImportSource": "vue",
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "sourceMap": true,
+    "moduleResolution": "bundler",
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.tsbuildinfo",
     "skipLibCheck": true,
-    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
+    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@test/*": ["test/*"],
@@ -23,16 +23,20 @@
       "vue-router": ["node_modules/vue-router"],
       "@vue/reactivity": ["node_modules/@vue/reactivity/dist/reactivity"]
     },
+    "jsxImportSource": "vue",
+    "importHelpers": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
-    "types": ["node", "vue-router", "vuetify", "vitest/globals"]
+    "types": ["vue-router", "vuetify", "vitest/globals"]
   },
   "include": [
-    "vite.config.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "test/**/*.ts",
     "test/**/*.tsx"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

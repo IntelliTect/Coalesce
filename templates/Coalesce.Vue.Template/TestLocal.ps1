@@ -42,6 +42,7 @@ foreach ($testCase in $testCases) {
         dotnet restore
         dotnet coalesce
         npm i
+        npx tsc -p ./tsconfig.node.json
         npm run build
         npm run lint:fix # ensure all lint issues are auto-fixable
         # CS9113: Parameter '<param>' is unread. (too annoying to fix this for every possible combination of template params)

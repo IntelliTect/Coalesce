@@ -16,6 +16,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/coalesce-vue-vuetify3.js"
     },
+    "./build": {
+      "types": "./dist/build.d.ts",
+      "default": "./dist/build.js"
+    },
     "./*": "./dist/*",
     "./styles": "./dist/coalesce-vue-vuetify.css",
     "./styles.css": "./dist/coalesce-vue-vuetify.css"
@@ -54,7 +58,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.14.11",
-    "@vitejs/plugin-vue-jsx": "^4.1.1",
+    "@vitejs/plugin-vue-jsx": "^5.1.1",
     "coalesce-vue": "../coalesce-vue",
     "sass": "^1.69.7",
     "vue-router": "^4.4.1",

@@ -19,7 +19,7 @@
     "gray-matter": "^4.0.3",
     "linkcheck-bin": "3.0.0-2",
     "serve-handler": "^6.1.6",
-    "vitepress": "2.0.0-alpha.5",
+    "vitepress": "2.0.0-alpha.12",
     "wait-on": "^8.0.4"
   }
 }

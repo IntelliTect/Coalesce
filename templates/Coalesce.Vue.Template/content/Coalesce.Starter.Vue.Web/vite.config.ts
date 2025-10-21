@@ -91,17 +91,6 @@ export default defineConfig({
     },
   },
 
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: "modern",
-      },
-      sass: {
-        api: "modern",
-      },
-    },
-  },
-
   test: {
     globals: true,
     environment: "jsdom",

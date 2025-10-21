@@ -100,7 +100,7 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
               "coalesce-vue/lib/*": [ "{{workingDirectory}}/src/*" ],
               "*": [ "{{workingDirectory}}/node_modules/*" ],
             },
-            "types": ["{{workingDirectory}}/node_modules/vue-router"]
+            "types": ["vue-router"]
           },
           "include": [
             "src/**/*.ts",

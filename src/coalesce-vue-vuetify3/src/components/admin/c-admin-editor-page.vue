@@ -126,8 +126,8 @@ const params = mapQueryToParams(route.query, ListParameters, metadata.value);
 viewModel.$dataSource = params.dataSource;
 
 if (props.id) {
-  // Clear the dirty flag before loading,
-  // which may be set if the type has any props with a default value.
+  // Clear the dirty flag before initial load,
+  // which may be set if the type has any props with a defaultValue.
   // If we don't clear it, autosave will get confused and try to immediately save.
   viewModel.$isDirty = false;
   viewModel.$load(props.id);

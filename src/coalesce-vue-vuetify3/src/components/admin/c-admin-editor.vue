@@ -76,12 +76,7 @@
             :class="'prop-' + prop.name"
             no-gutters
           >
-            <v-col
-              cols="12"
-              md="2"
-              class="py-0 pr-3 py-md-3 font-weight-bold text-md-right c-admin-editor--label-col"
-              align-self="start"
-            >
+            <v-col cols="12" md="2" class="c-admin-editor--label-col">
               <i
                 v-if="prop.createOnly && !isPropReadOnly(prop, model)"
                 class="fa fa-asterisk pr-1"
@@ -90,8 +85,8 @@
               {{ prop.displayName }}
             </v-col>
             <v-col class="py-0" align-self="start" style="flex-basis: 1px">
-              <v-row no-gutters style="min-height: 44px" align-content="center">
-                <v-col class="c-admin-editor--input-col">
+              <div class="c-admin-editor--input-row">
+                <div class="c-admin-editor--input-col">
                   <c-input
                     :model="model"
                     :for="prop"
@@ -111,8 +106,8 @@
                   >
                     <c-admin-display :model="model" :for="prop" />
                   </c-input>
-                </v-col>
-                <v-col
+                </div>
+                <div
                   v-if="prop.role == 'referenceNavigation'"
                   class="c-admin-editor--aux-col"
                 >
@@ -126,8 +121,8 @@
                   >
                     <v-icon>fa fa-ellipsis-h</v-icon>
                   </v-btn>
-                </v-col>
-                <v-col
+                </div>
+                <div
                   v-if="
                     prop.type == 'string' &&
                     (prop.subtype == 'url' ||
@@ -153,16 +148,16 @@
                       >fa fa-external-link-alt
                     </v-icon>
                   </v-btn>
-                </v-col>
-                <v-col
+                </div>
+                <div
                   v-if="prop.type == 'string' && prop.subtype == 'url-image'"
                   class="c-admin-editor--aux-col"
                 >
                   <v-card outlined rounded class="c-admin-editor--img-preview">
                     <c-display :model="model" :for="prop"></c-display>
                   </v-card>
-                </v-col>
-              </v-row>
+                </div>
+              </div>
             </v-col>
           </v-row>
         </v-form>
@@ -311,14 +306,11 @@ const isBulkSaveDirty = computed(() => {
 </script>
 
 <style lang="scss">
-.c-admin-editor--ref-nav-link {
-  height: 40px !important;
-}
 .c-admin-editor--row {
   // Center each row so that things are nicely aligned,
   // especially in the case where labels are long enough to have to wrap.
   align-items: center;
-  padding: 4px 0;
+  padding: 6px 0;
 
   // Remove extra padding on the top of v-switch components
   // so they align nicely with other components.
@@ -331,9 +323,39 @@ const isBulkSaveDirty = computed(() => {
     }
   }
 }
+
+$row-height: 40px;
+$text-height: 10px;
+.c-admin-editor--label-col {
+  padding: 0 12px 0 0 !important;
+  font-weight: bold;
+  align-self: start;
+  @media (min-width: 960px) {
+    min-height: $row-height;
+    padding-top: ($row-height/2 - $text-height) !important;
+    text-align: right;
+  }
+}
+
+.c-admin-editor--input-row {
+  display: flex;
+  min-height: $row-height;
+  width: 100%;
+}
+.c-admin-editor--input-col {
+  flex-grow: 1;
+
+  @media (min-width: 960px) {
+    > a,
+    > span {
+      display: inline-block;
+      padding-top: ($row-height/2 - $text-height) !important;
+    }
+  }
+}
 .c-admin-editor--aux-col {
   align-self: flex-start;
-  flex-grow: 0 !important;
+  padding-top: 2px;
   padding-left: 12px !important;
 }
 .c-admin-editor--img-preview img {

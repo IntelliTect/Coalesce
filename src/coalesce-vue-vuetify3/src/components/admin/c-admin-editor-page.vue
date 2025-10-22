@@ -122,35 +122,37 @@ function onDeleted() {
   router.back();
 }
 
-onMounted(async () => {
-  const params = mapQueryToParams(route.query, ListParameters, metadata.value);
-  viewModel.$dataSource = params.dataSource;
+const params = mapQueryToParams(route.query, ListParameters, metadata.value);
+viewModel.$dataSource = params.dataSource;
 
-  if (props.id) {
-    await viewModel.$load(props.id);
-  } else {
-    copyParamsToNewViewModel(viewModel, params);
+if (props.id) {
+  // Clear the dirty flag before loading,
+  // which may be set if the type has any props with a default value.
+  // If we don't clear it, autosave will get confused and try to immediately save.
+  viewModel.$isDirty = false;
+  viewModel.$load(props.id);
+} else {
+  copyParamsToNewViewModel(viewModel, params);
 
-    bindKeyToRouteOnCreate(
-      instance!,
-      viewModel,
-      "id",
-      /* keep the querystring in case it has data source parameters */ true,
-    );
-  }
-
-  watch(
-    () => effectiveAutoSave.value,
-    (autoSave) => {
-      if (autoSave) {
-        viewModel.$startAutoSave(instance!);
-      } else {
-        viewModel.$stopAutoSave();
-      }
-    },
-    { immediate: true },
+  bindKeyToRouteOnCreate(
+    instance!,
+    viewModel,
+    "id",
+    /* keep the querystring in case it has data source parameters */ true,
   );
-});
+}
+
+watch(
+  () => effectiveAutoSave.value,
+  (autoSave) => {
+    if (autoSave) {
+      viewModel.$startAutoSave(instance!);
+    } else {
+      viewModel.$stopAutoSave();
+    }
+  },
+  { immediate: true },
+);
 
 // Expose computed values for external access
 defineExpose({

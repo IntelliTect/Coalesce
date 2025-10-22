@@ -83,6 +83,7 @@ Binds a value on an object, or the value of a ref, to the query string.
   function useBindToQueryString(ref: Ref<any>, options: BindToQueryStringOptions): void
 
   interface BindToQueryStringOptions {
+    queryKey?: string;
     mode?: 'push' | 'replace'
     parse?: (value: string) => any
     stringify?: (value: any) => string
@@ -99,13 +100,8 @@ Binds a value on an object, or the value of a ref, to the query string.
 
   **Auto-detection features:**
   - **ListParameters**: When binding to a `ListParameters` object (or any object with `page` and `pageSize` properties), numeric fields are automatically parsed using `parseInt` without needing to specify a `parse` function.
-  - **ListViewModel $ properties**: When binding to properties starting with `$` (e.g., `$page`, `$pageSize`, `$search`), the query key automatically drops the `$` prefix (e.g., `$page` becomes `page` in the URL). Numeric properties are automatically parsed using `parseInt`.
-
-  ::: tip Migration Note
-  Existing code using `{ parse: parseInt }` for `ListParameters` properties or manual `queryKey` specification for `$` properties can be simplified by removing these options - the auto-detection will handle them automatically.
-  :::
-
-  If the object being bound to has `$metadata`, information from that metadata will be used to serialize and parse values to and from the query string. Otherwise, the `stringify` option (default: `String(value)`) will be used to serialize the value, and the `parse` option (if provided) will be used to parse the value from the query string.
+  - **ListViewModel $ properties**: When binding to the ListViewModel shorthand parameter properties (e.g., `$page`, `$pageSize`, `$search`), the query key automatically drops the `$` prefix (e.g., `$page` becomes `page` in the URL). Numeric properties are automatically parsed using `parseInt`.
+  - **Models and DataSources**: When binding to a property on a [Model](#model-interfaces), [ViewModel](./viewmodels.md#viewmodels), or [Data Source](#data-sources), `parse` and `stringify` are auto-configured.
 
 - **Example**
 
@@ -135,16 +131,32 @@ Binds a value on an object, or the value of a ref, to the query string.
   ```ts
   import { useBindToQueryString } from 'coalesce-vue';
 
-  // Bind pagination information to the query string (auto-detects numeric parsing):
+  // Bind to a property on an object:
   const list = new PersonListViewModel();
-  useBindToQueryString(list.$params, 'pageSize');
-
-  // Bind ListViewModel shorthand parameters (auto-detects query key and numeric parsing):
   useBindToQueryString(list, '$page');
   useBindToQueryString(list, '$search');
+  useBindToQueryString(list.$params, 'pageSize');
+  
+  const dataSource = new PersonListViewModel.DataSources.MySource();
+  useBindToQueryString(dataSource, 'myParameter');
 
+  // Bind to a `ref` ('tab' is the querystring key)
   const activeTab = ref("1")
-  useBindToQueryString(activeTab, 'activeTab');
+  useBindToQueryString(activeTab, 'tab');
+
+  // With more complex options:
+  const enumTab = ref<MyEnum>(MyEnum.Home)
+  useBindToQueryString(enumTab, {
+    queryKey: 'tab',
+    stringify: (val: MyEnum) => MyEnum[val],
+    parse: (val: string) => {
+      if (val && val in MyEnum) {
+        const enumVal = MyEnum[val as keyof typeof MyEnum];
+        return typeof enumVal === 'number' ? enumVal : null;
+      }
+      return null;
+    },
+  });
   ```
 
   </template>

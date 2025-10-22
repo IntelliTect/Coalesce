@@ -119,7 +119,10 @@ internal static class ValidateContext
 
                     if (prop.IsPOCO)
                     {
-                        assert.IsNotNull(prop.Object?.ListTextProperty, "The target object for the property has no discernible display text. Add a [ListTextAttribute] to one of its properties.");
+                        assert.IsNotNull(
+                            prop.Object?.ListTextProperty,
+                            $"{prop.Object} has no discernible display text. Add a [ListTextAttribute] to one of its properties."
+                            + (prop.Object?.HasDbSet == false ? " If the type was meant to be an EF entity, add a corresponding DbSet property to your DbContext." : ""));
                         if (!prop.IsReadOnly && !prop.HasNotMapped && prop.Object?.HasDbSet == true)
                         {
                             // Validate navigation properties

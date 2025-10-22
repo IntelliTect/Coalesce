@@ -447,6 +447,16 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
 }
 
 
+export class PersonLocationApiClient extends ModelApiClient<$models.PersonLocation> {
+  constructor() { super($metadata.PersonLocation) }
+}
+
+
+export class PersonStatsApiClient extends ModelApiClient<$models.PersonStats> {
+  constructor() { super($metadata.PersonStats) }
+}
+
+
 export class ProductApiClient extends ModelApiClient<$models.Product> {
   constructor() { super($metadata.Product) }
 }

@@ -524,6 +524,7 @@ export interface Person extends Model<typeof metadata.Person> {
   lastBath: Date | null
   nextUpgrade: Date | null
   personStats: PersonStats | null
+  personLocation: PersonLocation | null
   profilePic: string | null
   
   /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
@@ -582,6 +583,61 @@ export namespace Person {
         return reactiveDataSource(this);
       }
     }
+  }
+}
+
+
+export interface PersonLocation extends Model<typeof metadata.PersonLocation> {
+  personLocationId: number | null
+  personId: number | null
+  person: Person | null
+  latitude: number | null
+  longitude: number | null
+}
+export class PersonLocation {
+  
+  /** Mutates the input object and its descendants into a valid PersonLocation implementation. */
+  static convert(data?: Partial<PersonLocation>): PersonLocation {
+    return convertToModel<PersonLocation>(data || {}, metadata.PersonLocation) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid PersonLocation implementation. */
+  static map(data?: Partial<PersonLocation>): PersonLocation {
+    return mapToModel<PersonLocation>(data || {}, metadata.PersonLocation) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.PersonLocation; }
+  
+  /** Instantiate a new PersonLocation, optionally basing it on the given data. */
+  constructor(data?: Partial<PersonLocation> | {[k: string]: any}) {
+    Object.assign(this, PersonLocation.map(data || {}));
+  }
+}
+
+
+export interface PersonStats extends Model<typeof metadata.PersonStats> {
+  personId: number | null
+  person: Person | null
+  height: number | null
+  weight: number | null
+}
+export class PersonStats {
+  
+  /** Mutates the input object and its descendants into a valid PersonStats implementation. */
+  static convert(data?: Partial<PersonStats>): PersonStats {
+    return convertToModel<PersonStats>(data || {}, metadata.PersonStats) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid PersonStats implementation. */
+  static map(data?: Partial<PersonStats>): PersonStats {
+    return mapToModel<PersonStats>(data || {}, metadata.PersonStats) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.PersonStats; }
+  
+  /** Instantiate a new PersonStats, optionally basing it on the given data. */
+  constructor(data?: Partial<PersonStats> | {[k: string]: any}) {
+    Object.assign(this, PersonStats.map(data || {}));
   }
 }
 
@@ -803,60 +859,6 @@ export class PersonCriteria {
   /** Instantiate a new PersonCriteria, optionally basing it on the given data. */
   constructor(data?: Partial<PersonCriteria> | {[k: string]: any}) {
     Object.assign(this, PersonCriteria.map(data || {}));
-  }
-}
-
-
-export interface PersonLocation extends Model<typeof metadata.PersonLocation> {
-  latitude: number | null
-  longitude: number | null
-}
-export class PersonLocation {
-  
-  /** Mutates the input object and its descendants into a valid PersonLocation implementation. */
-  static convert(data?: Partial<PersonLocation>): PersonLocation {
-    return convertToModel<PersonLocation>(data || {}, metadata.PersonLocation) 
-  }
-  
-  /** Maps the input object and its descendants to a new, valid PersonLocation implementation. */
-  static map(data?: Partial<PersonLocation>): PersonLocation {
-    return mapToModel<PersonLocation>(data || {}, metadata.PersonLocation) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.PersonLocation; }
-  
-  /** Instantiate a new PersonLocation, optionally basing it on the given data. */
-  constructor(data?: Partial<PersonLocation> | {[k: string]: any}) {
-    Object.assign(this, PersonLocation.map(data || {}));
-  }
-}
-
-
-export interface PersonStats extends Model<typeof metadata.PersonStats> {
-  height: number | null
-  weight: number | null
-  name: string | null
-  nullableValueTypeCollection: Date[] | null
-  valueTypeCollection: Date[] | null
-  personLocation: PersonLocation | null
-}
-export class PersonStats {
-  
-  /** Mutates the input object and its descendants into a valid PersonStats implementation. */
-  static convert(data?: Partial<PersonStats>): PersonStats {
-    return convertToModel<PersonStats>(data || {}, metadata.PersonStats) 
-  }
-  
-  /** Maps the input object and its descendants to a new, valid PersonStats implementation. */
-  static map(data?: Partial<PersonStats>): PersonStats {
-    return mapToModel<PersonStats>(data || {}, metadata.PersonStats) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.PersonStats; }
-  
-  /** Instantiate a new PersonStats, optionally basing it on the given data. */
-  constructor(data?: Partial<PersonStats> | {[k: string]: any}) {
-    Object.assign(this, PersonStats.map(data || {}));
   }
 }
 

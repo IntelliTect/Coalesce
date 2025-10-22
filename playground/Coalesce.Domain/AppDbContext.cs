@@ -15,6 +15,9 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 {
 #nullable disable
     public DbSet<Person> People { get; set; }
+    public DbSet<PersonStats> PeopleStats { get; set; }
+    public DbSet<PersonLocation> PeopleLocations { get; set; }
+
     public DbSet<Case> Cases { get; set; }
     public DbSet<Company> Companies { get; set; }
     public DbSet<Product> Products { get; set; }

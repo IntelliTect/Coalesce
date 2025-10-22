@@ -154,6 +154,7 @@ namespace Coalesce.Web.Vue3.Models
         public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseResponse> CasesAssigned { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseResponse> CasesReported { get; set; }
         public Coalesce.Web.Vue3.Models.PersonStatsResponse PersonStats { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonLocationResponse PersonLocation { get; set; }
         public Coalesce.Web.Vue3.Models.CompanyResponse Company { get; set; }
 
         /// <summary>
@@ -202,8 +203,11 @@ namespace Coalesce.Web.Vue3.Models
                 this.CasesReported = new CaseResponse[0];
             }
 
+            if (tree == null || tree[nameof(this.PersonStats)] != null)
+                this.PersonStats = obj.PersonStats.MapToDto<Coalesce.Domain.PersonStats, PersonStatsResponse>(context, tree?[nameof(this.PersonStats)]);
 
-            this.PersonStats = obj.PersonStats.MapToDto<Coalesce.Domain.PersonStats, PersonStatsResponse>(context, tree?[nameof(this.PersonStats)]);
+            if (tree == null || tree[nameof(this.PersonLocation)] != null)
+                this.PersonLocation = obj.PersonLocation.MapToDto<Coalesce.Domain.PersonLocation, PersonLocationResponse>(context, tree?[nameof(this.PersonLocation)]);
 
             if (tree == null || tree[nameof(this.Company)] != null)
                 this.Company = obj.Company.MapToDto<Coalesce.Domain.Company, CompanyResponse>(context, tree?[nameof(this.Company)]);

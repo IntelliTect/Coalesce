@@ -40,7 +40,7 @@ public class OneToOneParent
 
 public class OneToOneChild
 {
-    [Key, ForeignKey("Parent")]
+    [Key, ForeignKey(nameof(Parent))]
     public int ParentId { get; set; }
 
     public OneToOneParent? Parent { get; set; }

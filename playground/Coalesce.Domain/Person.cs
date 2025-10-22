@@ -23,7 +23,6 @@ namespace Coalesce.Domain;
 )]
 public class Person
 {
-#nullable disable
     public enum Genders
     {
         NonSpecified = 0,
@@ -37,11 +36,6 @@ public class Person
         Ms = 1,
         Mrs = 2,
         Miss = 4
-    }
-
-    public Person()
-    {
-        //Address = new Address();
     }
 
     /// <summary>
@@ -62,7 +56,7 @@ public class Person
     [MinLength(2)]
     [MaxLength(length: 75)]
     [Search]
-    public string FirstName { get; set; }
+    public string? FirstName { get; set; }
 
     /// <summary>
     /// Last name of the person
@@ -71,7 +65,7 @@ public class Person
     [MinLength(length: 3)]
     [MaxLength(100)]
     [Search]
-    public string LastName { get; set; }
+    public string? LastName { get; set; }
 
     /// <summary>
     /// Email address of the person
@@ -79,7 +73,7 @@ public class Person
     [ClientValidation(IsEmail = true)]
     [DataType(DataType.EmailAddress)]
     [EmailAddress]
-    public string Email { get; set; }
+    public string? Email { get; set; }
 
     /// <summary>
     /// Genetic Gender of the person. 
@@ -94,13 +88,13 @@ public class Person
     /// List of cases assigned to the person
     /// </summary>
     [InverseProperty("AssignedTo")]
-    public ICollection<Case> CasesAssigned { get; set; }
+    public ICollection<Case> CasesAssigned { get; set; } = [];
 
     /// <summary>
     /// List of cases reported by the person.
     /// </summary>
     [InverseProperty("ReportedBy")]
-    public List<Case> CasesReported { get; set; }
+    public List<Case> CasesReported { get; set; } = [];
 
     [DateType(DateTypeAttribute.DateTypes.DateOnly)]
     public DateTime? BirthDate { get; set; }
@@ -111,12 +105,11 @@ public class Person
     [Hidden]
     public DateTimeOffset? NextUpgrade { get; set; }
 
-
-    [Hidden]
-    public PersonStats PersonStats => new PersonStats { Name = Name, Height = 10, Weight = 20 };
+    public PersonStats? PersonStats { get; set; }
+    public PersonLocation? PersonLocation { get; set; }
 
     // [InternalUse]
-    public byte[] ProfilePic { get; set; }
+    public byte[]? ProfilePic { get; set; }
 
     /// <summary>
     /// Calculated name of the person. eg., Mr. Michael Stokesbary.
@@ -134,17 +127,9 @@ public class Person
     /// <summary>
     /// Company loaded from the Company ID
     /// </summary>
-    public Company Company { get; set; }
+    public Company? Company { get; set; }
 
-#if NET8_0_OR_GREATER
-    // https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-8.0/whatsnew#primitive-collections
-#else
-    [NotMapped]
-#endif
-    public List<string> ArbitraryCollectionOfStrings { get; set; }
-
-
-#nullable restore
+    public List<string>? ArbitraryCollectionOfStrings { get; set; }
 
     /// <summary>
     /// Sets the FirstName to the given text.
@@ -172,7 +157,7 @@ public class Person
     public ItemResult ChangeSpacesToDashesInName(AppDbContext db)
     {
         var old = FirstName;
-        FirstName = FirstName.Replace(" ", "-");
+        FirstName = FirstName?.Replace(" ", "-");
         db.SaveChanges();
         return new ItemResult(true, $"Changed name from {old} to {FirstName}");
     }
@@ -232,7 +217,7 @@ public class Person
     [Description("Returns a count of all people in the database whose last name starts with the specified value.")]
     public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
     {
-        return db.People.Count(f => f.LastName.StartsWith(lastNameStartsWith));
+        return db.People.Count(f => f.LastName!.StartsWith(lastNameStartsWith));
     }
 
     [Coalesce]
@@ -307,7 +292,7 @@ public class Person
     [Coalesce, Execute]
     public static IEnumerable<string> NamesStartingWith(AppDbContext db, string characters)
     {
-        return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
+        return db.People.Where(f => f.FirstName!.StartsWith(characters)).Select(f => f.Name).ToList();
     }
 
     [Coalesce, Execute]
@@ -349,7 +334,7 @@ public class Person
 
         if (!string.IsNullOrEmpty(criteria.Name))
         {
-            query = query.Where(f => f.FirstName.StartsWith(criteria.Name) || f.LastName.StartsWith(criteria.Name));
+            query = query.Where(f => f.FirstName!.StartsWith(criteria.Name) || f.LastName!.StartsWith(criteria.Name));
         }
         if (criteria.BirthdayMonth >= 1 && criteria.BirthdayMonth >= 12)
         {
@@ -357,7 +342,7 @@ public class Person
         }
         if (!string.IsNullOrWhiteSpace(criteria.EmailDomain))
         {
-            query = query.Where(f => f.Email.Contains($"@{criteria.EmailDomain}"));
+            query = query.Where(f => f.Email!.Contains($"@{criteria.EmailDomain}"));
         }
 
         return new ListResult<Person>(query, page, pageSize);
@@ -420,7 +405,7 @@ public class NamesStartingWithAWithCases : StandardDataSource<Person, AppDbConte
         return Db.People
             .IncludedSeparately(f => f.CasesAssigned).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
             .IncludedSeparately(f => f.CasesReported).ThenIncluded(c => c.CaseProducts).ThenIncluded(cp => cp.Product)
-            .Where(f => f.FirstName.StartsWith("A"));
+            .Where(f => f.FirstName!.StartsWith("A"));
     }
 }
 
@@ -433,7 +418,7 @@ public class BOrCPeople : StandardDataSource<Person, AppDbContext>
     public BOrCPeople(CrudContext<AppDbContext> context) : base(context) { }
 
     public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) =>
-        Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
+        Db.People.Where(f => f.LastName!.StartsWith("B") || f.LastName.StartsWith("c"));
 }
 
 public class PersonCriteria

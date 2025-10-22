@@ -1796,10 +1796,20 @@ export const Person = domain.types.Person = {
     personStats: {
       name: "personStats",
       displayName: "Person Stats",
-      type: "object",
-      get typeDef() { return (domain.types.PersonStats as ObjectType & { name: "PersonStats" }) },
+      type: "model",
+      get typeDef() { return (domain.types.PersonStats as ModelType & { name: "PersonStats" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.PersonStats as ModelType & { name: "PersonStats" }).props.personId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.PersonStats as ModelType & { name: "PersonStats" }).props.person as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    personLocation: {
+      name: "personLocation",
+      displayName: "Person Location",
+      type: "model",
+      get typeDef() { return (domain.types.PersonLocation as ModelType & { name: "PersonLocation" }) },
       role: "value",
-      hidden: 3 as HiddenAreas,
       dontSerialize: true,
     },
     profilePic: {
@@ -2436,6 +2446,105 @@ export const Person = domain.types.Person = {
     },
   },
 }
+export const PersonLocation = domain.types.PersonLocation = {
+  name: "PersonLocation" as const,
+  displayName: "Person Location",
+  get displayProp() { return this.props.personLocationId }, 
+  type: "model",
+  controllerRoute: "PersonLocation",
+  get keyProp() { return this.props.personLocationId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    personLocationId: {
+      name: "personLocationId",
+      displayName: "Person Location Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    personId: {
+      name: "personId",
+      displayName: "Person Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      get navigationProp() { return (domain.types.PersonLocation as ModelType & { name: "PersonLocation" }).props.person as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+    },
+    person: {
+      name: "person",
+      displayName: "Person",
+      type: "model",
+      get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.PersonLocation as ModelType & { name: "PersonLocation" }).props.personId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    latitude: {
+      name: "latitude",
+      displayName: "Latitude",
+      type: "number",
+      role: "value",
+    },
+    longitude: {
+      name: "longitude",
+      displayName: "Longitude",
+      type: "number",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const PersonStats = domain.types.PersonStats = {
+  name: "PersonStats" as const,
+  displayName: "Person Stats",
+  get displayProp() { return this.props.personId }, 
+  type: "model",
+  controllerRoute: "PersonStats",
+  get keyProp() { return this.props.personId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    personId: {
+      name: "personId",
+      displayName: "Person Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    person: {
+      name: "person",
+      displayName: "Person",
+      type: "model",
+      get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.PersonStats as ModelType & { name: "PersonStats" }).props.personId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Person as ModelType & { name: "Person" }).props.personStats as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    height: {
+      name: "height",
+      displayName: "Height",
+      type: "number",
+      role: "value",
+    },
+    weight: {
+      name: "weight",
+      displayName: "Weight",
+      type: "number",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const Product = domain.types.Product = {
   name: "Product" as const,
   displayName: "Product",
@@ -2821,84 +2930,6 @@ export const PersonCriteria = domain.types.PersonCriteria = {
       name: "emailDomain",
       displayName: "Email Domain",
       type: "string",
-      role: "value",
-    },
-  },
-}
-export const PersonLocation = domain.types.PersonLocation = {
-  name: "PersonLocation" as const,
-  displayName: "Person Location",
-  type: "object",
-  props: {
-    latitude: {
-      name: "latitude",
-      displayName: "Latitude",
-      type: "number",
-      role: "value",
-    },
-    longitude: {
-      name: "longitude",
-      displayName: "Longitude",
-      type: "number",
-      role: "value",
-    },
-  },
-}
-export const PersonStats = domain.types.PersonStats = {
-  name: "PersonStats" as const,
-  displayName: "Person Stats",
-  get displayProp() { return this.props.name }, 
-  type: "object",
-  props: {
-    height: {
-      name: "height",
-      displayName: "Height",
-      type: "number",
-      role: "value",
-    },
-    weight: {
-      name: "weight",
-      displayName: "Weight",
-      type: "number",
-      role: "value",
-    },
-    name: {
-      name: "name",
-      displayName: "Name",
-      type: "string",
-      role: "value",
-    },
-    nullableValueTypeCollection: {
-      name: "nullableValueTypeCollection",
-      displayName: "Nullable Value Type Collection",
-      type: "collection",
-      itemType: {
-        name: "$collectionItem",
-        displayName: "",
-        role: "value",
-        type: "date",
-        dateKind: "datetime",
-      },
-      role: "value",
-    },
-    valueTypeCollection: {
-      name: "valueTypeCollection",
-      displayName: "Value Type Collection",
-      type: "collection",
-      itemType: {
-        name: "$collectionItem",
-        displayName: "",
-        role: "value",
-        type: "date",
-        dateKind: "datetime",
-      },
-      role: "value",
-    },
-    personLocation: {
-      name: "personLocation",
-      displayName: "Person Location",
-      type: "object",
-      get typeDef() { return (domain.types.PersonLocation as ObjectType & { name: "PersonLocation" }) },
       role: "value",
     },
   },

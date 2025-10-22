@@ -294,6 +294,17 @@ function render() {
       return h(CDatetimePicker, data, vuetifySlots);
 
     case "model":
+      if (
+        valueMeta.role == "referenceNavigation" &&
+        "foreignKey" in valueMeta &&
+        valueMeta.foreignKey.role == "primaryKey"
+      ) {
+        // This is a shared-key one-to-one. Its not possible to select values with c-select,
+        // since doing so would mean changing the PK of the child, which is nonsensical.
+        // The only thing we could *maybe* do here is show a "create" button if the prop is null
+        // (but if the prop is null because the object wasn't loaded, then that's wrong).
+        break;
+      }
       data.model = props.model;
       data.for = props.for;
       addHandler(data, "update:modelValue", (v: any) =>
@@ -492,7 +503,7 @@ function render() {
 
   // Fall back to just displaying the value.
   if (defaultSlot) {
-    return h("div", {}, { default: defaultSlot });
+    return defaultSlot();
   }
 
   return h(

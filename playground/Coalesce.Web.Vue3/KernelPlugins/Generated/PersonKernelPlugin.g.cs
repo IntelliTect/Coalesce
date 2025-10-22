@@ -87,7 +87,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         int page,
         [Description("Provide true if you only need a count of results.")]
         bool countOnly,
-        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: PersonId,Title,FirstName,LastName,Email,Gender,Height,CasesAssigned,CasesReported,BirthDate,LastBath,NextUpgrade,PersonStats,ProfilePic,Name,CompanyId,Company,ArbitraryCollectionOfStrings")]
+        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: PersonId,Title,FirstName,LastName,Email,Gender,Height,CasesAssigned,CasesReported,BirthDate,LastBath,NextUpgrade,PersonStats,PersonLocation,ProfilePic,Name,CompanyId,Company,ArbitraryCollectionOfStrings")]
         string[] fields,
         [Description("Filter the cases returned to only those with these statuses.")]
         System.Collections.Generic.ICollection<Coalesce.Domain.Case.Statuses> allowedStatuses = default)
@@ -141,7 +141,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         int page,
         [Description("Provide true if you only need a count of results.")]
         bool countOnly,
-        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: PersonId,Title,FirstName,LastName,Email,Gender,Height,CasesAssigned,CasesReported,BirthDate,LastBath,NextUpgrade,PersonStats,ProfilePic,Name,CompanyId,Company,ArbitraryCollectionOfStrings")]
+        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: PersonId,Title,FirstName,LastName,Email,Gender,Height,CasesAssigned,CasesReported,BirthDate,LastBath,NextUpgrade,PersonStats,PersonLocation,ProfilePic,Name,CompanyId,Company,ArbitraryCollectionOfStrings")]
         string[] fields,
         [Description("A set of parameters that are ignored entirely.")]
         PersonCriteriaParameter personCriteria = default)

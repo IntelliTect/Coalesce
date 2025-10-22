@@ -1,22 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coalesce.Domain;
 
-[NotMapped]
+/// <summary>
+/// Shared-key one-to-one
+/// </summary>
 public class PersonStats
 {
-#nullable disable
-    //public int PersonStatsId { get; set; }
+    [Key, ForeignKey(nameof(Person))]
+    public int PersonId { get; set; }
+    public Person? Person { get; set; }
+
     public double Height { get; set; }
     public double Weight { get; set; }
-    public string Name { get; set; }
-
-    [NotMapped]
-    public ICollection<DateTimeOffset?> NullableValueTypeCollection { get; set; }
-
-    public ICollection<DateTimeOffset> ValueTypeCollection { get; set; }
-
-     public PersonLocation PersonLocation { get; set; }
 }

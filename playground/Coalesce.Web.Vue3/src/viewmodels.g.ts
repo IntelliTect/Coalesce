@@ -647,7 +647,10 @@ export interface PersonViewModel extends $models.Person {
   birthDate: Date | null;
   lastBath: Date | null;
   nextUpgrade: Date | null;
-  personStats: $models.PersonStats | null;
+  get personStats(): PersonStatsViewModel | null;
+  set personStats(value: PersonStatsViewModel | $models.PersonStats | null);
+  get personLocation(): PersonLocationViewModel | null;
+  set personLocation(value: PersonLocationViewModel | $models.PersonLocation | null);
   profilePic: string | null;
   
   /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
@@ -911,6 +914,53 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
 }
 
 
+export interface PersonLocationViewModel extends $models.PersonLocation {
+  personLocationId: number | null;
+  personId: number | null;
+  get person(): PersonViewModel | null;
+  set person(value: PersonViewModel | $models.Person | null);
+  latitude: number | null;
+  longitude: number | null;
+}
+export class PersonLocationViewModel extends ViewModel<$models.PersonLocation, $apiClients.PersonLocationApiClient, number> implements $models.PersonLocation  {
+  
+  constructor(initialData?: DeepPartial<$models.PersonLocation> | null) {
+    super($metadata.PersonLocation, new $apiClients.PersonLocationApiClient(), initialData)
+  }
+}
+defineProps(PersonLocationViewModel, $metadata.PersonLocation)
+
+export class PersonLocationListViewModel extends ListViewModel<$models.PersonLocation, $apiClients.PersonLocationApiClient, PersonLocationViewModel> {
+  
+  constructor() {
+    super($metadata.PersonLocation, new $apiClients.PersonLocationApiClient())
+  }
+}
+
+
+export interface PersonStatsViewModel extends $models.PersonStats {
+  personId: number | null;
+  get person(): PersonViewModel | null;
+  set person(value: PersonViewModel | $models.Person | null);
+  height: number | null;
+  weight: number | null;
+}
+export class PersonStatsViewModel extends ViewModel<$models.PersonStats, $apiClients.PersonStatsApiClient, number> implements $models.PersonStats  {
+  
+  constructor(initialData?: DeepPartial<$models.PersonStats> | null) {
+    super($metadata.PersonStats, new $apiClients.PersonStatsApiClient(), initialData)
+  }
+}
+defineProps(PersonStatsViewModel, $metadata.PersonStats)
+
+export class PersonStatsListViewModel extends ListViewModel<$models.PersonStats, $apiClients.PersonStatsApiClient, PersonStatsViewModel> {
+  
+  constructor() {
+    super($metadata.PersonStats, new $apiClients.PersonStatsApiClient())
+  }
+}
+
+
 export interface ProductViewModel extends $models.Product {
   productId: number | null;
   name: string | null;
@@ -1083,6 +1133,8 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   DateOnlyPk: DateOnlyPkViewModel,
   Log: LogViewModel,
   Person: PersonViewModel,
+  PersonLocation: PersonLocationViewModel,
+  PersonStats: PersonStatsViewModel,
   Product: ProductViewModel,
   StandaloneReadCreate: StandaloneReadCreateViewModel,
   StandaloneReadonly: StandaloneReadonlyViewModel,
@@ -1106,6 +1158,8 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   DateOnlyPk: DateOnlyPkListViewModel,
   Log: LogListViewModel,
   Person: PersonListViewModel,
+  PersonLocation: PersonLocationListViewModel,
+  PersonStats: PersonStatsListViewModel,
   Product: ProductListViewModel,
   StandaloneReadCreate: StandaloneReadCreateListViewModel,
   StandaloneReadonly: StandaloneReadonlyListViewModel,

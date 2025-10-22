@@ -13,9 +13,21 @@ namespace Coalesce.Web.Vue3.Models
     {
         public PersonLocationParameter() { }
 
+        private int? _PersonLocationId;
+        private int? _PersonId;
         private double? _Latitude;
         private double? _Longitude;
 
+        public int? PersonLocationId
+        {
+            get => _PersonLocationId;
+            set { _PersonLocationId = value; Changed(nameof(PersonLocationId)); }
+        }
+        public int? PersonId
+        {
+            get => _PersonId;
+            set { _PersonId = value; Changed(nameof(PersonId)); }
+        }
         public double? Latitude
         {
             get => _Latitude;
@@ -34,6 +46,8 @@ namespace Coalesce.Web.Vue3.Models
         {
             var includes = context.Includes;
 
+            if (ShouldMapTo(nameof(PersonLocationId))) entity.PersonLocationId = (PersonLocationId ?? entity.PersonLocationId);
+            if (ShouldMapTo(nameof(PersonId))) entity.PersonId = PersonId;
             if (ShouldMapTo(nameof(Latitude))) entity.Latitude = (Latitude ?? entity.Latitude);
             if (ShouldMapTo(nameof(Longitude))) entity.Longitude = (Longitude ?? entity.Longitude);
         }
@@ -60,8 +74,11 @@ namespace Coalesce.Web.Vue3.Models
     {
         public PersonLocationResponse() { }
 
+        public int? PersonLocationId { get; set; }
+        public int? PersonId { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonResponse Person { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -71,8 +88,13 @@ namespace Coalesce.Web.Vue3.Models
             if (obj == null) return;
             var includes = context.Includes;
 
+            this.PersonLocationId = obj.PersonLocationId;
+            this.PersonId = obj.PersonId;
             this.Latitude = obj.Latitude;
             this.Longitude = obj.Longitude;
+            if (tree == null || tree[nameof(this.Person)] != null)
+                this.Person = obj.Person.MapToDto<Coalesce.Domain.Person, PersonResponse>(context, tree?[nameof(this.Person)]);
+
         }
     }
 }

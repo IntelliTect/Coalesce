@@ -74,6 +74,7 @@ TModel extends Model ?
     
 // Handle binding of `:model` to an API caller (which binds values to the caller's args object):    
 : TModel extends ApiStateTypeWithArgs<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   infer TMethod extends Method,
   any,
   infer TArgsObj,
@@ -127,7 +128,7 @@ export type MethodForSpec<
     | ListViewModel
     | ViewModel
     | unknown = unknown,
-  MethodKind extends Method = Method
+  MethodKind extends Method = Method,
 > = "__never" extends keyof MethodsOf<TModel> // Check if we only know that the type's method names are any strings
   ? // If so, we have to allow any string because the exact method names aren't known.
     string | Method
@@ -144,7 +145,7 @@ export type MethodForSpec<
 export function getValueMetaAndOwner(
   forVal: ForSpec | null | undefined,
   model: Model | DataSource | AnyArgCaller | null | undefined,
-  $metadata?: Domain
+  $metadata?: Domain,
 ) {
   const valueMeta = getValueMeta(forVal, model?.$metadata, $metadata);
 
@@ -172,7 +173,7 @@ export function getValueMeta(
     | Method
     | null
     | undefined,
-  $metadata?: Domain
+  $metadata?: Domain,
 ): Property | Value | Method | null {
   if (!forVal) {
     return null;
@@ -301,7 +302,7 @@ export function getValueMeta(
       throw Error(
         `Could not resolve token '${forPart}'${
           forVal != forPart ? " in " + forVal : ""
-        } from ${tailKind} '${tail?.name}'`
+        } from ${tailKind} '${tail?.name}'`,
       );
     }
   }
@@ -341,7 +342,7 @@ export function getValueMeta(
 export function buildVuetifyAttrs(
   valueMeta: Property | Value | null,
   model: Model<ClassType> | AnyArgCaller | null | undefined,
-  attrs?: { [k: string]: any }
+  attrs?: { [k: string]: any },
 ): { [s: string]: any } {
   if (attrs) {
     attrs = { ...attrs };
@@ -374,9 +375,9 @@ export function buildVuetifyAttrs(
       valueMeta.name in (modelMeta as ModelType)!.props
         ? model.$getRules(valueMeta.name)
         : // Grab the rules from the metadata for the bound value
-        "rules" in valueMeta && valueMeta.rules
-        ? Object.values(valueMeta.rules)
-        : undefined,
+          "rules" in valueMeta && valueMeta.rules
+          ? Object.values(valueMeta.rules)
+          : undefined,
 
     ...attrs,
   };
@@ -389,7 +390,7 @@ export function useMetadataProps<TModel extends ModelAllowedType = Model>(
     model: TModel | null | undefined;
     for: ForSpec | null | undefined;
   },
-  transformValueMeta?: (meta: Value | Property) => Value | Property
+  transformValueMeta?: (meta: Value | Property) => Value | Property,
 ) {
   const metadata = useMetadata();
 
@@ -414,7 +415,7 @@ export function useMetadataProps<TModel extends ModelAllowedType = Model>(
 
   const attrs = useAttrs();
   const inputBindAttrs = computed(() =>
-    buildVuetifyAttrs(valueMeta.value, props.model, attrs)
+    buildVuetifyAttrs(valueMeta.value, props.model, attrs),
   );
 
   return { modelMeta, valueMeta, valueOwner, inputBindAttrs };
@@ -427,11 +428,11 @@ export function useCustomInput(props: {
   const form: any = inject(Symbol.for("vuetify:form"), null);
 
   const isDisabled = computed(
-    (): boolean => props.disabled || form?.isDisabled.value
+    (): boolean => props.disabled || form?.isDisabled.value,
   );
 
   const isReadonly = computed(
-    (): boolean => props.readonly || form?.isReadonly.value
+    (): boolean => props.readonly || form?.isReadonly.value,
   );
 
   const isInteractive = computed((): boolean => {

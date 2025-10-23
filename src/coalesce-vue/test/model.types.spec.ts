@@ -7,7 +7,7 @@ import {
 
 describe("types", () => {
   test("derived is assignable to base", () => {
-    const model: AbstractModel = new AbstractImpl1();
+    const _model: AbstractModel = new AbstractImpl1();
   });
 
   test("derived is assignable to base ViewModel prop", () => {
@@ -16,6 +16,6 @@ describe("types", () => {
   });
 
   test("derived vm is assignable to base ViewModel", () => {
-    const vm: AbstractModelViewModel = new AbstractImpl1ViewModel();
+    const _vm: AbstractModelViewModel = new AbstractImpl1ViewModel();
   });
 });

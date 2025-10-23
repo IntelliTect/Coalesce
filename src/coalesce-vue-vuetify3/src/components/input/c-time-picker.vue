@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="c-time-picker" ref="root">
+  <v-sheet ref="root" class="c-time-picker">
     <v-sheet :color="color!" class="c-time-picker-header">
       <slot name="header">
         {{ isValid(modelValue) ? format(modelValue!, "h:mm a") : "- : - -" }}
@@ -7,16 +7,15 @@
     </v-sheet>
     <div class="c-time-picker__columns">
       <div
+        ref="hourColumn"
         class="c-time-picker__column c-time-picker__column-hour"
         aria-label="Hour"
-        ref="hourColumn"
         tabindex="0"
         @keydown="handleKeyDown($event, 'hour')"
       >
         <button
           v-for="i in hours"
           :key="'h-' + i"
-          @click="setHour(i)"
           :disabled="!testHourValid(i)"
           tabindex="-1"
           class="c-time-picker__item c-time-picker__item-hour"
@@ -24,35 +23,36 @@
             [activeItemClass]:
               modelValue && modelValue.getHours() % 12 == i % 12,
           }"
+          @click="setHour(i)"
         >
           {{ i }}
         </button>
       </div>
       <div
+        ref="minuteColumn"
         class="c-time-picker__column c-time-picker__column-minute"
         aria-label="Minute"
-        ref="minuteColumn"
         tabindex="0"
         @keydown="handleKeyDown($event, 'minute')"
       >
         <button
           v-for="i in minutes"
           :key="'m-' + i"
-          @click="setMinute(i)"
           :disabled="!testValid({ minutes: i })"
           tabindex="-1"
           class="c-time-picker__item c-time-picker__item-minute"
           :class="{
             [activeItemClass]: modelValue?.getMinutes() == i,
           }"
+          @click="setMinute(i)"
         >
           {{ i.toString().padStart(2, "0") }}
         </button>
       </div>
       <div
+        ref="meridiemColumn"
         class="c-time-picker__column c-time-picker__column-meridiem"
         aria-label="AM/PM"
-        ref="meridiemColumn"
         tabindex="0"
         @keydown="handleKeyDown($event, 'meridiem')"
       >
@@ -60,13 +60,13 @@
           v-for="(item, i) in meridiems"
           :key="item"
           class="c-time-picker__item c-time-picker__item-meridiem"
-          @click="setAM(i == 0)"
           :disabled="!testMeridiemValid(i == 0)"
           tabindex="-1"
           :class="{
             [activeItemClass]:
               modelValue && (i == 0) == modelValue.getHours() < 12,
           }"
+          @click="setAM(i == 0)"
         >
           {{ item }}
         </button>
@@ -74,72 +74,6 @@
     </div>
   </v-sheet>
 </template>
-
-<style lang="scss">
-.c-time-picker {
-  max-height: calc(100% - 64px);
-}
-
-.c-time-picker-header {
-  padding: 6px 14px;
-  font-size: 32px;
-  line-height: 40px;
-}
-
-.c-time-picker__columns {
-  display: flex;
-  padding: 8px;
-  justify-content: space-around;
-}
-
-.c-time-picker__column {
-  max-height: 328px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 8px 9px;
-  background-color: rgba(var(--v-theme-surface), 0.3);
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    border-radius: 8px;
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
-    box-shadow: inset 0 0 6px rgba(var(--v-theme-on-surface), 0.2);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 8px;
-    background-color: rgba(var(--v-theme-on-surface), 0.3);
-  }
-}
-.c-time-picker__item {
-  display: block;
-  padding: 5px 14px;
-  min-width: 46px;
-  margin: 0 4px;
-  text-align: center;
-  text-justify: center;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 8px;
-  user-select: none;
-
-  &:disabled {
-    opacity: 0.2;
-  }
-  &:not(:disabled):not(.c-time-picker__item-active) {
-    &:hover {
-      background: rgba(var(--v-theme-on-surface), 0.1);
-    }
-  }
-
-  &.c-time-picker__item-active {
-    color: rgb(var(--v-theme-on-secondary));
-    background: rgb(var(--v-theme-secondary));
-  }
-}
-</style>
 
 <script setup lang="ts">
 import {
@@ -154,14 +88,7 @@ import {
   endOfHour,
   isSameDay,
 } from "date-fns";
-import {
-  ComponentPublicInstance,
-  computed,
-  nextTick,
-  onMounted,
-  useTemplateRef,
-  watch,
-} from "vue";
+import { computed, nextTick, onMounted, useTemplateRef, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -228,7 +155,7 @@ function testValid(parts: DateValues) {
 }
 
 function testMeridiemValid(isAM: boolean) {
-  let value = props.modelValue;
+  const value = props.modelValue;
   if (!value || (!props.min && !props.max)) return true;
 
   if (props.min && isSameDay(props.min, value) && props.min.getHours() >= 12) {
@@ -405,9 +332,9 @@ onMounted(() => {
         const parent = el.parentElement;
         if (!parent) return;
 
-        //@ts-expect-error
+        //@ts-expect-error _scrollAnimInterval not declared
         clearInterval(parent._scrollAnimInterval);
-        //@ts-expect-error
+        //@ts-expect-error _scrollAnimInterval not declared
         const interval = (parent._scrollAnimInterval = setInterval(() => {
           const rect = el.getBoundingClientRect();
           const parentRect = parent.getBoundingClientRect();
@@ -439,3 +366,69 @@ function lerp(a: number, b: number, alpha: number) {
   return a + alpha * (b - a);
 }
 </script>
+
+<style lang="scss">
+.c-time-picker {
+  max-height: calc(100% - 64px);
+}
+
+.c-time-picker-header {
+  padding: 6px 14px;
+  font-size: 32px;
+  line-height: 40px;
+}
+
+.c-time-picker__columns {
+  display: flex;
+  padding: 8px;
+  justify-content: space-around;
+}
+
+.c-time-picker__column {
+  max-height: 328px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 9px;
+  background-color: rgba(var(--v-theme-surface), 0.3);
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    border-radius: 8px;
+    border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+    box-shadow: inset 0 0 6px rgba(var(--v-theme-on-surface), 0.2);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: rgba(var(--v-theme-on-surface), 0.3);
+  }
+}
+.c-time-picker__item {
+  display: block;
+  padding: 5px 14px;
+  min-width: 46px;
+  margin: 0 4px;
+  text-align: center;
+  text-justify: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  user-select: none;
+
+  &:disabled {
+    opacity: 0.2;
+  }
+  &:not(:disabled):not(.c-time-picker__item-active) {
+    &:hover {
+      background: rgba(var(--v-theme-on-surface), 0.1);
+    }
+  }
+
+  &.c-time-picker__item-active {
+    color: rgb(var(--v-theme-on-secondary));
+    background: rgb(var(--v-theme-secondary));
+  }
+}
+</style>

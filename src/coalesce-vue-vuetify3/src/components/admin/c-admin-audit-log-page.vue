@@ -34,7 +34,7 @@
 
         <c-list-page class="c-admin-table-toolbar--page" :list="listVm" />
 
-        <template v-slot:extension>
+        <template #extension>
           <v-defaults-provider
             :defaults="{
               global: {
@@ -71,14 +71,14 @@
               <c-input
                 v-model="filter.state"
                 :for="listVm.$metadata.props.state"
-                @click:clear="$nextTick(() => (filter.state = ''))"
                 style="min-width: 210px; max-width: 210px"
+                @click:clear="$nextTick(() => (filter.state = ''))"
               />
 
               <c-select
                 v-if="'foreignKey' in userPropMeta"
-                :for="userPropMeta"
                 v-model:key-value="filter[userPropMeta.foreignKey.name]"
+                :for="userPropMeta"
                 clearable
                 style="width: 240px"
                 @click:clear="
@@ -146,8 +146,8 @@
                   />
                   <pre
                     :class="timeDiffClass(auditLog, items[index + 1])"
-                    v-text="timeDiff(auditLog, items[index + 1])"
                     title="Time delta from the preceding row"
+                    v-text="timeDiff(auditLog, items[index + 1])"
                   ></pre>
                 </td>
 
@@ -164,8 +164,8 @@
                   >
                   <div
                     v-if="auditLog.description"
-                    v-text="auditLog.description"
                     class="c-audit-logs--entry-desc text-grey"
+                    v-text="auditLog.description"
                   ></div>
                 </td>
 
@@ -221,8 +221,8 @@
                           {{ prop.oldValue }}
 
                           <span
-                            class="c-audit-logs--property-value-desc text-grey"
                             v-if="prop.oldValueDescription"
+                            class="c-audit-logs--property-value-desc text-grey"
                           >
                             ({{ prop.oldValueDescription }})
                           </span>
@@ -233,8 +233,8 @@
                           {{ prop.newValue }}
 
                           <span
-                            class="c-audit-logs--property-value-desc text-grey"
                             v-if="prop.newValueDescription"
+                            class="c-audit-logs--property-value-desc text-grey"
                           >
                             ({{ prop.newValueDescription }})
                           </span>
@@ -375,10 +375,10 @@ function timeDiff(current: AuditLogBase, older?: AuditLogBase) {
   const positive = ms >= 0;
   ms = Math.abs(ms);
 
-  var totalSec = ms / 1000;
-  var hours = Math.floor(totalSec / 3600);
-  var minutes = Math.floor((totalSec - hours * 3600) / 60);
-  var seconds = totalSec - hours * 3600 - minutes * 60;
+  const totalSec = ms / 1000;
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec - hours * 3600) / 60);
+  const seconds = totalSec - hours * 3600 - minutes * 60;
 
   return (
     (positive ? "+" : "-") +

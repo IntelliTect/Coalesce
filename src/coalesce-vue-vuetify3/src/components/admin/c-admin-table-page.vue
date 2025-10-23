@@ -31,7 +31,11 @@ import { HiddenAreas, ListViewModel, ModelType } from "coalesce-vue";
 const props = defineProps({
   type: { required: false, type: String, default: null },
   color: { required: false, type: String, default: null },
-  list: { required: false, type: Object as PropType<ListViewModel> },
+  list: {
+    required: false,
+    type: Object as PropType<ListViewModel>,
+    default: null,
+  },
   autoSave: {
     required: false,
     type: [String, Boolean] as PropType<"auto" | boolean>,

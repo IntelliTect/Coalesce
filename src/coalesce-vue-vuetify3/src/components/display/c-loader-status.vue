@@ -46,10 +46,10 @@
               <slot name="append"></slot>
               <v-btn
                 v-if="retryLoaders.length"
-                @click="handleRetry"
                 variant="outlined"
                 class="ml-2"
                 prepend-icon="$loading"
+                @click="handleRetry"
               >
                 Retry
               </v-btn>
@@ -112,6 +112,7 @@ type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
 
 type AnyLoaderMaybe =
   // Intersection with `Function` makes vue emit correct runtime props.
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   (AnyLoader & Function) | null | undefined | false;
 
 // Since the component props are the most general level of flags

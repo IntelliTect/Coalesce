@@ -262,9 +262,7 @@ describe("CDatetimePicker", () => {
       await delay(1);
 
       // Check that the hour column is focused
-      const hourColumn = overlay.find(
-        '.c-time-picker__column-hour',
-      );
+      const hourColumn = overlay.find(".c-time-picker__column-hour");
       expect(document.activeElement).toBe(hourColumn.element);
     });
 
@@ -317,15 +315,9 @@ describe("CDatetimePicker", () => {
       )).findComponent(CDatetimePicker);
 
       const overlay = await openMenu(wrapper);
-      const hourColumn = overlay.find(
-        '.c-time-picker__column-hour',
-      );
-      const minuteColumn = overlay.find(
-        '.c-time-picker__column-minute',
-      );
-      const meridiemColumn = overlay.find(
-        '.c-time-picker__column-meridiem',
-      );
+      const hourColumn = overlay.find(".c-time-picker__column-hour");
+      const minuteColumn = overlay.find(".c-time-picker__column-minute");
+      const meridiemColumn = overlay.find(".c-time-picker__column-meridiem");
 
       // Start at hour column
       (hourColumn.element as HTMLElement).focus();
@@ -359,9 +351,7 @@ describe("CDatetimePicker", () => {
       )).findComponent(CDatetimePicker);
 
       const overlay = await openMenu(wrapper);
-      const hourColumn = overlay.find(
-        '.c-time-picker__column-hour',
-      );
+      const hourColumn = overlay.find(".c-time-picker__column-hour");
       const datePicker = overlay.find(".v-date-picker");
 
       (hourColumn.element as HTMLElement).focus();
@@ -381,9 +371,7 @@ describe("CDatetimePicker", () => {
       )).findComponent(CDatetimePicker);
 
       const overlay = await openMenu(wrapper);
-      const meridiemColumn = overlay.find(
-        '.c-time-picker__column-meridiem',
-      );
+      const meridiemColumn = overlay.find(".c-time-picker__column-meridiem");
 
       (meridiemColumn.element as HTMLElement).focus();
 
@@ -407,9 +395,7 @@ describe("CDatetimePicker", () => {
       const overlay = await openMenu(wrapper);
 
       // Test hour column navigation
-      const hourColumn = overlay.find(
-        '.c-time-picker__column-hour',
-      );
+      const hourColumn = overlay.find(".c-time-picker__column-hour");
       (hourColumn.element as HTMLElement).focus();
 
       await hourColumn.trigger("keydown", { key: "ArrowDown" });
@@ -421,9 +407,7 @@ describe("CDatetimePicker", () => {
       expect(model.dateTime?.getHours()).toBe(12); // back to 12 PM
 
       // Test minute column navigation
-      const minuteColumn = overlay.find(
-        '.c-time-picker__column-minute',
-      );
+      const minuteColumn = overlay.find(".c-time-picker__column-minute");
       (minuteColumn.element as HTMLElement).focus();
 
       await minuteColumn.trigger("keydown", { key: "ArrowDown" });
@@ -435,9 +419,7 @@ describe("CDatetimePicker", () => {
       expect(model.dateTime?.getMinutes()).toBe(30);
 
       // Test meridiem column navigation
-      const meridiemColumn = overlay.find(
-        '.c-time-picker__column-meridiem',
-      );
+      const meridiemColumn = overlay.find(".c-time-picker__column-meridiem");
       (meridiemColumn.element as HTMLElement).focus();
 
       await meridiemColumn.trigger("keydown", { key: "ArrowDown" });
@@ -456,9 +438,7 @@ describe("CDatetimePicker", () => {
       )).findComponent(CDatetimePicker);
 
       const overlay = await openMenu(wrapper);
-      const meridiemColumn = overlay.find(
-        '.c-time-picker__column-meridiem',
-      );
+      const meridiemColumn = overlay.find(".c-time-picker__column-meridiem");
 
       (meridiemColumn.element as HTMLElement).focus();
 
@@ -480,9 +460,7 @@ describe("CDatetimePicker", () => {
       )).findComponent(CDatetimePicker);
 
       const overlay = await openMenu(wrapper);
-      const hourColumn = overlay.find(
-        '.c-time-picker__column-hour',
-      );
+      const hourColumn = overlay.find(".c-time-picker__column-hour");
       const datePicker = overlay.find(".v-date-picker");
 
       (hourColumn.element as HTMLElement).focus();
@@ -501,9 +479,7 @@ describe("CDatetimePicker", () => {
       )).findComponent(CDatetimePicker);
 
       const overlay = await openMenu(wrapper);
-      const hourColumn = overlay.find(
-        '.c-time-picker__column-hour',
-      );
+      const hourColumn = overlay.find(".c-time-picker__column-hour");
 
       (hourColumn.element as HTMLElement).focus();
 
@@ -525,9 +501,7 @@ describe("CDatetimePicker", () => {
       )).findComponent(CDatetimePicker);
 
       const overlay = await openMenu(wrapper);
-      const hourColumn = overlay.find(
-        '.c-time-picker__column-hour',
-      );
+      const hourColumn = overlay.find(".c-time-picker__column-hour");
 
       (hourColumn.element as HTMLElement).focus();
 
@@ -549,9 +523,7 @@ describe("CDatetimePicker", () => {
       )).findComponent(CDatetimePicker);
 
       const overlay = await openMenu(wrapper);
-      const minuteColumn = overlay.find(
-        '.c-time-picker__column-minute',
-      );
+      const minuteColumn = overlay.find(".c-time-picker__column-minute");
 
       (minuteColumn.element as HTMLElement).focus();
 
@@ -572,4 +544,3 @@ describe("CDatetimePicker", () => {
     });
   });
 });
-

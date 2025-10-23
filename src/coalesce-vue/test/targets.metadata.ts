@@ -489,6 +489,7 @@ export const DisplaysStudentSerializesChild = <ObjectType>{
   },
 };
 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 interface AppDomain extends Domain {
   enums: {};
   types: {

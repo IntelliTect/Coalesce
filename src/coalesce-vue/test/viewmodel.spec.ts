@@ -1,3 +1,4 @@
+/* eslint-disable vue/one-component-per-file */
 import {
   computed,
   defineComponent,
@@ -37,8 +38,6 @@ import {
   ProductViewModel,
   TestViewModel,
   ZipCodeViewModel,
-  AbstractImpl1ViewModel,
-  MultipleParentsViewModel,
   Parent1ViewModel,
   Parent2ViewModel,
 } from "../../test-targets/viewmodels.g";
@@ -65,11 +64,11 @@ function mockItemResult<T>(success: boolean, object: T) {
 describe("ViewModel", () => {
   describe("types", () => {
     test("is assignable to generic untyped ViewModel", () => {
-      const vm: ViewModel = new StudentViewModel();
+      const _: ViewModel = new StudentViewModel();
     });
 
     test("$loadCleanData is chainable", () => {
-      const vm: StudentViewModel = new StudentViewModel().$loadCleanData({
+      const _: StudentViewModel = new StudentViewModel().$loadCleanData({
         studentId: 1,
       });
     });
@@ -90,15 +89,15 @@ describe("ViewModel", () => {
         // ViewModel shouldn't have its own property descriptor for callerName.
         // The descriptor will be on the prototype.
         expect(
-          Object.getOwnPropertyDescriptor(vue.student, callerName)
+          Object.getOwnPropertyDescriptor(vue.student, callerName),
         ).toBeUndefined();
 
         // Access the caller to cause it to be created.
-        vue.student[callerName];
+        vue.student[callerName].toString();
 
         // Instance should now have its own caller.
         expect(
-          Object.getOwnPropertyDescriptor(vue.student, callerName)
+          Object.getOwnPropertyDescriptor(vue.student, callerName),
         ).not.toBeUndefined();
         expect(vue.student[callerName]).toBeInstanceOf(ItemApiState);
 
@@ -113,7 +112,7 @@ describe("ViewModel", () => {
         // Watcher should have been triggered for isLoading.
         expect(callbackFn).toBeCalledTimes(1);
       });
-    }
+    },
   );
 
   describe.each(["$load", "$save", "$bulkSave"] as const)(
@@ -171,7 +170,7 @@ describe("ViewModel", () => {
           expect(capturedName).toBe("Bob");
         });
       });
-    }
+    },
   );
 
   describe.each(["$save", "$bulkSave"] as const)("%s", (callerName) => {
@@ -222,13 +221,6 @@ describe("ViewModel", () => {
   });
 
   describe("$save", () => {
-    const saveMock = mockItemResult(true, <Student>{
-      studentId: 3,
-      name: "Bob",
-      studentAdvisorId: null,
-      advisor: null,
-    });
-
     test("updates collection navigation entities with new PK", async () => {
       const student = new StudentViewModel({
         name: "Bob",
@@ -439,7 +431,7 @@ describe("ViewModel", () => {
       student.$saveMode = "surgical";
       const promise = student.$save({ grade: Grade.Freshman });
       expect(student.$savingProps).toEqual(
-        new Set(["studentId", "name", "grade"])
+        new Set(["studentId", "name", "grade"]),
       );
       await promise;
       expect(student.$savingProps).toEqual(new Set());
@@ -464,7 +456,7 @@ describe("ViewModel", () => {
       let triggered = false;
       watch(
         () => student.$savingProps.has("name"),
-        () => (triggered = true)
+        () => (triggered = true),
       );
 
       student.$saveMode = "surgical";
@@ -479,7 +471,7 @@ describe("ViewModel", () => {
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: { caseKey: 1, title: "TEST", assignedToId: 1 },
-        }))
+        })),
       );
 
       const vm = new CaseViewModel();
@@ -537,7 +529,7 @@ describe("ViewModel", () => {
       // If the user was typing in the middle of the field, this presents a very bad UX.
       // (If the user was typing at the end of the field, they probably won't notice this bug).
 
-      var student = new StudentViewModel({
+      const student = new StudentViewModel({
         studentId: 1,
         name: "bob",
         currentCourse: new CourseViewModel({ courseId: 1 }),
@@ -545,7 +537,7 @@ describe("ViewModel", () => {
       student.$isDirty = false;
       student.currentCourse!.$isDirty = false;
 
-      var list = new StudentListViewModel();
+      const list = new StudentListViewModel();
       list.$items.push(student);
 
       const saveMock = (student.$apiClient.save = vitest.fn(async () => {
@@ -580,7 +572,7 @@ describe("ViewModel", () => {
         } as AxiosListResult<any>;
       }));
 
-      const vue = mountData({ student });
+      const _ = mountData({ student });
 
       // Act: Trigger a load that will finish while a save is still pending.
       list.$load();
@@ -609,7 +601,7 @@ describe("ViewModel", () => {
     });
 
     test("loads that are older than the most recent save are ignored", async () => {
-      var student = new StudentViewModel({
+      const student = new StudentViewModel({
         studentId: 1,
         name: "bob",
         currentCourse: new CourseViewModel({ courseId: 1 }),
@@ -617,7 +609,7 @@ describe("ViewModel", () => {
       student.$isDirty = false;
       student.currentCourse!.$isDirty = false;
 
-      var list = new StudentListViewModel();
+      const list = new StudentListViewModel();
       list.$items.push(student);
 
       const saveMock = (student.$apiClient.save = vitest.fn(async () => {
@@ -652,7 +644,7 @@ describe("ViewModel", () => {
         } as AxiosListResult<any>;
       }));
 
-      const vue = mountData({ student });
+      const _ = mountData({ student });
 
       // Act: Trigger a load that will finish while a save is still pending.
       list.$load();
@@ -690,7 +682,7 @@ describe("ViewModel", () => {
             studentId: 1,
             studentAdvisorId: 3,
           },
-        }))
+        })),
       );
 
       const student = new StudentViewModel({
@@ -705,7 +697,7 @@ describe("ViewModel", () => {
       await student.$save();
 
       expect(saveEndpoint.mock.calls[0][0].data).toBe(
-        '{"name":"bob","studentAdvisorId":7}'
+        '{"name":"bob","studentAdvisorId":7}',
       );
 
       saveEndpoint.destroy();
@@ -717,7 +709,7 @@ describe("ViewModel", () => {
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: { complexModelId: 1 },
-        }))
+        })),
       );
 
       const vm = new ComplexModelViewModel();
@@ -736,7 +728,7 @@ describe("ViewModel", () => {
       await vm.$save();
 
       expect(saveEndpoint.mock.calls[0][0].data).toBe(
-        '{"complexModelId":1,"intCollection":[],"enumCollection":[]}'
+        '{"complexModelId":1,"intCollection":[],"enumCollection":[]}',
       );
 
       saveEndpoint.destroy();
@@ -752,7 +744,7 @@ describe("ViewModel", () => {
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: { productId: 1 },
-        }))
+        })),
       );
 
       const vm = new ProductViewModel();
@@ -790,7 +782,7 @@ describe("ViewModel", () => {
         vitest.fn((req) => ({
           wasSuccessful: true,
           ...JSON.parse(JSON.stringify(response)), // deep clone
-        }))
+        })),
       );
 
       const student = new StudentViewModel();
@@ -900,7 +892,7 @@ describe("ViewModel", () => {
         vitest.fn((req) => ({
           wasSuccessful: true,
           ...JSON.parse(JSON.stringify(response)), // deep clone
-        }))
+        })),
       );
 
       const student = new StudentViewModel({ name: "scott" });
@@ -968,7 +960,7 @@ describe("ViewModel", () => {
             name: "bob",
             // We're assuming that `advisor` has a SetNull cascading delete on the server.
           },
-        }))
+        })),
       );
 
       const student = new StudentViewModel();
@@ -1029,7 +1021,7 @@ describe("ViewModel", () => {
             advisor: { advisorId: 2, name: "bob" },
             // We're assuming that `advisor` has a SetNull cascading delete on the server.
           },
-        }))
+        })),
       );
 
       const student = new StudentViewModel({ studentId: 1 });
@@ -1107,7 +1099,7 @@ describe("ViewModel", () => {
           object: {
             studentId: 1,
           },
-        }))
+        })),
       );
 
       const student = new StudentViewModel();
@@ -1147,7 +1139,7 @@ describe("ViewModel", () => {
         vitest.fn((req) => ({
           wasSuccessful: true,
           ...JSON.parse(JSON.stringify(response)), // deep clone
-        }))
+        })),
       );
 
       const student = new StudentViewModel();
@@ -1207,7 +1199,7 @@ describe("ViewModel", () => {
         "/Company/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
-        }))
+        })),
       );
 
       const parent = new CompanyViewModel();
@@ -1256,7 +1248,7 @@ describe("ViewModel", () => {
         "/Company/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
-        }))
+        })),
       );
 
       const parent = new CompanyViewModel();
@@ -1301,7 +1293,7 @@ describe("ViewModel", () => {
         "/Company/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
-        }))
+        })),
       );
 
       const company1 = new CompanyViewModel({ name: "new company1" });
@@ -1347,7 +1339,7 @@ describe("ViewModel", () => {
             studentId: 1,
             studentAdvisorId: 3,
           },
-        }))
+        })),
       );
 
       const advisor = new AdvisorViewModel();
@@ -1392,7 +1384,7 @@ describe("ViewModel", () => {
             zip: "12345",
             state: "wa",
           },
-        }))
+        })),
       );
 
       const vm = new ZipCodeViewModel({ zip: "12345", state: "wa" });
@@ -1426,7 +1418,7 @@ describe("ViewModel", () => {
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: null,
-        }))
+        })),
       );
 
       const vm = new Parent1ViewModel({
@@ -1439,7 +1431,7 @@ describe("ViewModel", () => {
       expect(vm.children[0].parent1).toBeNull();
       // There should be a collection nav on the other parent with the same name
       expect(new Parent2ViewModel().$metadata.props.children.name).toBe(
-        vm.$metadata.props.children.name
+        vm.$metadata.props.children.name,
       );
 
       await vm.$bulkSave();
@@ -1476,7 +1468,7 @@ describe("ViewModel", () => {
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: null,
-        }))
+        })),
       );
 
       const existingProduct = new ProductViewModel();
@@ -1554,7 +1546,7 @@ describe("ViewModel", () => {
       // If this is too small then the test wont work.
       const tickLength = 30;
 
-      var savePromise: Promise<any>;
+      let savePromise: Promise<any>;
       const saveMock = (student.$apiClient.save = vitest
         .fn()
         .mockImplementation((dto: any) => {
@@ -1573,7 +1565,7 @@ describe("ViewModel", () => {
                   object: result,
                 },
               });
-            }, tickLength)
+            }, tickLength),
           ));
         }));
 
@@ -1677,12 +1669,12 @@ describe("ViewModel", () => {
       // will never be refreshed with the most recent server value via $loadCleanData
       // when $loadCleanData is being called by hand outside of a $save().
 
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       student.$loadCleanData(studentModel);
 
       // precondition:
@@ -1698,12 +1690,12 @@ describe("ViewModel", () => {
     });
 
     test("$loadCleanData won't trigger autosave on root", async () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       student.$loadCleanData(studentModel);
       const saveMock = (student.$apiClient.save = vitest
         .fn()
@@ -1722,12 +1714,12 @@ describe("ViewModel", () => {
     });
 
     test("$loadCleanData won't trigger autosave on ref nav", async () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       student.$loadCleanData(studentModel);
       const saveMock = (student.advisor!.$apiClient.save = vitest
         .fn()
@@ -1746,11 +1738,11 @@ describe("ViewModel", () => {
     });
 
     test("$loadCleanData won't trigger autosave on collection nav", async () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         courses: [{ courseId: 7, name: "foo", studentId: 1 }],
       });
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       student.$loadCleanData(studentModel);
       const saveMock = (student.courses![0].$apiClient.save = vitest
         .fn()
@@ -1769,7 +1761,7 @@ describe("ViewModel", () => {
     });
 
     test("triggers save immediately if model is dirty", async () => {
-      var student = new StudentViewModel({
+      const student = new StudentViewModel({
         studentId: 1,
         name: "bob",
       });
@@ -1814,7 +1806,7 @@ describe("ViewModel", () => {
               In this scenario, you could always use a predicate when setting up deep autosaves
               in order to prevent this behavior - just add an explicit check for $isDirty.
       */
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       student.$loadCleanData({ name: "bob" });
 
       const saveMock = (student.$apiClient.save = mockItemResult(true, {
@@ -1833,7 +1825,7 @@ describe("ViewModel", () => {
     });
 
     test("triggers save immediately if model is empty but valid", async () => {
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
 
       const saveMock = (student.$apiClient.save = mockItemResult(true, {
         studentId: 1,
@@ -1859,7 +1851,7 @@ describe("ViewModel", () => {
     });
 
     test("does not trigger if enabled while model load is pending", async () => {
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       const saveMock = (student.$apiClient.save = vitest
         .fn()
         .mockResolvedValue(<AxiosItemResult<Student>>{
@@ -1876,7 +1868,7 @@ describe("ViewModel", () => {
     });
 
     test("does not trigger if enabled just before loading model", async () => {
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       const saveMock = (student.$apiClient.save = vitest
         .fn()
         .mockResolvedValue(<AxiosItemResult<Student>>{
@@ -1893,7 +1885,7 @@ describe("ViewModel", () => {
     });
 
     test("does not trigger if enabled just before loading model and model load fails", async () => {
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       const saveMock = (student.$apiClient.save = vitest
         .fn()
         .mockResolvedValue(<AxiosItemResult<Student>>{
@@ -1917,7 +1909,7 @@ describe("ViewModel", () => {
     });
 
     test("does not trigger if model has errors", async () => {
-      var viewModel = new AdvisorViewModel({
+      const viewModel = new AdvisorViewModel({
         advisorId: 1,
         name: null,
       });
@@ -1941,7 +1933,7 @@ describe("ViewModel", () => {
     });
 
     test("does not infinitely trigger if API call fails", async () => {
-      var student = new StudentViewModel({
+      const student = new StudentViewModel({
         name: "bob",
       });
       const saveMock = (student.$apiClient.save = vitest
@@ -1957,7 +1949,7 @@ describe("ViewModel", () => {
     });
 
     test("debounces correctly", async () => {
-      var student = new StudentViewModel({
+      const student = new StudentViewModel({
         studentId: 1,
         name: "bob",
       });
@@ -1992,7 +1984,7 @@ describe("ViewModel", () => {
     });
 
     test("works with setup()", async () => {
-      var student = new StudentViewModel({
+      const student = new StudentViewModel({
         studentId: 1,
         name: "bob",
       });
@@ -2001,7 +1993,6 @@ describe("ViewModel", () => {
 
       const wrapper = mount(
         defineComponent({
-          template: "<div></div>",
           setup() {
             student.name += "2";
             expect(student.$isDirty).toBe(true);
@@ -2009,7 +2000,8 @@ describe("ViewModel", () => {
             // Autosave should trigger immediately since the model is dirty.
             student.$startAutoSave(getCurrentInstance()!.proxy!, { wait: 0 });
           },
-        })
+          template: "<div></div>",
+        }),
       );
 
       await delay(10);
@@ -2021,7 +2013,7 @@ describe("ViewModel", () => {
     });
 
     test("useAutoSave works with setup()", async () => {
-      var student = new StudentViewModel({
+      const student = new StudentViewModel({
         studentId: 1,
         name: "bob",
       });
@@ -2030,7 +2022,6 @@ describe("ViewModel", () => {
 
       const wrapper = mount(
         defineComponent({
-          template: "<div></div>",
           setup() {
             student.name += "2";
             expect(student.$isDirty).toBe(true);
@@ -2038,7 +2029,8 @@ describe("ViewModel", () => {
             // Autosave should trigger immediately since the model is dirty.
             student.$useAutoSave({ wait: 0 });
           },
-        })
+          template: "<div></div>",
+        }),
       );
 
       await delay(10);
@@ -2051,13 +2043,13 @@ describe("ViewModel", () => {
 
     describe("deep", () => {
       test("propagates to existing related objects", async () => {
-        var studentModel = new Student({
+        const studentModel = new Student({
           studentId: 1,
           courses: [{ studentId: 1, courseId: 7, name: "foo" }],
           studentAdvisorId: 3,
           advisor: { advisorId: 3, name: "Bob" },
         });
-        var student = new StudentViewModel(studentModel);
+        const student = new StudentViewModel(studentModel);
         const saveMock =
           (student.courses![0].$apiClient.save =
           student.advisor!.$apiClient.save =
@@ -2080,10 +2072,10 @@ describe("ViewModel", () => {
       });
 
       test("propagates to new collection navigation items", async () => {
-        var studentModel = new Student({
+        const studentModel = new Student({
           studentId: 1,
         });
-        var student = new StudentViewModel(studentModel);
+        const student = new StudentViewModel(studentModel);
         student.$isDirty = false;
         const vue = mountData({ student });
 
@@ -2103,10 +2095,10 @@ describe("ViewModel", () => {
       });
 
       test("propagates to new reference navigation items", async () => {
-        var studentModel = new Student({
+        const studentModel = new Student({
           studentId: 1,
         });
-        var student = new StudentViewModel(studentModel);
+        const student = new StudentViewModel(studentModel);
         student.$isDirty = false;
         const vue = mountData({ student });
 
@@ -2131,7 +2123,7 @@ describe("ViewModel", () => {
       });
 
       test("when autosave of child returns different PK, does not trigger save of parent", async () => {
-        var parent = new StudentViewModel({
+        const parent = new StudentViewModel({
           studentId: 2,
           name: "Steve",
           currentCourseId: 10,
@@ -2189,24 +2181,22 @@ describe("ViewModel", () => {
 
   describe("$addChild", () => {
     test("creates ViewModels", () => {
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       const course = student.$addChild("courses");
 
       expect(course).toBeInstanceOf(CourseViewModel);
     });
 
     test("new model has $parent and $parentCollection set", () => {
-      var student = new StudentViewModel();
+      const student = new StudentViewModel();
       const course = student.$addChild("courses");
 
-      // @ts-ignore testing private field
       expect(course.$parent).toBe(student);
-      // @ts-ignore testing private field
       expect(course.$parentCollection).toBe(student.courses);
     });
 
     test("new model has foreign key and $isDirty set", () => {
-      var student = new StudentViewModel({ studentId: 3 });
+      const student = new StudentViewModel({ studentId: 3 });
       const course = student.$addChild("courses") as CourseViewModel;
 
       expect(course).toBeInstanceOf(CourseViewModel);
@@ -2217,7 +2207,7 @@ describe("ViewModel", () => {
     });
 
     test("new model has collections initialized to empty arrays", () => {
-      var advisor = new AdvisorViewModel({ advisorId: 3 });
+      const advisor = new AdvisorViewModel({ advisorId: 3 });
       const student = advisor.$addChild("students") as StudentViewModel;
 
       expect(student.courses).not.toBeNull();
@@ -2225,7 +2215,7 @@ describe("ViewModel", () => {
     });
 
     test("new model has initial data flagged dirty", () => {
-      var advisor = new AdvisorViewModel({ advisorId: 3 });
+      const advisor = new AdvisorViewModel({ advisorId: 3 });
       advisor.$isDirty = false;
 
       const student = advisor.$addChild("students", {
@@ -2251,7 +2241,7 @@ describe("ViewModel", () => {
 
   describe("validation", () => {
     test("$removeRule adds ignore for metadata-provided rule", () => {
-      var viewModel = new AdvisorViewModel();
+      const viewModel = new AdvisorViewModel();
       expect([...viewModel.$getErrors()]).toHaveLength(1);
 
       viewModel.$removeRule("name", "required");
@@ -2259,7 +2249,7 @@ describe("ViewModel", () => {
     });
 
     test("$removeRule removes custom rule", () => {
-      var viewModel = new AdvisorViewModel();
+      const viewModel = new AdvisorViewModel();
       viewModel.$addRule("name", "required2", (v) => !!v || "custom");
       expect([...viewModel.$getErrors()]).toEqual([
         "Name is required.",
@@ -2271,7 +2261,7 @@ describe("ViewModel", () => {
     });
 
     test("$removeRule removes metadata rule and leaves custom rule", () => {
-      var viewModel = new AdvisorViewModel();
+      const viewModel = new AdvisorViewModel();
       viewModel.$addRule("name", "required2", (v) => !!v || "custom");
       expect([...viewModel.$getErrors()]).toEqual([
         "Name is required.",
@@ -2283,7 +2273,7 @@ describe("ViewModel", () => {
     });
 
     test("$addRule overrides metadata-provided rule", () => {
-      var viewModel = new AdvisorViewModel();
+      const viewModel = new AdvisorViewModel();
       expect([...viewModel.$getErrors()]).toEqual(["Name is required."]);
 
       viewModel.$addRule("name", "required", (v) => !!v || "custom");
@@ -2291,7 +2281,7 @@ describe("ViewModel", () => {
     });
 
     test("$addRule adds additional rules when prop has metadata-provided rules", () => {
-      var viewModel = new AdvisorViewModel();
+      const viewModel = new AdvisorViewModel();
       expect([...viewModel.$getErrors()]).toEqual(["Name is required."]);
 
       viewModel.$addRule("name", "required2", (v) => !!v || "custom");
@@ -2302,7 +2292,7 @@ describe("ViewModel", () => {
     });
 
     test("$addRule adds rules when prop has no metadata-provided rules", () => {
-      var viewModel = new AdvisorViewModel();
+      const viewModel = new AdvisorViewModel();
       expect([...viewModel.$getErrors()]).toEqual(["Name is required."]);
 
       viewModel.$addRule("advisorId", "required", (v) => !!v || "custom");
@@ -2330,7 +2320,7 @@ describe("ViewModel", () => {
       ])(
         "%s setter doesn't trigger reactivity for unchanged value",
         async (_, factory) => {
-          var student = new StudentViewModel();
+          const student = new StudentViewModel();
           student.$loadCleanData(factory());
 
           const vue = mountData({ student });
@@ -2342,13 +2332,13 @@ describe("ViewModel", () => {
 
           // Exact same model was reloaded. There should be no changes.
           expect(watchCallback).toBeCalledTimes(0);
-        }
+        },
       );
     });
 
     describe("object getter/setters", () => {
       test("object setter converts to Model", () => {
-        var advisor = new AdvisorViewModel();
+        const advisor = new AdvisorViewModel();
         advisor.$loadCleanData({
           studentWrapperObject: {
             name: "bob",
@@ -2360,15 +2350,15 @@ describe("ViewModel", () => {
         });
 
         expect(advisor.studentWrapperObject!.$metadata).toBe(
-          metadata.DisplaysStudent
+          metadata.DisplaysStudent,
         );
         expect(advisor.studentWrapperObject!.student?.$metadata).toBe(
-          metadata.Student
+          metadata.Student,
         );
       });
 
       test("object setter does not throw when newValue is null and oldValue is non-null", () => {
-        var advisor = new AdvisorViewModel();
+        const advisor = new AdvisorViewModel();
         advisor.$loadCleanData({
           studentWrapperObject: {
             name: "bob",
@@ -2387,7 +2377,7 @@ describe("ViewModel", () => {
     describe("collection navigation getter/setters", () => {
       test("types", () => {
         const model = new ComplexModelViewModel({});
-        const plain: ComplexModel = model;
+        const _plain: ComplexModel = model;
 
         model.tests = model.tests;
         model.tests = [];
@@ -2420,7 +2410,7 @@ describe("ViewModel", () => {
         model.tests.push(
           new Test({
             testName: "Seagull",
-          })
+          }),
         );
 
         expect(model.tests[0]).toBeInstanceOf(TestViewModel);
@@ -2464,10 +2454,10 @@ describe("ViewModel", () => {
         model.unmappedCollectionOfMappedModels = [];
 
         expect(model.unmappedCollectionOfMappedModels.push).not.toBe(
-          Array.prototype.push
+          Array.prototype.push,
         );
         expect(model.unmappedCollectionOfMappedModels.$metadata).toBe(
-          model.$metadata.props.unmappedCollectionOfMappedModels
+          model.$metadata.props.unmappedCollectionOfMappedModels,
         );
       });
 
@@ -2478,22 +2468,22 @@ describe("ViewModel", () => {
         model.unmappedCollectionOfMappedModels.push(
           new Test({
             testName: "Seagull",
-          })
+          }),
         );
 
         expect(model.unmappedCollectionOfMappedModels[0]).toBeInstanceOf(
-          TestViewModel
+          TestViewModel,
         );
         expect(model.unmappedCollectionOfMappedModels[0].testName).toBe(
-          "Seagull"
+          "Seagull",
         );
       });
     });
 
     describe("reference navigation & FK getter/setters", () => {
       test("setter copies foreign key", () => {
-        var student = new StudentViewModel();
-        var advisor = new AdvisorViewModel({ advisorId: 3 });
+        const student = new StudentViewModel();
+        const advisor = new AdvisorViewModel({ advisorId: 3 });
         student.advisor = advisor;
         expect(student.studentAdvisorId).toBe(advisor.advisorId);
       });
@@ -2507,7 +2497,7 @@ describe("ViewModel", () => {
       });
 
       test("clears FK when reference is nulled", () => {
-        var student = new StudentViewModel({
+        const student = new StudentViewModel({
           studentAdvisorId: 3,
           advisor: { advisorId: 3, name: "Delphine" },
         });
@@ -2517,7 +2507,7 @@ describe("ViewModel", () => {
       });
 
       test("updates FK when reference is changed", () => {
-        var student = new StudentViewModel({
+        const student = new StudentViewModel({
           studentAdvisorId: 3,
           advisor: { advisorId: 3, name: "Delphine" },
         });
@@ -2527,7 +2517,7 @@ describe("ViewModel", () => {
       });
 
       test("clears reference when FK is nulled", () => {
-        var student = new StudentViewModel({
+        const student = new StudentViewModel({
           studentAdvisorId: 3,
           advisor: { advisorId: 3, name: "Delphine" },
         });
@@ -2537,7 +2527,7 @@ describe("ViewModel", () => {
       });
 
       test("maintains reference when FK is nulled if reference has null PK", () => {
-        var student = new StudentViewModel();
+        const student = new StudentViewModel();
 
         student.advisor = new AdvisorViewModel({
           advisorId: null,
@@ -2548,7 +2538,7 @@ describe("ViewModel", () => {
       });
 
       test("sets null FK when reference with null PK is set", () => {
-        var student = new StudentViewModel({
+        const student = new StudentViewModel({
           studentAdvisorId: 3,
         });
 
@@ -2561,7 +2551,7 @@ describe("ViewModel", () => {
       });
 
       test("clears reference when FK no longer matches", () => {
-        var student = new StudentViewModel({
+        const student = new StudentViewModel({
           studentAdvisorId: 3,
           advisor: { advisorId: 3, name: "Delphine" },
         });
@@ -2571,7 +2561,7 @@ describe("ViewModel", () => {
       });
 
       test("maintains reference when FK is set to same value", () => {
-        var student = new StudentViewModel({
+        const student = new StudentViewModel({
           studentAdvisorId: 3,
           advisor: { advisorId: 3, name: "Delphine" },
         });
@@ -2585,14 +2575,14 @@ describe("ViewModel", () => {
 
   describe("$loadFromModel", () => {
     test("preserves & updates existing reference navigations when key is same", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
 
-      var currentAdvisor = student.advisor;
+      const currentAdvisor = student.advisor;
       studentModel.advisor!.name = "Beth";
       student.$loadCleanData(studentModel);
 
@@ -2604,14 +2594,14 @@ describe("ViewModel", () => {
     });
 
     test("overwrites existing reference navigations when key is different", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
 
-      var currentAdvisor = student.advisor;
+      const currentAdvisor = student.advisor;
       studentModel.studentAdvisorId = 4;
       studentModel.advisor!.name = "Beth";
       studentModel.advisor!.advisorId = 4;
@@ -2625,14 +2615,14 @@ describe("ViewModel", () => {
     });
 
     test("preserves existing reference navigation when incoming ref is null but key is same and non-null", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
 
-      var currentAdvisor = student.advisor;
+      const currentAdvisor = student.advisor;
       studentModel.advisor = null;
       student.$loadCleanData(studentModel);
 
@@ -2641,12 +2631,12 @@ describe("ViewModel", () => {
     });
 
     test("clears existing reference navigation when incoming ref is null but key doesn't match", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
 
       // Make the incoming reference null,
       // and make the key not match the current key.
@@ -2659,12 +2649,12 @@ describe("ViewModel", () => {
     });
 
     test("clears existing reference navigation when incoming ref and key are null, and existing object has a PK", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
       expect(student.advisor).not.toBeNull();
 
       studentModel.studentAdvisorId = null;
@@ -2690,8 +2680,8 @@ describe("ViewModel", () => {
         To ensure this happens, we need to ensure that the `advisor` navigation isn't nulled out
         when the first save against the Student finishes.
       */
-      var student = new StudentViewModel();
-      var advisor = (student.advisor = new AdvisorViewModel());
+      const student = new StudentViewModel();
+      const advisor = (student.advisor = new AdvisorViewModel());
 
       // Simulate first save against Student.
       student.$loadCleanData({
@@ -2709,15 +2699,15 @@ describe("ViewModel", () => {
       // Assert that the precondition now holds.
       const values = Object.values(metadata.Student.props);
       expect(values.indexOf(metadata.Student.props.advisor)).toBeLessThan(
-        values.indexOf(metadata.Student.props.studentAdvisorId)
+        values.indexOf(metadata.Student.props.studentAdvisorId),
       );
 
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         advisor: { advisorId: 3, name: "Delphine" },
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
 
       studentModel.studentAdvisorId = 4;
       studentModel.advisor!.advisorId = 4;
@@ -2738,15 +2728,15 @@ describe("ViewModel", () => {
       // Assert that the precondition holds.
       const values = Object.values(metadata.Course.props);
       expect(values.indexOf(metadata.Course.props.student)).toBeGreaterThan(
-        values.indexOf(metadata.Course.props.studentId)
+        values.indexOf(metadata.Course.props.studentId),
       );
 
-      var courseModel = new Course({
+      const courseModel = new Course({
         courseId: 1,
         studentId: 3,
         student: { studentId: 3, name: "Delphine" },
       });
-      var course = new CourseViewModel(courseModel);
+      const course = new CourseViewModel(courseModel);
 
       courseModel.studentId = 4;
       courseModel.student!.studentId = 4;
@@ -2765,11 +2755,11 @@ describe("ViewModel", () => {
       // Assert that the precondition now holds.
       const values = Object.values(metadata.Student.props);
       expect(values.indexOf(metadata.Student.props.advisor)).toBeLessThan(
-        values.indexOf(metadata.Student.props.studentAdvisorId)
+        values.indexOf(metadata.Student.props.studentAdvisorId),
       );
 
-      var advisor = new AdvisorViewModel({ advisorId: 1, name: "Steve" });
-      var student = new StudentViewModel();
+      const advisor = new AdvisorViewModel({ advisorId: 1, name: "Steve" });
+      const student = new StudentViewModel();
       student.$loadCleanData({ advisor });
 
       expect(student.advisor).toBe(advisor);
@@ -2780,11 +2770,11 @@ describe("ViewModel", () => {
       // Assert that the precondition now holds.
       const values = Object.values(metadata.Course.props);
       expect(values.indexOf(metadata.Course.props.student)).toBeGreaterThan(
-        values.indexOf(metadata.Course.props.studentId)
+        values.indexOf(metadata.Course.props.studentId),
       );
 
-      var student = new StudentViewModel({ studentId: 1, name: "Steve" });
-      var course = new CourseViewModel();
+      const student = new StudentViewModel({ studentId: 1, name: "Steve" });
+      const course = new CourseViewModel();
       course.$loadCleanData({ student });
 
       expect(course.student).toBe(student);
@@ -2792,12 +2782,12 @@ describe("ViewModel", () => {
     });
 
     test("preserves existing collection navigation when incoming is null", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         courses: [{ courseId: 7, name: "foo" }],
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
 
       studentModel.courses = null;
@@ -2810,12 +2800,12 @@ describe("ViewModel", () => {
     });
 
     test("clears existing collection navigation when incoming is []", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
         courses: [{ courseId: 7, name: "foo" }],
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
 
       studentModel.courses = [];
@@ -2828,18 +2818,18 @@ describe("ViewModel", () => {
     });
 
     test("preserves existing collection navigation items when keys are same", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         courses: [
           { courseId: 7, name: "foo" },
           { courseId: 9, name: "bar" },
         ],
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
 
-      var originalFoo = student.courses![0];
-      var originalBar = student.courses![1];
+      const originalFoo = student.courses![0];
+      const originalBar = student.courses![1];
 
       studentModel.courses![0].name = "baz";
       studentModel.courses![1].courseId = 11;
@@ -2892,11 +2882,11 @@ describe("ViewModel", () => {
       ["reorder", [{ courseId: 8 }, { courseId: 7 }, { courseId: 9 }]],
       ["reorder", [{ courseId: 8 }, { courseId: 9 }, { courseId: 7 }]],
     ])("collection navigation is reactive to %s", async (name, data) => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         courses: [{ courseId: 7 }, { courseId: 8 }, { courseId: 9 }],
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
 
       const vue = mountData({ student });
@@ -2923,14 +2913,14 @@ describe("ViewModel", () => {
     });
 
     test("collection navigation is not reactive when nothing changes", async () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         courses: [
           { courseId: 7, name: "foo" },
           { courseId: 9, name: "bar" },
         ],
       });
-      var student = new StudentViewModel(studentModel);
+      const student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
 
       const vue = mountData({ student });
@@ -2949,7 +2939,7 @@ describe("ViewModel", () => {
     });
 
     test("doesnt stackoverflow when creating new recursive object structures", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 1,
         advisor: { name: "Seagull", advisorId: 1 },
@@ -2969,7 +2959,7 @@ describe("ViewModel", () => {
     });
 
     test("doesnt stackoverflow when updating existing recursive object structures", () => {
-      var studentModel = new Student({
+      const studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 1,
         advisor: { name: "Seagull", advisorId: 1 },
@@ -2995,14 +2985,14 @@ describe("ViewModel", () => {
     });
 
     test("child object is reactive", async () => {
-      var course = new CourseViewModel({
+      const course = new CourseViewModel({
         student: { studentId: 1, name: "Steve" },
       });
 
       let triggered = false;
       watch(
         () => course.student?.name,
-        () => (triggered = true)
+        () => (triggered = true),
       );
       course.$loadCleanData({ student: { studentId: 1, name: "Steve2" } });
 
@@ -3026,21 +3016,21 @@ describe("ViewModel", () => {
           {
             courses: [{ courseId: 1, name: "CS101" }],
           },
-          purgeUnsaved
+          purgeUnsaved,
         );
 
         expect(student.courses?.length).toBe(purgeUnsaved ? 1 : 2);
-      }
+      },
     );
   });
 
   describe("$delete", () => {
     test("removes deleted item from parent collection if item has PK", async () => {
-      var student = new StudentViewModel(
+      const student = new StudentViewModel(
         new Student({
           studentId: 1,
           courses: [{ courseId: 7, name: "foo" }],
-        })
+        }),
       );
 
       const course = student.courses![0];
@@ -3058,11 +3048,11 @@ describe("ViewModel", () => {
     });
 
     test("removes deleted item from parent collection if item has no PK", async () => {
-      var student = new StudentViewModel(
+      const student = new StudentViewModel(
         new Student({
           studentId: 1,
           courses: [{ name: "foo" }],
-        })
+        }),
       );
 
       const course = student.courses![0];
@@ -3082,13 +3072,13 @@ describe("ViewModel", () => {
 
   describe("$isDirty", () => {
     test("is reactive", async () => {
-      var vm = new StudentViewModel();
+      const vm = new StudentViewModel();
       await delay(1);
 
       let triggered = false;
       watch(
         () => vm.$isDirty,
-        () => (triggered = true)
+        () => (triggered = true),
       );
       vm.name = "bob";
       await delay(1);
@@ -3097,7 +3087,7 @@ describe("ViewModel", () => {
     });
 
     test("serializable collections are dirtied when mutated directly", async () => {
-      var vm = new ComplexModelViewModel();
+      const vm = new ComplexModelViewModel();
       vm.$isDirty = false;
       await delay(1);
 
@@ -3120,13 +3110,13 @@ describe("ViewModel", () => {
 
   describe("$getPropDirty", () => {
     test("is reactive", async () => {
-      var vm = new StudentViewModel();
+      const vm = new StudentViewModel();
       await nextTick();
 
       let triggered = false;
       watch(
         () => vm.$getPropDirty("name"),
-        () => (triggered = true)
+        () => (triggered = true),
       );
       vm.name = "bob";
       await nextTick();
@@ -3137,12 +3127,12 @@ describe("ViewModel", () => {
 
   describe("ctor", () => {
     test("preserves ViewModel instances in initialData", () => {
-      var advisorVM = new AdvisorViewModel({
+      const advisorVM = new AdvisorViewModel({
         advisorId: 1,
         name: "Steve",
       });
 
-      var studentVM = new StudentViewModel({
+      const studentVM = new StudentViewModel({
         advisor: advisorVM,
       });
 
@@ -3227,7 +3217,7 @@ describe("ViewModel", () => {
         "/ComplexModel/methodWithOptionalParams",
         vitest.fn((req) => ({
           wasSuccessful: true,
-        }))
+        })),
       );
 
       await new ComplexModelViewModel({
@@ -3244,7 +3234,7 @@ describe("ViewModel", () => {
 
 describe("ListViewModel", () => {
   test("is assignable to generic untyped ListViewModel", () => {
-    const vm: ListViewModel = new ComplexModelListViewModel();
+    const _vm: ListViewModel = new ComplexModelListViewModel();
   });
 
   describe("$load & $items", () => {
@@ -3271,7 +3261,7 @@ describe("ListViewModel", () => {
             pageCount: 1,
             totalCount: 2,
           };
-        })
+        }),
       );
     });
 
@@ -3324,7 +3314,6 @@ describe("ListViewModel", () => {
 
       const vue = mount(
         defineComponent({
-          template: "<div></div>",
           data() {
             return { list };
           },
@@ -3333,7 +3322,8 @@ describe("ListViewModel", () => {
               return this.list.$items[1].name;
             },
           },
-        })
+          template: "<div></div>",
+        }),
       ).vm;
       const watchCallback = vitest.fn();
       vue.$watch("name", watchCallback);
@@ -3356,7 +3346,7 @@ describe("ListViewModel", () => {
       watch(list.$items, watchCallback);
 
       list.$items.push(
-        new ComplexModelViewModel({ complexModelId: 3, name: "Heidi" })
+        new ComplexModelViewModel({ complexModelId: 3, name: "Heidi" }),
       );
 
       await vue.$nextTick();
@@ -3433,7 +3423,6 @@ describe("ListViewModel", () => {
 
       const vue = mount(
         defineComponent({
-          template: "<div></div>",
           data() {
             return { list };
           },
@@ -3442,7 +3431,8 @@ describe("ListViewModel", () => {
               return this.list.$items[0].name;
             },
           },
-        })
+          template: "<div></div>",
+        }),
       ).vm;
       const watchCallback = vitest.fn();
 
@@ -3520,17 +3510,17 @@ describe("ListViewModel", () => {
 
   describe("autoload", () => {
     test("works with setup()", async () => {
-      var list = new StudentListViewModel();
+      const list = new StudentListViewModel();
       const loadMock = (list.$apiClient.list = mockItemResult(true, {}));
 
       const wrapper = mount(
         defineComponent({
-          template: "<div></div>",
           setup() {
             list.$startAutoLoad(getCurrentInstance()!.proxy!, { wait: 0 });
             list.$params.search = "a";
           },
-        })
+          template: "<div></div>",
+        }),
       );
 
       await delay(10);
@@ -3542,17 +3532,17 @@ describe("ListViewModel", () => {
     });
 
     test("useAutoLoad works with setup()", async () => {
-      var list = new StudentListViewModel();
+      const list = new StudentListViewModel();
       const loadMock = (list.$apiClient.list = mockItemResult(true, {}));
 
       const wrapper = mount(
         defineComponent({
-          template: "<div></div>",
           setup() {
             list.$useAutoLoad({ wait: 0 });
             list.$params.search = "a";
           },
-        })
+          template: "<div></div>",
+        }),
       );
 
       await delay(10);
@@ -3571,7 +3561,7 @@ describe("ListViewModel", () => {
 
       const saveMock = mockEndpoint(
         "/Case/save",
-        vitest.fn(() => ({ wasSuccessful: true }))
+        vitest.fn(() => ({ wasSuccessful: true })),
       );
 
       list.$startAutoSave(vue, { wait: 0 });
@@ -3593,7 +3583,7 @@ describe("ListViewModel", () => {
 
       const saveMock = mockEndpoint(
         "/Case/save",
-        vitest.fn(() => ({ wasSuccessful: true }))
+        vitest.fn(() => ({ wasSuccessful: true })),
       );
 
       const item = new CaseViewModel({ title: "bob" });
@@ -3613,7 +3603,7 @@ describe("ListViewModel", () => {
 
       const saveMock = mockEndpoint(
         "/Case/save",
-        vitest.fn(() => ({ wasSuccessful: true }))
+        vitest.fn(() => ({ wasSuccessful: true })),
       );
 
       const item = new CaseViewModel({ title: "foo" });

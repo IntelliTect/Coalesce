@@ -1,4 +1,4 @@
-import { delay, mockEndpoint } from "./test-utils";
+import { mockEndpoint } from "./test-utils";
 
 import {
   PersonViewModel,
@@ -18,7 +18,7 @@ describe("ViewModel", () => {
       vitest.fn((req) => ({
         wasSuccessful: true,
         object: null,
-      }))
+      })),
     );
 
     // This tests the fact that the metadata instance of
@@ -93,7 +93,7 @@ describe("abstract proxy", () => {
           $type: "AbstractImpl1",
           ...expectedData,
         },
-      }))
+      })),
     );
   }
 
@@ -139,7 +139,7 @@ describe("abstract proxy", () => {
     const dummyRef = ref(1);
 
     const isImpl1 = computed(
-      () => dummyRef.value && vm instanceof AbstractImpl1ViewModel
+      () => dummyRef.value && vm instanceof AbstractImpl1ViewModel,
     );
     expect(isImpl1.value).toBeFalsy();
 
@@ -156,7 +156,7 @@ describe("abstract proxy", () => {
     const dummyRef = ref(1);
 
     const isImpl1 = computed(
-      () => dummyRef.value && vm.$metadata.name == "AbstractImpl1"
+      () => dummyRef.value && vm.$metadata.name == "AbstractImpl1",
     );
     expect(isImpl1.value).toBeFalsy();
 
@@ -182,7 +182,7 @@ describe("abstract proxy", () => {
     expect(vm.$metadata).toStrictEqual(new AbstractImpl1().$metadata);
     expect(vm.$apiClient).toBeInstanceOf(AbstractImpl1ApiClient);
     expect(vm.$apiClient.$metadata).toStrictEqual(
-      new AbstractImpl1().$metadata
+      new AbstractImpl1().$metadata,
     );
 
     const impl1 = vm as AbstractImpl1ViewModel;

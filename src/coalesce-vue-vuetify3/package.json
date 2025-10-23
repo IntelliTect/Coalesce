@@ -41,6 +41,8 @@
     "buildts": "tsc -p ./tsconfig.build-utils.json",
     "build-local-deps": "cd ../coalesce-vue && npm run build",
     "test": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "coverage": "vitest --coverage"
   },
   "dependencies": {

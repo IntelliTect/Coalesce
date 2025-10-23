@@ -1,7 +1,6 @@
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
 import type {
-  ModelValue,
   ObjectValue,
   Value,
   ObjectType,
@@ -11,7 +10,6 @@ import { shortStringify, expectDeepMatch } from "./test-utils";
 import { type Indexable } from "../src/util";
 import {
   twoWayConversions,
-  studentValue,
   type MappingData,
   displaysStudentValue,
 } from "./model.shared";
@@ -308,9 +306,9 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
 
 describe("mapToModel", () => {
   test("can be typed with concrete model class", () => {
-    const mapped: Course = model.mapToModel<Course>({}, $metadata.Course);
-    //@ts-expect-error
-    const mapped2: Course = model.mapToModel<Course>({}, $metadata.Student);
+    const _mapped: Course = model.mapToModel<Course>({}, $metadata.Course);
+    //@ts-expect-error wrong metadata
+    const _mapped2: Course = model.mapToModel<Course>({}, $metadata.Student);
   });
 
   test("ignores mismatched existing metadata", () => {
@@ -339,9 +337,12 @@ describe("mapToModel", () => {
 
 describe("convertToModel", () => {
   test("can be typed with concrete model class", () => {
-    const mapped: Course = model.convertToModel<Course>({}, $metadata.Course);
-    //@ts-expect-error
-    const mapped2: Course = model.convertToModel<Course>({}, $metadata.Student);
+    const _mapped: Course = model.convertToModel<Course>({}, $metadata.Course);
+    const _mapped2: Course = model.convertToModel<Course>(
+      {},
+      //@ts-expect-error wrong metadata
+      $metadata.Student,
+    );
   });
 
   test("rejects mismatched existing metadata", () => {

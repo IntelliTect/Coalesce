@@ -14,9 +14,9 @@
 
     <c-admin-create-btn
       :list
-      @add="addItem"
       variant="text"
       label="Create"
+      @add="addItem"
     ></c-admin-create-btn>
 
     <v-btn
@@ -32,8 +32,8 @@
       v-if="editable !== null"
       class="c-admin-table-toolbar--button-editable"
       variant="text"
-      @click="editable = !editable"
       :title="editable ? 'Make Read-only' : 'Make Editable'"
+      @click="editable = !editable"
     >
       <template v-if="!editable">
         <v-icon start>$edit</v-icon>
@@ -55,13 +55,13 @@
 
     <c-list-page class="c-admin-table-toolbar--page" :list="list" />
 
-    <template v-slot:extension>
+    <template #extension>
       <v-text-field
+        v-model="list.$params.search"
         class="c-admin-table-toolbar--search"
         hide-details
         prepend-inner-icon="fa fa-search"
         label="Search"
-        v-model="list.$params.search"
         density="comfortable"
         single-line
         clearable

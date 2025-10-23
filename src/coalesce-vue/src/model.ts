@@ -30,10 +30,7 @@ import type {
   NumberValue,
   StringValue,
   ModelCollectionNavigationProperty,
-  ModelReferenceNavigationProperty,
   ForeignKeyProperty,
-  ModelCollectionValue,
-  CollectionProperty,
   TypeDiscriminatorToType,
   EnumType,
   ObjectType,
@@ -51,11 +48,13 @@ import {
 /** Populated by generated code in order to perform lookups of actual model types
  * using metadata names as inputs to the lookup. `MetadataToModelType` is recommended for lookups.
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ModelTypeLookup {}
 
 /** Populated by generated code in order to perform lookups of actual enum types
  * using metadata names as inputs to the lookup. `MetadataToModelType` is recommended for lookups.
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface EnumTypeLookup {}
 
 // prettier-ignore
@@ -562,7 +561,7 @@ class MapToDtoVisitor extends Visitor<
 > {
   private depth: number = 0;
 
-  public visitObject(value: any, meta: ClassType): {} | null | undefined {
+  public visitObject(value: any, meta: ClassType): object | null | undefined {
     // If we've exceeded max depth, return undefined to prevent the
     // creation of an entry in the parent object for this object.
     if (this.depth > this.maxObjectDepth) return undefined;
@@ -607,7 +606,6 @@ class MapToDtoVisitor extends Visitor<
             output[propName] = objectValuePkValue;
           }
         }
-        propMeta.principalType.keyProp.name;
       }
     }
 
@@ -771,8 +769,8 @@ export { mapToDto as mapValueToDto };
 export function mapToDtoFiltered<T extends Model<ClassType>>(
   object: T | null | undefined,
   props?: PropNames<T["$metadata"]>[] | null,
-): {} | null {
-  var dto = mapToDto(object) as any;
+): object | null {
+  const dto = mapToDto(object) as any;
 
   if (props && dto) {
     const filteredDto: any = {
@@ -922,7 +920,7 @@ class DisplayVisitor extends Visitor<
     let isLightFormatString = false;
 
     if (this.options) {
-      let { format: formatOptionInput } = this.options;
+      const { format: formatOptionInput } = this.options;
       if (formatOptionInput) {
         if (typeof formatOptionInput == "string") {
           formatString = formatOptionInput;
@@ -1060,7 +1058,7 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
 ) {
   const propMeta = resolvePropMeta(item.$metadata, prop);
 
-  var value = (item as Indexable<T>)[propMeta.name];
+  const value = (item as Indexable<T>)[propMeta.name];
   return (
     options ? new DisplayVisitor(options) : defaultDisplayVisitor
   ).visitValue(value, propMeta);
@@ -1129,14 +1127,14 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
     stringify,
   }: BindToQueryStringOptions<T[TKey]> = {},
 ): void {
-  if (isRef(obj) && typeof key == "string" && key !== "value") {
-    return bindToQueryString(vue, obj, "value", { queryKey: key });
-  }
-
-  if (typeof key == "object") {
-    // Handle the overload that accepts a ref directly
-    //@ts-expect-error
-    return bindToQueryString(vue, obj, "value", key);
+  if (isRef(obj)) {
+    if (typeof key == "string" && key !== "value") {
+      return bindToQueryString(vue, obj, "value", { queryKey: key });
+    }
+    if (typeof key == "object") {
+      // Handle the overload that accepts a ref directly
+      return bindToQueryString(vue, obj, "value", key);
+    }
   }
 
   // Auto-detection logic
@@ -1222,7 +1220,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
       }
 
       const newQuery = {
-        ...//@ts-expect-error
+        ...//@ts-expect-error we don't have $router types here
         (vue.$router[coalescePendingQuery] || vue.$route.query),
         [queryKey]: queryValue,
       };
@@ -1234,9 +1232,9 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
       // So, we store the pending new query value so that subsequent updates
       // during the same tick can read the previous update's desired end state,
       // rather than every update reading the beginning state.
-      //@ts-expect-error
+      //@ts-expect-error we don't have $router types here
       vue.$router[coalescePendingQuery] = newQuery;
-      //@ts-expect-error
+      //@ts-expect-error we don't have $router types here
       nextTick(() => delete vue.$router[coalescePendingQuery]);
 
       vuePublic.$router[mode]({

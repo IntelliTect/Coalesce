@@ -16,8 +16,8 @@
       <v-list-item
         v-for="item in creatableTypes"
         :key="item.metadata.name"
-        @click="emit('add', item.metadata, item.route!)"
         :title="item.metadata.displayName"
+        @click="emit('add', item.metadata, item.route!)"
       ></v-list-item>
     </v-list>
   </v-menu>

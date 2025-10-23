@@ -1,7 +1,12 @@
 import { mount } from "@test/util";
 import { CDisplay } from "..";
 import { Case, ComplexModel, Statuses } from "@test-targets/models.g";
-import { CaseViewModel, CompanyViewModel, ComplexModelViewModel, PersonViewModel } from "@test-targets/viewmodels.g";
+import {
+  CaseViewModel,
+  CompanyViewModel,
+  ComplexModelViewModel,
+  PersonViewModel,
+} from "@test-targets/viewmodels.g";
 import { Model } from "coalesce-vue";
 
 describe("CDisplay", () => {
@@ -105,7 +110,7 @@ describe("CDisplay", () => {
   });
 
   test("password", async () => {
-    const model = new PersonViewModel({secretPhrase: "Hunter2"});
+    const model = new PersonViewModel({ secretPhrase: "Hunter2" });
     const wrapper = mount(() => <CDisplay model={model} for="secretPhrase" />);
 
     expect(wrapper.text()).toContain("••••••••");
@@ -118,22 +123,22 @@ describe("CDisplay", () => {
   });
 
   test("email", async () => {
-    const model = new PersonViewModel({email: "bob@example.com"});
+    const model = new PersonViewModel({ email: "bob@example.com" });
     const wrapper = mount(() => <CDisplay model={model} for="email" />);
 
     expect(wrapper.text()).toContain(model.email);
     expect(wrapper.find("a[href]").attributes()["href"]).toEqual(
-      "mailto:" + model.email
+      "mailto:" + model.email,
     );
   });
 
   test("phone", async () => {
-    const model = new CompanyViewModel({phone: "15095555555"});
+    const model = new CompanyViewModel({ phone: "15095555555" });
     const wrapper = mount(() => <CDisplay model={model} for="phone" />);
 
     expect(wrapper.text()).toContain(model.phone);
     expect(wrapper.find("a[href]").attributes()["href"]).toEqual(
-      "tel:" + model.phone
+      "tel:" + model.phone,
     );
   });
 
@@ -152,16 +157,16 @@ describe("CDisplay", () => {
 
     expect(wrapper.text()).toContain(model.color);
     expect(
-      wrapper.find(".c-display--color-swatch").attributes()["style"]
+      wrapper.find(".c-display--color-swatch").attributes()["style"],
     ).toEqual(
       // Note: this assertion subject to nuances of jsdom,
       // which seems to normalize colors into `rgb` format.
-      "background-color: rgb(255, 0, 0);"
+      "background-color: rgb(255, 0, 0);",
     );
   });
 
   test("multiline", async () => {
-    const model = new CaseViewModel({description: "foo\nbar"});
+    const model = new CaseViewModel({ description: "foo\nbar" });
     const wrapper = mount(() => <CDisplay model={model} for="description" />);
 
     expect(wrapper.text()).toContain(model.description);

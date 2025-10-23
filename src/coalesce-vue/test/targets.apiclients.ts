@@ -14,7 +14,7 @@ export class StudentApiClient extends ModelApiClient<$models.Student> {
 
   public fullNameAndAge(
     id: number,
-    $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig,
   ): AxiosPromise<ItemResult<string>> {
     const $method = this.$metadata.methods.fullNameAndAge;
     const $params = {
@@ -26,7 +26,7 @@ export class StudentApiClient extends ModelApiClient<$models.Student> {
   public getWithObjParam(
     id: number,
     advisor?: $models.Advisor,
-    $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig,
   ): AxiosPromise<ItemResult<$models.Advisor>> {
     const $method = this.$metadata.methods.getWithObjParam;
     const $params = {
@@ -39,7 +39,7 @@ export class StudentApiClient extends ModelApiClient<$models.Student> {
   public getFile(
     id: number,
     etag: string | null,
-    $config?: AxiosRequestConfig
+    $config?: AxiosRequestConfig,
   ): AxiosPromise<ItemResult<File>> {
     const $method = this.$metadata.methods.getFile;
     const $params = {

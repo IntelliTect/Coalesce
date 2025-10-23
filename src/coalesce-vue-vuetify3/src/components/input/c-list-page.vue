@@ -4,9 +4,9 @@
       variant="outlined"
       size="x-small"
       icon
-      @click="list.$page = effectivePage - 1"
       :disabled="!list.$hasPreviousPage"
       title="Previous Page"
+      @click="list.$page = effectivePage - 1"
     >
       <v-icon size="small">$prev</v-icon>
     </v-btn>
@@ -18,14 +18,14 @@
       min="1"
       :max="list.$load.pageCount === -1 ? null : list.$load.pageCount"
       :modelValue="effectivePage"
-      @update:model-value="list.$page = +$event"
       hide-details
       density="compact"
       variant="outlined"
       title="Current Page Number"
+      @update:model-value="list.$page = +$event"
     ></v-text-field>
     <span class="text-no-wrap hidden-sm-and-up">{{ list.$page }}</span>
-    <span class="text-no-wrap ml-0" v-if="list.$load.pageCount !== -1"
+    <span v-if="list.$load.pageCount !== -1" class="text-no-wrap ml-0"
       >of {{ list.$load.pageCount }}</span
     >
 
@@ -33,9 +33,9 @@
       variant="outlined"
       size="x-small"
       icon
-      @click="list.$page = effectivePage + 1"
       :disabled="!list.$hasNextPage"
       title="Next Page"
+      @click="list.$page = effectivePage + 1"
     >
       <v-icon size="small">$next</v-icon>
     </v-btn>

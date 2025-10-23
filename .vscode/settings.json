@@ -1,5 +1,8 @@
 {
   "dotnet.defaultSolution": "Coalesce.slnx",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
   "editor.formatOnPaste": false,
   "editor.formatOnSave": true,
   "editor.formatOnType": true,

@@ -55,7 +55,9 @@ export type { DeepPartial } from "./util.js";
 // These imports allow TypeScript to correctly name types in the generated declarations.
 // Without them, it will generate some horrible, huge relative paths that won't work on any other machine.
 // For example: import("../../../../Coalesce/src/coalesce-vue/src/api-client").ItemResult<TModel>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type * as apiClient from "./api-client.js";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type * as axios from "axios";
 
 /*
@@ -327,7 +329,8 @@ export abstract class ViewModel<
     // Remove any ignore for this rule, if there is one:
     const ignoreSpec = `${propName}.${identifier}`;
     if (this.$ignoredRules && ignoreSpec in this.$ignoredRules) {
-      let { [ignoreSpec]: removed, ...remainder } = this.$ignoredRules as any;
+      const { [ignoreSpec]: _removed, ...remainder } = this
+        .$ignoredRules as any;
       this.$ignoredRules = remainder;
     }
 
@@ -341,7 +344,7 @@ export abstract class ViewModel<
     // Remove any custom rule that may match this spec.
     const propRules = this.$customRules?.[propName] as any;
     if (propRules) {
-      let { [identifier]: removed, ...remainder } = propRules;
+      const { [identifier]: _removed, ...remainder } = propRules;
       this.$customRules = {
         ...this.$customRules,
         [propName]: remainder,
@@ -747,7 +750,7 @@ export abstract class ViewModel<
                   prop.typeDef.derivedTypes?.includes(
                     collection.$parent.$metadata,
                   ) &&
-                  //@ts-expect-error
+                  //@ts-expect-error runtime type narrowing here would be pointless
                   collection.$metadata.foreignKey?.name ==
                     prop.inverseNavigation?.foreignKey?.name))
             ) {
@@ -1255,7 +1258,7 @@ export abstract class ViewModel<
       this.$metadata,
       prop,
     );
-    var collection: Array<any> | undefined = (this as any as Indexable<TModel>)[
+    let collection: Array<any> | undefined = (this as any as Indexable<TModel>)[
       propMeta.name
     ];
 
@@ -1422,6 +1425,7 @@ export function createAbstractProxyViewModelType<
 
       super(metadata, new apiClientCtor(), initialDirtyData);
 
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const vm = this;
 
       let $load = (vm[$loadProxy] = vm.$apiClient
@@ -1431,7 +1435,7 @@ export function createAbstractProxyViewModelType<
         .onFulfilled((state) => {
           const result = state.result!;
 
-          var realCtor = ViewModel.typeLookup![result.$metadata.name];
+          const realCtor = ViewModel.typeLookup![result.$metadata.name];
 
           // Grab real metadata and API client instances of the concrete type.
           const { $apiClient, $metadata } = new realCtor();
@@ -2150,19 +2154,6 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
   });
 }
 
-function resolveProto(obj: ViewModelCollection<any, any>): Array<any> {
-  // Babel does some stupid nonsense where it will wrap our proto
-  // in another proto. This breaks things if coalesce-vue is imported from source,
-  // or if we were to at some point in the future emit a esnext version of coalesce-vue.
-  const proto = Object.getPrototypeOf(obj);
-  if (obj.push == proto.push) {
-    // `proto` is the wrapper because it contains our own `push` (and other methods).
-    // Go up one more level.
-    return Object.getPrototypeOf(proto);
-  }
-  return proto;
-}
-
 export class ViewModelCollection<
   T extends ViewModel,
   TModel extends Model,
@@ -2481,9 +2472,9 @@ export function defineProps<T extends new () => ViewModel>(
                   ) {
                     (this as any)[hasWatcherFlag] = true;
                     if (!watcherFinalizationRegistry) {
-                      //@ts-expect-error
+                      //@ts-expect-error yep, undeclared
                       if (!window.__coalesce_warned_collection_watcher) {
-                        //@ts-expect-error
+                        //@ts-expect-error yep, undeclared
                         window.__coalesce_warned_collection_watcher = true;
                         console.warn(
                           "Unable to setup dirty watcher for collection prop mutations because FinalizationRegistry is not available.",
@@ -2568,7 +2559,7 @@ function rebuildModelCollectionForViewModelCollection<
     }
 
     let incomingLength = incomingValue.length;
-    let currentLength = currentValue.length;
+    const currentLength = currentValue.length;
 
     // There are existing items. We need to surgically merge in the incoming items,
     // keeping existing ViewModels the same based on keys.
@@ -2668,7 +2659,7 @@ export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>,
 >(
   target: TViewModel,
-  source: Indexable<{}>,
+  source: any,
   skipDirty = false,
   isCleanData: DataFreshness = true,
   purgeUnsaved = false,
@@ -2884,7 +2875,7 @@ export function updateViewModelFromModel<
 
 class AutoCallState<TOptions = any> {
   active: boolean = false;
-  cleanup: Function | null = null;
+  cleanup: (() => void) | null = null;
 
   // Note: these can't be properly typed because Vue ref unwrapping blows everything up.
   vue: any | null = null;

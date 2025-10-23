@@ -1,13 +1,14 @@
 <template>
   <v-text-field
     ref="rootRef"
+    v-model="mainValue"
+    v-intersect="onIntersect"
     class="c-select"
     role="combobox"
     :class="{
       'c-select--is-menu-active': menuOpen,
       'c-select--multiple': effectiveMultiple,
     }"
-    v-model="mainValue"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :validationValue="
@@ -23,9 +24,8 @@
     @click:clear.stop.prevent="onInput(null, true)"
     @keydown="onInputKey($event)"
     @click:control.stop.prevent="openMenu()"
-    v-intersect="onIntersect"
   >
-    <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
+    <template v-for="(_, slot) of passthroughSlots" #[slot]="scope">
       <slot :name="slot" v-bind="scope" />
     </template>
 
@@ -73,7 +73,6 @@
 
       <v-menu
         :modelValue="menuOpen"
-        @update:modelValue="!$event ? closeMenu() : openMenu()"
         activator="parent"
         :close-on-content-click="false"
         :open-on-click="false"
@@ -82,6 +81,7 @@
         origin="top"
         location="bottom"
         v-bind="menuProps"
+        @update:model-value="!$event ? closeMenu() : openMenu()"
       >
         <v-sheet
           ref="menuContentRef"
@@ -102,8 +102,8 @@
           @blur.capture="onMenuContentBlur"
         >
           <v-text-field
-            v-model="search"
             ref="searchRef"
+            v-model="search"
             hide-details="auto"
             prepend-inner-icon="fa fa-search"
             :loading="listCaller.isLoading"
@@ -146,14 +146,14 @@
                 'c-select__create-item--end': props.create?.position === 'end',
                 'pending-selection': pendingSelection === createItemIndex,
               }"
-              @click="createItem"
               :loading="createItemLoading"
+              @click="createItem"
             >
               <template #prepend>
                 <v-progress-circular
+                  v-if="createItemLoading"
                   size="20"
                   indeterminate
-                  v-if="createItemLoading"
                 ></v-progress-circular>
                 <v-icon v-else>$plus</v-icon>
               </template>
@@ -171,7 +171,6 @@
             <v-list-item
               v-for="(item, i) in listItems"
               :key="item.key"
-              @click="onInput(item.model)"
               :value="item.key"
               :class="{
                 'pending-selection': pendingSelection === i,
@@ -179,8 +178,9 @@
               :active="item.selected"
               role="option"
               :aria-selected="item.selected"
+              @click="onInput(item.model)"
             >
-              <template #prepend v-if="effectiveMultiple">
+              <template v-if="effectiveMultiple" #prepend>
                 <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
               </template>
               <v-list-item-title>
@@ -219,78 +219,6 @@
     </template>
   </v-text-field>
 </template>
-
-<style lang="scss">
-.c-select {
-  .v-field {
-    align-items: center;
-    min-height: var(--v-input-control-height, 56px);
-  }
-  .v-field__field {
-    align-items: center;
-    .v-field__input {
-      // flex-wrap: nowrap;
-      input {
-        min-width: 0;
-        flex: 1 1;
-        flex-basis: 1px;
-        &:focus {
-          outline: none;
-        }
-      }
-    }
-  }
-  .v-input__details {
-    padding-inline-start: 16px;
-    padding-inline-end: 16px;
-  }
-  .v-field__clearable,
-  .v-field__append-inner {
-    padding-top: 0;
-    .v-icon {
-      transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-  }
-
-  .v-field__append-inner > .v-icon {
-    cursor: pointer;
-  }
-  &.c-select--is-menu-active .v-field__append-inner > .v-icon {
-    transform: rotate(180deg);
-  }
-
-  :has(.v-select__selection--selected) {
-    .v-field__input {
-      caret-color: transparent;
-    }
-    .v-select__selection:not(.v-select__selection--selected) {
-      opacity: var(--v-medium-emphasis-opacity);
-    }
-  }
-}
-
-.c-select__menu-content {
-  .v-list-item.pending-selection {
-    &::after {
-      opacity: calc(0.15 * var(--v-theme-overlay-multiplier));
-    }
-    &:not(.v-list-item--active) > .v-list-item__overlay {
-      opacity: calc(0.05 * var(--v-theme-overlay-multiplier));
-    }
-  }
-}
-.c-select__create-item {
-  .v-list-item__prepend {
-    width: 40px;
-  }
-
-  order: -1; // Default: position at start
-
-  &.c-select__create-item--end {
-    order: 999999; // Position at end
-  }
-}
-</style>
 
 <script lang="ts">
 // These types are declared outside the `setup` script so that vue-tsc doesn't have to inline
@@ -382,12 +310,10 @@ type InheritedSlots = {
   "
 >
 import {
-  ComponentPublicInstance,
   ref,
   computed,
   nextTick,
   watch,
-  camelize,
   onBeforeUnmount,
   useTemplateRef,
 } from "vue";
@@ -442,11 +368,11 @@ import { Intersect } from "vuetify/directives";
 
 defineOptions({
   name: "c-select",
+  directives: { Intersect },
   // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
   // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
   // on the root element rather than on the search field in Vuetify component.
   inheritAttrs: false,
-  directives: { Intersect },
 });
 
 type SelectedModelType = _SelectedModelType<TModel, TFor, TMultiple>;
@@ -605,12 +531,10 @@ watch(mainInputRef, (el) => {
 
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
-const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
-  props,
-  (v) =>
-    // Use the navigation metadata (if exists) to drive the logic in here,
-    // as it will be a better source to pull label, hint, etc. from.
-    v.role == "foreignKey" && "navigationProp" in v ? v.navigationProp! : v,
+const { inputBindAttrs, valueMeta, valueOwner } = useMetadataProps(props, (v) =>
+  // Use the navigation metadata (if exists) to drive the logic in here,
+  // as it will be a better source to pull label, hint, etc. from.
+  v.role == "foreignKey" && "navigationProp" in v ? v.navigationProp! : v,
 );
 
 const search = ref(null as string | null);
@@ -730,7 +654,7 @@ const primaryBindKind = computed((): "model" | "key" => {
 
 /** The metadata of the type being selected by the dropdown. */
 const modelObjectMeta = computed((): ModelType => {
-  var meta = valueMeta.value!;
+  const meta = valueMeta.value!;
   if (meta.role == "foreignKey" && "principalType" in meta) {
     return meta.principalType;
   } else if (meta.type == "model") {
@@ -759,8 +683,8 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
     return toArray(props.modelValue);
   }
 
-  let ret = [];
-  let needsLoad = [];
+  const ret = [];
+  const needsLoad = [];
   for (const key of internalKeyValue.value) {
     // See if we already have a model that we're using to represent a key-only binding.
     // Storing this object prevents it from flipping between different instances
@@ -778,7 +702,6 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
       (i) => key === i[modelObjectMeta.value.keyProp.name],
     )[0];
     if (item) {
-      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       internallyFetchedModels.set(key, new WeakRef(item));
       ret.push(item);
       continue;
@@ -789,7 +712,6 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
       (x) => key === x[modelObjectMeta.value.keyProp.name],
     );
     if (singleItem) {
-      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
       internallyFetchedModels.set(key, new WeakRef(singleItem));
       ret.push(singleItem);
       continue;
@@ -1253,7 +1175,7 @@ function confirmPendingSelection(): void {
   }
 
   // For regular items, pendingSelection directly corresponds to the item index
-  var item = items.value[pendingSelection.value];
+  const item = items.value[pendingSelection.value];
   if (!item) return;
   onInput(item);
 }
@@ -1363,11 +1285,6 @@ function closeMenu(force = false): void {
   mainInputRef.value?.focus();
 }
 
-function toggleMenu(): void {
-  if (menuOpen.value) closeMenu();
-  else openMenu();
-}
-
 if (!valueMeta.value) {
   throw "c-select requires value metadata. Specify it with the 'for' prop'";
 }
@@ -1466,8 +1383,8 @@ watch(
 watch(pendingSelection, async () => {
   await nextTick();
   await nextTick();
-  var listDiv = menuContentRef.value?.$el as HTMLElement;
-  var selectedItem = listDiv?.querySelector(".pending-selection");
+  const listDiv = menuContentRef.value?.$el as HTMLElement;
+  const selectedItem = listDiv?.querySelector(".pending-selection");
   selectedItem?.scrollIntoView?.({
     behavior: "auto",
     block: "nearest",
@@ -1522,3 +1439,75 @@ defineExpose({
   search: search,
 });
 </script>
+
+<style lang="scss">
+.c-select {
+  .v-field {
+    align-items: center;
+    min-height: var(--v-input-control-height, 56px);
+  }
+  .v-field__field {
+    align-items: center;
+    .v-field__input {
+      // flex-wrap: nowrap;
+      input {
+        min-width: 0;
+        flex: 1 1;
+        flex-basis: 1px;
+        &:focus {
+          outline: none;
+        }
+      }
+    }
+  }
+  .v-input__details {
+    padding-inline-start: 16px;
+    padding-inline-end: 16px;
+  }
+  .v-field__clearable,
+  .v-field__append-inner {
+    padding-top: 0;
+    .v-icon {
+      transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  .v-field__append-inner > .v-icon {
+    cursor: pointer;
+  }
+  &.c-select--is-menu-active .v-field__append-inner > .v-icon {
+    transform: rotate(180deg);
+  }
+
+  :has(.v-select__selection--selected) {
+    .v-field__input {
+      caret-color: transparent;
+    }
+    .v-select__selection:not(.v-select__selection--selected) {
+      opacity: var(--v-medium-emphasis-opacity);
+    }
+  }
+}
+
+.c-select__menu-content {
+  .v-list-item.pending-selection {
+    &::after {
+      opacity: calc(0.15 * var(--v-theme-overlay-multiplier));
+    }
+    &:not(.v-list-item--active) > .v-list-item__overlay {
+      opacity: calc(0.05 * var(--v-theme-overlay-multiplier));
+    }
+  }
+}
+.c-select__create-item {
+  .v-list-item__prepend {
+    width: 40px;
+  }
+
+  order: -1; // Default: position at start
+
+  &.c-select__create-item--end {
+    order: 999999; // Position at end
+  }
+}
+</style>

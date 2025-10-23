@@ -37,7 +37,7 @@ describe("parseDateUserInput", () => {
     ["datetime", "1 7 2022", new Date(2022, 0, 7), null],
   ])("%s => %s", (kind, input, expected, today) => {
     expect(
-      parseDateUserInput(input, today || defaultDefaultDate, kind)
+      parseDateUserInput(input, today || defaultDefaultDate, kind),
     ).toEqual(expected);
   });
 });
@@ -54,6 +54,8 @@ describe("VueInstance", () => {
     });
   });
 
+  /* eslint-disable @typescript-eslint/no-unused-expressions */
+
   test("is assignable from getCurrentInstance", async () => {
     () => bindToQueryString(getCurrentInstance()!.proxy!, { a: 1 }, "a");
   });
@@ -61,20 +63,20 @@ describe("VueInstance", () => {
   test("is not assignable from invalid object", async () => {
     () =>
       bindToQueryString(
-        //@ts-expect-error
+        //@ts-expect-error no 'a' prop on window
         window,
         { a: 1 },
-        "a"
+        "a",
       );
   });
 
   test("is not assignable from invalid scalar", async () => {
     () =>
       bindToQueryString(
-        //@ts-expect-error
+        //@ts-expect-error no 'a' prop on string
         "foo",
         { a: 1 },
-        "a"
+        "a",
       );
   });
 });

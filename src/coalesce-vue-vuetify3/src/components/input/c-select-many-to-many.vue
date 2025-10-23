@@ -5,7 +5,6 @@
     :for="farItemModelType"
     multiple
     :modelValue="farItems"
-    @selectionChanged="selectionChanged"
     :clearable="
       !canDelete ? false : clearable === undefined ? false : clearable
     "
@@ -14,14 +13,17 @@
     :error-messages="error"
     :itemTitle="itemText"
     :disabled="disabled || forceDisabled"
+    @selection-changed="selectionChanged"
   >
-    <template v-for="(_, slot) of ($slots as {})" v-slot:[slot]="scope">
-      <slot :name="slot" v-bind="(scope as any)" />
+    <template v-for="(_, slot) of $slots as {}" #[slot]="scope">
+      <slot :name="slot" v-bind="scope as any" />
     </template>
   </c-select>
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+
 import CSelect from "./c-select.vue";
 import { ComponentSlots } from "../../util";
 
@@ -30,35 +32,39 @@ type _FarItemType<
   TFor extends ForSpec<
     TModel,
     ModelCollectionNavigationProperty & { manyToMany: {} }
-  >
-> = TFor extends PropNames<TModel["$metadata"]>
-  ? TModel["$metadata"]["props"][TFor] extends
-      | ModelCollectionNavigationProperty & { manyToMany: {} }
-    ? MetadataToModelType<
-        TModel["$metadata"]["props"][TFor]["manyToMany"]["typeDef"]
-      >
-    : any
-  : Model<ModelType>;
+  >,
+> =
+  TFor extends PropNames<TModel["$metadata"]>
+    ? TModel["$metadata"]["props"][TFor] extends ModelCollectionNavigationProperty & {
+        manyToMany: {};
+      }
+      ? MetadataToModelType<
+          TModel["$metadata"]["props"][TFor]["manyToMany"]["typeDef"]
+        >
+      : any
+    : Model<ModelType>;
 
 type _MiddleItemType<
   TModel extends Model,
   TFor extends ForSpec<
     TModel,
     ModelCollectionNavigationProperty & { manyToMany: {} }
-  >
-> = TFor extends PropNames<TModel["$metadata"]>
-  ? TModel["$metadata"]["props"][TFor] extends
-      | ModelCollectionNavigationProperty & { manyToMany: {} }
-    ? MetadataToModelType<TModel["$metadata"]["props"][TFor]["itemType"]>
-    : any
-  : Model<ModelType>;
+  >,
+> =
+  TFor extends PropNames<TModel["$metadata"]>
+    ? TModel["$metadata"]["props"][TFor] extends ModelCollectionNavigationProperty & {
+        manyToMany: {};
+      }
+      ? MetadataToModelType<TModel["$metadata"]["props"][TFor]["itemType"]>
+      : any
+    : Model<ModelType>;
 
 type _InheritedSlots<
   TModel extends Model,
   TFor extends ForSpec<
     TModel,
     ModelCollectionNavigationProperty & { manyToMany: {} }
-  >
+  >,
 > = ComponentSlots<
   typeof CSelect<
     undefined,
@@ -75,7 +81,7 @@ type InheritedSlots<
   TFor extends ForSpec<
     TModel,
     ModelCollectionNavigationProperty & { manyToMany: {} }
-  >
+  >,
 > = {
   [Property in keyof _InheritedSlots<TModel, TFor>]?: _InheritedSlots<
     TModel,
@@ -88,8 +94,12 @@ type InheritedSlots<
   lang="ts"
   setup
   generic="
-  TModel extends Model, 
-  TFor extends ForSpec<TModel, (ModelCollectionNavigationProperty & { manyToMany: {} })>"
+    TModel extends Model,
+    TFor extends ForSpec<
+      TModel,
+      ModelCollectionNavigationProperty & { manyToMany: {} }
+    >
+  "
 >
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
 import {
@@ -145,7 +155,7 @@ const props = withDefaults(
   }>(),
   {
     clearable: undefined,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -203,7 +213,7 @@ function mapFarItemToMiddleItem(farItem: Indexable<FarItemType>) {
 
   return convertToModel(
     middleModelRaw,
-    collectionMeta.value.itemType.typeDef
+    collectionMeta.value.itemType.typeDef,
   ) as MiddleItemType;
 }
 
@@ -234,7 +244,7 @@ const collectionMeta = computed((): ModelCollectionNavigationProperty => {
     return meta;
   } else {
     throw Error(
-      "c-select-many-to-many requires value metadata for a many-to-many collection. Specify it with the 'for' prop'"
+      "c-select-many-to-many requires value metadata for a many-to-many collection. Specify it with the 'for' prop'",
     );
   }
 });
@@ -244,7 +254,7 @@ const manyToManyMeta = computed(() => {
     return collectionMeta.value.manyToMany!;
   }
   throw Error(
-    "c-select-many-to-many requires value metadata for a many-to-many collection. Specify it with the 'for' prop'"
+    "c-select-many-to-many requires value metadata for a many-to-many collection. Specify it with the 'for' prop'",
   );
 });
 
@@ -264,7 +274,7 @@ const farItems = computed((): FarItemType[] => {
           [farItemKeyPropName.value]:
             x[manyToManyMeta.value.farForeignKey.name],
         },
-        farItemModelType.value
+        farItemModelType.value,
       ) as FarItemType;
       (ret as any)[fakeItemMarker] = true;
     }
@@ -273,7 +283,7 @@ const farItems = computed((): FarItemType[] => {
 });
 
 const farFkToMiddleItemLookup = computed(() => {
-  var map = new Map<any, MiddleItemType>();
+  const map = new Map<any, MiddleItemType>();
   const farFkName = manyToManyMeta.value.farForeignKey.name;
   for (const middleItem of internalValue.value) {
     map.set(middleItem[farFkName], middleItem);
@@ -293,7 +303,7 @@ function pushLoader(loader: ApiState<any, any>) {
   // User performed an action to make this happen.
   // Remove all loaders that aren't loading so that if there are any that are in an error state,
   // the old error state is cleared out to make room for any future error states.
-  var newArray = currentLoaders.value.filter((l) => l.isLoading);
+  const newArray = currentLoaders.value.filter((l) => l.isLoading);
 
   // Reset the error message of the loader. If the attempt previously failed,
   // we don't want to suddenly flash an old error message to the user.
@@ -326,7 +336,7 @@ function itemText(farItem: Indexable<FarItemType>): string | null {
 
 function selectionChanged(
   farItems: Indexable<FarItemType>[],
-  selected: boolean
+  selected: boolean,
 ) {
   const manyToMany = manyToManyMeta.value;
 
@@ -337,7 +347,7 @@ function selectionChanged(
       const vm = newItems.find(
         (x) =>
           (x as any)[manyToMany.farForeignKey.name] ==
-          farItem[farItemKeyPropName.value]
+          farItem[farItemKeyPropName.value],
       );
 
       if (vm instanceof ViewModel && canDelete.value) {
@@ -352,7 +362,7 @@ function selectionChanged(
               // Delete successful. No need to keep the state around.
               emit("deleted", vm);
               currentLoaders.value = currentLoaders.value.filter(
-                (l) => l != vm.$delete
+                (l) => l != vm.$delete,
               );
             })
             .catch(() => {
@@ -389,7 +399,7 @@ function selectionChanged(
             (x) =>
               x.$metadata == collectionMeta.value.itemType.typeDef &&
               (x as any)[manyToMany.farForeignKey.name] ==
-                farItem[farItemKeyPropName.value]
+                farItem[farItemKeyPropName.value],
           );
 
           if (itemIndex >= 0) {
@@ -410,7 +420,7 @@ function selectionChanged(
           middleItem,
           // All of the data of `middleItem`, recursing into any nested objects, IS clean.
           // However, `vm` itself is dirty because it is a brand new object with no PK.
-          true
+          true,
         ) as any as MiddleItemViewModel;
         vm.$isDirty = true;
       }
@@ -427,7 +437,7 @@ function selectionChanged(
             // Save successful. No need to keep the state around.
             emit("added", vm!);
             currentLoaders.value = currentLoaders.value.filter(
-              (l) => l != vm!.$save
+              (l) => l != vm!.$save,
             );
           })
           .catch(() => {
@@ -450,7 +460,7 @@ function emitInput(items: MiddleItemType[]) {
 }
 
 function farItemOf(
-  value: Indexable<MiddleItemType>
+  value: Indexable<MiddleItemType>,
 ): Indexable<FarItemType> | null | undefined {
   return value[manyToManyMeta.value.farNavigationProp.name];
 }

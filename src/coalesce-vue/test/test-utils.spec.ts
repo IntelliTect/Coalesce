@@ -13,7 +13,7 @@ describe("mockEndpoint", () => {
           studentId: 1,
           name: "bob",
         },
-      }))
+      })),
     );
 
     const vm = new StudentViewModel();
@@ -29,7 +29,7 @@ describe("mockEndpoint", () => {
       vitest.fn((config) => ({
         wasSuccessful: true,
         object: "bob, 42",
-      }))
+      })),
     );
 
     const result = await new StudentApiClient().fullNameAndAge(1);
@@ -43,7 +43,7 @@ describe("mockEndpoint", () => {
       vitest.fn((config) => ({
         wasSuccessful: true,
         object: "bob, 23",
-      }))
+      })),
     );
 
     const result = await new StudentApiClient().fullNameAndAge(1);
@@ -66,7 +66,7 @@ describe("mockEndpoint", () => {
       vitest.fn((config) => ({
         wasSuccessful: true,
         list: "",
-      }))
+      })),
     );
   });
 
@@ -81,7 +81,7 @@ describe("mockEndpoint", () => {
         object: {
           whatever: "anything",
         },
-      }))
+      })),
     );
   });
 
@@ -91,7 +91,7 @@ describe("mockEndpoint", () => {
       vitest.fn(async (config) => ({
         wasSuccessful: false,
         message: "something went wrong",
-      }))
+      })),
     );
 
     const vm = new StudentListViewModel();
@@ -115,7 +115,7 @@ describe("mockEndpoint", () => {
           { studentId: 1, name: "bob" },
           { studentId: 2, name: "sue" },
         ],
-      }))
+      })),
     );
 
     const vm = new StudentListViewModel();
@@ -134,7 +134,7 @@ describe("mockEndpoint", () => {
       vitest.fn((config) => ({
         wasSuccessful: true,
         object: "bob",
-      }))
+      })),
     );
 
     const mock2 = mockEndpoint(
@@ -142,7 +142,7 @@ describe("mockEndpoint", () => {
       vitest.fn((config) => ({
         wasSuccessful: true,
         object: "steve",
-      }))
+      })),
     );
 
     let result = await client.fullNameAndAge(1);

@@ -2,7 +2,7 @@
 const primitiveTypes = ["string", "number", "date", "enum", "boolean"];
 
 const passwordWrapper = defineComponent({
-  name: "c-password-input",
+  name: "CPasswordInput",
   data() {
     return {
       shown: false,
@@ -19,6 +19,7 @@ const passwordWrapper = defineComponent({
   },
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 function addHandler(data: any, eventName: string, handler: Function) {
   eventName = toHandlerKey(eventName);
   // consider using mergeProps (import from vue) here?
@@ -113,6 +114,7 @@ type _InheritedSlots<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>,
 > =
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   SelectSlotItemType<TModel, TFor> extends {}
     ? // These slots for v-select/v-autocomplete are duplicated from Vuetify because Vuetify doesn't export their types correctly for generic components.
       Omit<VInput["$slots"] & VField["$slots"], "default"> & {
@@ -423,7 +425,8 @@ function render() {
             // Without this, only clicks on the html input element itself, inside the text field, will open the picker.
             addHandler(data, "mouseup", function (e: MouseEvent) {
               const t = e.currentTarget as HTMLElement | null;
-              t?.matches(".v-input__slot") && t.querySelector("input")?.click();
+              if (t?.matches(".v-input__slot"))
+                t.querySelector("input")?.click();
             });
             data.type = valueMeta.subtype;
             break;

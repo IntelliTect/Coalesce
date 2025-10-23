@@ -2,12 +2,12 @@
   <v-combobox
     class="c-select-values"
     :modelValue="internalValue"
-    @update:modelValue="onInput"
     v-bind="inputBindAttrs"
     multiple
     chips
     closable-chips
     no-filter
+    @update:model-value="onInput"
   >
   </v-combobox>
 </template>
@@ -78,7 +78,7 @@ const collectionMeta = computed(() => {
     return meta;
   } else {
     throw Error(
-      "c-select-values requires value metadata for a collection of non-object values. Specify it with the 'for' prop'"
+      "c-select-values requires value metadata for a collection of non-object values. Specify it with the 'for' prop'",
     );
   }
 });
@@ -107,5 +107,6 @@ function onInput(value: unknown) {
 }
 
 // Access this so it will throw an error if the meta props aren't in order.
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 collectionMeta.value;
 </script>

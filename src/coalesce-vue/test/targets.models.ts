@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+
 import * as metadata from "./targets.metadata";
 import {
   type Model,

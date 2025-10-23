@@ -48,7 +48,7 @@ describe("CListFilters", () => {
     const { list, watchTracker } = setupListAndWatcher();
 
     // Mount the component without any user action. list.$params should be unchanged.
-    const wrapper = mountApp(() => <CListFilters list={list}></CListFilters>);
+    const _wrapper = mountApp(() => <CListFilters list={list}></CListFilters>);
     await flushPromises();
     expect(watchTracker).toBeCalledTimes(0);
   });

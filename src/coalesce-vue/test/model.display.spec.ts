@@ -1,6 +1,6 @@
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
-import type { ObjectValue, Value } from "../src/metadata";
+import type { Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import { format, subYears } from "date-fns";
 import { toDate } from "date-fns-tz";
@@ -19,7 +19,7 @@ const basicStudent = {
 describe("modelDisplay", () => {
   test("for object without $metadata, throws", () => {
     expect(() => model.modelDisplay({} as any)).toThrowError(
-      /has no \$metadata/
+      /has no \$metadata/,
     );
   });
 
@@ -35,7 +35,7 @@ describe("modelDisplay", () => {
       model.modelDisplay({
         $metadata: $metadata.DisplaysStudent,
         student: basicStudent,
-      })
+      }),
     ).toBe(basicStudent.name);
   });
 });
@@ -47,7 +47,7 @@ describe("propDisplay - resolves property", () => {
 
   test("by object", () => {
     expect(model.propDisplay(basicStudent, studentProps.name)).toBe(
-      basicStudent.name
+      basicStudent.name,
     );
   });
 });
@@ -150,7 +150,7 @@ describe.each(<DisplayData[]>[
     // We define the expected using date-fns's format to make this test timezone-independent.
     display: format(
       new Date("1990-01-02T03:04:05.000-08:00"),
-      "M/d/yyyy h:mm:ss aa"
+      "M/d/yyyy h:mm:ss aa",
     ),
   },
   ...undisplayable(
@@ -160,7 +160,7 @@ describe.each(<DisplayData[]>[
     "abc",
     {},
     [],
-    new Date("!!Invalid")
+    new Date("!!Invalid"),
   ),
 
   { meta: studentProps.grade, model: undefined, display: null },
@@ -263,7 +263,7 @@ describe("valueDisplay", () => {
         studentProps.dateNoOffset,
         {
           format: "yyyy-MM-dd HH:mm:ss",
-        }
+        },
       );
 
       // Output is what we put in.
@@ -279,7 +279,7 @@ describe("valueDisplay", () => {
         studentProps.birthDate,
         {
           format: "yyyy-MM-dd HH:mm:ss zzzz",
-        }
+        },
       );
 
       // Output is shifted from UTC+2 to UTC-9, a total of 11 hours (1300 hours to 0200 hours).

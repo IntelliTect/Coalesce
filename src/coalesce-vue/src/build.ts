@@ -1,19 +1,12 @@
-import type {
-  HtmlTagDescriptor,
-  Plugin,
-  ResolvedConfig,
-  ViteDevServer,
-} from "vite";
+import type { Plugin, ResolvedConfig, ViteDevServer } from "vite";
 import MagicString from "magic-string";
 
 import * as path from "node:path";
-import * as os from "node:os";
 import * as fs from "node:fs";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { spawn, exec } from "node:child_process";
 import { TLSSocket } from "node:tls";
 import { promisify } from "node:util";
-import type { AddressInfo, Server } from "node:net";
 
 const execPromise = promisify(exec);
 
@@ -323,22 +316,6 @@ function createAssetBypassPlugins(
   let resolvedConfig: ResolvedConfig;
 
   const plugins: Plugin<any>[] = [];
-
-  function getNetworkAddresses() {
-    return Object.values(os.networkInterfaces())
-      .flatMap((nInterface) => nInterface ?? [])
-      .filter(
-        (detail) =>
-          detail &&
-          detail.address &&
-          // @ts-ignore Node < v18
-          ((typeof detail.family === "string" && detail.family === "IPv4") ||
-            // @ts-ignore Node >= v18
-            (typeof detail.family === "number" && detail.family === 4)),
-      )
-      .map((detail) => detail.address)
-      .filter((host) => !host.includes("127.0.0.1"));
-  }
 
   function getViteOrigin() {
     const serverConfig = resolvedConfig.server;
@@ -698,7 +675,6 @@ export async function getCertPaths(certName?: string) {
 
   const certsExportPromise = (async () => {
     // console.log("Launching dotnet dev-certs to get fresh copy of local cert");
-    const start = new Date();
     const oldContent = certContent;
 
     await new Promise((resolve) => {

@@ -2,11 +2,8 @@ import { addYears, parse } from "date-fns";
 import type {
   ComponentPublicInstance,
   ReactiveFlags,
-  CreateComponentPublicInstance,
-  WatchOptions,
   ComponentInternalInstance,
 } from "vue";
-import { version } from "vue";
 import type { DateKind } from "./metadata";
 
 export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;
@@ -69,7 +66,7 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
     // Time-only formats might come from the server as truly only a time (C# TimeOnly type).
     // "ISO 8601: Time without UTC offset information" https://github.com/dotnet/runtime/issues/53539
 
-    var timeParts = argument.match(iso8601TimeRegex) || [];
+    const timeParts = argument.match(iso8601TimeRegex) || [];
     if (timeParts.length >= 3) {
       // If ES Temporal was actually implemented in browsers we could maybe switch Coalesce to use it,
       // but for now we just settle for using a Date and ignoring the time part.
@@ -89,7 +86,7 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
     }
   }
 
-  var parts = argument.match(iso8601DateRegex) || [];
+  const parts = argument.match(iso8601DateRegex) || [];
 
   const partTzOffset = parts[8] == "Z" ? 0 : parts[10]; // TZ offset
 
@@ -256,7 +253,7 @@ export function objectToQueryString(
   a: Array<any> | { [s: string]: any } | null,
   includeNull = true,
 ) {
-  var items: Array<any> = [];
+  const items: Array<any> = [];
   const add = function (key: string, value: any) {
     if (!includeNull && value == null) return;
 
@@ -279,7 +276,7 @@ export function objectToQueryString(
 }
 
 export function objectToFormData(a: Array<any> | { [s: string]: any } | null) {
-  var items = new FormData();
+  const items = new FormData();
   const add = function (key: string, value: any) {
     if (value instanceof Uint8Array) {
       // Add raw binary as blobs
@@ -305,7 +302,7 @@ function buildParams(
   obj: any,
   add: (key: string, value: any) => void,
 ) {
-  var name;
+  let name;
 
   if (
     prefix.startsWith("dataSource.") &&
@@ -321,7 +318,7 @@ function buildParams(
       }),
     );
   } else if (obj instanceof Array) {
-    var isScalarArray = obj.every(isScalarFormValue);
+    const isScalarArray = obj.every(isScalarFormValue);
     if (obj.length == 0) {
       // The "count=0" doesn't /really/ do anything in the aspnetcore model binder.
       // "count" and "0" can both be any sequence of characters.

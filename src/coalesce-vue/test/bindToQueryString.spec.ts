@@ -1,4 +1,6 @@
-import { createApp, defineComponent, h, nextTick, ref } from "vue";
+/* eslint-disable vue/one-component-per-file */
+
+import { defineComponent, h, ref } from "vue";
 import {
   createRouter,
   RouterView,
@@ -122,9 +124,9 @@ describe("bindToQueryString", () => {
   test("bad types", async () => {
     await runTest(async (v) => {
       //@ts-expect-error Missing queryKey in options object.
-      () => bindToQueryString(v, dateRef, {});
+      bindToQueryString(v, dateRef, {});
       //@ts-expect-error Missing options or queryKey.
-      () => bindToQueryString(v, dateRef);
+      bindToQueryString(v, dateRef);
     });
   });
 
@@ -179,8 +181,8 @@ describe("bindToQueryString", () => {
   });
 
   test("does not put values on new route when changing routes", async () => {
-    let changeBoundValue: Function;
-    var router = createRouter({
+    let changeBoundValue: () => void;
+    const router = createRouter({
       history: createWebHistory(), // Note: memory history doesn't reproduce the bug.
       routes: [
         {
@@ -203,7 +205,7 @@ describe("bindToQueryString", () => {
       ],
     });
 
-    const app = mount(
+    const _app = mount(
       defineComponent({
         render() {
           return h("div", [
@@ -250,7 +252,7 @@ describe("bindToQueryString", () => {
 
   test("sets query value before returning", async () => {
     let boundValueNewValue;
-    var router = createRouter({
+    const router = createRouter({
       history: createMemoryHistory(),
       routes: [
         {
@@ -273,7 +275,7 @@ describe("bindToQueryString", () => {
       ],
     });
 
-    const app = mount(
+    const _app = mount(
       defineComponent({
         render() {
           return h(RouterView);
@@ -304,7 +306,7 @@ describe("bindToQueryString", () => {
   test("handles multiple bound values changing simultaneously", async () => {
     let setBoundValues: (v: string | null) => void;
 
-    var router = createRouter({
+    const router = createRouter({
       history: createWebHistory(),
       routes: [
         {
@@ -327,7 +329,7 @@ describe("bindToQueryString", () => {
       ],
     });
 
-    const app = mount(
+    const _app = mount(
       defineComponent({
         render() {
           return h(RouterView);

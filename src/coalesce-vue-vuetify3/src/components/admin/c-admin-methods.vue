@@ -1,5 +1,5 @@
 <template>
-  <v-card class="c-admin-methods" v-if="methods.length">
+  <v-card v-if="methods.length" class="c-admin-methods">
     <v-toolbar
       class="c-admin-methods--toolbar"
       density="compact"

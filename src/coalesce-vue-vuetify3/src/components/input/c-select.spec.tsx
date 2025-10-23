@@ -16,22 +16,14 @@ import {
   ModelReferenceNavigationProperty,
 } from "coalesce-vue";
 import { Mock } from "vitest";
-import { FunctionalComponent, ref } from "vue";
+import { FunctionalComponent } from "vue";
 import { VForm } from "vuetify/components";
 import { CSelect } from "..";
 
-import {
-  Case,
-  Company,
-  ComplexModel,
-  EnumPkId,
-  Person,
-  Test,
-} from "@test-targets/models.g";
+import { ComplexModel, EnumPkId, Person, Test } from "@test-targets/models.g";
 import {
   CaseViewModel,
   ComplexModelViewModel,
-  PersonViewModel,
   TestViewModel,
 } from "@test-targets/viewmodels.g";
 
@@ -287,7 +279,7 @@ describe("CSelect", () => {
     // Vuetify props
     // ********
     () => <CSelect for="Test" variant="outlined" />;
-    //@ts-expect-error
+    //@ts-expect-error bad vuetify variant value
     () => <CSelect for="Test" variant="bad-variant" />;
 
     () => <CSelect for="Test"  />;
@@ -1225,11 +1217,6 @@ describe("CSelect", () => {
       expect(wrapper.findAll(".v-field--single-line")).toHaveLength(1);
     });
   });
-
-  // test("BOILERPLATE", () => {
-  //   const appWrapper = mountApp(CSelect, {});
-  //   const wrapper = appWrapper.findComponent(CSelect);
-  // });
 });
 
 const menuContents = () => getWrapper(".v-overlay__content");

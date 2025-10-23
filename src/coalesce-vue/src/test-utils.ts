@@ -22,21 +22,21 @@ type EndpointSpec =
       | string}`;
 
 type EndpointMock<TEndpoint extends EndpointSpec> = (
-  request: AxiosRequestConfig
+  request: AxiosRequestConfig,
 ) => PromiseOrSync<
   TEndpoint extends ListMethod | `/${string}/${"list"}`
     ? ListResult
     : TEndpoint extends `/${string}/${"count"}`
-    ? ItemResult<number>
-    : TEndpoint extends ItemMethod
-    ? ItemResult<TypeDiscriminatorToType<TEndpoint["return"]["type"]>>
-    : ItemResult | ListResult
+      ? ItemResult<number>
+      : TEndpoint extends ItemMethod
+        ? ItemResult<TypeDiscriminatorToType<TEndpoint["return"]["type"]>>
+        : ItemResult | ListResult
 >;
 
 let mocks: {
   endpoint: EndpointSpec;
   adapter: (
-    config: AxiosRequestConfig
+    config: AxiosRequestConfig,
   ) => PromiseOrSync<ItemResult | ListResult>;
 }[];
 
@@ -72,7 +72,7 @@ let mocks: {
  */
 export function mockEndpoint<
   TEndpoint extends EndpointSpec,
-  TMock extends EndpointMock<TEndpoint>
+  TMock extends EndpointMock<TEndpoint>,
 >(endpoint: TEndpoint, mock: TMock) {
   if (!mocks) {
     mocks = [];
@@ -101,7 +101,7 @@ export function mockEndpoint<
               result.totalCount ??= result.list?.length ?? 0;
               result.pageSize ??= Math.max(10, result.totalCount);
               result.pageCount ??= Math.ceil(
-                result.totalCount / result.pageSize
+                result.totalCount / result.pageSize,
               );
             }
 
@@ -117,8 +117,8 @@ export function mockEndpoint<
             if (!validateStatus || validateStatus(response.status)) {
               return response;
             } else {
-              var error = new Error(
-                "Request failed with status code " + response.status
+              const error = new Error(
+                "Request failed with status code " + response.status,
               ) as any;
               error.isAxiosError = true;
               error.response = response;

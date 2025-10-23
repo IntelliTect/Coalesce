@@ -212,7 +212,7 @@ describe("$useSimultaneousRequestCaching", () => {
         };
       }));
 
-    var client = new StudentApiClient().$useSimultaneousRequestCaching();
+    const client = new StudentApiClient().$useSimultaneousRequestCaching();
 
     const invoker = (nameStart: string) => {
       const params = new ListParameters();
@@ -253,7 +253,7 @@ describe("$useSimultaneousRequestCaching", () => {
         };
       }));
 
-    var client = new StudentApiClient().$useSimultaneousRequestCaching();
+    const client = new StudentApiClient().$useSimultaneousRequestCaching();
 
     const invoker = (advisorId: number) =>
       client.$invoke(StudentMeta.methods.getWithObjParam, {
@@ -276,7 +276,7 @@ describe("$useSimultaneousRequestCaching", () => {
   });
 
   test("functions when enabled via ApiState", async () => {
-    var invoker = new PersonApiClient()
+    const invoker = new PersonApiClient()
       .$makeCaller("item", (c, letter: string) => c.namesStartingWith(letter))
       .useSimultaneousRequestCaching()
       .setConcurrency("allow");
@@ -408,7 +408,7 @@ describe("$invoke", () => {
       type: "application/pdf",
     });
 
-    const response = await new StudentApiClient().$invoke(methodMeta, {
+    await new StudentApiClient().$invoke(methodMeta, {
       id: 42,
       file,
     });
@@ -459,7 +459,7 @@ describe("$invoke", () => {
       type: "application/pdf",
     });
 
-    const response = await new StudentApiClient().$invoke(methodMeta, {
+    await new StudentApiClient().$invoke(methodMeta, {
       id: 42,
       file,
       student: <Student>{ name: "bob&bob=bob", studentAdvisorId: null },
@@ -509,7 +509,7 @@ describe("$invoke", () => {
       type: "application/pdf",
     });
 
-    var response = await new StudentApiClient().$invoke(methodMeta, {
+    await new StudentApiClient().$invoke(methodMeta, {
       id: 42,
       files: [file1, file2],
     });
@@ -545,7 +545,7 @@ describe("$invoke", () => {
     };
 
     const bin = new Uint8Array([0x11, 0x22, 0x33]);
-    var response = await new StudentApiClient().$invoke(methodMeta, {
+    await new StudentApiClient().$invoke(methodMeta, {
       id: 42,
       bin,
     });
@@ -563,7 +563,7 @@ describe("$invoke", () => {
       status: 200,
     }));
 
-    var result = await new StudentApiClient().save(
+    await new StudentApiClient().save(
       new Student({
         studentAdvisorId: null,
         name: "bob",
@@ -979,7 +979,7 @@ describe("$makeCaller", () => {
   });
 
   test("handles successful file response", async () => {
-    let blob = new Blob(["foo"]);
+    const blob = new Blob(["foo"]);
 
     AxiosClient.defaults.adapter = vitest.fn().mockImplementation(async (c) => {
       const resp: AxiosResponse<any> = {
@@ -1007,7 +1007,7 @@ describe("$makeCaller", () => {
   });
 
   test("handles failed file response", async () => {
-    let blob = new Blob(['{ "wasSuccessful": false, "message": "broken" }'], {
+    const blob = new Blob(['{ "wasSuccessful": false, "message": "broken" }'], {
       type: "application/json",
     });
 
@@ -1383,11 +1383,11 @@ describe("$makeCaller with args object", () => {
       (c, args) => endpointMock(args.num),
     );
 
-    const result: number[] | null = caller.result;
-    const page: number | null = caller.page;
-    const pageCount: number | null = caller.pageCount;
-    const pageSize: number | null = caller.pageSize;
-    const totalCount: number | null = caller.totalCount;
+    const _result: number[] | null = caller.result;
+    const _page: number | null = caller.page;
+    const _pageCount: number | null = caller.pageCount;
+    const _pageSize: number | null = caller.pageSize;
+    const _totalCount: number | null = caller.totalCount;
 
     const promiseResult: number[] = await caller(42);
     expect(promiseResult).toStrictEqual([42]);
@@ -1398,9 +1398,9 @@ describe("$makeCaller with args object", () => {
     await caller.invoke(42);
     await caller.confirmInvoke("Are you sure?", 42);
     await caller.invokeWithArgs({ num: 42 });
-    //@ts-expect-error
+    //@ts-expect-error number expected
     await caller("asdf");
-    //@ts-expect-error
+    //@ts-expect-error `num` expects number
     await caller.invokeWithArgs({ num: "asdf" });
   });
 

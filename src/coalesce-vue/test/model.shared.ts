@@ -38,7 +38,7 @@ export const twoWayConversions = <MappingData[]>[
     // We define the expected using date-fns's format to make this test timezone-independent.
     dto: format(
       new Date("1990-01-02T03:04:05.000-08:00"),
-      "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+      "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
     ),
   },
   {
@@ -47,7 +47,7 @@ export const twoWayConversions = <MappingData[]>[
     // We define the expected using date-fns's format to make this test timezone-independent.
     dto: format(
       new Date("1990-01-02T03:04:05.000-08:00"),
-      "yyyy-MM-dd'T'HH:mm:ss.SSS"
+      "yyyy-MM-dd'T'HH:mm:ss.SSS",
     ),
   },
   { meta: studentProps.name, model: null, dto: null },
@@ -99,7 +99,7 @@ export const twoWayConversions = <MappingData[]>[
       // We define the expected using date-fns's format to make this test timezone-independent.
       birthDate: format(
         new Date("1990-01-02T03:04:05.000-08:00"),
-        "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+        "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
       ),
     },
   },

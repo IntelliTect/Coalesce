@@ -3,10 +3,10 @@
     <c-admin-table-toolbar
       :list="viewModel"
       :page-sizes="pageSizes"
-      @update:editable="editable = $event"
       :editable="canEdit ? editable : undefined"
       :color="color"
       :selected-columns="effectiveColumns"
+      @update:editable="editable = $event"
       @update:selected-columns="onColumnsUpdated"
     />
 
@@ -82,8 +82,8 @@
                 title="Delete"
                 variant="text"
                 icon
-                @click="deleteItemWithConfirmation(item)"
                 :loading="item.$delete.isLoading"
+                @click="deleteItemWithConfirmation(item)"
               >
                 <i
                   aria-hidden="true"
@@ -98,10 +98,10 @@
       <c-admin-create-btn
         v-if="editable"
         :list
-        @add="addItem"
         label="Add Item"
         :color
         class="my-2"
+        @add="addItem"
       ></c-admin-create-btn>
 
       <c-list-pagination
@@ -132,7 +132,7 @@ import {
   getCurrentInstance,
   onMounted,
 } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
 import { copyParamsToNewViewModel } from "./util";
 
@@ -157,7 +157,6 @@ const props = withDefaults(
   },
 );
 
-const router = useRouter();
 const route = useRoute();
 const instance = getCurrentInstance()!;
 const { metadata, canEdit, canDelete, hasInstanceMethods, getItemRoute } =

@@ -1,6 +1,6 @@
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
-import type { Value, ModelType } from "../src/metadata";
+import type { Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import {
   twoWayConversions,
@@ -105,7 +105,7 @@ describe.each(<MappingData[]>[
     123,
     "abc",
     [],
-    {}
+    {},
   ),
 ])(
   "mapValueToDto",
@@ -115,7 +115,7 @@ describe.each(<MappingData[]>[
       : `returns ${shortStringify(dtoValue)}`;
 
     const testTitle = `for ${shortStringify(
-      modelValue
+      modelValue,
     )}, ${expectedOutcomeDesc}`;
 
     describe(value.type, () => {
@@ -134,7 +134,7 @@ describe.each(<MappingData[]>[
         }
       });
     });
-  }
+  },
 );
 
 describe("mapToDto", () => {
@@ -176,7 +176,7 @@ describe("mapToDto", () => {
         name: "Steve",
         studentAdvisorId: 3,
       },
-      ["name", "studentId"]
+      ["name", "studentId"],
     );
 
     expect(mapped).toMatchObject({

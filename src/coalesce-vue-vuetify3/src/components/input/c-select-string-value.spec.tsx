@@ -33,14 +33,14 @@ describe("CSelectStringValue", () => {
       />
     );
 
-    
-    () => <CSelectStringValue 
-      for="Person" 
-      method="namesStartingWith" 
-      modelValue={selectedString.value} 
-      onUpdate:modelValue={v => selectedString.value = v} 
-    />;
-    
+    () => (
+      <CSelectStringValue
+        for="Person"
+        method="namesStartingWith"
+        modelValue={selectedString.value}
+        onUpdate:modelValue={(v) => (selectedString.value = v)}
+      />
+    );
 
     //@ts-expect-error wrong type for method
     () => <CSelectStringValue model={vm} for="name" method={badMethod} />;
@@ -61,71 +61,85 @@ describe("CSelectStringValue", () => {
   describe("prop variants", () => {
     let mock: Mock;
     beforeEach(() => {
-      mock = mockEndpoint(new PersonViewModel().$metadata.methods.namesStartingWith, vitest.fn(req => ({
-        wasSuccessful: true,
-        object: ["strFromServer"]
-      })));
-    })
+      mock = mockEndpoint(
+        new PersonViewModel().$metadata.methods.namesStartingWith,
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: ["strFromServer"],
+        })),
+      );
+    });
 
-    test("model={vm} for=propName method=methodName", async () =>{
+    test("model={vm} for=propName method=methodName", async () => {
       // Arrange/Act
       const vm = new PersonViewModel();
-      const wrapper = mountApp(() => <CSelectStringValue 
-        model={vm}
-        for="firstName" 
-        method="namesStartingWith"
-        listWhenEmpty
-      />);
+      const wrapper = mountApp(() => (
+        <CSelectStringValue
+          model={vm}
+          for="firstName"
+          method="namesStartingWith"
+          listWhenEmpty
+        />
+      ));
 
       await delay(10);
-      expect(mock).toBeCalledTimes(1)
+      expect(mock).toBeCalledTimes(1);
       await selectFirstResult(wrapper);
 
-      expect(mock).toBeCalledTimes(2) // Another call happens after selection to search for the new value
-      expect(vm.firstName).toBe("strFromServer")
-    })
+      expect(mock).toBeCalledTimes(2); // Another call happens after selection to search for the new value
+      expect(vm.firstName).toBe("strFromServer");
+    });
 
-    test("for=TypeName method=methodName v-model=selectedValue", async () =>{
+    test("for=TypeName method=methodName v-model=selectedValue", async () => {
       // Arrange/Act
       const selectedString = ref<string | null | undefined>("foo");
-      const wrapper = mountApp(() => <CSelectStringValue 
-        for="Person" 
-        method="namesStartingWith" 
-        listWhenEmpty
-        modelValue={selectedString.value} 
-        onUpdate:modelValue={v => selectedString.value = v} 
-      />);
+      const wrapper = mountApp(() => (
+        <CSelectStringValue
+          for="Person"
+          method="namesStartingWith"
+          listWhenEmpty
+          modelValue={selectedString.value}
+          onUpdate:modelValue={(v) => (selectedString.value = v)}
+        />
+      ));
 
       await delay(10);
-      expect(mock).toBeCalledTimes(1)
+      expect(mock).toBeCalledTimes(1);
       await selectFirstResult(wrapper);
 
-      expect(mock).toBeCalledTimes(2) // Another call happens after selection to search for the new value
-      expect(selectedString.value).toBe("strFromServer")
-    })
-  })
+      expect(mock).toBeCalledTimes(2); // Another call happens after selection to search for the new value
+      expect(selectedString.value).toBe("strFromServer");
+    });
+  });
 
-  test("search", async () =>{
+  test("search", async () => {
     const vm = new PersonViewModel();
-    const mock = mockEndpoint(vm.$metadata.methods.namesStartingWith, (req => ({
-      wasSuccessful: true,
-      object: ["strFromServer", "otherStrFromServer"].filter(item => item.includes(req.params.search || ""))
-    })));
-    
-    const wrapper = mountApp(() => <CSelectStringValue 
-      model={vm}
-      for="firstName" 
-      method="namesStartingWith"
-      listWhenEmpty
-    />);
+    const mock = mockEndpoint(
+      vm.$metadata.methods.namesStartingWith,
+      (req) => ({
+        wasSuccessful: true,
+        object: ["strFromServer", "otherStrFromServer"].filter((item) =>
+          item.includes(req.params.search || ""),
+        ),
+      }),
+    );
+
+    const wrapper = mountApp(() => (
+      <CSelectStringValue
+        model={vm}
+        for="firstName"
+        method="namesStartingWith"
+        listWhenEmpty
+      />
+    ));
 
     await nextTick();
-    wrapper.find("input").setValue("oth")
+    wrapper.find("input").setValue("oth");
     await nextTick();
     await selectFirstResult(wrapper);
 
-    expect(vm.firstName).toBe("otherStrFromServer")
-  })
+    expect(vm.firstName).toBe("otherStrFromServer");
+  });
 });
 
 const selectFirstResult = async (wrapper: VueWrapper) => {

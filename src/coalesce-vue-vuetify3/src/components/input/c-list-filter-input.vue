@@ -26,8 +26,8 @@
           variant="outlined"
           prepend-icon="$close"
           color="error"
-          @click="emit('clear')"
           title="Remove this filter"
+          @click="emit('clear')"
         >
           Remove
         </v-btn>
@@ -79,8 +79,8 @@
 
       <c-input
         v-else-if="filter.propMeta"
-        :for="filter.propMeta"
         v-model="filter.value"
+        :for="filter.propMeta"
         label=""
         placeholder="Enter filter value..."
         density="compact"

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { CAdminEditorPage, CAdminTablePage } from "../src";
 import { createCoalesceVuetify } from "../src/install";
 import {
@@ -67,7 +68,8 @@ type ComponentData<T> = T extends {
   data?(...args: any): infer D;
 }
   ? D
-  : {};
+  : // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    {};
 declare function betterMount<
   T,
   // BEGIN MODIFICATION
@@ -133,6 +135,7 @@ declare module "@vue/test-utils" {
 }
 
 declare module "vue/jsx-runtime" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     export interface IntrinsicAttributes {
       // Make tsx shut up about extra attributes on elements, which is a perfectly valid thing.

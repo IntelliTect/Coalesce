@@ -28,7 +28,7 @@ import {
   HiddenAreas,
 } from "coalesce-vue";
 
-import { computed, watch, getCurrentInstance, onMounted } from "vue";
+import { computed, watch, getCurrentInstance } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { isPropReadOnly } from "../../util";
 import { copyParamsToNewViewModel } from "./util";
@@ -87,7 +87,7 @@ const pageTitle = computed(() => {
     return "Create - " + metadata.value.displayName;
   }
 
-  let display = viewModel ? modelDisplay(viewModel) : null;
+  const display = viewModel ? modelDisplay(viewModel) : null;
   if (!display) {
     return metadata.value.displayName;
   }

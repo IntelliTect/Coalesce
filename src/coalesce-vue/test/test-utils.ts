@@ -51,14 +51,14 @@ export async function delay(ms: number) {
 export function mountData<T>(data: T) {
   return mount(
     defineComponent({
-      template: "<div></div>",
       data() {
         return data;
       },
-    })
+      template: "<div></div>",
+    }),
   ).vm;
 }
 
 export function destroy(wrapper: { destroy(): void } | { unmount(): void }) {
-  "destroy" in wrapper ? wrapper.destroy() : wrapper.unmount();
+  return "destroy" in wrapper ? wrapper.destroy() : wrapper.unmount();
 }

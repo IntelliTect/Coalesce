@@ -1,6 +1,8 @@
 <template>
   <v-text-field
     v-if="native"
+    v-bind="inputBindAttrs"
+    v-model:focused="focused"
     class="c-datetime-picker"
     :type="
       internalDateKind == 'time'
@@ -10,17 +12,15 @@
           : 'datetime-local'
     "
     :modelValue="nativeValue"
-    v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :validation-value="internalValue"
     :error-messages="error"
     :readonly="isReadonly"
     :disabled="isDisabled"
     autocomplete="off"
-    v-model:focused="focused"
     @change="textInputChanged($event, true)"
   >
-    <template v-for="(_, slot) of $slots as {}" v-slot:[slot]="scope">
+    <template v-for="(_, slot) of $slots as {}" #[slot]="scope">
       <slot :name="slot" v-bind="scope as any" />
     </template>
   </v-text-field>
@@ -28,6 +28,8 @@
   <v-text-field
     v-else
     ref="rootRef"
+    v-bind="inputBindAttrs"
+    v-model:focused="focused"
     class="c-datetime-picker"
     :class="{ 'has-today-btn': showTodayButton }"
     :placeholder="internalFormat"
@@ -36,7 +38,6 @@
         ? 'fa fa-clock cursor-pointer'
         : 'fa fa-calendar-alt cursor-pointer'
     "
-    v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
     :validation-value="internalValue"
@@ -44,14 +45,13 @@
     :readonly="isReadonly"
     :disabled="isDisabled"
     autocomplete="off"
-    v-model:focused="focused"
     @keydown.enter="acceptInput()"
     @keydown.escape="acceptInput()"
     @keydown.tab="closeMenu()"
     @update:model-value="textInputChanged($event, false)"
     @click="menu = !menu"
   >
-    <template v-for="(_, slot) of $slots as {}" v-slot:[slot]="scope">
+    <template v-for="(_, slot) of $slots as {}" #[slot]="scope">
       <slot :name="slot" v-bind="scope as any" />
     </template>
     <template #default>
@@ -59,12 +59,12 @@
       <v-menu
         v-if="isInteractive"
         :modelValue="menu"
-        @update:modelValue="!$event ? closeMenu() : openMenu()"
         activator="parent"
         content-class="c-datetime-picker__menu"
         :close-on-content-click="false"
         :open-on-click="false"
         min-width="1px"
+        @update:model-value="!$event ? closeMenu() : openMenu()"
       >
         <v-card class="d-flex" @keydown.enter="closeMenu()">
           <v-date-picker
@@ -72,7 +72,6 @@
             ref="datePickerRef"
             :color="color!"
             :modelValue="internalValueZoned"
-            @update:modelValue="dateChanged"
             density="comfortable"
             scrollable
             tabindex="0"
@@ -81,9 +80,10 @@
             :min="min ? startOfDay(min) : undefined"
             :max="max ? endOfDay(max) : undefined"
             v-bind="datePickerProps"
+            @update:model-value="dateChanged"
             @keydown="handleDateKeydown"
           >
-            <template v-slot:actions v-if="showTodayButton">
+            <template v-if="showTodayButton" #actions>
               <v-btn @click="setToday"> Today </v-btn>
               <v-spacer />
             </template>
@@ -95,12 +95,12 @@
             v-if="showTime"
             ref="timePickerRef"
             :model-value="internalValueZoned"
-            @update:model-value="timeChanged"
-            @navigate-out="handleTimePickerNavigateOut"
             :step="step ?? undefined"
             :min="min"
             :max="max"
             :color
+            @update:model-value="timeChanged"
+            @navigate-out="handleTimePickerNavigateOut"
           >
             <template #header>
               {{ displayedTime || "&nbsp;" }}
@@ -112,9 +112,9 @@
             :color="color"
             size="x-small"
             icon="$complete"
-            @click="menu = false"
             tabindex="-1"
             :title="$vuetify.locale.t('$vuetify.close')"
+            @click="menu = false"
           >
           </v-fab>
         </v-card>
@@ -122,52 +122,6 @@
     </template>
   </v-text-field>
 </template>
-
-<style lang="scss">
-.c-datetime-picker__menu {
-  > .v-card {
-    @media screen and (max-width: 600px) {
-      flex-wrap: wrap;
-      > * {
-        width: 100%;
-        flex-grow: 1;
-      }
-    }
-  }
-  .has-today-btn {
-    max-height: 365px;
-  }
-  .v-date-picker {
-    width: 300px;
-    overflow-y: auto;
-  }
-  .v-picker-title {
-    display: none;
-  }
-
-  .v-date-picker-header {
-    height: auto;
-    padding: 6px 14px;
-    font-size: 32px;
-  }
-
-  .v-date-picker-month__day {
-    width: 36px;
-
-    .v-btn {
-      font-size: 14px !important;
-      font-weight: 400;
-    }
-  }
-  .v-date-picker-months {
-    .v-date-picker-months__content {
-      padding: 8px;
-      grid-template-columns: repeat(3, 1fr);
-      grid-gap: 4px 8px;
-    }
-  }
-}
-</style>
 
 <script lang="ts">
 import { VTextField, VDatePicker } from "vuetify/components";
@@ -309,8 +263,7 @@ const timePickerRef = useTemplateRef("timePickerRef");
 
 const modelValue = defineModel<Date | null | undefined>();
 
-const { inputBindAttrs, modelMeta, valueMeta, valueOwner } =
-  useMetadataProps(props);
+const { inputBindAttrs, valueMeta, valueOwner } = useMetadataProps(props);
 
 const focused = ref(false);
 const error = ref<string[]>([]);
@@ -460,7 +413,7 @@ function createDefaultDate() {
 }
 
 function parseUserInput(val: string) {
-  var value: Date | null;
+  let value: Date | null;
   const referenceDate = internalValueZoned.value || createDefaultDate();
 
   if (!val || !val.trim()) {
@@ -538,7 +491,7 @@ function textInputChanged(val: string | Event, isNative: boolean) {
     return;
   }
 
-  var value: Date | null;
+  let value: Date | null;
   const referenceDate = internalValueZoned.value || createDefaultDate();
 
   if (isNative) {
@@ -557,7 +510,7 @@ function textInputChanged(val: string | Event, isNative: boolean) {
 function timeChanged(input: Date) {
   error.value = [];
 
-  var value = internalValueZoned.value || createDefaultDate();
+  let value = internalValueZoned.value || createDefaultDate();
 
   value = setHours(value, input.getHours());
   value = setMinutes(value, input.getMinutes());
@@ -576,7 +529,7 @@ function dateChanged(input: unknown, close = true) {
 
   error.value = [];
 
-  var value = internalValueZoned.value || createDefaultDate();
+  let value = internalValueZoned.value || createDefaultDate();
 
   // Reset this first in case the year/month aren't valid for the current day.
   value = setDate(value, 1);
@@ -749,3 +702,49 @@ watch(focused, (focused) => {
   }
 });
 </script>
+
+<style lang="scss">
+.c-datetime-picker__menu {
+  > .v-card {
+    @media screen and (max-width: 600px) {
+      flex-wrap: wrap;
+      > * {
+        width: 100%;
+        flex-grow: 1;
+      }
+    }
+  }
+  .has-today-btn {
+    max-height: 365px;
+  }
+  .v-date-picker {
+    width: 300px;
+    overflow-y: auto;
+  }
+  .v-picker-title {
+    display: none;
+  }
+
+  .v-date-picker-header {
+    height: auto;
+    padding: 6px 14px;
+    font-size: 32px;
+  }
+
+  .v-date-picker-month__day {
+    width: 36px;
+
+    .v-btn {
+      font-size: 14px !important;
+      font-weight: 400;
+    }
+  }
+  .v-date-picker-months {
+    .v-date-picker-months__content {
+      padding: 8px;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 4px 8px;
+    }
+  }
+}
+</style>

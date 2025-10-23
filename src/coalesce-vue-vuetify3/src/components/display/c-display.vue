@@ -8,7 +8,7 @@ const standaloneDateValueMeta: DateValue = {
 };
 
 const passwordWrapper = defineComponent({
-  name: "c-password-display",
+  name: "CPasswordDisplay",
   props: {
     element: { type: String, default: "span" },
     value: { type: String, default: "" },

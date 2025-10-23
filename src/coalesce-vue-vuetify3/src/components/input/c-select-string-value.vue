@@ -1,15 +1,15 @@
 <template>
   <v-combobox
-    class="c-select-string-value"
-    :modelValue="internalValue ?? undefined"
-    @update:modelValue="onInput"
-    :loading="loading"
-    :items="items"
-    :hide-no-data="!listWhenEmpty"
     v-model:search="search"
     v-model:menu="menu"
     v-model:focused="focused"
+    class="c-select-string-value"
+    :modelValue="internalValue ?? undefined"
+    :loading="loading"
+    :items="items"
+    :hide-no-data="!listWhenEmpty"
     v-bind="inputBindAttrs"
+    @update:model-value="onInput"
   >
   </v-combobox>
 </template>
@@ -103,7 +103,7 @@ const methodMeta = computed(() => {
     method.return.itemType.type != "string"
   ) {
     throw Error(
-      "c-select-string-value requires a static model method that returns an array of strings."
+      "c-select-string-value requires a static model method that returns an array of strings.",
     );
   }
 

@@ -1,8 +1,8 @@
 <template>
   <div class="c-method">
     <v-row
-      class="my-0 c-method--section c-method--params"
       v-if="filteredParams.length"
+      class="my-0 c-method--section c-method--params"
     >
       <v-col
         v-for="param in filteredParams"
@@ -36,7 +36,7 @@
         <template
           v-if="methodMeta.return.type == 'file' && !filteredParams.length"
         >
-          <v-btn color="primary" @click="invoke" :loading="caller.isLoading">
+          <v-btn color="primary" :loading="caller.isLoading" @click="invoke">
             <template v-if="filteredParams.length">Execute</template>
             <template v-else>
               <v-icon start>fa fa-fw fa-search</v-icon>
@@ -46,8 +46,8 @@
           <v-btn
             class="mt-1"
             color="primary"
-            @click="invokeAndDownload"
             :loading="caller.isLoading"
+            @click="invokeAndDownload"
           >
             <v-icon start>fa fa-fw fa-download</v-icon>
             Download
@@ -56,9 +56,9 @@
         <v-btn
           v-else
           color="primary"
-          @click="invoke"
           :loading="caller.isLoading"
           sm
+          @click="invoke"
         >
           Execute
         </v-btn>
@@ -77,10 +77,10 @@
               <v-btn
                 v-if="caller.result && methodMeta.return.type == 'file'"
                 color="primary"
-                @click="downloadFileResult"
                 :loading="caller.isLoading"
                 size="x-small"
                 outlined
+                @click="downloadFileResult"
               >
                 <v-icon start small>fa fa-download</v-icon>
                 Save to Disk
@@ -123,9 +123,9 @@
 
             <c-display
               v-else-if="caller.result != null"
+              v-model="caller.result"
               element="pre"
               class="c-method--result-value"
-              v-model="caller.result"
               :for="methodMeta.return"
               :options="resultDisplayOptions"
             />

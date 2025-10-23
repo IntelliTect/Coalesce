@@ -61,12 +61,12 @@ export function isPropReadOnly(p: Property, model: ViewModel) {
 export type ComponentSlots<T> = T extends new () => { $slots: infer S }
   ? NonNullable<S>
   : T extends (
-      props: any,
-      ctx: { slots: infer S; attrs: any; emit: any },
-      ...args: any
-    ) => any
-  ? NonNullable<S>
-  : {};
+        props: any,
+        ctx: { slots: infer S; attrs: any; emit: any },
+        ...args: any
+      ) => any
+    ? NonNullable<S>
+    : object;
 
 export function detectFileFormat(base64: string): string | null {
   // Decode Base64 string

@@ -42,7 +42,7 @@ function render() {
 
   if (!meta) {
     throw Error(
-      "Provided model has no $metadata property, and no specific value was provided via the 'for' component prop to c-display."
+      "Provided model has no $metadata property, and no specific value was provided via the 'for' component prop to c-display.",
     );
   }
 
@@ -81,7 +81,7 @@ function render() {
           (((model as any)[narrowedMeta.name] as ViewModelCollection<any, any>)
             ?.$hasLoaded === false
             ? "View"
-            : "None")
+            : "None"),
       );
     }
 
@@ -95,7 +95,7 @@ function render() {
           {
             to: getRefNavRoute(router, model, meta),
           },
-          () => propDisplay(model, narrowedMeta) ?? fkValue
+          () => propDisplay(model, narrowedMeta) ?? fkValue,
         );
       }
     }
@@ -117,7 +117,7 @@ function render() {
             link.click();
           },
         },
-        h(CDisplay, { ...props })
+        h(CDisplay, { ...props }),
       );
     }
   }

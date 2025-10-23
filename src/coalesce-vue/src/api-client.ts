@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 import {
   onBeforeUnmount,
   ref,
@@ -5,8 +6,6 @@ import {
   getCurrentInstance,
   shallowRef,
   type Ref,
-  type ComponentPublicInstance,
-  type ComponentInternalInstance,
 } from "vue";
 
 import type {
@@ -113,6 +112,7 @@ export interface SaveParameters<T extends Model<ModelType> = any>
   fields?: PropNames<T["$metadata"]>[] | null;
 }
 export class SaveParameters<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   T extends Model<ModelType>,
 > extends DataSourceParameters {
   constructor() {
@@ -207,10 +207,10 @@ export function mapParamsToDto(parameters?: StandardParameters): {
   if (!parameters) return {};
 
   // Assume the widest type, which is ListParameters.
-  var wideParams = parameters as Partial<ListParameters>;
+  const wideParams = parameters as Partial<ListParameters>;
 
   // The list of 'simple' params where we just pass along the exact value.
-  var simpleParams = [
+  const simpleParams = [
     "includes",
     "search",
     "page",
@@ -221,7 +221,7 @@ export function mapParamsToDto(parameters?: StandardParameters): {
   ] as const;
 
   // Map all the simple params to `paramsObject`
-  var paramsObject = simpleParams.reduce(
+  const paramsObject = simpleParams.reduce(
     (obj, key) => {
       if (key in wideParams && wideParams[key] != null) {
         obj[key] = String(wideParams[key]);
@@ -234,8 +234,8 @@ export function mapParamsToDto(parameters?: StandardParameters): {
   // Map the 'filter' object, ensuring all values are strings.
   const filter = wideParams.filter;
   if (typeof filter == "object" && filter) {
-    for (var key in filter) {
-      let value = filter[key];
+    for (const key in filter) {
+      const value = filter[key];
       if (value !== undefined) {
         paramsObject["filter." + key] = String(value);
       }
@@ -253,12 +253,12 @@ export function mapParamsToDto(parameters?: StandardParameters): {
   if (dataSource) {
     // Add the data source name
     paramsObject["dataSource"] = dataSource.$metadata.name;
-    var paramsMeta = dataSource.$metadata.props;
+    const paramsMeta = dataSource.$metadata.props;
 
     // Add the data source parameters.
     // Note that we use "dataSource.{paramName}", not a nested object.
     // This is what the model binder expects.
-    for (var paramName in paramsMeta) {
+    for (const paramName in paramsMeta) {
       const paramMeta = paramsMeta[paramName];
       if (paramName in dataSource) {
         const paramValue = dataSource[paramName];
@@ -332,7 +332,7 @@ export function mapQueryToParams<T extends StandardParameters>(
     if ("includes" in dto) parameters.includes = dto.includes;
 
     if ("dataSource" in dto) {
-      var dataSourceMeta = Object.values(modelMeta.dataSources).find(
+      const dataSourceMeta = Object.values(modelMeta.dataSources).find(
         // Match case insensitively on the DS name,
         // because sometimes it'll be camelCase (keys of `modelMeta.dataSources`)
         // and sometimes it'll be PascalCase (values of `modelMeta.dataSources[x].name`).
@@ -345,7 +345,7 @@ export function mapQueryToParams<T extends StandardParameters>(
 
         for (const key in dto) {
           if (key.startsWith("dataSource.")) {
-            var paramName = key.replace("dataSource.", "");
+            const paramName = key.replace("dataSource.", "");
             if (paramName in dataSource.$metadata.props) {
               (dataSource as any)[paramName] = mapToModel(
                 dto[key],
@@ -371,7 +371,7 @@ async function parseApiResult(data: any): Promise<ApiResult | null> {
     // However, this means that if the endpoint fails and returns JSON,
     // it will return the ApiResult's JSON inside a blob. This extracts it back out.
     data = await new Promise((resolve, reject) => {
-      let reader = new FileReader();
+      const reader = new FileReader();
       reader.onload = () => {
         try {
           resolve(JSON.parse(reader.result as string));
@@ -468,7 +468,7 @@ function getRequestQuery<TMethod extends Method>(
   const formatted: {
     [paramName: string]: ReturnType<typeof mapToDto> | File | Blob | Uint8Array;
   } = {};
-  for (var paramName in method.params) {
+  for (const paramName in method.params) {
     const paramMeta = method.params[paramName];
     const paramValue = params[paramName];
 
@@ -510,7 +510,7 @@ async function getRequestBody<TMethod extends Method>(
 
   if (useMultipartFormData) {
     const mappedParams: { [paramName: string]: any } = {};
-    for (var name in method.params) {
+    for (const name in method.params) {
       const meta = method.params[name];
       const value = params[name];
 
@@ -542,7 +542,7 @@ async function getRequestBody<TMethod extends Method>(
     // Send JSON.
 
     const mappedParams: { [paramName: string]: any } = {};
-    for (var name in method.params) {
+    for (const name in method.params) {
       const meta = method.params[name];
       let value = params[name] as any;
 
@@ -685,7 +685,7 @@ export type ApiStateType<
 export type ApiStateTypeWithArgs<
   T extends TransportTypeSpecifier,
   TArgs extends any[],
-  TArgsObj extends {},
+  TArgsObj extends object,
   TResult,
 > = T extends ItemTransportTypeSpecifier
   ? ItemApiStateWithArgs<
@@ -802,7 +802,7 @@ export class ApiClient<T extends ApiRoutedType> {
    */
   $makeCaller<
     TArgs extends any[],
-    TArgsObj extends {},
+    TArgsObj extends object,
     TResult,
     TTransportType extends TransportTypeSpecifier<T>,
   >(
@@ -826,7 +826,7 @@ export class ApiClient<T extends ApiRoutedType> {
 
   $makeCaller<
     TArgs extends any[],
-    TArgsObj extends {},
+    TArgsObj extends object,
     TResult,
     TTransportType extends TransportTypeSpecifier<T>,
   >(
@@ -860,7 +860,7 @@ export class ApiClient<T extends ApiRoutedType> {
     // This is basically all just about resolving the overloads.
     // We use `any` because the types get really messy if you try to handle both types at once.
 
-    var instance;
+    let instance;
     if (argsFactory && argsInvoker) {
       switch (localResultType) {
         case "item":
@@ -1002,7 +1002,7 @@ export class ApiClient<T extends ApiRoutedType> {
         case "file":
           // Determine the name of the downloaded file.
           // https://stackoverflow.com/a/40940790
-          let disposition = r.headers["content-disposition"];
+          const disposition = r.headers["content-disposition"];
           let fileName = "";
           if (disposition) {
             const utf8FilenameRegex =
@@ -1328,6 +1328,7 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
   >;
   protected abstract _invokeInternal(
     thisArg: any,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     invoker: Function,
     args: any[],
   ): Promise<ItemResult<TResult> | ListResult<TResult>>;
@@ -1348,11 +1349,11 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
     const invoke = invokeFunc as unknown as this;
 
     // Manually assign ctor props
-    // @ts-expect-error
+    // @ts-expect-error initializing read-only member
     invoke.invoke = invoke;
-    // @ts-expect-error
+    // @ts-expect-error initializing read-only member
     invoke.invoker = invoker;
-    // @ts-expect-error
+    // @ts-expect-error initializing read-only member
     invoke.apiClient = apiClient;
 
     Object.setPrototypeOf(invoke, new.target.prototype);
@@ -1360,7 +1361,7 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
   }
 }
 
-// @ts-ignore Workaround for https://github.com/evanw/esbuild/issues/1918,
+// @ts-expect-error Workaround for https://github.com/evanw/esbuild/issues/1918,
 // an error that happens when esbuild transforms the class fields
 // into incorrectly using `this` even though our actual constructor does not use `this`.
 // Using `this` before a call to `super` (which we don't have or need either of these)
@@ -1599,6 +1600,7 @@ export abstract class ApiState<
 
   protected async _invokeInternal(
     thisArg: any,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     invoker: Function,
     args: any[],
   ) {
@@ -1773,7 +1775,7 @@ export abstract class ApiState<
       }
 
       this._cancelToken = token;
-      let promise = invoker.apply(thisArg, [apiClient, ...args]);
+      const promise = invoker.apply(thisArg, [apiClient, ...args]);
 
       if (!promise) {
         this.isLoading = false;
@@ -1827,6 +1829,7 @@ export abstract class ApiState<
         // https://github.com/IntelliTect/Coalesce/issues/296
         return;
       } else {
+        // eslint-disable-next-line no-var
         var error = thrown as AxiosError | ApiResult | Error | string;
       }
 
@@ -1890,7 +1893,7 @@ window.addEventListener("beforeunload", (e) => {
 });
 
 function purgeStaleCacheEntries(storage: Storage) {
-  for (var i = 0; i < storage.length; i++) {
+  for (let i = 0; i < storage.length; i++) {
     const key = storage.key(i)!;
     if (!key.startsWith("coalesce:")) continue;
 
@@ -1915,6 +1918,7 @@ purgeStaleCacheEntries(sessionStorage);
 export interface ItemApiState<
   TArgs extends any[],
   TResult,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TMethod extends ItemMethod | undefined = ItemMethod,
 > {
   // Do not put a doc comment on the call signature:
@@ -2107,7 +2111,7 @@ export class ItemApiStateWithArgs<
     // Workaround for https://github.com/axios/axios/issues/2468.
     // Prepend the baseURL if not already present
     // (It might be present e.g. if the above issue gets fixed).
-    let baseURL = AxiosClient.defaults.baseURL;
+    const baseURL = AxiosClient.defaults.baseURL;
     if (baseURL && !url.startsWith(baseURL)) {
       url = baseURL.replace(/\/+$/, "") + url;
     }

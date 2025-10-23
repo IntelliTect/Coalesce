@@ -30,7 +30,7 @@
             toggleColumn(prop.name, !selectedColumns?.includes(prop.name))
           "
         >
-          <template #prepend v-if="columnSelection">
+          <template v-if="columnSelection" #prepend>
             <v-checkbox-btn
               density="compact"
               class="mr-2"
@@ -41,7 +41,7 @@
           <v-list-item-title>{{ prop.displayName }}</v-list-item-title>
 
           <!-- Filter sub-menu -->
-          <template #append v-if="filter">
+          <template v-if="filter" #append>
             <v-menu
               location="end"
               :close-on-content-click="false"
@@ -92,16 +92,9 @@
   </v-menu>
 </template>
 
-<style lang="scss">
-.c-column-filter-card {
-  min-width: 350px;
-  max-width: 500px;
-}
-</style>
-
 <script setup lang="ts">
-import { computed, PropType, toRef } from "vue";
-import { ListViewModel, ModelType, Property } from "coalesce-vue";
+import { computed, toRef } from "vue";
+import { ListViewModel, ModelType } from "coalesce-vue";
 import CListFilterInput from "../input/c-list-filter-input.vue";
 import { useListFilters } from "../input/use-list-filters";
 
@@ -147,3 +140,10 @@ function resetToDefault() {
   props.list.$filter = {};
 }
 </script>
+
+<style lang="scss">
+.c-column-filter-card {
+  min-width: 350px;
+  max-width: 500px;
+}
+</style>

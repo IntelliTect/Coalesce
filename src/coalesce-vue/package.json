@@ -24,6 +24,8 @@
     "build": "tsc --noEmit && tsc -p ./tsconfig.build.esm.json",
     "prepack": "npm run build",
     "test": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "coverage": "vitest --coverage"
   },
   "files": [

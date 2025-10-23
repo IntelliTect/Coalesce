@@ -24,31 +24,31 @@
       <v-spacer></v-spacer>
       <v-btn
         v-if="!model.$isAutoSaveEnabled && showContent && canEdit"
-        @click="model.$bulkSave()"
         title="Save"
         :color="isBulkSaveDirty ? 'success' : undefined"
         :variant="isBulkSaveDirty ? 'elevated' : 'text'"
         :loading="model.$bulkSave.isLoading"
         prepend-icon="fa fa-save"
+        @click="model.$bulkSave()"
       >
         <span class="hidden-sm-and-down">Save</span>
       </v-btn>
       <v-btn
         v-if="canDelete"
-        @click="deleteItemWithConfirmation()"
         variant="text"
         :disabled="!hasPk"
         title="Delete"
         prepend-icon="fa fa-trash-alt"
+        @click="deleteItemWithConfirmation()"
       >
         <span class="hidden-sm-and-down">Delete</span>
       </v-btn>
       <v-btn
-        @click="reload"
         variant="text"
         :disabled="!hasPk"
         title="Reload"
         prepend-icon="$loading"
+        @click="reload"
       >
         <span class="hidden-sm-and-down">Reload</span>
       </v-btn>
@@ -168,12 +168,12 @@
       <v-spacer></v-spacer>
       <v-btn
         v-if="!model.$isAutoSaveEnabled"
-        @click="model.$bulkSave()"
         title="Save"
         :color="isBulkSaveDirty ? 'success' : undefined"
         :variant="isBulkSaveDirty ? 'elevated' : 'text'"
         :loading="model.$bulkSave.isLoading"
         prepend-icon="fa fa-save"
+        @click="model.$bulkSave()"
       >
         <span class="hidden-sm-and-down">Save</span>
       </v-btn>
@@ -231,7 +231,7 @@ watch(form, (form) => {
 });
 
 function propInputBinds(p: Property) {
-  let readonly = isPropReadOnly(p, props.model);
+  const readonly = isPropReadOnly(p, props.model);
 
   return {
     readonly,
@@ -306,6 +306,8 @@ const isBulkSaveDirty = computed(() => {
 </script>
 
 <style lang="scss">
+@use "sass:math";
+
 .c-admin-editor--row {
   // Center each row so that things are nicely aligned,
   // especially in the case where labels are long enough to have to wrap.
@@ -332,7 +334,7 @@ $text-height: 10px;
   align-self: start;
   @media (min-width: 960px) {
     min-height: $row-height;
-    padding-top: ($row-height/2 - $text-height) !important;
+    padding-top: (math.div($row-height, 2) - $text-height) !important;
     text-align: right;
   }
 }
@@ -349,7 +351,7 @@ $text-height: 10px;
     > a,
     > span {
       display: inline-block;
-      padding-top: ($row-height/2 - $text-height) !important;
+      padding-top: (math.div($row-height, 2) - $text-height) !important;
     }
   }
 }

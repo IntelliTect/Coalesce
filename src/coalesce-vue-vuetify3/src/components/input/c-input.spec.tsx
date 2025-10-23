@@ -11,9 +11,7 @@ import { CInput } from "..";
 import {
   Case,
   CaseProduct,
-  Company,
   ComplexModel,
-  EnumPk,
   Statuses,
   Test,
 } from "@test-targets/models.g";
@@ -33,7 +31,6 @@ describe("CInput", () => {
     });
   });
 
-  /* eslint-disable @typescript-eslint/no-unused-vars */
   // prettier-ignore
   test("types", () => {
     const model = new ComplexModel();

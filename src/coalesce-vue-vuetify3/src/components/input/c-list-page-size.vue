@@ -17,8 +17,8 @@
         v-else
         key="with-label"
         v-bind="selectBinds"
-        label="Page Size"
         v-model="list.$params.pageSize"
+        label="Page Size"
       ></v-select>
     </span>
   </div>

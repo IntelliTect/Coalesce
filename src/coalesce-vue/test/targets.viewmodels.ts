@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+
 // Ensure that ViewModel.typeLookup is created by the generated code as expected,
 // since the viewmodels in this class (which are deprecated and usages need to be changed
 // to use `test-targets`) get added to the generated ViewModel.typeLookup.

@@ -1,4 +1,3 @@
-import { ref } from "vue";
 import { CSelectValues } from "..";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 

@@ -46,6 +46,7 @@ export default [
       "no-undef": "off", // Redundant with Typescript
 
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {

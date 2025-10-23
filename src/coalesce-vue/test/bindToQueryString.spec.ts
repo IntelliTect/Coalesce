@@ -124,9 +124,9 @@ describe("bindToQueryString", () => {
   test("bad types", async () => {
     await runTest(async (v) => {
       //@ts-expect-error Missing queryKey in options object.
-      bindToQueryString(v, dateRef, {});
+      () => bindToQueryString(v, dateRef, {});
       //@ts-expect-error Missing options or queryKey.
-      bindToQueryString(v, dateRef);
+      () => bindToQueryString(v, dateRef);
     });
   });
 

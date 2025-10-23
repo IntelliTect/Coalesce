@@ -54,8 +54,6 @@ describe("VueInstance", () => {
     });
   });
 
-  /* eslint-disable @typescript-eslint/no-unused-expressions */
-
   test("is assignable from getCurrentInstance", async () => {
     () => bindToQueryString(getCurrentInstance()!.proxy!, { a: 1 }, "a");
   });

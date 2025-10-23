@@ -212,10 +212,12 @@ describe("ViewModel", () => {
       // Upon first invocation, the cache will be used.
       const loadPromise = vm2.$load(1);
       expect(vm2.name).toBe("Response 1");
+      expect(vm2.$isDirty).toBe(false);
 
       // After the real API call has a chance to finish, the new results should be loaded.
       await loadPromise;
       expect(vm2.name).toBe("Response 2");
+      expect(vm2.$isDirty).toBe(false);
     });
   });
 
@@ -3507,10 +3509,12 @@ describe("ListViewModel", () => {
       // Upon first invocation, the cache will be used.
       const loadPromise = list2.$load();
       expect(list2.$items[0].name).toBe("Response 1");
+      expect(list2.$items[0].$isDirty).toBe(false);
 
       // After the real API call has a chance to finish, the new results should be loaded.
       await loadPromise;
       expect(list2.$items[0].name).toBe("Response 2");
+      expect(list2.$items[0].$isDirty).toBe(false);
     });
   });
 

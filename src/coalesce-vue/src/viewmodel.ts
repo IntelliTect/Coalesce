@@ -423,9 +423,9 @@ export abstract class ViewModel<
         const result = state.result;
 
         // If there's no captured start time, assume the data is from response caching
-        // and use the oldest possible time (0).
+        // and use the oldest possible time (but not 0 because it tests as falsy...).
         // @ts-expect-error passed through from invoker
-        const startTime = state.rawResponse?.__startTime ?? 0;
+        const startTime = state.rawResponse?.__startTime ?? 0.01;
 
         if (result) {
           // We do `purgeUnsaved` (arg2) here, since $load() is always an explicit user action
@@ -1736,9 +1736,9 @@ export abstract class ListViewModel<
           const result = state.result;
 
           // If there's no captured start time, assume the data is from response caching
-          // and use the oldest possible time (0).
+          // and use the oldest possible time (but not 0 because it tests as falsy...).
           // @ts-expect-error passed through from invoker
-          const startTime = state.rawResponse?.__startTime ?? 0;
+          const startTime = state.rawResponse?.__startTime ?? 0.01;
 
           if (result) {
             this.$items = rebuildModelCollectionForViewModelCollection<

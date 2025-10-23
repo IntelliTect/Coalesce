@@ -6,6 +6,7 @@
 - `c-input` no longer wraps default slot fallback content in a superfluous div.
 - `c-input` no longer attempts to delegate shared-key one-to-one properties to `c-select`, a scenario that is not possible to select values for.
 - DTOs no longer generate MapToNew methods with unsatisfied `required` constraints.
+- Fix results from `useResponseCaching` in `ViewModel`/`ListViewModel` `$load` results would get treated as dirty data.
 
 # 6.0.1
 - `createAspNetCoreHmrPlugin` now displays NPM package mismatches with the standard vite overlay instead of a custom overlay.

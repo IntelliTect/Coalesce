@@ -340,7 +340,7 @@ public abstract partial class MethodViewModel : IAttributeProvider
 #if NET7_0_OR_GREATER
             if (!this.HasAttribute<System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute>())
             {
-                foreach (var requiredProp in Parent.ClientProperties.Where(p => p.HasRequiredKeyword))
+                foreach (var requiredProp in Parent.Properties.Where(p => p.HasRequiredKeyword))
                 {
                     if (!incomingProperties.ContainsKey(requiredProp.Name))
                     {
@@ -348,7 +348,7 @@ public abstract partial class MethodViewModel : IAttributeProvider
                         {
                             IsAcceptable = false,
                             Reason = $"Required property `{requiredProp.Name}` is not accepted as an input, " +
-                                $"so Coalesce cannnot satisfy its `required` constraint. Adding [SetsRequiredMembers] will suppress this."
+                                $"so Coalesce cannot satisfy its `required` constraint. Adding [SetsRequiredMembers] will suppress this."
                         };
                     }
                 }

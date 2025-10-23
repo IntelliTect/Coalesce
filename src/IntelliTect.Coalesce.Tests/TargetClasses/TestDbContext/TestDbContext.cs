@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<ComplexModelDependent> ComplexModelDependents { get; set; }
     public DbSet<ReadOnlyEntityUsedAsMethodInput> ReadOnlyEntityUsedAsMethodInputs { get; set; }
     public DbSet<RequiredAndInitModel> RequiredAndInitModels { get; set; }
+    public DbSet<RequiredInternalUseModel> RequiredInternalUseModels { get; set; }
     public DbSet<Test> Tests { get; set; }
 
     public DbSet<AbstractModel> AbstractModels { get; set; }

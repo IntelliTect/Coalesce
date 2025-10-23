@@ -5,6 +5,7 @@
 - Fix `c-admin-editor-page` briefly showing editors while the item is initially loading.
 - `c-input` no longer wraps default slot fallback content in a superfluous div.
 - `c-input` no longer attempts to delegate shared-key one-to-one properties to `c-select`, a scenario that is not possible to select values for.
+- DTOs no longer generate MapToNew methods with unsatisfied `required` constraints.
 
 # 6.0.1
 - `createAspNetCoreHmrPlugin` now displays NPM package mismatches with the standard vite overlay instead of a custom overlay.

@@ -1004,48 +1004,6 @@ export class MultipleParentsListViewModel extends ListViewModel<$models.Multiple
 }
 
 
-export interface OneToOneChild1ViewModel extends $models.OneToOneChild1 {
-  parentId: number | null;
-  get parent(): OneToOneParentViewModel | null;
-  set parent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
-}
-export class OneToOneChild1ViewModel extends ViewModel<$models.OneToOneChild1, $apiClients.OneToOneChild1ApiClient, number> implements $models.OneToOneChild1  {
-  
-  constructor(initialData?: DeepPartial<$models.OneToOneChild1> | null) {
-    super($metadata.OneToOneChild1, new $apiClients.OneToOneChild1ApiClient(), initialData)
-  }
-}
-defineProps(OneToOneChild1ViewModel, $metadata.OneToOneChild1)
-
-export class OneToOneChild1ListViewModel extends ListViewModel<$models.OneToOneChild1, $apiClients.OneToOneChild1ApiClient, OneToOneChild1ViewModel> {
-  
-  constructor() {
-    super($metadata.OneToOneChild1, new $apiClients.OneToOneChild1ApiClient())
-  }
-}
-
-
-export interface OneToOneChild2ViewModel extends $models.OneToOneChild2 {
-  parentId: number | null;
-  get parent(): OneToOneParentViewModel | null;
-  set parent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
-}
-export class OneToOneChild2ViewModel extends ViewModel<$models.OneToOneChild2, $apiClients.OneToOneChild2ApiClient, number> implements $models.OneToOneChild2  {
-  
-  constructor(initialData?: DeepPartial<$models.OneToOneChild2> | null) {
-    super($metadata.OneToOneChild2, new $apiClients.OneToOneChild2ApiClient(), initialData)
-  }
-}
-defineProps(OneToOneChild2ViewModel, $metadata.OneToOneChild2)
-
-export class OneToOneChild2ListViewModel extends ListViewModel<$models.OneToOneChild2, $apiClients.OneToOneChild2ApiClient, OneToOneChild2ViewModel> {
-  
-  constructor() {
-    super($metadata.OneToOneChild2, new $apiClients.OneToOneChild2ApiClient())
-  }
-}
-
-
 export interface OneToOneManyChildrenViewModel extends $models.OneToOneManyChildren {
   id: number | null;
   oneToOneParentId: number | null;
@@ -1070,10 +1028,12 @@ export class OneToOneManyChildrenListViewModel extends ListViewModel<$models.One
 
 export interface OneToOneParentViewModel extends $models.OneToOneParent {
   id: number | null;
-  get child1(): OneToOneChild1ViewModel | null;
-  set child1(value: OneToOneChild1ViewModel | $models.OneToOneChild1 | null);
-  get child2(): OneToOneChild2ViewModel | null;
-  set child2(value: OneToOneChild2ViewModel | $models.OneToOneChild2 | null);
+  get sharedKeyChild1(): OneToOneSharedKeyChild1ViewModel | null;
+  set sharedKeyChild1(value: OneToOneSharedKeyChild1ViewModel | $models.OneToOneSharedKeyChild1 | null);
+  get sharedKeyChild2(): OneToOneSharedKeyChild2ViewModel | null;
+  set sharedKeyChild2(value: OneToOneSharedKeyChild2ViewModel | $models.OneToOneSharedKeyChild2 | null);
+  get separateKeyChild(): OneToOneSeparateKeyChildViewModel | null;
+  set separateKeyChild(value: OneToOneSeparateKeyChildViewModel | $models.OneToOneSeparateKeyChild | null);
   get manyChildren(): ViewModelCollection<OneToOneManyChildrenViewModel, $models.OneToOneManyChildren>;
   set manyChildren(value: (OneToOneManyChildrenViewModel | $models.OneToOneManyChildren)[] | null);
 }
@@ -1094,6 +1054,70 @@ export class OneToOneParentListViewModel extends ListViewModel<$models.OneToOneP
   
   constructor() {
     super($metadata.OneToOneParent, new $apiClients.OneToOneParentApiClient())
+  }
+}
+
+
+export interface OneToOneSeparateKeyChildViewModel extends $models.OneToOneSeparateKeyChild {
+  id: number | null;
+  parentId: number | null;
+  get parent(): OneToOneParentViewModel | null;
+  set parent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
+}
+export class OneToOneSeparateKeyChildViewModel extends ViewModel<$models.OneToOneSeparateKeyChild, $apiClients.OneToOneSeparateKeyChildApiClient, number> implements $models.OneToOneSeparateKeyChild  {
+  
+  constructor(initialData?: DeepPartial<$models.OneToOneSeparateKeyChild> | null) {
+    super($metadata.OneToOneSeparateKeyChild, new $apiClients.OneToOneSeparateKeyChildApiClient(), initialData)
+  }
+}
+defineProps(OneToOneSeparateKeyChildViewModel, $metadata.OneToOneSeparateKeyChild)
+
+export class OneToOneSeparateKeyChildListViewModel extends ListViewModel<$models.OneToOneSeparateKeyChild, $apiClients.OneToOneSeparateKeyChildApiClient, OneToOneSeparateKeyChildViewModel> {
+  
+  constructor() {
+    super($metadata.OneToOneSeparateKeyChild, new $apiClients.OneToOneSeparateKeyChildApiClient())
+  }
+}
+
+
+export interface OneToOneSharedKeyChild1ViewModel extends $models.OneToOneSharedKeyChild1 {
+  parentId: number | null;
+  get parent(): OneToOneParentViewModel | null;
+  set parent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
+}
+export class OneToOneSharedKeyChild1ViewModel extends ViewModel<$models.OneToOneSharedKeyChild1, $apiClients.OneToOneSharedKeyChild1ApiClient, number> implements $models.OneToOneSharedKeyChild1  {
+  
+  constructor(initialData?: DeepPartial<$models.OneToOneSharedKeyChild1> | null) {
+    super($metadata.OneToOneSharedKeyChild1, new $apiClients.OneToOneSharedKeyChild1ApiClient(), initialData)
+  }
+}
+defineProps(OneToOneSharedKeyChild1ViewModel, $metadata.OneToOneSharedKeyChild1)
+
+export class OneToOneSharedKeyChild1ListViewModel extends ListViewModel<$models.OneToOneSharedKeyChild1, $apiClients.OneToOneSharedKeyChild1ApiClient, OneToOneSharedKeyChild1ViewModel> {
+  
+  constructor() {
+    super($metadata.OneToOneSharedKeyChild1, new $apiClients.OneToOneSharedKeyChild1ApiClient())
+  }
+}
+
+
+export interface OneToOneSharedKeyChild2ViewModel extends $models.OneToOneSharedKeyChild2 {
+  parentId: number | null;
+  get parent(): OneToOneParentViewModel | null;
+  set parent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
+}
+export class OneToOneSharedKeyChild2ViewModel extends ViewModel<$models.OneToOneSharedKeyChild2, $apiClients.OneToOneSharedKeyChild2ApiClient, number> implements $models.OneToOneSharedKeyChild2  {
+  
+  constructor(initialData?: DeepPartial<$models.OneToOneSharedKeyChild2> | null) {
+    super($metadata.OneToOneSharedKeyChild2, new $apiClients.OneToOneSharedKeyChild2ApiClient(), initialData)
+  }
+}
+defineProps(OneToOneSharedKeyChild2ViewModel, $metadata.OneToOneSharedKeyChild2)
+
+export class OneToOneSharedKeyChild2ListViewModel extends ListViewModel<$models.OneToOneSharedKeyChild2, $apiClients.OneToOneSharedKeyChild2ApiClient, OneToOneSharedKeyChild2ViewModel> {
+  
+  constructor() {
+    super($metadata.OneToOneSharedKeyChild2, new $apiClients.OneToOneSharedKeyChild2ApiClient())
   }
 }
 
@@ -1428,6 +1452,25 @@ export class RequiredAndInitModelListViewModel extends ListViewModel<$models.Req
 }
 
 
+export interface RequiredInternalUseModelViewModel extends $models.RequiredInternalUseModel {
+  id: number | null;
+}
+export class RequiredInternalUseModelViewModel extends ViewModel<$models.RequiredInternalUseModel, $apiClients.RequiredInternalUseModelApiClient, number> implements $models.RequiredInternalUseModel  {
+  
+  constructor(initialData?: DeepPartial<$models.RequiredInternalUseModel> | null) {
+    super($metadata.RequiredInternalUseModel, new $apiClients.RequiredInternalUseModelApiClient(), initialData)
+  }
+}
+defineProps(RequiredInternalUseModelViewModel, $metadata.RequiredInternalUseModel)
+
+export class RequiredInternalUseModelListViewModel extends ListViewModel<$models.RequiredInternalUseModel, $apiClients.RequiredInternalUseModelApiClient, RequiredInternalUseModelViewModel> {
+  
+  constructor() {
+    super($metadata.RequiredInternalUseModel, new $apiClients.RequiredInternalUseModelApiClient())
+  }
+}
+
+
 export interface SiblingViewModel extends $models.Sibling {
   siblingId: number | null;
   personId: number | null;
@@ -1663,10 +1706,11 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   DateTimePk: DateTimePkViewModel,
   EnumPk: EnumPkViewModel,
   MultipleParents: MultipleParentsViewModel,
-  OneToOneChild1: OneToOneChild1ViewModel,
-  OneToOneChild2: OneToOneChild2ViewModel,
   OneToOneManyChildren: OneToOneManyChildrenViewModel,
   OneToOneParent: OneToOneParentViewModel,
+  OneToOneSeparateKeyChild: OneToOneSeparateKeyChildViewModel,
+  OneToOneSharedKeyChild1: OneToOneSharedKeyChild1ViewModel,
+  OneToOneSharedKeyChild2: OneToOneSharedKeyChild2ViewModel,
   Parent1: Parent1ViewModel,
   Parent2: Parent2ViewModel,
   Person: PersonViewModel,
@@ -1674,6 +1718,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInputViewModel,
   RecursiveHierarchy: RecursiveHierarchyViewModel,
   RequiredAndInitModel: RequiredAndInitModelViewModel,
+  RequiredInternalUseModel: RequiredInternalUseModelViewModel,
   Sibling: SiblingViewModel,
   StandaloneReadonly: StandaloneReadonlyViewModel,
   StandaloneReadWrite: StandaloneReadWriteViewModel,
@@ -1698,10 +1743,11 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   DateTimePk: DateTimePkListViewModel,
   EnumPk: EnumPkListViewModel,
   MultipleParents: MultipleParentsListViewModel,
-  OneToOneChild1: OneToOneChild1ListViewModel,
-  OneToOneChild2: OneToOneChild2ListViewModel,
   OneToOneManyChildren: OneToOneManyChildrenListViewModel,
   OneToOneParent: OneToOneParentListViewModel,
+  OneToOneSeparateKeyChild: OneToOneSeparateKeyChildListViewModel,
+  OneToOneSharedKeyChild1: OneToOneSharedKeyChild1ListViewModel,
+  OneToOneSharedKeyChild2: OneToOneSharedKeyChild2ListViewModel,
   Parent1: Parent1ListViewModel,
   Parent2: Parent2ListViewModel,
   Person: PersonListViewModel,
@@ -1709,6 +1755,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInputListViewModel,
   RecursiveHierarchy: RecursiveHierarchyListViewModel,
   RequiredAndInitModel: RequiredAndInitModelListViewModel,
+  RequiredInternalUseModel: RequiredInternalUseModelListViewModel,
   Sibling: SiblingListViewModel,
   StandaloneReadonly: StandaloneReadonlyListViewModel,
   StandaloneReadWrite: StandaloneReadWriteListViewModel,

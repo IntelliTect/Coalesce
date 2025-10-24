@@ -108,7 +108,7 @@
                   </c-input>
                 </div>
                 <div
-                  v-if="prop.role == 'referenceNavigation'"
+                  v-if="prop.type == 'model'"
                   class="c-admin-editor--aux-col"
                 >
                   <v-btn

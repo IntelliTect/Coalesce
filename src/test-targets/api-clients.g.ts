@@ -578,16 +578,6 @@ export class MultipleParentsApiClient extends ModelApiClient<$models.MultiplePar
 }
 
 
-export class OneToOneChild1ApiClient extends ModelApiClient<$models.OneToOneChild1> {
-  constructor() { super($metadata.OneToOneChild1) }
-}
-
-
-export class OneToOneChild2ApiClient extends ModelApiClient<$models.OneToOneChild2> {
-  constructor() { super($metadata.OneToOneChild2) }
-}
-
-
 export class OneToOneManyChildrenApiClient extends ModelApiClient<$models.OneToOneManyChildren> {
   constructor() { super($metadata.OneToOneManyChildren) }
 }
@@ -595,6 +585,21 @@ export class OneToOneManyChildrenApiClient extends ModelApiClient<$models.OneToO
 
 export class OneToOneParentApiClient extends ModelApiClient<$models.OneToOneParent> {
   constructor() { super($metadata.OneToOneParent) }
+}
+
+
+export class OneToOneSeparateKeyChildApiClient extends ModelApiClient<$models.OneToOneSeparateKeyChild> {
+  constructor() { super($metadata.OneToOneSeparateKeyChild) }
+}
+
+
+export class OneToOneSharedKeyChild1ApiClient extends ModelApiClient<$models.OneToOneSharedKeyChild1> {
+  constructor() { super($metadata.OneToOneSharedKeyChild1) }
+}
+
+
+export class OneToOneSharedKeyChild2ApiClient extends ModelApiClient<$models.OneToOneSharedKeyChild2> {
+  constructor() { super($metadata.OneToOneSharedKeyChild2) }
 }
 
 
@@ -711,6 +716,11 @@ export class RecursiveHierarchyApiClient extends ModelApiClient<$models.Recursiv
 
 export class RequiredAndInitModelApiClient extends ModelApiClient<$models.RequiredAndInitModel> {
   constructor() { super($metadata.RequiredAndInitModel) }
+}
+
+
+export class RequiredInternalUseModelApiClient extends ModelApiClient<$models.RequiredInternalUseModel> {
+  constructor() { super($metadata.RequiredInternalUseModel) }
 }
 
 

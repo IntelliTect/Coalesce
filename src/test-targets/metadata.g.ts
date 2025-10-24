@@ -3182,72 +3182,6 @@ export const MultipleParents = domain.types.MultipleParents = {
   dataSources: {
   },
 }
-export const OneToOneChild1 = domain.types.OneToOneChild1 = {
-  name: "OneToOneChild1" as const,
-  displayName: "One To One Child1",
-  get displayProp() { return this.props.parentId }, 
-  type: "model",
-  controllerRoute: "OneToOneChild1",
-  get keyProp() { return this.props.parentId }, 
-  behaviorFlags: 7 as BehaviorFlags,
-  props: {
-    parentId: {
-      name: "parentId",
-      displayName: "Parent Id",
-      type: "number",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-    parent: {
-      name: "parent",
-      displayName: "Parent",
-      type: "model",
-      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
-      role: "referenceNavigation",
-      get foreignKey() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parentId as PrimaryKeyProperty },
-      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.child1 as ModelCollectionNavigationProperty },
-      dontSerialize: true,
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-  },
-}
-export const OneToOneChild2 = domain.types.OneToOneChild2 = {
-  name: "OneToOneChild2" as const,
-  displayName: "One To One Child2",
-  get displayProp() { return this.props.parentId }, 
-  type: "model",
-  controllerRoute: "OneToOneChild2",
-  get keyProp() { return this.props.parentId }, 
-  behaviorFlags: 7 as BehaviorFlags,
-  props: {
-    parentId: {
-      name: "parentId",
-      displayName: "Parent Id",
-      type: "number",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-    parent: {
-      name: "parent",
-      displayName: "Parent",
-      type: "model",
-      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
-      role: "referenceNavigation",
-      get foreignKey() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parentId as PrimaryKeyProperty },
-      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.child2 as ModelCollectionNavigationProperty },
-      dontSerialize: true,
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-  },
-}
 export const OneToOneManyChildren = domain.types.OneToOneManyChildren = {
   name: "OneToOneManyChildren" as const,
   displayName: "One To One Many Children",
@@ -3310,26 +3244,34 @@ export const OneToOneParent = domain.types.OneToOneParent = {
       role: "primaryKey",
       hidden: 3 as HiddenAreas,
     },
-    child1: {
-      name: "child1",
-      displayName: "Child1",
+    sharedKeyChild1: {
+      name: "sharedKeyChild1",
+      displayName: "Shared Key Child1",
       type: "model",
-      get typeDef() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }) },
+      get typeDef() { return (domain.types.OneToOneSharedKeyChild1 as ModelType & { name: "OneToOneSharedKeyChild1" }) },
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
-      get principalKey() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parentId as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parent as ModelCollectionNavigationProperty },
+      get principalKey() { return (domain.types.OneToOneSharedKeyChild1 as ModelType & { name: "OneToOneSharedKeyChild1" }).props.parentId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneSharedKeyChild1 as ModelType & { name: "OneToOneSharedKeyChild1" }).props.parent as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
-    child2: {
-      name: "child2",
-      displayName: "Child2",
+    sharedKeyChild2: {
+      name: "sharedKeyChild2",
+      displayName: "Shared Key Child2",
       type: "model",
-      get typeDef() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }) },
+      get typeDef() { return (domain.types.OneToOneSharedKeyChild2 as ModelType & { name: "OneToOneSharedKeyChild2" }) },
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
-      get principalKey() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parentId as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parent as ModelCollectionNavigationProperty },
+      get principalKey() { return (domain.types.OneToOneSharedKeyChild2 as ModelType & { name: "OneToOneSharedKeyChild2" }).props.parentId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneSharedKeyChild2 as ModelType & { name: "OneToOneSharedKeyChild2" }).props.parent as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    separateKeyChild: {
+      name: "separateKeyChild",
+      displayName: "Separate Key Child",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneSeparateKeyChild as ModelType & { name: "OneToOneSeparateKeyChild" }) },
+      role: "value",
       dontSerialize: true,
     },
     manyChildren: {
@@ -3346,6 +3288,117 @@ export const OneToOneParent = domain.types.OneToOneParent = {
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParentId as ForeignKeyProperty },
       get inverseNavigation() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParent as ModelReferenceNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneSeparateKeyChild = domain.types.OneToOneSeparateKeyChild = {
+  name: "OneToOneSeparateKeyChild" as const,
+  displayName: "One To One Separate Key Child",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "OneToOneSeparateKeyChild",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      get navigationProp() { return (domain.types.OneToOneSeparateKeyChild as ModelType & { name: "OneToOneSeparateKeyChild" }).props.parent as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => val != null || "Parent is required.",
+      }
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneSeparateKeyChild as ModelType & { name: "OneToOneSeparateKeyChild" }).props.parentId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneSharedKeyChild1 = domain.types.OneToOneSharedKeyChild1 = {
+  name: "OneToOneSharedKeyChild1" as const,
+  displayName: "One To One Shared Key Child1",
+  get displayProp() { return this.props.parentId }, 
+  type: "model",
+  controllerRoute: "OneToOneSharedKeyChild1",
+  get keyProp() { return this.props.parentId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneSharedKeyChild1 as ModelType & { name: "OneToOneSharedKeyChild1" }).props.parentId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.sharedKeyChild1 as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneSharedKeyChild2 = domain.types.OneToOneSharedKeyChild2 = {
+  name: "OneToOneSharedKeyChild2" as const,
+  displayName: "One To One Shared Key Child2",
+  get displayProp() { return this.props.parentId }, 
+  type: "model",
+  controllerRoute: "OneToOneSharedKeyChild2",
+  get keyProp() { return this.props.parentId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneSharedKeyChild2 as ModelType & { name: "OneToOneSharedKeyChild2" }).props.parentId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.sharedKeyChild2 as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
   },
@@ -4215,6 +4268,28 @@ export const RequiredAndInitModel = domain.types.RequiredAndInitModel = {
       type: "number",
       role: "value",
       createOnly: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const RequiredInternalUseModel = domain.types.RequiredInternalUseModel = {
+  name: "RequiredInternalUseModel" as const,
+  displayName: "Required Internal Use Model",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "RequiredInternalUseModel",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 4 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
     },
   },
   methods: {
@@ -5454,10 +5529,11 @@ interface AppDomain extends Domain {
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: typeof InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: typeof Location
     MultipleParents: typeof MultipleParents
-    OneToOneChild1: typeof OneToOneChild1
-    OneToOneChild2: typeof OneToOneChild2
     OneToOneManyChildren: typeof OneToOneManyChildren
     OneToOneParent: typeof OneToOneParent
+    OneToOneSeparateKeyChild: typeof OneToOneSeparateKeyChild
+    OneToOneSharedKeyChild1: typeof OneToOneSharedKeyChild1
+    OneToOneSharedKeyChild2: typeof OneToOneSharedKeyChild2
     OutputOnlyExternalTypeWithoutDefaultCtor: typeof OutputOnlyExternalTypeWithoutDefaultCtor
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: typeof OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
     OutputOnlyExternalTypeWithRequiredEntityProp: typeof OutputOnlyExternalTypeWithRequiredEntityProp
@@ -5470,6 +5546,7 @@ interface AppDomain extends Domain {
     ReadOnlyEntityUsedAsMethodInput: typeof ReadOnlyEntityUsedAsMethodInput
     RecursiveHierarchy: typeof RecursiveHierarchy
     RequiredAndInitModel: typeof RequiredAndInitModel
+    RequiredInternalUseModel: typeof RequiredInternalUseModel
     Sibling: typeof Sibling
     SimpleModelTarget: typeof SimpleModelTarget
     StandaloneReadonly: typeof StandaloneReadonly

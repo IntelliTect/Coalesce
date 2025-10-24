@@ -547,56 +547,6 @@ export class MultipleParents {
 }
 
 
-export interface OneToOneChild1 extends Model<typeof metadata.OneToOneChild1> {
-  parentId: number | null
-  parent: OneToOneParent | null
-}
-export class OneToOneChild1 {
-  
-  /** Mutates the input object and its descendants into a valid OneToOneChild1 implementation. */
-  static convert(data?: Partial<OneToOneChild1>): OneToOneChild1 {
-    return convertToModel<OneToOneChild1>(data || {}, metadata.OneToOneChild1) 
-  }
-  
-  /** Maps the input object and its descendants to a new, valid OneToOneChild1 implementation. */
-  static map(data?: Partial<OneToOneChild1>): OneToOneChild1 {
-    return mapToModel<OneToOneChild1>(data || {}, metadata.OneToOneChild1) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneChild1; }
-  
-  /** Instantiate a new OneToOneChild1, optionally basing it on the given data. */
-  constructor(data?: Partial<OneToOneChild1> | {[k: string]: any}) {
-    Object.assign(this, OneToOneChild1.map(data || {}));
-  }
-}
-
-
-export interface OneToOneChild2 extends Model<typeof metadata.OneToOneChild2> {
-  parentId: number | null
-  parent: OneToOneParent | null
-}
-export class OneToOneChild2 {
-  
-  /** Mutates the input object and its descendants into a valid OneToOneChild2 implementation. */
-  static convert(data?: Partial<OneToOneChild2>): OneToOneChild2 {
-    return convertToModel<OneToOneChild2>(data || {}, metadata.OneToOneChild2) 
-  }
-  
-  /** Maps the input object and its descendants to a new, valid OneToOneChild2 implementation. */
-  static map(data?: Partial<OneToOneChild2>): OneToOneChild2 {
-    return mapToModel<OneToOneChild2>(data || {}, metadata.OneToOneChild2) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneChild2; }
-  
-  /** Instantiate a new OneToOneChild2, optionally basing it on the given data. */
-  constructor(data?: Partial<OneToOneChild2> | {[k: string]: any}) {
-    Object.assign(this, OneToOneChild2.map(data || {}));
-  }
-}
-
-
 export interface OneToOneManyChildren extends Model<typeof metadata.OneToOneManyChildren> {
   id: number | null
   oneToOneParentId: number | null
@@ -625,8 +575,9 @@ export class OneToOneManyChildren {
 
 export interface OneToOneParent extends Model<typeof metadata.OneToOneParent> {
   id: number | null
-  child1: OneToOneChild1 | null
-  child2: OneToOneChild2 | null
+  sharedKeyChild1: OneToOneSharedKeyChild1 | null
+  sharedKeyChild2: OneToOneSharedKeyChild2 | null
+  separateKeyChild: OneToOneSeparateKeyChild | null
   manyChildren: OneToOneManyChildren[] | null
 }
 export class OneToOneParent {
@@ -646,6 +597,82 @@ export class OneToOneParent {
   /** Instantiate a new OneToOneParent, optionally basing it on the given data. */
   constructor(data?: Partial<OneToOneParent> | {[k: string]: any}) {
     Object.assign(this, OneToOneParent.map(data || {}));
+  }
+}
+
+
+export interface OneToOneSeparateKeyChild extends Model<typeof metadata.OneToOneSeparateKeyChild> {
+  id: number | null
+  parentId: number | null
+  parent: OneToOneParent | null
+}
+export class OneToOneSeparateKeyChild {
+  
+  /** Mutates the input object and its descendants into a valid OneToOneSeparateKeyChild implementation. */
+  static convert(data?: Partial<OneToOneSeparateKeyChild>): OneToOneSeparateKeyChild {
+    return convertToModel<OneToOneSeparateKeyChild>(data || {}, metadata.OneToOneSeparateKeyChild) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid OneToOneSeparateKeyChild implementation. */
+  static map(data?: Partial<OneToOneSeparateKeyChild>): OneToOneSeparateKeyChild {
+    return mapToModel<OneToOneSeparateKeyChild>(data || {}, metadata.OneToOneSeparateKeyChild) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneSeparateKeyChild; }
+  
+  /** Instantiate a new OneToOneSeparateKeyChild, optionally basing it on the given data. */
+  constructor(data?: Partial<OneToOneSeparateKeyChild> | {[k: string]: any}) {
+    Object.assign(this, OneToOneSeparateKeyChild.map(data || {}));
+  }
+}
+
+
+export interface OneToOneSharedKeyChild1 extends Model<typeof metadata.OneToOneSharedKeyChild1> {
+  parentId: number | null
+  parent: OneToOneParent | null
+}
+export class OneToOneSharedKeyChild1 {
+  
+  /** Mutates the input object and its descendants into a valid OneToOneSharedKeyChild1 implementation. */
+  static convert(data?: Partial<OneToOneSharedKeyChild1>): OneToOneSharedKeyChild1 {
+    return convertToModel<OneToOneSharedKeyChild1>(data || {}, metadata.OneToOneSharedKeyChild1) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid OneToOneSharedKeyChild1 implementation. */
+  static map(data?: Partial<OneToOneSharedKeyChild1>): OneToOneSharedKeyChild1 {
+    return mapToModel<OneToOneSharedKeyChild1>(data || {}, metadata.OneToOneSharedKeyChild1) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneSharedKeyChild1; }
+  
+  /** Instantiate a new OneToOneSharedKeyChild1, optionally basing it on the given data. */
+  constructor(data?: Partial<OneToOneSharedKeyChild1> | {[k: string]: any}) {
+    Object.assign(this, OneToOneSharedKeyChild1.map(data || {}));
+  }
+}
+
+
+export interface OneToOneSharedKeyChild2 extends Model<typeof metadata.OneToOneSharedKeyChild2> {
+  parentId: number | null
+  parent: OneToOneParent | null
+}
+export class OneToOneSharedKeyChild2 {
+  
+  /** Mutates the input object and its descendants into a valid OneToOneSharedKeyChild2 implementation. */
+  static convert(data?: Partial<OneToOneSharedKeyChild2>): OneToOneSharedKeyChild2 {
+    return convertToModel<OneToOneSharedKeyChild2>(data || {}, metadata.OneToOneSharedKeyChild2) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid OneToOneSharedKeyChild2 implementation. */
+  static map(data?: Partial<OneToOneSharedKeyChild2>): OneToOneSharedKeyChild2 {
+    return mapToModel<OneToOneSharedKeyChild2>(data || {}, metadata.OneToOneSharedKeyChild2) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneSharedKeyChild2; }
+  
+  /** Instantiate a new OneToOneSharedKeyChild2, optionally basing it on the given data. */
+  constructor(data?: Partial<OneToOneSharedKeyChild2> | {[k: string]: any}) {
+    Object.assign(this, OneToOneSharedKeyChild2.map(data || {}));
   }
 }
 
@@ -929,6 +956,30 @@ export class RequiredAndInitModel {
   /** Instantiate a new RequiredAndInitModel, optionally basing it on the given data. */
   constructor(data?: Partial<RequiredAndInitModel> | {[k: string]: any}) {
     Object.assign(this, RequiredAndInitModel.map(data || {}));
+  }
+}
+
+
+export interface RequiredInternalUseModel extends Model<typeof metadata.RequiredInternalUseModel> {
+  id: number | null
+}
+export class RequiredInternalUseModel {
+  
+  /** Mutates the input object and its descendants into a valid RequiredInternalUseModel implementation. */
+  static convert(data?: Partial<RequiredInternalUseModel>): RequiredInternalUseModel {
+    return convertToModel<RequiredInternalUseModel>(data || {}, metadata.RequiredInternalUseModel) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid RequiredInternalUseModel implementation. */
+  static map(data?: Partial<RequiredInternalUseModel>): RequiredInternalUseModel {
+    return mapToModel<RequiredInternalUseModel>(data || {}, metadata.RequiredInternalUseModel) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.RequiredInternalUseModel; }
+  
+  /** Instantiate a new RequiredInternalUseModel, optionally basing it on the given data. */
+  constructor(data?: Partial<RequiredInternalUseModel> | {[k: string]: any}) {
+    Object.assign(this, RequiredInternalUseModel.map(data || {}));
   }
 }
 
@@ -1672,10 +1723,11 @@ declare module "coalesce-vue/lib/model" {
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: Location
     MultipleParents: MultipleParents
-    OneToOneChild1: OneToOneChild1
-    OneToOneChild2: OneToOneChild2
     OneToOneManyChildren: OneToOneManyChildren
     OneToOneParent: OneToOneParent
+    OneToOneSeparateKeyChild: OneToOneSeparateKeyChild
+    OneToOneSharedKeyChild1: OneToOneSharedKeyChild1
+    OneToOneSharedKeyChild2: OneToOneSharedKeyChild2
     OutputOnlyExternalTypeWithoutDefaultCtor: OutputOnlyExternalTypeWithoutDefaultCtor
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
     OutputOnlyExternalTypeWithRequiredEntityProp: OutputOnlyExternalTypeWithRequiredEntityProp
@@ -1688,6 +1740,7 @@ declare module "coalesce-vue/lib/model" {
     ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInput
     RecursiveHierarchy: RecursiveHierarchy
     RequiredAndInitModel: RequiredAndInitModel
+    RequiredInternalUseModel: RequiredInternalUseModel
     Sibling: Sibling
     SimpleModelTarget: SimpleModelTarget
     StandaloneReadonly: StandaloneReadonly

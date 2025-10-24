@@ -5,16 +5,20 @@ import {
   Model,
   ModelReferenceNavigationProperty,
   ViewModel,
+  ModelValueProperty,
 } from "coalesce-vue";
 import { Router } from "vue-router";
 
 export function getRefNavRoute(
   router: Router,
   owner: Model,
-  prop: ModelReferenceNavigationProperty,
+  prop: ModelReferenceNavigationProperty | ModelValueProperty,
 ) {
   const item = (owner as any)[prop.name];
-  const fk = (owner as any)[prop.foreignKey.name] ?? item?.$primaryKey;
+  const fk =
+    ("foreignKey" in prop
+      ? (owner as any)[prop.foreignKey?.name]
+      : undefined) ?? item?.[prop.typeDef.keyProp.name];
 
   if (!fk) return;
 

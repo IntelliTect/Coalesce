@@ -38,8 +38,9 @@ public class AppDbContext : DbContext
     public DbSet<DbSetIsInternalUse> Internals { get; set; }
 
     public DbSet<OneToOneParent> OneToOneParents { get; set; }
-    public DbSet<OneToOneChild1> OneToOneChild1s { get; set; }
-    public DbSet<OneToOneChild2> OneToOneChild2s { get; set; }
+    public DbSet<OneToOneSharedKeyChild1> OneToOneSharedKeyChild1s { get; set; }
+    public DbSet<OneToOneSharedKeyChild2> OneToOneSharedKeyChild2s { get; set; }
+    public DbSet<OneToOneSeparateKeyChild> OneToOneSeparateKeyChildren { get; set; }
     public DbSet<OneToOneManyChildren> OneToOneManyChildren { get; set; }
 
     public DbSet<MultipleParents> MultipleParents { get; set; }

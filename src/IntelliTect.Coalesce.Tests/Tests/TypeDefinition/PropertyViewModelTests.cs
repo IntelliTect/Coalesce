@@ -333,19 +333,19 @@ public class PropertyViewModelTests
 
 
     [Theory]
-    [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.Child1))]
-    [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.Child2))]
+    [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.SharedKeyChild1))]
+    [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.SharedKeyChild2))]
     public void OneToOne_ParentNavigations_HasCorrectMetadata(PropertyViewModelData data)
     {
         PropertyViewModel vm = data;
         Assert.Equal(PropertyRole.ReferenceNavigation, vm.Role);
         Assert.Equal(vm.Parent.PropertyByName(nameof(OneToOneParent.Id)), vm.ForeignKeyProperty);
-        Assert.Equal(nameof(OneToOneChild1.Parent), vm.InverseProperty.Name);
+        Assert.Equal(nameof(OneToOneSharedKeyChild1.Parent), vm.InverseProperty.Name);
     }
 
     [Theory]
-    [PropertyViewModelData<OneToOneChild1>(nameof(OneToOneChild1.Parent), "Child1")]
-    [PropertyViewModelData<OneToOneChild2>(nameof(OneToOneChild2.Parent), "Child2")]
+    [PropertyViewModelData<OneToOneSharedKeyChild1>(nameof(OneToOneSharedKeyChild1.Parent), "SharedKeyChild1")]
+    [PropertyViewModelData<OneToOneSharedKeyChild2>(nameof(OneToOneSharedKeyChild2.Parent), "SharedKeyChild2")]
     public void OneToOne_ChildNavigations_HasCorrectMetadata(PropertyViewModelData data, string inverse)
     {
         PropertyViewModel vm = data;

@@ -31,13 +31,13 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
 
-      - name: npm publish coalesce-vue
-        if: ${{ !inputs.skipNpm }}
-        run: npm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
+      # - name: npm publish coalesce-vue
+      #   if: ${{ !inputs.skipNpm }}
+      #   run: npm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
 
-      - name: npm publish coalesce-mcp
-        if: ${{ !inputs.skipNpm }}
-        run: npm publish ./coalesce-mcp/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
+      # - name: npm publish coalesce-mcp
+      #   if: ${{ !inputs.skipNpm }}
+      #   run: npm publish ./coalesce-mcp/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
 
       - name: npm publish coalesce-vue-vuetify
         if: ${{ !inputs.skipNpm }}
@@ -45,6 +45,8 @@ jobs:
 
   nuget:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 
     steps:
       - name: Download all workflow run artifacts

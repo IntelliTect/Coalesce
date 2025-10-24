@@ -2,6 +2,10 @@
   "name": "coalesce-vue",
   "version": "0.1.0-local",
   "description": "Core scripts for IntelliTect's Coalesce framework.",
+  "repository": "https://github.com/IntelliTect/Coalesce",
+  "author": "IntelliTect",
+  "license": "Apache-2.0",
+  "private": false,
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "sideEffects": false,
@@ -16,10 +20,6 @@
       "import": "./lib/*.js"
     }
   },
-  "repository": "https://github.com/IntelliTect/Coalesce",
-  "author": "IntelliTect",
-  "license": "Apache-2.0",
-  "private": false,
   "scripts": {
     "build": "tsc --noEmit && tsc -p ./tsconfig.build.esm.json",
     "prepack": "npm run build",

@@ -75,7 +75,6 @@ jobs:
   publish-template:
     runs-on: ubuntu-latest
     needs: [build-template]
-    if: ${{ !inputs.skipTemplate }}
 
     steps:
       - name: Download Artifacts
@@ -90,4 +89,5 @@ jobs:
           user: ascott18
 
       - name: dotnet nuget push
+        if: ${{ !inputs.skipTemplate }}
         run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }}

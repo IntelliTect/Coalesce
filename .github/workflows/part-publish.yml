@@ -16,7 +16,6 @@ on:
 jobs:
   npm:
     runs-on: ubuntu-latest
-    if: ${{ !inputs.skipNpm }}
     permissions:
       id-token: write
 
@@ -33,17 +32,19 @@ jobs:
         run: npm install -g npm@latest
 
       - name: npm publish coalesce-vue
+        if: ${{ !inputs.skipNpm }}
         run: npm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
 
       - name: npm publish coalesce-mcp
+        if: ${{ !inputs.skipNpm }}
         run: npm publish ./coalesce-mcp/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
 
       - name: npm publish coalesce-vue-vuetify
+        if: ${{ !inputs.skipNpm }}
         run: for f in ./coalesce-vue-vuetify*/*.tgz; do npm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public; done
 
   nuget:
     runs-on: ubuntu-latest
-    if: ${{ !inputs.skipNuget }}
 
     steps:
       - name: Download all workflow run artifacts
@@ -56,6 +57,7 @@ jobs:
           user: ascott18
 
       - name: dotnet nuget push
+        if: ${{ !inputs.skipNuget }}
         run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
 
   docs:

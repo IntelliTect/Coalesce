@@ -212,6 +212,8 @@ const props = withDefaults(
     color?: string;
     /** Whether or not a delete button is shown. Default true if the provided model allows deletes. */
     deletable?: boolean;
+    /** An array of property names to display. If provided, only these properties will be shown. If omitted, all non-hidden properties will be shown. */
+    props?: string[];
   }>(),
   {
     deletable: true,
@@ -293,11 +295,17 @@ const canDelete = computed(() => {
 const showProps = computed(() => {
   if (!props.model) return [];
 
-  return Object.values(metadata.value.props).filter(
+  let filtered = Object.values(metadata.value.props).filter(
     (p: Property) =>
       p.hidden === undefined || (p.hidden & HiddenAreas.Edit) == 0,
     // && (!p.dontSerialize || p.role == "referenceNavigation" || p.role == "collectionNavigation")
   );
+
+  if (props.props) {
+    filtered = filtered.filter((p) => props.props!.includes(p.name));
+  }
+
+  return filtered;
 });
 
 const isBulkSaveDirty = computed(() => {

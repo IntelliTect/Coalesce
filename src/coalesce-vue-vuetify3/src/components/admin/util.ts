@@ -6,6 +6,7 @@ import {
   ModelReferenceNavigationProperty,
   ViewModel,
   ModelValueProperty,
+  ModelType,
 } from "coalesce-vue";
 import { Router } from "vue-router";
 
@@ -20,14 +21,29 @@ export function getRefNavRoute(
       ? (owner as any)[prop.foreignKey?.name]
       : undefined) ?? item?.[prop.typeDef.keyProp.name];
 
-  if (!fk) return;
+  const meta: ModelType = item?.$metadata ?? prop.typeDef;
 
-  // Resolve to an href to allow overriding of admin routes in userspace.
-  // If we just gave a named raw location, it would always use the coalesce admin route
-  // instead of the user-overridden one (that the user overrides by declaring another
-  // route with the same path).
   try {
-    const meta = item?.$metadata ?? prop.typeDef;
+    if (!item && "foreignKey" in prop && prop.foreignKey.role == "primaryKey") {
+      // This is a shared-key one-to-one, and the model isn't loaded.
+      // That most likely means that the model doesn't exist
+      // (or it failed to be .Included() in the response).
+      // We want to route to a create editor, not an edit editor.
+      return router.resolve({
+        name: "coalesce-admin-item",
+        params: {
+          type: meta.name,
+        },
+        query: { ["filter." + meta.keyProp.name]: fk },
+      }).fullPath;
+    }
+
+    if (!fk) return;
+
+    // Resolve to an href to allow overriding of admin routes in userspace.
+    // If we just gave a named raw location, it would always use the coalesce admin route
+    // instead of the user-overridden one (that the user overrides by declaring another
+    // route with the same path).
     return router.resolve({
       name: "coalesce-admin-item",
       params: {

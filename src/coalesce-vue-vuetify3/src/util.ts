@@ -21,7 +21,15 @@ export function isPropReadOnly(p: Property, model: ViewModel) {
     return true;
   }
 
-  if (p.createOnly) {
+  const mutableValue = p.role == "referenceNavigation" ? p.foreignKey : p;
+
+  if (mutableValue.role == "primaryKey" && !mutableValue.createOnly) {
+    // Primary keys without createOnly are server-generated.
+    // They're never client-mutable in any circumstance.
+    return true;
+  }
+
+  if (mutableValue.createOnly || mutableValue.role == "primaryKey") {
     // Editable create-only fields should only be editable if there either is no value for the PK,
     // or if the PK is dirty. If there's a clean value for the PK, it means it has been saved.
 
@@ -40,22 +48,18 @@ export function isPropReadOnly(p: Property, model: ViewModel) {
 
     // If there's no PK, one has yet to be entered.
     // If there is a PK but it is dirty, it has yet to be saved.
-    if (!model.$primaryKey || model.$getPropDirty(p.name)) {
+    if (!model.$primaryKey || model.$getPropDirty(mutableValue.name)) {
       return false;
     }
 
     return true;
   }
 
-  switch (p.role) {
-    case "referenceNavigation":
-      return p.foreignKey.dontSerialize;
-
-    case "collectionNavigation":
-      return false;
+  if (p.role == "collectionNavigation") {
+    return false;
   }
 
-  return p.dontSerialize;
+  return mutableValue.dontSerialize;
 }
 
 export type ComponentSlots<T> = T extends new () => { $slots: infer S }

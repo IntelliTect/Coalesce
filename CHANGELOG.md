@@ -1,12 +1,14 @@
 # 6.0.2
 - Fix error in c-select when keypress event has no key.
 - Accept problem details error messages in API Callers.
-- Fix `c-list-page` not correctly handling `noCount: true` lists.
-- Fix `c-admin-editor-page` briefly showing editors while the item is initially loading.
+- `c-list-page` once again correctly handles `noCount: true` lists.
 - `c-input` no longer wraps default slot fallback content in a superfluous div.
-- `c-input` no longer attempts to delegate shared-key one-to-one properties to `c-select`, a scenario that is not possible to select values for.
+- `c-table` no longer attempts to render input fields for server-generated PK fields in edit mode.
+- `c-admin-editor` has better support for shared-key one-to-one relationships.
+- `c-admin-editor`: added `props` prop to control listed fields.
+- `c-admin-editor-page` no longer briefly shows editors while the item is initially loading.
 - DTOs no longer generate MapToNew methods with unsatisfied `required` constraints.
-- Fix results from `useResponseCaching` in `ViewModel`/`ListViewModel` `$load` results would get treated as dirty data.
+- Fix results from `useResponseCaching` on `ViewModel`/`ListViewModel` `$load` callers getting flagged as dirty.
 - Separate-key one-to-one relationships, which already weren't supported by Coalesce, will no longer emit incorrect metadata for the navigation prop on the principal side of the relationship. These properties now emit as "value" properties instead of as "referenceNavigation" properties.
 
 # 6.0.1

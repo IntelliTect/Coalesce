@@ -20,5 +20,9 @@ Does not automatically enable [auto-save](/stacks/vue/layers/viewmodels.md) - if
 
 The [ViewModel](/stacks/vue/layers/viewmodels.md) to render an editor for.
 
+<Prop def="props?: string[]" lang="ts" />
+
+An array of property names to include. If provided, only these properties will be shown. If omitted, all non-hidden properties will be shown.
+
 
 

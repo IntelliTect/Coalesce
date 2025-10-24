@@ -34,6 +34,6 @@ a {
   .v-field__outline__end,
   .v-field__outline__notch::before,
   .v-field__outline__notch::after {
-    border-style: dashed;
+    border-style: dashed !important;
   }
 }

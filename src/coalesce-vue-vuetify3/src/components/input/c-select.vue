@@ -586,21 +586,18 @@ const isClearable = computed((): boolean => {
 });
 
 /** The property on `valueOwner` which holds the foreign key being selected for, or `null` if there is no such property. */
-const modelKeyProp = computed((): ForeignKeyProperty | null => {
-  const meta = valueMeta.value!;
-  if (meta.role == "foreignKey" && "principalType" in meta) {
-    return meta;
-  }
-  if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
-    if (meta.foreignKey.role == "primaryKey") {
-      throw new Error(
-        "c-select cannot be used for properties whose foreign key is simultaneously a primary key.",
-      );
+const modelKeyProp = computed(
+  (): ForeignKeyProperty | PrimaryKeyProperty | null => {
+    const meta = valueMeta.value!;
+    if (meta.role == "foreignKey" && "principalType" in meta) {
+      return meta;
     }
-    return meta.foreignKey;
-  }
-  return null;
-});
+    if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
+      return meta.foreignKey;
+    }
+    return null;
+  },
+);
 
 /** The property on `valueOwner` which holds the model object being selected for, or `null` if there is no such property. */
 const modelObjectProp = computed(

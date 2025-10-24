@@ -2515,6 +2515,10 @@ export const PersonStats = domain.types.PersonStats = {
       type: "number",
       role: "primaryKey",
       hidden: 3 as HiddenAreas,
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Person is required.",
+      }
     },
     person: {
       name: "person",

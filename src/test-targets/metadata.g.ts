@@ -3364,6 +3364,10 @@ export const OneToOneSharedKeyChild1 = domain.types.OneToOneSharedKeyChild1 = {
       type: "number",
       role: "primaryKey",
       hidden: 3 as HiddenAreas,
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Parent is required.",
+      }
     },
     parent: {
       name: "parent",
@@ -3397,6 +3401,10 @@ export const OneToOneSharedKeyChild2 = domain.types.OneToOneSharedKeyChild2 = {
       type: "number",
       role: "primaryKey",
       hidden: 3 as HiddenAreas,
+      createOnly: true,
+      rules: {
+        required: val => val != null || "Parent is required.",
+      }
     },
     parent: {
       name: "parent",

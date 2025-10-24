@@ -459,6 +459,10 @@ public abstract class PropertyViewModel : ValueViewModel
             {
                 if (Type.IsEnum) return DatabaseGeneratedOption.None;
 
+                // If the PK is also an FK, it can't be database generated.
+                // This happens for shared-key one-to-one relationships.
+                if (this.HasAttribute<ForeignKeyAttribute>()) return DatabaseGeneratedOption.None;
+
                 return DatabaseGeneratedOption.Identity;
             }
 

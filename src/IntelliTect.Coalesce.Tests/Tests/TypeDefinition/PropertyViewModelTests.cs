@@ -341,6 +341,7 @@ public class PropertyViewModelTests
         Assert.Equal(PropertyRole.ReferenceNavigation, vm.Role);
         Assert.Equal(vm.Parent.PropertyByName(nameof(OneToOneParent.Id)), vm.ForeignKeyProperty);
         Assert.Equal(nameof(OneToOneSharedKeyChild1.Parent), vm.InverseProperty.Name);
+        Assert.False(vm.EffectiveParent.PrimaryKey.IsCreateOnly);
     }
 
     [Theory]
@@ -352,6 +353,7 @@ public class PropertyViewModelTests
         Assert.Equal(PropertyRole.ReferenceNavigation, vm.Role);
         Assert.Equal(vm.Parent.PropertyByName("ParentId"), vm.ForeignKeyProperty);
         Assert.Equal(inverse, vm.InverseProperty.Name);
+        Assert.True(vm.EffectiveParent.PrimaryKey.IsCreateOnly);
     }
 
     [Theory]

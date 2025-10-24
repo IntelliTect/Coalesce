@@ -67,6 +67,16 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # setup-node and update npm are only here to preemptively test
+      # the required install of npm@11 that's needed for OIDC npm publish
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - run: npm ci
         working-directory: ${{ github.workspace }}
 

@@ -65,5 +65,11 @@ jobs:
         with:
           name: template-packages
 
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ascott18
+
       - name: dotnet nuget push
-        run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}
+        run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }}

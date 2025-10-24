@@ -28,7 +28,11 @@ On entities that are the "one" side of a one-to-many relationship, collection na
 
 ### One-to-one Relationships
 
-One-to-one relationships can be represented in Coalesce, but require fairly specific configuration to satisfy both EF and Coalesce's needs. Specifically, the dependent/child side of the one-to-one (the entity whose PK is also a FK), must explicitly annotate its PK with `[ForeignKey]` pointing at the parent navigation property. For example:
+One-to-one relationships can be represented in Coalesce, but require fairly specific configuration to satisfy both EF and Coalesce's needs. Coalesce handles two types of one-to-one relationships:
+
+#### Shared-Key One-to-One (Recommended)
+
+In a shared-key one-to-one relationship, the dependent/child entity's primary key is also its foreign key to the principal/parent entity. The dependent side must explicitly annotate its PK with `[ForeignKey]` pointing at the parent navigation property:
 
 ```c#
 public class OneToOneParent
@@ -47,7 +51,26 @@ public class OneToOneChild
 }
 ```
 
-Alternatively, you could also implement a one-to-one like a normal one-to-many relationship, where both sides of the relationship have their own distinct PK, and just never add more than one child to any particular principal entity. A unique constraint on the foreign key column can enforce the singularity of this relationship.
+The `[InverseProperty]` attribute can optionally be added to the parent's navigation property, but is not required for Coalesce to correctly identify this relationship.
+
+#### Separate-Key One-to-One (Limited Support)
+
+In a separate-key one-to-one relationship, the dependent entity has its own distinct primary key and a separate foreign key property with a unique constraint:
+
+```c#
+[Index(nameof(ParentId), IsUnique = true)]
+public class OneToOneSeparateKeyChild
+{
+    public int Id { get; set; }
+
+    [ForeignKey(nameof(Parent))]
+    public int ParentId { get; set; }
+    
+    public OneToOneParent? Parent { get; set; }
+}
+```
+
+**Important Limitation**: Coalesce cannot fully model reference navigation properties of separate-key one-to-one relationships from the principal/parent side (the side that doesn't own the foreign key). This is because Coalesce can only represent a reference navigation that has a corresponding foreign key property on the same type. Such navigation properties will be emitted as regular "value" role properties rather than reference navigation properties, even if annotated with `[InverseProperty]`. This results in a more limited experience in the [admin pages](/stacks/vue/admin-pages.md) and [ViewModels](/stacks/vue/layers/viewmodels.md)
 
 ### Inheritance (TPH and TPT)
 

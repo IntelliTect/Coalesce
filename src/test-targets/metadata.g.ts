@@ -3274,6 +3274,14 @@ export const OneToOneParent = domain.types.OneToOneParent = {
       role: "value",
       dontSerialize: true,
     },
+    separateKeyChildNoIp: {
+      name: "separateKeyChildNoIp",
+      displayName: "Separate Key Child No Ip",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneSeparateKeyChild as ModelType & { name: "OneToOneSeparateKeyChild" }) },
+      role: "value",
+      dontSerialize: true,
+    },
     manyChildren: {
       name: "manyChildren",
       displayName: "Many Children",

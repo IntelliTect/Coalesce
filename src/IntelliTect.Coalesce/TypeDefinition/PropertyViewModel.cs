@@ -512,24 +512,38 @@ public abstract class PropertyViewModel : ValueViewModel
             if (prop == null)
             {
                 // If the other side of the relationship is also a reference navigation,
-                // this is a 1-to-1. If there's otherwise no FK specified, assume that the PK
+                // this is a shared-key 1-to-1. If there's otherwise no FK specified, assume that the PK
                 // of this type is the FK we're looking for here.
-                // See test models "OneToOneParent"/"OneToOneChild1" for example.
-
-                if (this.HasAttribute<InversePropertyAttribute>() &&
-                    InverseProperty?.Role == PropertyRole.ReferenceNavigation)
+                // See test models "OneToOneParent"/"SharedKeyChild2" for example.
+                if (this.HasAttribute<InversePropertyAttribute>())
                 {
                     // Only look at `InverseProperty` if explicitly annotated.
                     // Otherwise, this will cause infinite recursion.
-                    return EffectiveParent.PrimaryKey;
+                    if (
+                        InverseProperty?.Role == PropertyRole.ReferenceNavigation &&
+                        // The reference navigation on the other side points at this prop's owner type
+                        InverseProperty.Object == this.EffectiveParent &&
+                        // The FK on the other side must reference this prop's type's PK.
+                        // This is what allows us to think of our own PK as also being a FK
+                        // into the other type (even if that's the exact opposite of the relationship in practice).
+                        // This is admittedly a bit of a hack.
+                        InverseProperty.ForeignKeyProperty?.IsPrimaryKey == true
+                    )
+                    {
+                        return EffectiveParent.PrimaryKey;
+                    }
                 }
-
-                if (Object!.ClientProperties.Any(p =>
-                    p.ForeignKeyProperty == Object.PrimaryKey &&
-                    p.Type == this.EffectiveParent.Type
-                ))
+                else
                 {
-                    return EffectiveParent.PrimaryKey;
+                    // Handle the similar scenario as above, but when InversePropertyAttribute
+                    // is not present. See "OneToOneParent"/"SharedKeyChild1".
+                    if (Object!.ClientProperties.Any(p =>
+                        p.ForeignKeyProperty == Object.PrimaryKey &&
+                        p.Type == this.EffectiveParent.Type
+                    ))
+                    {
+                        return EffectiveParent.PrimaryKey;
+                    }
                 }
             }
         }

@@ -355,6 +355,31 @@ public class PropertyViewModelTests
     }
 
     [Theory]
+    [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.SeparateKeyChild))]
+    [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.SeparateKeyChildNoIp))]
+    public void OneToOne_SeparateKey_ParentNavigations_HasCorrectMetadata(PropertyViewModelData data)
+    {
+        PropertyViewModel vm = data;
+        Assert.Equal(PropertyRole.Value, vm.Role);
+        Assert.Null(vm.ForeignKeyProperty);
+    }
+
+    [Theory]
+    [PropertyViewModelData<OneToOneSeparateKeyChild>(nameof(OneToOneSeparateKeyChild.Parent))]
+    public void OneToOne_SeparateKey_ChildNavigations_HasCorrectMetadata(PropertyViewModelData data)
+    {
+        // See comments in OneToOne.cs about what this is all about
+
+        PropertyViewModel vm = data;
+        Assert.Equal(PropertyRole.ReferenceNavigation, vm.Role);
+        Assert.Equal(vm.Parent.PropertyByName("ParentId"), vm.ForeignKeyProperty);
+
+        // We can't model the other side as a reference navigation,
+        // so the inverse property shouldn't be defined.
+        Assert.Null(vm.InverseProperty);
+    }
+
+    [Theory]
     [PropertyViewModelData<OneToOneManyChildren>(nameof(OneToOneManyChildren.OneToOneParent))]
     [Description("https://github.com/IntelliTect/Coalesce/commit/513db257dda32b99099355f1a6de0f5fbf367f5a")]
     public void ReferenceNavigation_HasCorrectFkWhenPrincipalAlsoParticipatesInOneToOne(PropertyViewModelData data)

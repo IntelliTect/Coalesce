@@ -15,7 +15,16 @@ public class OneToOneParent
     [InverseProperty(nameof(SharedKeyChild2.Parent))] // Can be specified, but not required.
     public OneToOneSharedKeyChild2 SharedKeyChild2 { get; set; }
 
+    // Coalesce can't model reference navigations of separate-key one-to-one relationships
+    // from the side that doesn't own the FK, since Coalesce can only represent
+    // a referenceNavigation that has a corresponding foreignKey on the same type.
+    // This will emit as a "value" role, despite having InverseProperty
+    // which would normally make this a referenceNavigation.
+    [InverseProperty(nameof(SeparateKeyChild.Parent))]
     public OneToOneSeparateKeyChild SeparateKeyChild { get; set; }
+
+    // This should also emit as a "value" role.
+    public OneToOneSeparateKeyChild SeparateKeyChildNoIp { get; set; }
 
     public List<OneToOneManyChildren> ManyChildren { get; set; } = [];
 }

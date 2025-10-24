@@ -165,7 +165,7 @@ public class ClassDto : StringBuilderCSharpGenerator<ClassViewModel>
                     .OrderBy(c => c.Parameters.Count())
                     .Where(c => c.DtoMapToNewConstructorUsage.IsAcceptable)
                     .FirstOrDefault();
-                
+
                 if (bestCtor == null)
                 {
                     var reasons = Model.Constructors
@@ -196,7 +196,7 @@ public class ClassDto : StringBuilderCSharpGenerator<ClassViewModel>
                         // If the type has no default constructor but also isn't used as an input by Coalesce,
                         // don't stop code gen - just gen an exception (that will never be hit at runtime)
                         b.Line("throw new NotSupportedException(" +
-                            $"\"Type {Model.Name} does not have a constructor suitable for use by Coalesce for new object instantiation. " +
+                            $"\"Type '{Model.Name}' does not have a constructor suitable for use by Coalesce for new object instantiation. " +
                             "Fortunately, this type appears to never be used in an input position in a Coalesce-generated API.\");");
                     }
                     else
@@ -406,8 +406,8 @@ public class ClassDto : StringBuilderCSharpGenerator<ClassViewModel>
     /// <param name="modelVar">The variable that holds the entity/model instance.</param>
     /// <returns></returns>
     private IEnumerable<string> GetPropertySetterConditional(
-        PropertyViewModel property, 
-        PropertySecurityPermission permission, 
+        PropertyViewModel property,
+        PropertySecurityPermission permission,
         string modelVar)
     {
         string RoleCheck(string role) => $"context.IsInRoleCached(\"{role.EscapeStringLiteralForCSharp()}\")";
@@ -599,8 +599,8 @@ public class ClassDto : StringBuilderCSharpGenerator<ClassViewModel>
         {
             // Only check the includes tree for things that are in the database.
             // Otherwise, this would break IncludesExternal.
-            string treeCheck = property.Type.ClassViewModel.HasDbSet 
-                ? $"if (tree == null || tree[nameof({dtoVar}.{name})] != null)" 
+            string treeCheck = property.Type.ClassViewModel.HasDbSet
+                ? $"if (tree == null || tree[nameof({dtoVar}.{name})] != null)"
                 : "";
 
             setter = $@"{treeCheck}

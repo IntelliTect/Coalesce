@@ -7,6 +7,7 @@
 - `c-input` no longer attempts to delegate shared-key one-to-one properties to `c-select`, a scenario that is not possible to select values for.
 - DTOs no longer generate MapToNew methods with unsatisfied `required` constraints.
 - Fix results from `useResponseCaching` in `ViewModel`/`ListViewModel` `$load` results would get treated as dirty data.
+- Separate-key one-to-one relationships, which already weren't supported by Coalesce, will no longer emit incorrect metadata for the navigation prop on the principal side of the relationship. These properties now emit as "value" properties instead of as "referenceNavigation" properties.
 
 # 6.0.1
 - `createAspNetCoreHmrPlugin` now displays NPM package mismatches with the standard vite overlay instead of a custom overlay.

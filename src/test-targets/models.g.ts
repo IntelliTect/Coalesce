@@ -578,6 +578,7 @@ export interface OneToOneParent extends Model<typeof metadata.OneToOneParent> {
   sharedKeyChild1: OneToOneSharedKeyChild1 | null
   sharedKeyChild2: OneToOneSharedKeyChild2 | null
   separateKeyChild: OneToOneSeparateKeyChild | null
+  separateKeyChildNoIp: OneToOneSeparateKeyChild | null
   manyChildren: OneToOneManyChildren[] | null
 }
 export class OneToOneParent {

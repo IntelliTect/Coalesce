@@ -1034,6 +1034,8 @@ export interface OneToOneParentViewModel extends $models.OneToOneParent {
   set sharedKeyChild2(value: OneToOneSharedKeyChild2ViewModel | $models.OneToOneSharedKeyChild2 | null);
   get separateKeyChild(): OneToOneSeparateKeyChildViewModel | null;
   set separateKeyChild(value: OneToOneSeparateKeyChildViewModel | $models.OneToOneSeparateKeyChild | null);
+  get separateKeyChildNoIp(): OneToOneSeparateKeyChildViewModel | null;
+  set separateKeyChildNoIp(value: OneToOneSeparateKeyChildViewModel | $models.OneToOneSeparateKeyChild | null);
   get manyChildren(): ViewModelCollection<OneToOneManyChildrenViewModel, $models.OneToOneManyChildren>;
   set manyChildren(value: (OneToOneManyChildrenViewModel | $models.OneToOneManyChildren)[] | null);
 }

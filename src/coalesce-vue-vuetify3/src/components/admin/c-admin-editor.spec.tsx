@@ -5,6 +5,7 @@ import {
   PersonListViewModel,
   OneToOneParentViewModel,
   OneToOneSharedKeyChild1ViewModel,
+  ZipCodeViewModel,
 } from "@test-targets/viewmodels.g";
 import { mockEndpoint, mount } from "@test/util";
 
@@ -133,6 +134,79 @@ describe("CAdminEditor", () => {
       const link = row.find(".c-admin-editor--ref-nav-link");
       expect(link.exists()).toBeTruthy();
       expect(link.attributes("href")).toBe("/admin/OneToOneParent/item/42");
+    });
+  });
+
+  describe("user-provided PK", () => {
+    const saveMock = mockEndpoint("/ZipCode/save", vitest.fn());
+
+    test("create with user-provided PK", async () => {
+      const vm = new ZipCodeViewModel();
+
+      const wrapper = mount(() => <CAdminEditor model={vm} />);
+
+      // Find the row for the PK field (zip)
+      const zipRow = wrapper.find(".prop-zip");
+      expect(zipRow.exists()).toBeTruthy();
+
+      // PK field should be editable for a new item
+      const zipInput = zipRow.find("input");
+      expect(zipInput.exists()).toBeTruthy();
+      expect(zipInput.element.readOnly).toBe(false);
+
+      // Set PK and other field values
+      await zipInput.setValue("98052");
+      vm.state = "WA";
+
+      // Save the item
+      saveMock.mockResolvedValue({
+        wasSuccessful: true,
+        object: { zip: "98052", state: "WA" },
+      });
+      await vm.$save();
+
+      expect(JSON.parse(saveMock.mock.calls[0][0].data)).toMatchObject({
+        zip: "98052",
+        state: "WA",
+      });
+      expect(vm.$primaryKey).toBe("98052");
+      expect(vm.$isDirty).toBeFalsy();
+      expect(zipInput.element.readOnly).toBe(true);
+    });
+
+    test("update with user-provided PK", async () => {
+      const vm = new ZipCodeViewModel();
+      vm.$loadCleanData({ zip: "98052", state: "WA" });
+
+      const wrapper = mount(() => <CAdminEditor model={vm} />);
+
+      // Find the row for the PK field (zip)
+      const zipRow = wrapper.find(".prop-zip");
+      expect(zipRow.exists()).toBeTruthy();
+
+      // PK field should be readonly for an existing item
+      const zipInput = zipRow.find("input");
+      expect(zipInput.exists()).toBeTruthy();
+      expect(zipInput.element.readOnly).toBe(true);
+
+      // Update a non-PK field
+      const stateRow = wrapper.find(".prop-state");
+      const stateInput = stateRow.find("input");
+      await stateInput.setValue("Washington");
+
+      // Save the item
+      saveMock.mockResolvedValue({
+        wasSuccessful: true,
+        object: { zip: "98052", state: "Washington" },
+      });
+      await vm.$save();
+
+      expect(JSON.parse(saveMock.mock.calls[1][0].data)).toMatchObject({
+        zip: "98052",
+        state: "Washington",
+      });
+      expect(vm.$primaryKey).toBe("98052");
+      expect(vm.$isDirty).toBeFalsy();
     });
   });
 });

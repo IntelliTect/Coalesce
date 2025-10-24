@@ -12,6 +12,21 @@ on:
           - rc
           - beta
           - ""
+      skipNuget:
+        description: "Skip NuGet publish"
+        required: false
+        default: false
+        type: boolean
+      skipNpm:
+        description: "Skip npm publish"
+        required: false
+        default: false
+        type: boolean
+      skipTemplate:
+        description: "Skip template publish"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   meta:
@@ -34,6 +49,8 @@ jobs:
     secrets: inherit
     with:
       prereleaseSlug: ${{ inputs.prereleaseSlug }}
+      skipNuget: ${{ inputs.skipNuget }}
+      skipNpm: ${{ inputs.skipNpm }}
 
   create-release:
     runs-on: ubuntu-latest
@@ -58,6 +75,7 @@ jobs:
   publish-template:
     runs-on: ubuntu-latest
     needs: [build-template]
+    if: ${{ !inputs.skipTemplate }}
 
     steps:
       - name: Download Artifacts

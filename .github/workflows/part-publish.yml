@@ -4,10 +4,19 @@ on:
       prereleaseSlug:
         required: false
         type: string
+      skipNuget:
+        required: false
+        type: boolean
+        default: false
+      skipNpm:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   npm:
     runs-on: ubuntu-latest
+    if: ${{ !inputs.skipNpm }}
     permissions:
       id-token: write
 
@@ -34,6 +43,7 @@ jobs:
 
   nuget:
     runs-on: ubuntu-latest
+    if: ${{ !inputs.skipNuget }}
 
     steps:
       - name: Download all workflow run artifacts

@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload artifact for deployment
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: web-app
           path: ${{ github.workspace }}/publish
@@ -85,7 +85,7 @@ jobs:
 
     steps:
       - name: Download artifact for deployment
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: web-app
 

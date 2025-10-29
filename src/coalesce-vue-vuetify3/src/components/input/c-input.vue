@@ -479,7 +479,11 @@ function render() {
         addHandler(data, "update:modelValue", onInput);
         return h(VFileInput, data, vuetifySlots);
       } else if (valueMeta.itemType.type == "enum") {
-        data.items = valueMeta.itemType.typeDef.values;
+        let items = valueMeta.itemType.typeDef.values;
+        if (props.filter) {
+          items = items.filter(props.filter);
+        }
+        data.items = items;
         data.multiple = true;
         data["chips"] = true;
         data["closable-chips"] = true;

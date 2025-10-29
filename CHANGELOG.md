@@ -1,4 +1,5 @@
 # 6.0.3
+- `c-select` now correctly respects the `filter` prop for enum collections.
 
 # 6.0.2
 - Fix error in c-select when keypress event has no key.

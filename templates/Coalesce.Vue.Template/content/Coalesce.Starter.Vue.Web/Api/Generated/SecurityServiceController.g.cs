@@ -41,6 +41,7 @@ namespace Coalesce.Starter.Vue.Web.Api
         public virtual ItemResult<UserInfoResponse> WhoAmI(
             [FromServices] Coalesce.Starter.Vue.Data.AppDbContext db)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("WhoAmI");
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Service.WhoAmI(

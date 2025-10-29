@@ -97,6 +97,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromForm(Name = "name")] string name,
             [FromForm(Name = "adminEmail")] string adminEmail)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("Create");
             var _params = new
             {
                 Name = name,
@@ -105,8 +106,7 @@ namespace Coalesce.Starter.Vue.Web.Api
 
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("Create"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -137,10 +137,10 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromBody] CreateParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("Create");
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("Create"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 

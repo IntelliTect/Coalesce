@@ -970,9 +970,6 @@ export const UserInfo = domain.types.UserInfo = {
       displayName: "Tenant Id",
       type: "string",
       role: "value",
-      rules: {
-        maxLength: val => !val || val.length <= 36 || "Tenant Id may not be more than 36 characters.",
-      }
     },
     tenantName: {
       name: "tenantName",

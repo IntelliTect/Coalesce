@@ -96,6 +96,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromQuery] string id,
             [FromQuery] byte[] etag)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetPhoto");
             var _params = new
             {
                 Id = id,
@@ -150,6 +151,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] string id)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("Evict");
             var _params = new
             {
                 Id = id
@@ -186,6 +188,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromBody] EvictParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("Evict");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -212,6 +215,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromForm(Name = "email")] string email,
             [FromForm(Name = "role")] RoleParameter role)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("InviteUser");
             var _params = new
             {
                 Email = email,
@@ -220,8 +224,7 @@ namespace Coalesce.Starter.Vue.Web.Api
 
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("InviteUser"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -253,10 +256,10 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromBody] InviteUserParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("InviteUser");
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("InviteUser"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -283,6 +286,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromForm(Name = "id")] string id,
             [FromForm(Name = "newEmail")] string newEmail)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("SetEmail");
             var _params = new
             {
                 Id = id,
@@ -298,8 +302,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("SetEmail"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -330,6 +333,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromBody] SetEmailParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("SetEmail");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -339,8 +343,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("SetEmail"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -364,6 +367,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromServices] Coalesce.Starter.Vue.Data.Auth.UserManagementService userService,
             [FromForm(Name = "id")] string id)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("SendEmailConfirmation");
             var _params = new
             {
                 Id = id
@@ -401,6 +405,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromBody] SendEmailConfirmationParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("SendEmailConfirmation");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -431,6 +436,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromForm(Name = "newPassword")] string newPassword,
             [FromForm(Name = "confirmNewPassword")] string confirmNewPassword)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("SetPassword");
             var _params = new
             {
                 Id = id,
@@ -448,8 +454,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("SetPassword"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -486,6 +491,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromBody] SetPasswordParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("SetPassword");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -495,8 +501,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("SetPassword"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 

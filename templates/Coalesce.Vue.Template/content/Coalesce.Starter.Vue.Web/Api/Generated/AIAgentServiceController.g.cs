@@ -1,5 +1,4 @@
 
-using Coalesce.Starter.Vue.Data.Services;
 using Coalesce.Starter.Vue.Web.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
@@ -26,11 +25,11 @@ namespace Coalesce.Starter.Vue.Web.Api
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class AIAgentServiceController : BaseApiController
     {
-        protected AIAgentService Service { get; }
+        protected Coalesce.Starter.Vue.Data.Services.AIAgentService Service { get; }
 
-        public AIAgentServiceController(CrudContext context, AIAgentService service) : base(context)
+        public AIAgentServiceController(CrudContext context, Coalesce.Starter.Vue.Data.Services.AIAgentService service) : base(context)
         {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<AIAgentService>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Starter.Vue.Data.Services.AIAgentService>();
             Service = service;
         }
 
@@ -41,10 +40,11 @@ namespace Coalesce.Starter.Vue.Web.Api
         [Authorize]
         [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ItemResult<ChatResponseResponse>> ChatAgent(
-            [FromForm(Name = "cancellationToken")] System.Threading.CancellationToken cancellationToken,
+            System.Threading.CancellationToken cancellationToken,
             [FromForm(Name = "history")] string history,
             [FromForm(Name = "prompt")] string prompt)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("ChatAgent");
             var _params = new
             {
                 History = history,
@@ -53,8 +53,7 @@ namespace Coalesce.Starter.Vue.Web.Api
 
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("ChatAgent"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
             }
 
@@ -66,7 +65,7 @@ namespace Coalesce.Starter.Vue.Web.Api
                 cancellationToken
             );
             var _result = new ItemResult<ChatResponseResponse>();
-            _result.Object = Mapper.MapToDto<AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
+            _result.Object = Mapper.MapToDto<Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
 
@@ -87,10 +86,10 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromBody] ChatAgentParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("ChatAgent");
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("ChatAgent"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
             }
 
@@ -102,7 +101,7 @@ namespace Coalesce.Starter.Vue.Web.Api
                 cancellationToken
             );
             var _result = new ItemResult<ChatResponseResponse>();
-            _result.Object = Mapper.MapToDto<AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
+            _result.Object = Mapper.MapToDto<Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
     }

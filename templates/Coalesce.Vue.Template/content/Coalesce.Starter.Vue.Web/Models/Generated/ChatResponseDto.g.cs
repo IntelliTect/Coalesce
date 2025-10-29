@@ -1,4 +1,3 @@
-using Coalesce.Starter.Vue.Data.Services;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -10,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace Coalesce.Starter.Vue.Web.Models
 {
-    public partial class ChatResponseParameter : SparseDto, IGeneratedParameterDto<AIAgentService.ChatResponse>
+    public partial class ChatResponseParameter : SparseDto, IGeneratedParameterDto<Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse>
     {
         public ChatResponseParameter() { }
 
@@ -31,7 +30,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public void MapTo(AIAgentService.ChatResponse entity, IMappingContext context)
+        public void MapTo(Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse entity, IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -40,11 +39,11 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public AIAgentService.ChatResponse MapToNew(IMappingContext context)
+        public Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse MapToNew(IMappingContext context)
         {
             var includes = context.Includes;
 
-            var entity = new AIAgentService.ChatResponse(
+            var entity = new Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse(
                 response,
                 history
             )
@@ -56,7 +55,7 @@ namespace Coalesce.Starter.Vue.Web.Models
             return entity;
         }
 
-        public AIAgentService.ChatResponse MapToModelOrNew(AIAgentService.ChatResponse obj, IMappingContext context)
+        public Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse MapToModelOrNew(Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse obj, IMappingContext context)
         {
             if (obj is null) return MapToNew(context);
             MapTo(obj, context);
@@ -64,7 +63,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         }
     }
 
-    public partial class ChatResponseResponse : IGeneratedResponseDto<AIAgentService.ChatResponse>
+    public partial class ChatResponseResponse : IGeneratedResponseDto<Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse>
     {
         public ChatResponseResponse() { }
 
@@ -74,7 +73,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public void MapFrom(AIAgentService.ChatResponse obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Starter.Vue.Data.Services.AIAgentService.ChatResponse obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

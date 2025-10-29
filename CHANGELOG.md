@@ -1,3 +1,5 @@
+# 6.0.3
+
 # 6.0.2
 - Fix error in c-select when keypress event has no key.
 - Accept problem details error messages in API Callers.

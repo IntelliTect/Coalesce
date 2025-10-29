@@ -209,11 +209,45 @@ describe("CInput", () => {
 
     // Open the dropdown and select the 4th item.
     await wrapper.find(".v-field").trigger("mousedown");
+    expect(wrapper.text()).not.contains(
+      model.$metadata.props.status.typeDef.valueLookup.ClosedNoSolution
+        .displayName,
+    );
     await wrapper.findAllComponents(VListItem)[3].trigger("click");
 
     // The selected value should now be the 4th value of the list,
     // which is the 5th value of the enum because ClosedNoSolution was the 4th and we filtered it out.
     expect(model.status).toBe(Statuses.Cancelled);
+    expect(wrapper.text()).contains("Cancelled");
+  });
+
+  test("enums filtered", async () => {
+    const model = new ComplexModelViewModel({
+      enumCollection: [Statuses.InProgress],
+    });
+    const wrapper = mount(() => (
+      <CInput
+        model={model}
+        for="enumCollection"
+        filter={(v) => v.value != Statuses.ClosedNoSolution}
+      />
+    ));
+
+    // Open the dropdown and select the 4th item.
+    await wrapper.find(".v-field").trigger("mousedown");
+    expect(wrapper.text()).not.contains(
+      model.$metadata.props.enumCollection.itemType.typeDef.valueLookup
+        .ClosedNoSolution.displayName,
+    );
+    await wrapper.findAllComponents(VListItem)[3].trigger("click");
+
+    // The selected value should now be the 4th value of the list,
+    // which is the 5th value of the enum because ClosedNoSolution was the 4th and we filtered it out.
+    expect(model.enumCollection).toMatchObject([
+      Statuses.InProgress,
+      Statuses.Cancelled,
+    ]);
+    expect(wrapper.text()).contains("In Progress");
     expect(wrapper.text()).contains("Cancelled");
   });
 

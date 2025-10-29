@@ -205,7 +205,7 @@ An object owning the value that was specified by the `for` prop. If provided, th
 If binding the component with ``v-model``, accepts the ``modelValue`` part of ``v-model``.
 
 
-<Prop def="filter?: (value: EnumMember)" lang="ts" />
+<Prop def="filter?: (value: EnumMember) => boolean" lang="ts" />
 
 For enum inputs, filters the enum members that are available for selection.
 

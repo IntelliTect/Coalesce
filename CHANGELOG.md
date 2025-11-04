@@ -1,3 +1,5 @@
+# 6.0.4
+
 # 6.0.3
 - `c-select` now correctly respects the `filter` prop for enum collections.
 

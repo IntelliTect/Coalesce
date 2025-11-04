@@ -312,7 +312,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
     /// Cache for stored procedure names. Size is limited in case there is an application whose Model
     /// is not a singleton, e.g. dynamic model configuration for schema-based tenancy.
     /// </summary>
-    private readonly MemoryCache _storedProcedureCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000 });
+    private static readonly MemoryCache _storedProcedureCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000 });
 
     /// <summary>
     /// Ensures the stored procedure exists and returns its name.

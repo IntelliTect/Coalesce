@@ -1,4 +1,5 @@
 # 6.0.4
+- AuditLogging: Stored procedure cache was not being correctly persisted to avoid redundant `SELECT OBJECT_DEFINITION` queries.
 
 # 6.0.3
 - `c-select` now correctly respects the `filter` prop for enum collections.

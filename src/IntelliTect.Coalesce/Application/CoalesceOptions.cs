@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -8,6 +9,35 @@ namespace IntelliTect.Coalesce;
 
 public class CoalesceOptions
 {
+    /// <summary>
+    /// Excludes the browser refresh hosting startup assembly from being loaded.
+    /// This prevents the undesirable "aspnetcore-browser-refresh.js" script from being injected.
+    /// Call this method at the very start of your Program.cs, before creating the WebApplicationBuilder.
+    /// <see href="https://github.com/dotnet/aspnetcore/issues/45213#issuecomment-3488619651">See here for more details.</see>
+    /// </summary>
+    public static void PreventAspNetBrowserRefresh()
+    {
+        const string key = "ASPNETCORE_" + WebHostDefaults.HostingStartupExcludeAssembliesKey;
+        const string assemblyToExclude = "Microsoft.AspNetCore.Watch.BrowserRefresh";
+
+        var existing = Environment.GetEnvironmentVariable(key);
+
+        if (string.IsNullOrWhiteSpace(existing))
+        {
+            Environment.SetEnvironmentVariable(key, assemblyToExclude);
+        }
+        else if (!existing.Contains(assemblyToExclude))
+        {
+            Environment.SetEnvironmentVariable(key, $"{existing};{assemblyToExclude}");
+        }
+
+        var hostingStartupAssemblies = Environment.GetEnvironmentVariable("ASPNETCORE_" + WebHostDefaults.HostingStartupAssembliesKey);
+        if (!string.IsNullOrWhiteSpace(hostingStartupAssemblies) && hostingStartupAssemblies.Contains(assemblyToExclude))
+        {
+            Console.WriteLine($"CoalesceOptions.DisableBrowserRefresh: {assemblyToExclude} has been suppressed.");
+        }
+    }
+
     /// <summary>
     /// Determines whether API controllers will return the <see cref="Exception.Message"/> 
     /// of unhandled exceptions or not. 

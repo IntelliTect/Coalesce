@@ -124,6 +124,20 @@ Defaults to `true`.
 
 Coalesce provides several helper extension methods to simplify common application setup tasks:
 
+<Prop def="public static void CoalesceOptions.PreventAspNetBrowserRefresh()" />
+
+Prevents ASP.NET Core from injecting the browser refresh script during development. This script, `aspnetcore-browser-refresh.js`, is redundant with Vite's HMR and attempts to refresh your whole browser whenever a C# file changes.
+
+Call this method at the very start of your `Program.cs`, before creating the `WebApplicationBuilder`:
+
+``` c#
+// Program.cs
+CoalesceOptions.PreventAspNetBrowserRefresh();
+
+var builder = WebApplication.CreateBuilder(args);
+// ... rest of your configuration
+```
+
 <Prop def="public static IApplicationBuilder UseViteStaticFiles(this IApplicationBuilder app, ViteStaticFilesOptions? options = null)" />
 
 Configures static file middleware with optimizations for Vite build output. This middleware:

@@ -36,6 +36,8 @@ using Coalesce.Starter.Vue.Data.Services;
 #endif
 #endif
 
+CoalesceOptions.PreventAspNetBrowserRefresh();
+
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     Args = args,

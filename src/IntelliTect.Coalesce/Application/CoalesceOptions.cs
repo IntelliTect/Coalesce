@@ -17,7 +17,7 @@ public class CoalesceOptions
     /// </summary>
     public static void PreventAspNetBrowserRefresh()
     {
-        const string key = "ASPNETCORE_" + WebHostDefaults.HostingStartupExcludeAssembliesKey;
+        string key = "ASPNETCORE_" + WebHostDefaults.HostingStartupExcludeAssembliesKey;
         const string assemblyToExclude = "Microsoft.AspNetCore.Watch.BrowserRefresh";
 
         var existing = Environment.GetEnvironmentVariable(key);

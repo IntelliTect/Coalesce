@@ -104,6 +104,7 @@
           <v-text-field
             ref="searchRef"
             v-model="search"
+            v-intersect="onSearchIntersect"
             hide-details="auto"
             prepend-inner-icon="fa fa-search"
             :loading="listCaller.isLoading"
@@ -548,13 +549,13 @@ const { inputBindAttrs, valueMeta, valueOwner } = useMetadataProps(props, (v) =>
 
 const search = ref(null as string | null);
 const menuOpen = ref(false);
-const menuOpenForced = ref(false);
 const searchChanged = ref(new Date());
 const mainValue = ref("");
 const createItemLoading = ref(false);
 const createItemError = ref("" as string | null);
 const pendingSelection = ref(0);
 const selectionIndex = ref(-1);
+const pendingSearchSelect = ref(false);
 
 /** The models representing the current selected item(s)
  * in the case that only the PK was provided to the component.
@@ -1230,8 +1231,29 @@ function onIntersect(isIntersecting: boolean) {
   }, 50);
 }
 
+async function onSearchIntersect(isIntersecting: boolean) {
+  if (!isIntersecting) return;
+
+  const input = searchRef.value?.$el.querySelector("input") as HTMLInputElement;
+  if (!input) return;
+
+  await nextTick();
+  await new Promise((resolve) => setTimeout(resolve, 25));
+
+  input.focus();
+
+  if (pendingSearchSelect.value) {
+    input.select();
+    pendingSearchSelect.value = false;
+  }
+}
+
 async function openMenu(select?: boolean): Promise<void> {
   if (!isInteractive.value || forceClosed) return;
+
+  if (menuOpen.value) return;
+  menuOpen.value = true;
+  selectionIndex.value = -1; // Reset selection index when menu opens
 
   if (select == undefined) {
     // Select the whole search input if it hasn't changed recently.
@@ -1240,39 +1262,10 @@ async function openMenu(select?: boolean): Promise<void> {
     select = new Date().valueOf() - searchChanged.value.valueOf() > 1000;
   }
 
-  if (menuOpen.value) return;
-  menuOpen.value = true;
-  selectionIndex.value = -1; // Reset selection index when menu opens
-
   if (props.reloadOnOpen) listCaller();
 
-  await nextTick();
-  const input = searchRef.value?.$el.querySelector("input") as HTMLInputElement;
-
-  // Wait for the menu fade-in animation to unhide the content root
-  // before we try to focus the search input, because otherwise it wont work.
-  // https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
-  const start = performance.now();
-
-  // Force the menu open while we wait, because otherwise if a user clicks and then rapidly types a character,
-  // the typed character will process before the click, resulting in the click toggling the menu closed
-  // after the typed character opened the menu.
-  menuOpenForced.value = true;
-
-  while (
-    // cap waiting
-    start + 500 > performance.now() &&
-    (!input.offsetParent || input != document.activeElement)
-  ) {
-    input.focus();
-    await new Promise((resolve) => setTimeout(resolve, 1));
-  }
-
-  menuOpenForced.value = false;
-
-  if (select) {
-    input.select();
-  }
+  // Store the select preference for when the input becomes visible
+  pendingSearchSelect.value = select ?? false;
 }
 
 let forceClosed = false;
@@ -1283,9 +1276,7 @@ function closeMenu(force = false): void {
   }
 
   if (!menuOpen.value) return;
-  if (menuOpenForced.value && !force) return;
 
-  menuOpenForced.value = false;
   menuOpen.value = false;
   selectionIndex.value = -1;
   mainInputRef.value?.focus();

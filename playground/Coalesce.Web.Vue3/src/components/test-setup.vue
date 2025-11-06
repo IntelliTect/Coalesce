@@ -1,5 +1,11 @@
 <template>
   <v-container>
+    <c-select
+      for="Person"
+      :params="{ pageSize: 400 }"
+      v-model="vm.assignedTo"
+    ></c-select>
+
     <v-btn @click="add" prepend-icon="fa fa-plus"> Add Product </v-btn>
     <v-btn
       @click="vm.$bulkSave()"

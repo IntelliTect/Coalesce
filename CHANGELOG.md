@@ -1,6 +1,7 @@
 # 6.0.4
 - AuditLogging: Stored procedure cache was not being correctly persisted to avoid redundant `SELECT OBJECT_DEFINITION` queries.
 - Added `CoalesceOptions.PreventAspNetBrowserRefresh()` utility method to block unwanted `aspnetcore-browser-refresh.js` script.
+- Perf: use v-memo in `c-select` list items to avoid redundant re-renders.
 
 # 6.0.3
 - `c-select` now correctly respects the `filter` prop for enum collections.

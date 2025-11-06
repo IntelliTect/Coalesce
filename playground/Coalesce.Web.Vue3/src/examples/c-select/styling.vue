@@ -36,6 +36,39 @@
     </template>
   </c-select>
 
+  <h1>c-select slots</h1>
+  <c-select for="Person" multiple v-model="people" variant="outlined">
+    <!-- c-select specific slots -->
+    <template #selected-item="{ item, index, remove }">
+      <v-chip
+        size="small"
+        closable
+        @click:close="remove"
+        color="purple"
+        class="ma-1"
+      >
+        <v-icon start>fa fa-star</v-icon>
+        {{ item.name }} (#{{ index + 1 }})
+      </v-chip>
+    </template>
+
+    <template #list-item="{ item, search, selected }">
+      <div class="d-flex align-center">
+        <v-avatar size="24" color="primary" class="mr-2">
+          <span class="text-caption">{{ item.name?.[0] }}</span>
+        </v-avatar>
+        <div>
+          <div class="font-weight-bold">{{ item.name }}</div>
+          <div class="text-caption text-grey">
+            ID: {{ item.personId }} |
+            {{ selected ? "✓ Selected" : "Not selected" }}
+            {{ search ? `| Search: "${search}"` : "" }}
+          </div>
+        </div>
+      </div>
+    </template>
+  </c-select>
+
   <h1>compact/outlined via v-defaults-provider</h1>
   <v-defaults-provider
     :defaults="{
@@ -117,13 +150,15 @@
 
 <script setup lang="ts">
 import { Person } from "@/models.g";
-import { CaseViewModel } from "@/viewmodels.g";
+import { CaseViewModel, PersonViewModel } from "@/viewmodels.g";
 import { modelDisplay, useBindToQueryString } from "coalesce-vue";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 
 const caseVm = new CaseViewModel();
 caseVm.$load(15);
 caseVm.$useAutoSave();
+
+const people = ref<Person[]>([]);
 
 const dialogOpen = ref(false);
 </script>

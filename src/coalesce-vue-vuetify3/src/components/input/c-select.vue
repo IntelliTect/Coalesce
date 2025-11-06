@@ -171,6 +171,11 @@
             <v-list-item
               v-for="(item, i) in listItems"
               :key="item.key"
+              v-memo="[
+                pendingSelection === i,
+                item.selected,
+                hasCustomItemSlots ? search : false,
+              ]"
               :value="item.key"
               :class="{
                 'pending-selection': pendingSelection === i,
@@ -496,6 +501,10 @@ const passthroughSlots = computed(() => {
   delete ret.default;
   return ret;
 });
+
+const hasCustomItemSlots = computed(
+  () => !!slots["list-item"] || !!slots["item"],
+);
 
 const rootRef = useTemplateRef("rootRef");
 const menuContentRef = useTemplateRef("menuContentRef");

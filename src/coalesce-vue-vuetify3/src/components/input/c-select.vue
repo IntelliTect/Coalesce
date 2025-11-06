@@ -133,86 +133,89 @@
           <!-- This height shows 7 full items, with a final item partially out 
         of the scroll area to improve visual hints to the user that the can scroll the list. -->
           <v-list
-            class="py-0 d-flex flex-column"
-            max-height="302"
+            class="py-0"
             density="compact"
             :aria-multiselectable="effectiveMultiple"
             role="listbox"
+            max-height="302"
           >
-            <v-list-item
-              v-if="createItemLabel"
-              class="c-select__create-item"
-              :class="{
-                'c-select__create-item--end': props.create?.position === 'end',
-                'pending-selection': pendingSelection === createItemIndex,
-              }"
-              :loading="createItemLoading"
-              @click="createItem"
+            <v-virtual-scroll
+              :renderless="trueConst"
+              :items="listItems"
+              item-key="key"
             >
-              <template #prepend>
-                <v-progress-circular
-                  v-if="createItemLoading"
-                  size="20"
-                  indeterminate
-                ></v-progress-circular>
-                <v-icon v-else>$plus</v-icon>
-              </template>
-              <v-list-item-title>
-                {{ createItemLabel }}
-              </v-list-item-title>
-              <v-list-item-subtitle
-                v-if="createItemError"
-                class="text-error font-weight-bold"
-              >
-                {{ createItemError }}
-              </v-list-item-subtitle>
-            </v-list-item>
-
-            <v-list-item
-              v-for="(item, i) in listItems"
-              :key="item.key"
-              :value="item.key"
-              :class="{
-                'pending-selection': pendingSelection === i,
-              }"
-              :active="item.selected"
-              role="option"
-              :aria-selected="item.selected"
-              @click="onInput(item.model)"
-            >
-              <template v-if="effectiveMultiple" #prepend>
-                <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
-              </template>
-              <v-list-item-title>
-                <slot
-                  name="list-item"
-                  :item="item.model"
-                  :search="search"
-                  :selected="item.selected"
+              <template #default="{ item, index, itemRef }">
+                <v-list-item
+                  v-if="item.type === 'create'"
+                  :ref="itemRef"
+                  class="c-select__create-item"
+                  :class="{
+                    'c-select__create-item--end':
+                      props.create?.position === 'end',
+                    'pending-selection': pendingSelection === index,
+                  }"
+                  :loading="createItemLoading"
+                  @click="createItem"
                 >
-                  <slot name="item" :item="item.model" :search="search">
-                    {{ itemTitle(item.model) }}
-                  </slot>
-                </slot>
-              </v-list-item-title>
-            </v-list-item>
+                  <template #prepend>
+                    <v-progress-circular
+                      v-if="createItemLoading"
+                      size="20"
+                      indeterminate
+                    ></v-progress-circular>
+                    <v-icon v-else>$plus</v-icon>
+                  </template>
+                  <v-list-item-title>
+                    {{ createItemLabel }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle
+                    v-if="createItemError"
+                    class="text-error font-weight-bold"
+                  >
+                    {{ createItemError }}
+                  </v-list-item-subtitle>
+                </v-list-item>
 
-            <!-- TODO: With this version of c-select (versus the v2 one),
-        we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
-            <v-list-item
-              v-if="
-                // When we do know an actual page count:
-                (listCaller.pageCount && listCaller.pageCount > 1) ||
-                // When `noCount` is used or counting is disabled on the server:
-                (listCaller.pageCount == -1 &&
-                  listCaller.pageSize &&
-                  listItems.length >= listCaller.pageSize)
-              "
-              class="text-grey font-italic"
-            >
-              Max {{ listCaller.pageSize }} items retrieved. Refine your search
-              to view more.
-            </v-list-item>
+                <v-list-item
+                  v-else-if="item.type === 'item'"
+                  :ref="itemRef"
+                  :key="item.key"
+                  :value="item.key"
+                  :class="{
+                    'pending-selection': pendingSelection === index,
+                  }"
+                  :active="item.selected"
+                  role="option"
+                  :aria-selected="item.selected"
+                  @click="onInput(item.model!)"
+                >
+                  <template v-if="effectiveMultiple" #prepend>
+                    <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
+                  </template>
+                  <v-list-item-title>
+                    <slot
+                      name="list-item"
+                      :item="item.model!"
+                      :search="search"
+                      :selected="item.selected!"
+                    >
+                      <slot name="item" :item="item.model!" :search="search">
+                        {{ itemTitle(item.model!) }}
+                      </slot>
+                    </slot>
+                  </v-list-item-title>
+                </v-list-item>
+
+                <v-list-item
+                  v-else-if="item.type === 'pagination'"
+                  :ref="itemRef"
+                  class="text-grey font-italic"
+                >
+                  Max {{ listCaller.pageSize }} items retrieved. Refine your
+                  search to view more.
+                </v-list-item>
+              </template>
+            </v-virtual-scroll>
           </v-list>
         </v-sheet>
       </v-menu>
@@ -298,6 +301,9 @@ type _InheritedSlots = Omit<VTextField["$slots"], "default">;
 type InheritedSlots = {
   [Property in keyof _InheritedSlots]?: _InheritedSlots[Property];
 };
+
+// Stupid workaround for bad syntax highlighting
+const trueConst = true as const;
 </script>
 
 <script
@@ -805,11 +811,53 @@ const items = computed((): SelectedModelTypeSingle[] => {
 
 const listItems = computed(() => {
   const pkName = modelObjectMeta.value.keyProp.name;
-  return items.value.map((item) => ({
-    model: item,
-    key: item[pkName],
-    selected: selectedKeysSet.value.has(item[pkName]),
-  }));
+  const result: Array<{
+    type: "create" | "item" | "pagination";
+    model?: SelectedModelTypeSingle;
+    key: any;
+    selected?: boolean;
+  }> = [];
+
+  // Add create item at start if applicable
+  if (createItemLabel.value && props.create?.position !== "end") {
+    result.push({
+      type: "create",
+      key: "__create__",
+    });
+  }
+
+  // Add regular items
+  items.value.forEach((item) => {
+    result.push({
+      type: "item",
+      model: item,
+      key: item[pkName],
+      selected: selectedKeysSet.value.has(item[pkName]),
+    });
+  });
+
+  // Add create item at end if applicable
+  if (createItemLabel.value && props.create?.position === "end") {
+    result.push({
+      type: "create",
+      key: "__create__",
+    });
+  }
+
+  // Add pagination message if applicable
+  if (
+    (listCaller.pageCount && listCaller.pageCount > 1) ||
+    (listCaller.pageCount == -1 &&
+      listCaller.pageSize &&
+      items.value.length >= listCaller.pageSize)
+  ) {
+    result.push({
+      type: "pagination",
+      key: "__pagination__",
+    });
+  }
+
+  return result;
 });
 
 const totalSelectableItems = computed(() => {
@@ -1252,7 +1300,7 @@ async function openMenu(select?: boolean): Promise<void> {
 
   while (
     // cap waiting
-    start + 500 > performance.now() &&
+    start + 1500 > performance.now() &&
     (!input.offsetParent || input != document.activeElement)
   ) {
     input.focus();

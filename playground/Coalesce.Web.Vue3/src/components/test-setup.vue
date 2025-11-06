@@ -1,6 +1,11 @@
 <template>
   <v-container>
-    <v-btn @click="add" prepend-icon="fa fa-plus"> Add Product </v-btn>
+    <c-select
+      for="Person"
+      :params="{ pageSize: 400 }"
+      v-model="person"
+    ></c-select>
+    <!-- <v-btn @click="add" prepend-icon="fa fa-plus"> Add Product </v-btn>
     <v-btn
       @click="vm.$bulkSave()"
       :loading="vm.$bulkSave.isLoading"
@@ -47,7 +52,7 @@
         icon="fa fa-sync"
       ></v-btn>
       {{ x.product?.name }}: (pk: {{ x.$primaryKey }}, ref {{ x.$stableId }})
-    </div>
+    </div> -->
   </v-container>
 </template>
 
@@ -61,6 +66,7 @@ import {
 import { useBindToQueryString } from "coalesce-vue";
 import { ref } from "vue";
 
+const person = ref();
 // const vm = new CaseViewModel({title: 'asd'});
 const vm = new CaseViewModel();
 // vm.$load(1);

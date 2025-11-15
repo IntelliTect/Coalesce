@@ -3,7 +3,7 @@
     <PackageType>Template</PackageType>
     <PackageId>IntelliTect.Coalesce.Vue.Template</PackageId>
     <Version>1.0.0</Version>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
 
     <Title>Coalesce Vue Project Template</Title>
     <Company>IntelliTect</Company>

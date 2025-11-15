@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 #if OpenAPI
-using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 #endif
 using System.Security.Claims;
@@ -90,7 +89,7 @@ services.AddTransient<IEmailService, NoOpEmailService>();
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
-    c.SwaggerDoc("current", new OpenApiInfo
+    c.SwaggerDoc("current", new()
     {
         Title = "Current API",
         Version = "current",

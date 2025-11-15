@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 
 namespace IntelliTect.Coalesce.AuditLogging;
@@ -75,6 +76,21 @@ public class AuditOptions
     /// that we make in CoalesceAuditLoggingBuilder.
     /// </summary>
     internal AuditConfiguration? AuditConfiguration { get; set; }
+
+    /// <summary>
+    /// Cache for stored procedure names. Size is limited in case there is an application whose Model
+    /// is not a singleton, e.g. dynamic model configuration for schema-based tenancy.
+    /// </summary>
+    internal static readonly MemoryCache StoredProcedureCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000 });
+
+    /// <summary>
+    /// Wipes the cache of known existing audit log merge stored procedures
+    /// that is used if <see cref="UseStoredProcedures" /> is enabled.
+    /// </summary>
+    public static void ClearStoredProcedureCache()
+    {
+        StoredProcedureCache.Clear();
+    }
 }
 
 /// <summary>

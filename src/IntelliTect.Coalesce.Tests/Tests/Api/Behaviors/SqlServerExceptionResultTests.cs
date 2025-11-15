@@ -296,7 +296,18 @@ public class SqlServerExceptionResultTests
     {
         // (int infoNumber, byte errorState, byte errorClass, string server, string message, string procedure, int lineNumber, uint win32ErrorCode, Exception exception = null)
         var sqlErrorCtor = typeof(SqlError).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)[0];
-        return (SqlError)sqlErrorCtor.Invoke([errorCode, (byte)0, (byte)0, "Server", errorMessage, "Procedure", 0, (uint)0, null]);
+
+        var type = sqlErrorCtor.GetParameters()[7].ParameterType;
+        return (SqlError)sqlErrorCtor.Invoke([
+            errorCode,
+            (byte)0,
+            (byte)0,
+            "Server",
+            errorMessage,
+            "Procedure",
+            0,
+            sqlErrorCtor.GetParameters()[7].ParameterType == typeof(uint) ? (object)(uint)0 : (object)(int)0,
+            null]);
     }
 
     private static SqlErrorCollection CreateSqlErrorCollection(SqlError sqlError)

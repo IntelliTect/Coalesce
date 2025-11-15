@@ -4,6 +4,7 @@ using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,6 +20,9 @@ namespace IntelliTect.Coalesce.Api.Controllers;
 
 [AttributeUsage(AttributeTargets.Class)]
 internal sealed class CoalesceApiControllerAttribute : Attribute, IControllerModelConvention
+#if NET10_0_OR_GREATER
+, IDisableCookieRedirectMetadata
+#endif
 {
     public void Apply(ControllerModel controller)
     {

@@ -209,7 +209,7 @@ public class AppDbContext
             if (model.BaseType is null)
             {
                 var param = Expression.Parameter(model.ClrType);
-                model.SetQueryFilter(Expression.Lambda(
+                model.SetQueryFilter("TenancyFilter", Expression.Lambda(
                     Expression.Equal(
                         Expression.MakeMemberAccess(param, model.ClrType.GetProperty("TenantId")!),
                         Expression.MakeMemberAccess(Expression.Constant(this), this.GetType().GetProperty("TenantIdOrThrow")!)

@@ -23,7 +23,7 @@
     <PackageReference Include="OpenTelemetry" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != '' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFramework.TrimStart('net')), '9.0'))">
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
 

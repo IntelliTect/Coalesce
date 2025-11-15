@@ -4,7 +4,6 @@ using Coalesce.Domain.WebShared;
 using IntelliTect.Coalesce;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Console;
-using Microsoft.OpenApi;
 using Microsoft.SemanticKernel;
 using Scalar.AspNetCore;
 using System.Reflection;
@@ -56,7 +55,7 @@ services.AddOpenApi();
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    c.SwaggerDoc("v1", new() { Title = "My API", Version = "v1" });
 });
 
 services.AddScoped<IWeatherService, WeatherService>();

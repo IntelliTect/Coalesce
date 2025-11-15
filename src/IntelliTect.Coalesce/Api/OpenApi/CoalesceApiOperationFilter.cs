@@ -144,7 +144,8 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
                 {
                     foreach (var filterProp in cvm.ClientProperties.Where(p => p.IsUrlFilterParameter))
                     {
-                        operation.Parameters?.Add(new OpenApiParameter
+                        operation.Parameters ??= [];
+                        operation.Parameters.Add(new OpenApiParameter
                         {
                             In = ParameterLocation.Query,
                             Name = $"filter.{filterProp.Name}",

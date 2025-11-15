@@ -34,7 +34,7 @@ public class CoalesceOptions
         var hostingStartupAssemblies = Environment.GetEnvironmentVariable("ASPNETCORE_" + WebHostDefaults.HostingStartupAssembliesKey);
         if (!string.IsNullOrWhiteSpace(hostingStartupAssemblies) && hostingStartupAssemblies.Contains(assemblyToExclude))
         {
-            Console.WriteLine($"CoalesceOptions.DisableBrowserRefresh: {assemblyToExclude} has been suppressed.");
+            Console.WriteLine($"CoalesceOptions.PreventAspNetBrowserRefresh: {assemblyToExclude} has been suppressed.");
         }
     }
 

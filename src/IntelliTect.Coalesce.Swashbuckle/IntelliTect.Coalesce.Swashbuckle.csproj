@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
     <!-- This project itself should not try to generate api defs on build. -->
     <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
     <Description>Enhanced OpenAPI documentation generation for Coalesce-generated APIs. Learn more at https://coalesce.intellitect.com/topics/coalesce-swashbuckle.html</Description>

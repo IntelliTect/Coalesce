@@ -4,7 +4,7 @@ using Coalesce.Domain.WebShared;
 using IntelliTect.Coalesce;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Console;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Microsoft.SemanticKernel;
 using Scalar.AspNetCore;
 using System.Reflection;

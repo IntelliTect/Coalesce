@@ -2,7 +2,7 @@
   <PropertyGroup>
     <!-- All these frameworks are included for testing code generation.
     Override the used framework by specifying (framework: "tfm") in coalesce.json. -->
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
   </PropertyGroup>

@@ -19,6 +19,10 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Routing;
+
+
 
 
 
@@ -132,6 +136,19 @@ public static class CoalesceServiceCollectionExtensions
     {
         if (services == null) throw new ArgumentNullException(nameof(services));
 
+#if NET10_0_OR_GREATER
+        services.AddScoped<IUrlHelper>(x =>
+        {
+            var httpContext = x.GetRequiredService<IHttpContextAccessor>().HttpContext;
+            var endpoint = httpContext?.GetEndpoint();
+            var actionDescriptor = endpoint?.Metadata.GetMetadata<ActionDescriptor>();
+
+            var factory = x.GetRequiredService<IUrlHelperFactory>();
+            return factory.GetUrlHelper(httpContext is not null && actionDescriptor is not null
+                ? new ActionContext(httpContext, httpContext.GetRouteData(), actionDescriptor)
+                : new());
+        });
+#else
         services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
         services.AddScoped<IUrlHelper>(x =>
         {
@@ -139,6 +156,7 @@ public static class CoalesceServiceCollectionExtensions
             var factory = x.GetRequiredService<IUrlHelperFactory>();
             return factory.GetUrlHelper(actionContext!);
         });
+#endif
 
         return services;
     }

@@ -1,4 +1,9 @@
 using Xunit;
+#if NET10_0_OR_GREATER
+using Microsoft.OpenApi;
+#else
+using Microsoft.OpenApi.Models;
+#endif
 
 namespace IntelliTect.Coalesce.Swashbuckle.Tests;
 
@@ -30,7 +35,11 @@ public class OpenApiDocumentTests
 
         var caseSaveProperties = doc
             .Paths["/api/Case/save"]
-            .Operations[Microsoft.OpenApi.Models.OperationType.Post]
+#if NET10_0_OR_GREATER
+            .Operations[HttpMethod.Post]
+#else
+            .Operations[OperationType.Post]
+#endif
             .RequestBody.Content["multipart/form-data"]
             .Schema.Properties;
 
@@ -66,7 +75,11 @@ public class OpenApiDocumentTests
 
         var properties = doc
             .Paths["/api/ComplexModel/HasTopLevelParamWithSameNameAsObjectProp"]
-            .Operations[Microsoft.OpenApi.Models.OperationType.Post]
+#if NET10_0_OR_GREATER
+            .Operations[HttpMethod.Post]
+#else
+            .Operations[OperationType.Post]
+#endif
             .RequestBody.Content["multipart/form-data"]
             .Schema.Properties;
 
@@ -81,7 +94,11 @@ public class OpenApiDocumentTests
 
         var parameters = doc
             .Paths["/api/Person/list"]
-            .Operations[Microsoft.OpenApi.Models.OperationType.Get]
+#if NET10_0_OR_GREATER
+            .Operations[HttpMethod.Get]
+#else
+            .Operations[OperationType.Get]
+#endif
             .Parameters;
 
         var param = Assert.Single(parameters, p => p.Name == "dataSource.IntArray");

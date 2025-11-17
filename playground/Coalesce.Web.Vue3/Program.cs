@@ -4,7 +4,6 @@ using Coalesce.Domain.WebShared;
 using IntelliTect.Coalesce;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Console;
-using Microsoft.OpenApi.Models;
 using Microsoft.SemanticKernel;
 using Scalar.AspNetCore;
 using System.Reflection;
@@ -43,6 +42,7 @@ services.AddCoalesce<AppDbContext>(c => c.Configure(o =>
 }));
 services.AddScoped<Person.WithoutCases>();
 
+services.AddRazorPages();
 services.AddMvc();
 
 services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
@@ -56,7 +56,7 @@ services.AddOpenApi();
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    c.SwaggerDoc("v1", new() { Title = "My API", Version = "v1" });
 });
 
 services.AddScoped<IWeatherService, WeatherService>();
@@ -103,6 +103,7 @@ app.UseViteStaticFiles();
 app.UseNoCacheResponseHeader();
 
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
+app.MapRazorPages();
 app.MapControllers();
 
 app.MapOpenApi();

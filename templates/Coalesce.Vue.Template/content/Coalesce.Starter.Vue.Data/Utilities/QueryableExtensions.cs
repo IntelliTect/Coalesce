@@ -8,6 +8,6 @@ public static class QueryableExtensions
     /// </summary>
     public static IQueryable<T> IgnoreTenancy<T>(this IQueryable<T> query)
         where T : class
-        => query.IgnoreQueryFilters().AsNoTrackingWithIdentityResolution();
+        => query.IgnoreQueryFilters(["TenancyFilter"]).AsNoTrackingWithIdentityResolution();
 #endif
 }

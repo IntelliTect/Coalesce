@@ -1,3 +1,6 @@
+# 6.1.0
+- Added support for .NET 10
+
 # 6.0.4
 - AuditLogging: Stored procedure cache was not being correctly persisted to avoid redundant `SELECT OBJECT_DEFINITION` queries.
 - Added `CoalesceOptions.PreventAspNetBrowserRefresh()` utility method to block unwanted `aspnetcore-browser-refresh.js` script.

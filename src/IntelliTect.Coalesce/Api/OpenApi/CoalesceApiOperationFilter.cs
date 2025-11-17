@@ -7,8 +7,13 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
+#if NET10_0_OR_GREATER
+using Microsoft.OpenApi;
+using System.Text.Json.Nodes;
+#else
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,32 +39,30 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
             .ToLookup(d => (d.HttpMethod, d.RelativePath));
     }
 
-    public Task TransformAsync(
-        OpenApiOperation operation, 
-        OpenApiOperationTransformerContext context, 
+    public async Task TransformAsync(
+        OpenApiOperation operation,
+        OpenApiOperationTransformerContext context,
         CancellationToken cancellationToken)
     {
         if (context.Description.ActionDescriptor is not ControllerActionDescriptor cad ||
             !cad.ControllerTypeInfo.IsAssignableTo(typeof(BaseApiController)))
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var methodInfo = cad.MethodInfo;
         var cvm = reflectionRepository.GetClassViewModel(methodInfo.DeclaringType!)!;
         var method = new ReflectionMethodViewModel(methodInfo, cvm, cvm);
 
-        AddOtherBodyTypes(operation, context);
+        await AddOtherBodyTypes(operation, context, cancellationToken);
         ProcessDataSources(operation, context, method);
         ProcessStandardParameters(operation, method);
-
-        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Workaround https://github.com/dotnet/aspnetcore/issues/58329
     /// </summary>
-    private async void AddOtherBodyTypes(OpenApiOperation operation, OpenApiOperationTransformerContext context)
+    private async Task AddOtherBodyTypes(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken ct)
     {
         Type? docServiceType = Type.GetType("Microsoft.AspNetCore.OpenApi.OpenApiDocumentService,Microsoft.AspNetCore.OpenApi");
         if (docServiceType is null) return;
@@ -72,6 +75,24 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
         foreach (var otherDescription in otherDescriptions)
         {
             object docService = context.ApplicationServices.GetRequiredKeyedService(docServiceType, context.DocumentName);
+#if NET10_0_OR_GREATER
+            // In .NET 10, GetRequestBodyAsync requires OpenApiDocument as the first parameter
+            var resultTask = docServiceType
+                .GetMethod("GetRequestBodyAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?
+                .Invoke(docService, [
+                    // OpenApiDocument document,
+                    context.Document,
+                    // ApiDescription description,
+                    otherDescription,
+                    // IServiceProvider scopedServiceProvider,
+                    context.ApplicationServices,
+                    // IOpenApiSchemaTransformer[] schemaTransformers,
+                    // TODO: Too hard to acquire schema transformers here.
+                    Array.Empty<IOpenApiSchemaTransformer>(),
+                    // CancellationToken cancellationToken
+                    ct
+                ]) as Task<OpenApiRequestBody>;
+#else
             var resultTask = docServiceType
                 .GetMethod("GetRequestBodyAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?
                 .Invoke(docService, [
@@ -83,17 +104,21 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
                     // TODO: Too hard to acquire schema transformers here.
                     Array.Empty<IOpenApiSchemaTransformer>(),
                     // CancellationToken cancellationToken
-                    CancellationToken.None
+                    ct
                 ]) as Task<OpenApiRequestBody>;
+#endif
 
             if (resultTask is null) continue;
 
             var result = await resultTask;
-            if (result is null) continue;
+            if (result?.Content is null) continue;
 
-            foreach (var otherContent in result.Content)
+            if (operation.RequestBody?.Content is not null)
             {
-                operation.RequestBody.Content.Add(otherContent);
+                foreach (var otherContent in result.Content)
+                {
+                    operation.RequestBody.Content.Add(otherContent);
+                }
             }
         }
     }
@@ -105,16 +130,24 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
             var paramType = paramVm.Type.ClassViewModel!;
 
             // Join our ParameterViewModels with the OpenApiParameters.
-            var paramsUnion = paramType.ClientProperties.Join(
-                operation.Parameters, p => p.Name, p => p.Name, (pvm, nbp) => (PropViewModel: pvm, OperationParam: nbp)
-            );
-
-            foreach (var noSetterProp in paramsUnion.Where(p =>
-                // Remove "Filter" - we'll enumerate all available filter params
-                (p.PropViewModel.Name == nameof(IFilterParameters.Filter) && p.OperationParam.Schema.Type == "object")
-            ))
+            if (operation.Parameters != null)
             {
-                operation.Parameters.Remove(noSetterProp.OperationParam);
+                var paramsUnion = paramType.ClientProperties.Join(
+                    operation.Parameters, p => p.Name, p => p.Name, (pvm, nbp) => (PropViewModel: pvm, OperationParam: nbp)
+                );
+
+                foreach (var noSetterProp in paramsUnion.Where(p =>
+                    // Remove "Filter" - we'll enumerate all available filter params
+                    p.PropViewModel.Name == nameof(IFilterParameters.Filter)
+#if NET10_0_OR_GREATER
+                    && p.OperationParam.Schema?.Type == JsonSchemaType.Object
+#else
+                    && p.OperationParam.Schema?.Type == "object"
+#endif
+                ))
+                {
+                    operation.Parameters.Remove(noSetterProp.OperationParam);
+                }
             }
 
             if (paramVm.Type.IsA<IFilterParameters>())
@@ -128,13 +161,21 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
                 {
                     foreach (var filterProp in cvm.ClientProperties.Where(p => p.IsUrlFilterParameter))
                     {
+                        operation.Parameters ??= [];
                         operation.Parameters.Add(new OpenApiParameter
                         {
                             In = ParameterLocation.Query,
                             Name = $"filter.{filterProp.Name}",
                             Required = false,
                             Description = $"Filters results by values contained in property '{filterProp.JsonName}'.",
-                            Schema = new OpenApiSchema { Type = "string" }
+                            Schema = new OpenApiSchema
+                            {
+#if NET10_0_OR_GREATER
+                                Type = JsonSchemaType.String,
+#else
+                                Type = "string",
+#endif    
+                            }
                         });
                     }
                 }
@@ -143,10 +184,18 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
 
         if (method.ResultType.IsA<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>>())
         {
-            operation.Responses["200"].Content.Clear();
-            operation.Responses["200"].Content["application/octet-stream"] = new OpenApiMediaType
+            operation.Responses!["200"].Content!.Clear();
+            operation.Responses["200"].Content!["application/octet-stream"] = new OpenApiMediaType
             {
-                Schema = new() { Type = "string", Format = "binary" }
+                Schema = new OpenApiSchema()
+                {
+#if NET10_0_OR_GREATER
+                    Type = JsonSchemaType.String,
+#else
+                    Type = "string",
+#endif    
+                    Format = "binary"
+                }
             };
         }
     }
@@ -163,21 +212,45 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
         var dataSources = declaredFor.ClassViewModel!.ClientDataSources(reflectionRepository);
 
         var dataSourceNameParam = operation.Parameters?.FirstOrDefault(p => p.Name == nameof(IDataSourceParameters.DataSource));
-        if (dataSourceNameParam is not null)
+        if (dataSourceNameParam is not null && operation.Parameters is not null)
         {
+            var enumValues = (new string[] { IntelliTect.Coalesce.Api.DataSources.DataSourceFactory.DefaultSourceName })
+                .Concat(dataSources.Select(ds => ds.ClientTypeName));
+
+#if NET10_0_OR_GREATER
+            // In OpenAPI.NET 2.0, Schema is read-only, so we need to create a new parameter
+            var newSchema = new OpenApiSchema
+            {
+                Type = JsonSchemaType.String,
+                Enum = enumValues.Select(n => JsonValue.Create(n) as JsonNode).ToList()
+            };
+
+            var newParam = new OpenApiParameter
+            {
+                Name = dataSourceNameParam.Name,
+                In = dataSourceNameParam.In,
+                Description = dataSourceNameParam.Description,
+                Required = dataSourceNameParam.Required,
+                Schema = newSchema
+            };
+
+            var index = operation.Parameters.IndexOf(dataSourceNameParam);
+            operation.Parameters.RemoveAt(index);
+            operation.Parameters.Insert(index, newParam);
+#else
             dataSourceNameParam.Schema = new OpenApiSchema
             {
                 Type = "string",
-                Enum = (new string[] { IntelliTect.Coalesce.Api.DataSources.DataSourceFactory.DefaultSourceName })
-                    .Concat(dataSources.Select(ds => ds.ClientTypeName))
+                Enum = enumValues
                     .Select(n => new OpenApiString(n) as IOpenApiAny)
                     .ToList()
             };
+#endif
 
             foreach (var param in dataSources.SelectMany(ds => ds.DataSourceParameters).GroupBy(ds => ds.Name))
             {
-                var openApiParam = operation.Parameters?.FirstOrDefault(p => 
-                    p.Name.Equals($"{dataSourceNameParam.Name}.{param.Key}", StringComparison.OrdinalIgnoreCase));
+                var openApiParam = operation.Parameters.FirstOrDefault(p =>
+                    p.Name?.Equals($"{dataSourceNameParam.Name}.{param.Key}", StringComparison.OrdinalIgnoreCase) == true);
 
                 if (openApiParam is not null)
                 {

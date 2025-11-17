@@ -34,10 +34,13 @@ internal class CoalesceApiDescriptionProvider(ReflectionRepository reflectionRep
             var method = new ReflectionMethodViewModel(methodInfo, cvm, cvm);
 
             ProcessStandardParameters(operation, method);
+#if !NET10_0_OR_GREATER
             FixEnumSerializationType(operation, method);
+#endif
         }
     }
 
+#if !NET10_0_OR_GREATER
     /// <summary>
     /// Workaround https://github.com/dotnet/aspnetcore/issues/61327 by correcting enum types from String
     /// to their underlying integral type. Coalesce also just generally only handles enums as numbers on the wire anyway,
@@ -57,6 +60,7 @@ internal class CoalesceApiDescriptionProvider(ReflectionRepository reflectionRep
             }
         }
     }
+#endif
 
     private void ProcessStandardParameters(ApiDescription operation, MethodViewModel method)
     {

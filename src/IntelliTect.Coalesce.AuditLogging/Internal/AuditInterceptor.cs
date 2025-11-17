@@ -309,20 +309,16 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
     }
 
     /// <summary>
-    /// Cache for stored procedure names. Size is limited in case there is an application whose Model
-    /// is not a singleton, e.g. dynamic model configuration for schema-based tenancy.
-    /// </summary>
-    private static readonly MemoryCache _storedProcedureCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000 });
-
-    /// <summary>
     /// Ensures the stored procedure exists and returns its name.
     /// </summary>
     private async ValueTask<string> EnsureStoredProcedureExists(DbContext db, string sql, bool async)
     {
+        var cacheKey = (db.Model, db.Database.GetConnectionString());
+
         var procedureName = GetStoredProcedureName(sql);
 
         // Check if we've already verified this procedure exists for this model
-        if (_storedProcedureCache.TryGetValue<string>(db.Model, out var cachedName) && cachedName == procedureName)
+        if (AuditOptions.StoredProcedureCache.TryGetValue<string>(cacheKey, out var cachedName) && cachedName == procedureName)
         {
             return procedureName;
         }
@@ -346,9 +342,9 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         }
 
         // Cache that we've verified this procedure exists with the correct content
-        _storedProcedureCache.Set(db.Model, procedureName, new MemoryCacheEntryOptions
+        AuditOptions.StoredProcedureCache.Set(cacheKey, procedureName, new MemoryCacheEntryOptions
         {
-            Size = procedureName.Length,
+            Size = procedureName.Length + cacheKey.Item2?.Length,
             AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1) // Re-verify after an hour
         });
 

@@ -1,12 +1,20 @@
 ﻿using IntelliTect.Coalesce.Models;
+#if NET10_0_OR_GREATER
+using Microsoft.OpenApi;
+#else
 using Microsoft.OpenApi.Models;
+#endif
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace IntelliTect.Coalesce.Swashbuckle;
 
 public class CoalesceApiSchemaFilter : ISchemaFilter
 {
+#if NET10_0_OR_GREATER
+    public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
+#else
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+#endif
     {
         if (context.Type.IsAssignableTo(typeof(ISparseDto)))
         {

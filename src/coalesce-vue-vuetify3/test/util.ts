@@ -10,7 +10,6 @@ import {
   VueWrapper,
   flushPromises,
 } from "@vue/test-utils";
-import { ArgumentsType } from "vitest";
 import {
   defineComponent,
   h,
@@ -28,6 +27,8 @@ import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import $metadata from "@test-targets/metadata.g";
+
+type ArgumentsType<T> = T extends (...args: infer U) => any ? U : never;
 
 // https://github.com/vuetifyjs/vuetify/issues/21692
 if (!globalThis.visualViewport) {

@@ -27,7 +27,7 @@
       "@vue/reactivity": ["node_modules/@vue/reactivity/dist/reactivity"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
-    "types": ["vue-router", "vuetify", "vitest/globals"]
+    "types": ["vue-router", "vuetify", "vitest/globals", "node"]
   },
   "include": [
     "src/**/*.ts",

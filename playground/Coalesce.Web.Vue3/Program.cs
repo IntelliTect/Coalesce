@@ -42,6 +42,7 @@ services.AddCoalesce<AppDbContext>(c => c.Configure(o =>
 }));
 services.AddScoped<Person.WithoutCases>();
 
+services.AddRazorPages();
 services.AddMvc();
 
 services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
@@ -102,6 +103,7 @@ app.UseViteStaticFiles();
 app.UseNoCacheResponseHeader();
 
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
+app.MapRazorPages();
 app.MapControllers();
 
 app.MapOpenApi();

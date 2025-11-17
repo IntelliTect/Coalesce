@@ -15,7 +15,6 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-
         IFileProvider provider = new PhysicalFileProvider(hostingEnvironment.WebRootPath);
         IFileInfo fileInfo = provider.GetFileInfo("index.html");
         if (!fileInfo.Exists)

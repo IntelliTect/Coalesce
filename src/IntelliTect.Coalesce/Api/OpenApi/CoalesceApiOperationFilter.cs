@@ -39,7 +39,7 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
             .ToLookup(d => (d.HttpMethod, d.RelativePath));
     }
 
-    public Task TransformAsync(
+    public async Task TransformAsync(
         OpenApiOperation operation,
         OpenApiOperationTransformerContext context,
         CancellationToken cancellationToken)
@@ -47,24 +47,22 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
         if (context.Description.ActionDescriptor is not ControllerActionDescriptor cad ||
             !cad.ControllerTypeInfo.IsAssignableTo(typeof(BaseApiController)))
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var methodInfo = cad.MethodInfo;
         var cvm = reflectionRepository.GetClassViewModel(methodInfo.DeclaringType!)!;
         var method = new ReflectionMethodViewModel(methodInfo, cvm, cvm);
 
-        AddOtherBodyTypes(operation, context);
+        await AddOtherBodyTypes(operation, context, cancellationToken);
         ProcessDataSources(operation, context, method);
         ProcessStandardParameters(operation, method);
-
-        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Workaround https://github.com/dotnet/aspnetcore/issues/58329
     /// </summary>
-    private async void AddOtherBodyTypes(OpenApiOperation operation, OpenApiOperationTransformerContext context)
+    private async Task AddOtherBodyTypes(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken ct)
     {
         Type? docServiceType = Type.GetType("Microsoft.AspNetCore.OpenApi.OpenApiDocumentService,Microsoft.AspNetCore.OpenApi");
         if (docServiceType is null) return;
@@ -77,6 +75,24 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
         foreach (var otherDescription in otherDescriptions)
         {
             object docService = context.ApplicationServices.GetRequiredKeyedService(docServiceType, context.DocumentName);
+#if NET10_0_OR_GREATER
+            // In .NET 10, GetRequestBodyAsync requires OpenApiDocument as the first parameter
+            var resultTask = docServiceType
+                .GetMethod("GetRequestBodyAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?
+                .Invoke(docService, [
+                    // OpenApiDocument document,
+                    context.Document,
+                    // ApiDescription description,
+                    otherDescription,
+                    // IServiceProvider scopedServiceProvider,
+                    context.ApplicationServices,
+                    // IOpenApiSchemaTransformer[] schemaTransformers,
+                    // TODO: Too hard to acquire schema transformers here.
+                    Array.Empty<IOpenApiSchemaTransformer>(),
+                    // CancellationToken cancellationToken
+                    ct
+                ]) as Task<OpenApiRequestBody>;
+#else
             var resultTask = docServiceType
                 .GetMethod("GetRequestBodyAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?
                 .Invoke(docService, [
@@ -88,8 +104,9 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
                     // TODO: Too hard to acquire schema transformers here.
                     Array.Empty<IOpenApiSchemaTransformer>(),
                     // CancellationToken cancellationToken
-                    CancellationToken.None
+                    ct
                 ]) as Task<OpenApiRequestBody>;
+#endif
 
             if (resultTask is null) continue;
 

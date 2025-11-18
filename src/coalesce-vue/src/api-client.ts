@@ -1394,12 +1394,26 @@ export abstract class ApiState<
     this.__isLoading.value = v;
   }
 
+  /**
+   * @internal
+   * Whether the endpoint has ever successfully loaded.
+   * This is internal state because we don't want to confuse users into using it incorrectly
+   * (it's somewhat similar to wasSuccessful and hasResult)
+   * Could expose if there's a compelling argument for doing so.
+   */
+  _hasLoaded = ref(false);
+
   private readonly __wasSuccessful = ref<boolean | null>(null);
   /** True if the previous request was successful. */
   get wasSuccessful() {
     return this.__wasSuccessful.value;
   }
   set wasSuccessful(v) {
+    if (v === null) {
+      this._hasLoaded.value = false;
+    } else if (v) {
+      this._hasLoaded.value = true;
+    }
     this.__wasSuccessful.value = v;
   }
 

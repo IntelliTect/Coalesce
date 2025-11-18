@@ -175,7 +175,7 @@ The available flags are as follows, all of which default to `true` except for `s
 | - | - |
 | `no-loading-content` | Controls whether the default slot is rendered while any API caller is loading (i.e. when  `caller.isLoading === true`). |
 | `no-error-content` | Controls whether the default slot is rendered while any API Caller is in an error state (i.e. when  `caller.wasSuccessful === false`). |
-| `no-initial-content` | Controls whether the default slot is rendered while any API Caller has yet to receive a response for the first time (i.e. when `caller.wasSuccessful === null`). |
+| `no-initial-content` | Controls whether the default slot is rendered while any API Caller has yet to receive a successful response for the first time. |
 | `no-progress` | Master toggle for whether the progress indicator is shown in any scenario. |
 | `no-initial-progress` | Controls whether the progress indicator is shown when an API Caller is loading for the very first time (i.e. when  `caller.wasSuccessful === null`). |
 | `no-secondary-progress` | Controls whether the progress indicator is shown when an API Caller is loading any time after its first invocation (i.e. when  `caller.wasSuccessful !== null`). |

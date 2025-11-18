@@ -341,10 +341,7 @@ const showContent = computed(() => {
       // initial content is off, and either:
       !flags["initial-content"] &&
       // loader has not yet loaded
-      (loader.wasSuccessful == null ||
-        // or loader has loaded, but it errored and there's no current result
-        // (implying it has never successfully loaded).
-        (loader.wasSuccessful === false && !loader.hasResult))
+      !loader._hasLoaded.value
     ) {
       return false;
     }

@@ -1,4 +1,4 @@
-import { mountApp } from "@test/util";
+import { mountApp, mockEndpoint, flushPromises } from "@test/util";
 import CLS from "./c-loader-status.vue";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 
@@ -143,5 +143,63 @@ describe("CLoaderStatus", () => {
 
     // Verify the default "Success" message is displayed
     expect(wrapper.text()).toContain("Success");
+  });
+
+  test("void-returning endpoint with no-initial-content shows content after success then failure", async () => {
+    // This tests the fix for void-returning endpoints where hasResult should be true
+    // when the endpoint succeeds, even though result is null.
+    const vm = new ComplexModelViewModel();
+    vm.$primaryKey = 1;
+    const voidCaller = vm.methodWithOptionalEnumParam;
+
+    const mockSuccess = mockEndpoint(
+      vm.$metadata.methods.methodWithOptionalEnumParam,
+      () => ({
+        wasSuccessful: true,
+        // Void endpoints don't have an 'object' property in the response
+      }),
+    );
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={voidCaller} no-initial-content>
+        <div>Content</div>
+      </CLS>
+    ));
+
+    // Initially, content should be hidden (wasSuccessful is null)
+    expect(wrapper.text()).not.toContain("Content");
+
+    // Call the void endpoint successfully
+    await voidCaller();
+    await flushPromises();
+
+    // After success, content should be visible
+    expect(voidCaller.wasSuccessful).toBe(true);
+    expect(voidCaller.result).toBeNull();
+    expect(voidCaller._hasLoaded.value).toBe(true);
+    expect(wrapper.text()).toContain("Content");
+
+    mockSuccess.destroy();
+
+    // Now mock a failure
+    const mockFailure = mockEndpoint(
+      vm.$metadata.methods.methodWithOptionalEnumParam,
+      () => ({
+        wasSuccessful: false,
+        message: "Error occurred",
+      }),
+    );
+
+    // Call the endpoint again, this time it fails
+    await expect(voidCaller()).rejects.toThrow();
+    await flushPromises();
+
+    // Content should still be visible because hasLoaded is true
+    // (the endpoint has successfully loaded before, even though this call failed)
+    expect(voidCaller.wasSuccessful).toBe(false);
+    expect(voidCaller._hasLoaded.value).toBe(true);
+    expect(wrapper.text()).toContain("Content");
+
+    mockFailure.destroy();
   });
 });

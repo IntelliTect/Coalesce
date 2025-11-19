@@ -216,7 +216,7 @@ A message from the last response. Typically an error message if the last request
 readonly hasResult: boolean
 ```
 
-True if `result` is non-null. This prop can be useful in niche, performance-critical scenarios where checking `result` directly will cause an overabundance of re-renders in high-churn scenarios.
+True if `result` is non-null. This is also true for void-returning endpoints that were successful.
 
 ### args {#args}
 

@@ -2564,6 +2564,37 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    returnsListResult: {
+      name: "returnsListResult",
+      displayName: "Returns List Result",
+      transportType: "list",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "collection",
+        itemType: {
+          name: "$collectionItem",
+          displayName: "",
+          role: "value",
+          type: "model",
+          get typeDef() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }) },
+        },
+        role: "value",
+      },
+    },
     methodWithOptionalCancellationToken: {
       name: "methodWithOptionalCancellationToken",
       displayName: "Method With Optional Cancellation Token",

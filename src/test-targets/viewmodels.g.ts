@@ -706,6 +706,17 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return downloadAttachmentItemResult
   }
   
+  public get returnsListResult() {
+    const returnsListResult = this.$apiClient.$makeCaller(
+      this.$metadata.methods.returnsListResult,
+      (c) => c.returnsListResult(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.returnsListResult(this.$primaryKey))
+    
+    Object.defineProperty(this, 'returnsListResult', {value: returnsListResult});
+    return returnsListResult
+  }
+  
   public get methodWithOptionalCancellationToken() {
     const methodWithOptionalCancellationToken = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOptionalCancellationToken,

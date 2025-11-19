@@ -339,6 +339,12 @@ public class ComplexModel
         return new File(new byte[] { 0x42 }) { Name = "42.png" };
     }
 
+    [Coalesce]
+    public ListResult<ComplexModel> ReturnsListResult()
+    {
+        return new();
+    }
+
     [ControllerAction(Method = HttpMethod.Get)]
     [Coalesce]
     [SemanticKernel("MethodWithOptionalCancellationToken")]

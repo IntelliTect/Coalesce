@@ -1394,26 +1394,12 @@ export abstract class ApiState<
     this.__isLoading.value = v;
   }
 
-  /**
-   * @internal
-   * Whether the endpoint has ever successfully loaded.
-   * This is internal state because we don't want to confuse users into using it incorrectly
-   * (it's somewhat similar to wasSuccessful and hasResult)
-   * Could expose if there's a compelling argument for doing so.
-   */
-  _hasLoaded = ref(false);
-
   private readonly __wasSuccessful = ref<boolean | null>(null);
   /** True if the previous request was successful. */
   get wasSuccessful() {
     return this.__wasSuccessful.value;
   }
   set wasSuccessful(v) {
-    if (v === null) {
-      this._hasLoaded.value = false;
-    } else if (v) {
-      this._hasLoaded.value = true;
-    }
     this.__wasSuccessful.value = v;
   }
 
@@ -1454,7 +1440,6 @@ export abstract class ApiState<
   public reset() {
     if (this.isLoading)
       throw new Error("Cannot reset while a request is pending.");
-    this.hasResult = false;
     this.result = null;
     this.wasSuccessful = null;
     this.message = null;
@@ -1963,7 +1948,11 @@ export class ItemApiState<
   }
   set result(v) {
     this.__result.value = v;
-    this.hasResult = v != null;
+    if (this.$metadata?.return.type == "void") {
+      this.hasResult = !!this.wasSuccessful;
+    } else {
+      this.hasResult = v != null;
+    }
   }
 
   override get rawResponse() {
@@ -2064,7 +2053,6 @@ export class ItemApiState<
     } else {
       this.result = null;
     }
-    this.hasResult = this.result != null;
   }
 }
 
@@ -2208,6 +2196,7 @@ export class ListApiState<
   }
   set result(v) {
     this.__result.value = v;
+    this.hasResult = v != null;
   }
 
   override get rawResponse() {
@@ -2248,7 +2237,6 @@ export class ListApiState<
     } else {
       this.result = null;
     }
-    this.hasResult = this.result != null;
   }
 }
 

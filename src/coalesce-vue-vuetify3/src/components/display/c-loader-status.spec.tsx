@@ -1,6 +1,7 @@
 import { mountApp, mockEndpoint, flushPromises } from "@test/util";
 import CLS from "./c-loader-status.vue";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
+import { AxiosError } from "axios";
 
 describe("CLoaderStatus", () => {
   const vm = new ComplexModelViewModel();
@@ -145,61 +146,152 @@ describe("CLoaderStatus", () => {
     expect(wrapper.text()).toContain("Success");
   });
 
-  test("void-returning endpoint with no-initial-content shows content after success then failure", async () => {
-    // This tests the fix for void-returning endpoints where hasResult should be true
-    // when the endpoint succeeds, even though result is null.
-    const vm = new ComplexModelViewModel();
-    vm.$primaryKey = 1;
-    const voidCaller = vm.methodWithOptionalEnumParam;
-
-    const mockSuccess = mockEndpoint(
-      vm.$metadata.methods.methodWithOptionalEnumParam,
-      () => ({
+  const endpoints = [
+    {
+      name: "void-returning",
+      methodName: "methodWithOptionalEnumParam" as const,
+      mockSuccessResponse: () => ({
         wasSuccessful: true,
         // Void endpoints don't have an 'object' property in the response
       }),
-    );
-
-    const wrapper = mountApp(() => (
-      <CLS loaders={voidCaller} no-initial-content>
-        <div>Content</div>
-      </CLS>
-    ));
-
-    // Initially, content should be hidden (wasSuccessful is null)
-    expect(wrapper.text()).not.toContain("Content");
-
-    // Call the void endpoint successfully
-    await voidCaller();
-    await flushPromises();
-
-    // After success, content should be visible
-    expect(voidCaller.wasSuccessful).toBe(true);
-    expect(voidCaller.result).toBeNull();
-    expect(voidCaller._hasLoaded.value).toBe(true);
-    expect(wrapper.text()).toContain("Content");
-
-    mockSuccess.destroy();
-
-    // Now mock a failure
-    const mockFailure = mockEndpoint(
-      vm.$metadata.methods.methodWithOptionalEnumParam,
-      () => ({
-        wasSuccessful: false,
-        message: "Error occurred",
+    },
+    {
+      name: "string-returning",
+      methodName: "methodWithOptionalParams" as const,
+      mockSuccessResponse: () => ({
+        wasSuccessful: true,
+        object: "test string result",
       }),
-    );
+    },
+    {
+      name: "object-returning",
+      methodName: "methodWithManyParams" as const,
+      mockSuccessResponse: () => ({
+        wasSuccessful: true,
+        object: { externalParentId: 42, name: "Test Parent" },
+      }),
+    },
+    {
+      name: "ListResult-returning",
+      methodName: "returnsListResult" as const,
+      mockSuccessResponse: () => ({
+        wasSuccessful: true,
+        list: [],
+      }),
+    },
+  ] as const;
 
-    // Call the endpoint again, this time it fails
-    await expect(voidCaller()).rejects.toThrow();
-    await flushPromises();
+  describe.each(endpoints)(
+    "$name endpoint",
+    function ({ methodName, mockSuccessResponse }) {
+      test("no-initial-content shows content after success then Network Error", async () => {
+        // This tests that hasResult is properly set when an endpoint succeeds,
+        // regardless of the return type (void, primitive, object, ItemResult).
+        const vm = new ComplexModelViewModel();
+        vm.$primaryKey = 1;
+        const caller = vm[methodName];
 
-    // Content should still be visible because hasLoaded is true
-    // (the endpoint has successfully loaded before, even though this call failed)
-    expect(voidCaller.wasSuccessful).toBe(false);
-    expect(voidCaller._hasLoaded.value).toBe(true);
-    expect(wrapper.text()).toContain("Content");
+        const mockSuccess = mockEndpoint(
+          vm.$metadata.methods[methodName],
+          mockSuccessResponse,
+        );
 
-    mockFailure.destroy();
-  });
+        const wrapper = mountApp(() => (
+          <CLS loaders={caller} no-initial-content>
+            <div>Content</div>
+          </CLS>
+        ));
+
+        // Initially, content should be hidden (wasSuccessful is null)
+        expect(wrapper.text()).not.toContain("Content");
+
+        // Call the endpoint successfully
+        await caller();
+        await flushPromises();
+
+        // After success, content should be visible
+        expect(caller.wasSuccessful).toBe(true);
+        expect(caller.hasResult).toBe(true);
+        expect(wrapper.text()).toContain("Content");
+
+        mockSuccess.destroy();
+
+        // Now mock a failure
+        const mockFailure = mockEndpoint(
+          vm.$metadata.methods[methodName],
+          () => {
+            throw new AxiosError("Network Error");
+          },
+        );
+
+        // Call the endpoint again, this time it fails
+        await expect(caller()).rejects.toThrow();
+        await flushPromises();
+
+        // Content should still be visible because Network errors do not wipe a caller's result.
+        // This is tested for because its how Coalesce has always worked,
+        // and would cause all kinds of subtile behavior changes if it ever stopped doing that.
+        expect(caller.wasSuccessful).toBe(false);
+        expect(caller.hasResult).toBe(true);
+        expect(wrapper.text()).toContain("Content");
+
+        mockFailure.destroy();
+      });
+
+      test("no-initial-content hides content after explicit failure", async () => {
+        // This tests that hasResult is properly set when an endpoint succeeds,
+        // regardless of the return type (void, primitive, object, ItemResult).
+        const vm = new ComplexModelViewModel();
+        vm.$primaryKey = 1;
+        const caller = vm[methodName];
+
+        const mockSuccess = mockEndpoint(
+          vm.$metadata.methods[methodName],
+          mockSuccessResponse,
+        );
+
+        const wrapper = mountApp(() => (
+          <CLS loaders={caller} no-initial-content>
+            <div>Content</div>
+          </CLS>
+        ));
+
+        // Initially, content should be hidden (wasSuccessful is null)
+        expect(wrapper.text()).not.toContain("Content");
+
+        // Call the endpoint successfully
+        await caller();
+        await flushPromises();
+
+        // After success, content should be visible
+        expect(caller.wasSuccessful).toBe(true);
+        expect(caller.hasResult).toBe(true);
+        expect(wrapper.text()).toContain("Content");
+
+        mockSuccess.destroy();
+
+        // Now mock a failure
+        const mockFailure = mockEndpoint(
+          vm.$metadata.methods[methodName],
+          () => ({
+            wasSuccessful: false,
+            message: "Explicit failure",
+          }),
+        );
+
+        // Call the endpoint again, this time it fails
+        await expect(caller()).rejects.toThrow();
+        await flushPromises();
+
+        // Since no-initial-status is based on `hasResult`,
+        // and our result has been wiped by an explicit server error, the content should hide.
+        expect(caller.wasSuccessful).toBe(false);
+        expect(caller.hasResult).toBe(false);
+        expect(caller.result).toBeFalsy();
+        expect(wrapper.text()).not.toContain("Content");
+
+        mockFailure.destroy();
+      });
+    },
+  );
 });

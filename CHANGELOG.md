@@ -1,6 +1,6 @@
 # 6.1.0
 - Added support for .NET 10
-- `c-loader-status`: The `initial-content` flag now behaves more consistently. A loader is now considered to have initial content if it has ever successfully invoked. Previously, some types of failures (e.g. network errors) would not clear this state, but other kinds of failures (explicit server error responses) did clear this state. If errors should result in hidden content, the `no-error-content` flag should be used.
+- API Callers now set `hasResult = true` for void-returning endpoints that have successfully loaded. This means that the `no-initial-content` flag on `c-loader-status` works as expected for void-returning endpoints.
 
 # 6.0.4
 - AuditLogging: Stored procedure cache was not being correctly persisted to avoid redundant `SELECT OBJECT_DEFINITION` queries.

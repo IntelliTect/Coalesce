@@ -426,6 +426,15 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
   }
   
   
+  public returnsListResult(id: number | null, $config?: AxiosRequestConfig): AxiosPromise<ListResult<$models.ComplexModel>> {
+    const $method = this.$metadata.methods.returnsListResult
+    const $params =  {
+      id,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
   public methodWithOptionalCancellationToken(id: number | null, q?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.methodWithOptionalCancellationToken
     const $params =  {

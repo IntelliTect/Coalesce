@@ -1,3 +1,6 @@
+# 6.1.1
+- Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.
+
 # 6.1.0
 - Added support for .NET 10
 - API Callers now set `hasResult = true` for void-returning endpoints that have successfully loaded. This means that the `no-initial-content` flag on `c-loader-status` works as expected for void-returning endpoints.

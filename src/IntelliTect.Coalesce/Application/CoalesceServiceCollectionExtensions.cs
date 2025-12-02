@@ -144,8 +144,8 @@ public static class CoalesceServiceCollectionExtensions
             var actionDescriptor = endpoint?.Metadata.GetMetadata<ActionDescriptor>();
 
             var factory = x.GetRequiredService<IUrlHelperFactory>();
-            return factory.GetUrlHelper(httpContext is not null && actionDescriptor is not null
-                ? new ActionContext(httpContext, httpContext.GetRouteData(), actionDescriptor)
+            return factory.GetUrlHelper(httpContext is not null
+                ? new ActionContext(httpContext, httpContext.GetRouteData(), actionDescriptor ?? new())
                 : new());
         });
 #else

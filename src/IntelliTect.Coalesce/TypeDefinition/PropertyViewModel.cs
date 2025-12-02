@@ -224,6 +224,7 @@ public abstract class PropertyViewModel : ValueViewModel
     /// <summary>
     /// True if the property has the DateType(DateOnly) Attribute.
     /// </summary>
+    [Obsolete("Documentation comment does not match behavior. Use `DateType` directly.")]
     public bool IsDateOnly => DateType == DateTypeAttribute.DateTypes.DateOnly;
 
     /// <summary>

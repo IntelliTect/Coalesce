@@ -112,6 +112,15 @@ public abstract class QueryableDataSourceBase<T>
                 return query.Where(_ => false);
             }
 
+            // Handle DateOnly separately since it can't cast from DateTime
+            if (propType.NullableValueUnderlyingType.IsA<DateOnly>() && DateOnly.TryParse(value, out DateOnly parsedDateOnly))
+            {
+                var dateParam = parsedDateOnly.AsQueryParam(propType);
+                return query.WhereExpression(it =>
+                    Expression.Equal(it.Prop(prop), dateParam)
+                );
+            }
+
             // See if they just passed in a date or a date and a time
             if (DateTime.TryParse(value, out DateTime parsedValue))
             {

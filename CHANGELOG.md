@@ -1,5 +1,6 @@
 # 6.1.1
 - Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.
+- Fix errors thrown when filtering and searching on `System.DateOnly` properties.
 
 # 6.1.0
 - Added support for .NET 10

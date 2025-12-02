@@ -192,6 +192,33 @@ public class StandardDataSourceTests : TestDbContextFixture
         Assert.Equal(shouldMatch ? 1 : 0, query.Count());
     }
 
+    public static IEnumerable<object[]> Filter_MatchesDateOnlyData = new[]
+    {
+        new object[] { true, "2017-08-02", new DateOnly(2017, 08, 02) },
+        new object[] { false, "2017-08-02", new DateOnly(2017, 08, 03) },
+        new object[] { false, "2017-08-02", new DateOnly(2017, 08, 01) },
+
+        new object[] { true, "2017-08-02T12:34:56", new DateOnly(2017, 08, 02) },
+        new object[] { false, "2017-08-02T12:34:56", new DateOnly(2017, 08, 03) },
+
+        new object[] { false, "can't parse", new DateOnly(2017, 08, 02) },
+        
+        // Null or empty inputs always do nothing - these will always match.
+        new object[] { true, "", new DateOnly(2017, 08, 02) },
+        new object[] { true, null, new DateOnly(2017, 08, 02) },
+    };
+
+    [Theory]
+    [MemberData(nameof(Filter_MatchesDateOnlyData))]
+    public void ApplyListPropertyFilter_WhenPropIsDateOnly_FiltersProp(
+        bool shouldMatch, string inputValue, DateOnly fieldValue)
+    {
+        var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateOnly>(
+            m => m.SystemDateOnly, fieldValue, inputValue);
+
+        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+    }
+
 
     public static IEnumerable<object[]> Filter_MatchesDateTimeOffsetsData = new[]
     {

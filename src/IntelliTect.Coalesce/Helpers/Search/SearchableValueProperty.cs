@@ -19,10 +19,10 @@ public class SearchableValueProperty : SearchableProperty
     public enum ParseFlags
     {
         None = 0,
-        HaveYear   = 1 << 0,
-        HaveMonth  = 1 << 1,
-        HaveDay    = 1 << 2,
-        HaveHour   = 1 << 3,
+        HaveYear = 1 << 0,
+        HaveMonth = 1 << 1,
+        HaveDay = 1 << 2,
+        HaveHour = 1 << 3,
         HaveMinute = 1 << 4,
         HaveSecond = 1 << 5,
 
@@ -143,6 +143,12 @@ public class SearchableValueProperty : SearchableProperty
 
                     min = offset.AsQueryParam(propType);
                     max = offset.Add(range.Value).AsQueryParam(propType);
+                }
+                else if (propType.NullableValueUnderlyingType.IsA<DateOnly>())
+                {
+                    var dateOnly = new DateOnly(dt.Year, dt.Month, dt.Day);
+                    min = dateOnly.AsQueryParam(propType);
+                    max = dateOnly.AddDays((int)range.Value.TotalDays).AsQueryParam(propType);
                 }
                 else
                 {

@@ -99,6 +99,34 @@ public class SearchTests
             TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(new Random().Next(-11, 12)), "test", "test"));
     }
 
+    public static IEnumerable<object[]> Search_MatchesDateOnlyData = new[]
+    {
+        new object[] { true, "2017", new DateOnly(2017, 08, 15) },
+        new object[] { false, "2018", new DateOnly(2017, 08, 15) },
+        new object[] { true, "2017-08", new DateOnly(2017, 08, 01) },
+        new object[] { true, "2017-08", new DateOnly(2017, 08, 15) },
+        new object[] { false, "2017-08", new DateOnly(2017, 07, 31) },
+        new object[] { false, "2017-08", new DateOnly(2017, 09, 01) },
+        new object[] { false, "2018-08", new DateOnly(2017, 08, 15) },
+
+        new object[] { true, "Nov 6 17", new DateOnly(2017, 11, 06) },
+        new object[] { true, "Nov 6, 2017", new DateOnly(2017, 11, 06) },
+        new object[] { true, "6 November 2017", new DateOnly(2017, 11, 06) },
+        new object[] { true, "6 Nov 2017", new DateOnly(2017, 11, 06) },
+        new object[] { true, "6 Nov 17", new DateOnly(2017, 11, 06) },
+    };
+
+    [Theory]
+    [MemberData(nameof(Search_MatchesDateOnlyData))]
+    public void Search_DateOnly_SearchesCorrectly(bool expectedMatch, string searchTerm, DateOnly searchCandidate)
+    {
+        SearchHelper(
+            (ComplexModel t) => t.SystemDateOnly,
+            "systemdateonly:" + searchTerm,
+            searchCandidate,
+            expectedMatch);
+    }
+
     [Theory]
     [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6")]
     [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "fafab015-ffa4-41f8-b4dd-c15eb0ce40b6")]

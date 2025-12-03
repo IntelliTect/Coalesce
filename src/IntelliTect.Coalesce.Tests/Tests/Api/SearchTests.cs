@@ -103,6 +103,8 @@ public class SearchTests
     {
         new object[] { true, "2017", new DateOnly(2017, 08, 15) },
         new object[] { false, "2018", new DateOnly(2017, 08, 15) },
+        new object[] { false, "2018", new DateOnly(2017, 12, 31) },
+        new object[] { false, "2018", new DateOnly(2019, 1, 1) },
         new object[] { true, "2017-08", new DateOnly(2017, 08, 01) },
         new object[] { true, "2017-08", new DateOnly(2017, 08, 15) },
         new object[] { false, "2017-08", new DateOnly(2017, 07, 31) },

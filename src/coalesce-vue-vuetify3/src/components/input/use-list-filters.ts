@@ -1,5 +1,7 @@
 import { computed, Ref } from "vue";
 import {
+  mapToDto,
+  ModelReferenceNavigationProperty,
   parseValue,
   type ListViewModel,
   type ModelType,
@@ -8,6 +10,8 @@ import {
 
 export interface FilterInfo {
   key: string;
+  selectFor: ModelType | ModelReferenceNavigationProperty | null;
+  selectForMultiple: boolean;
   displayName: string;
   isDefined: boolean;
   isActive: boolean;
@@ -60,7 +64,7 @@ export function useListFilters(list: Ref<ListViewModel | undefined | null>) {
               type: "collection",
               itemType: propMeta,
             } as any;
-          } else if (propMeta?.type == "date") {
+          } else if (propMeta?.type == "date" && propMeta.role == "value") {
             // We don't use dates as datepickers at the moment
             // because date filter behavior uses complex filtering that allows
             // a time to either be included or excluded, which can't be done with a picker.
@@ -77,18 +81,55 @@ export function useListFilters(list: Ref<ListViewModel | undefined | null>) {
           } as any;
         }
 
+        const selectFor = !propMeta
+          ? null
+          : propMeta.role == "primaryKey"
+            ? meta
+            : propMeta.role == "referenceNavigation"
+              ? propMeta
+              : propMeta.role == "foreignKey"
+                ? (propMeta.navigationProp ?? propMeta.principalType)
+                : null;
+
+        const selectForMultiple =
+          !!selectFor &&
+          // Multiple disabled in string keys for now because commas are ambiguous.
+          // Is this restriction not useful since real world keys are unlikely to contain commas?
+          propMeta.type != "string" &&
+          // For dates, only System.DateOnly supports CSV on the backend.
+          // This check isn't perfect because of DateKindAttribute, but its close enough.
+          !(propMeta.type == "date" && propMeta.dateKind != "date");
+
         return {
           key,
+          selectFor,
+          selectForMultiple,
           get value() {
             if (propMeta) {
+              if (selectForMultiple && typeof value == "string") {
+                return value
+                  .split(",")
+                  .filter((x) => x)
+                  .map((v) => parseValue(v, propMeta));
+              }
               return parseValue(value, propMeta) as any;
             }
             return filter[key];
           },
           set value(value) {
+            if (selectFor && value) {
+              // If this is a key-like value, it could be a date, which requires correct mapping.
+              if (Array.isArray(value)) {
+                value = value.map((v) => mapToDto(v, propMeta));
+              } else {
+                value = mapToDto(value, propMeta);
+              }
+            }
+
             if (Array.isArray(value)) {
               value = value.join(",");
             }
+
             (listValue.$params.filter ??= {})[key] = value;
           },
           propMeta,

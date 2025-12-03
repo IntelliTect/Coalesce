@@ -1,6 +1,8 @@
 # 6.1.1
 - Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.
 - Fix errors thrown when filtering and searching on `System.DateOnly` properties.
+- `c-select` now properly performs key equality operations on date primary keys.
+- `c-list-filters` now properly handles filtering by date foreign keys.
 
 # 6.1.0
 - Added support for .NET 10

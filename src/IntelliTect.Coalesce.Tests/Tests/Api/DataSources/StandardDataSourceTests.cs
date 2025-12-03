@@ -219,6 +219,30 @@ public class StandardDataSourceTests : TestDbContextFixture
         Assert.Equal(shouldMatch ? 1 : 0, query.Count());
     }
 
+    public static IEnumerable<object[]> Filter_MatchesTimeOnlyData = new[]
+    {
+        new object[] { true, "12:34:56", new TimeOnly(12, 34, 56) },
+        new object[] { true, "12:34", new TimeOnly(12, 34, 00) },
+        new object[] { false, "12:34:56", new TimeOnly(12, 34, 55) },
+        new object[] { false, "12:34:56", new TimeOnly(12, 34, 57) },
+        new object[] { false, "can't parse", new TimeOnly(12, 34, 56) },
+        
+        // Null or empty inputs always do nothing - these will always match.
+        new object[] { true, "", new TimeOnly(12, 34, 56) },
+        new object[] { true, null, new TimeOnly(12, 34, 56) },
+    };
+
+    [Theory]
+    [MemberData(nameof(Filter_MatchesTimeOnlyData))]
+    public void ApplyListPropertyFilter_WhenPropIsTimeOnly_FiltersProp(
+        bool shouldMatch, string inputValue, TimeOnly fieldValue)
+    {
+        var (prop, query) = PropertyFiltersTestHelper<ComplexModel, TimeOnly>(
+            m => m.SystemTimeOnly, fieldValue, inputValue);
+
+        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+    }
+
 
     public static IEnumerable<object[]> Filter_MatchesDateTimeOffsetsData = new[]
     {

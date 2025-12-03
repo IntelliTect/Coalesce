@@ -97,7 +97,9 @@ public abstract class QueryableDataSourceBase<T>
         }
 
         TypeViewModel propType = prop.Type;
-        if (propType.IsDate)
+        if (propType.IsDate &&
+            // DateOnly is handled by the fallback case
+            !propType.NullableValueUnderlyingType.IsA<DateOnly>())
         {
             // Literal string "null" should match null values if the prop is nullable.
             if (value.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
@@ -110,15 +112,6 @@ public abstract class QueryableDataSourceBase<T>
                 }
 
                 return query.Where(_ => false);
-            }
-
-            // Handle DateOnly separately since it can't cast from DateTime
-            if (propType.NullableValueUnderlyingType.IsA<DateOnly>() && DateOnly.TryParse(value, out DateOnly parsedDateOnly))
-            {
-                var dateParam = parsedDateOnly.AsQueryParam(propType);
-                return query.WhereExpression(it =>
-                    Expression.Equal(it.Prop(prop), dateParam)
-                );
             }
 
             // See if they just passed in a date or a date and a time

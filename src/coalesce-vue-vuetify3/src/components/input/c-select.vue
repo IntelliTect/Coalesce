@@ -559,14 +559,23 @@ const pendingSearchSelect = ref(false);
 
 /** The models representing the current selected item(s)
  * in the case that only the PK was provided to the component.
+ * Uses normalized keys to handle Date objects.
  */
 const internallyFetchedModels = new Map<
-  SelectedPkTypeSingle,
+  any,
   WeakRef<SelectedModelTypeSingle>
 >();
 
 function toArray<T>(x: T | T[] | null | undefined) {
   return Array.isArray(x) ? x : x == null ? [] : [x];
+}
+
+/** Normalizes a key value for use in equality comparisons.
+ * Converts Date objects to ISO strings to enable proper equality checks.
+ */
+function normalizeKey(key: any): any {
+  if (key instanceof Date) return key.toISOString();
+  return key;
 }
 
 /** The effective clearability state of the dropdown. */
@@ -697,7 +706,8 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
     // Storing this object prevents it from flipping between different instances
     // obtained from either getCaller or listCaller,
     // which causes vuetify to reset its search when the object passed to v-select's `modelValue` prop changes.
-    const keyFetchedModel = internallyFetchedModels.get(key)?.deref();
+    const normalizedKey = normalizeKey(key);
+    const keyFetchedModel = internallyFetchedModels.get(normalizedKey)?.deref();
     if (keyFetchedModel) {
       ret.push(keyFetchedModel);
       continue;
@@ -705,21 +715,23 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
 
     // All we have is the PK. First, check if it is already in our item array.
     // If so, capture it. If not, request the object from the server.
-    const item = items.value.filter(
-      (i) => key === i[modelObjectMeta.value.keyProp.name],
-    )[0];
+    const item = items.value.find(
+      (i) =>
+        normalizeKey(i[modelObjectMeta.value.keyProp.name]) === normalizedKey,
+    );
     if (item) {
-      internallyFetchedModels.set(key, new WeakRef(item));
+      internallyFetchedModels.set(normalizedKey, new WeakRef(item));
       ret.push(item);
       continue;
     }
 
     // See if we obtained the item via getCaller.
     const singleItem = getCaller.result?.find(
-      (x) => key === x[modelObjectMeta.value.keyProp.name],
+      (x) =>
+        normalizeKey(x[modelObjectMeta.value.keyProp.name]) === normalizedKey,
     );
     if (singleItem) {
-      internallyFetchedModels.set(key, new WeakRef(singleItem));
+      internallyFetchedModels.set(normalizedKey, new WeakRef(singleItem));
       ret.push(singleItem);
       continue;
     }
@@ -730,7 +742,12 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
   if (
     !listCaller.isLoading &&
     !getCaller.isLoading &&
-    needsLoad.some((needed) => !getCaller.args.ids.includes(needed))
+    needsLoad.some(
+      (needed) =>
+        !getCaller.args.ids.some(
+          (id) => normalizeKey(id) === normalizeKey(needed),
+        ),
+    )
   ) {
     // Only request the item if the list isn't currently loading,
     // since the item may end up coming back from a pending list call.
@@ -762,12 +779,15 @@ const internalKeyValue = computed((): SelectedPkTypeSingle[] => {
   return value.map((v) => mapValueToModel(v, modelObjectMeta.value.keyProp));
 });
 
+/** A Set of normalized primary keys representing all currently selected items.
+ * Keys are normalized via `normalizeKey()` to handle Date objects and ensure proper equality comparisons.
+ */
 const selectedKeysSet = computed(
   (): Set<any> =>
     new Set([
-      ...internalKeyValue.value,
-      ...internalModelValue.value.map(
-        (x) => x[modelObjectMeta.value.keyProp.name],
+      ...internalKeyValue.value.map(normalizeKey),
+      ...internalModelValue.value.map((x) =>
+        normalizeKey(x[modelObjectMeta.value.keyProp.name]),
       ),
     ]),
 );
@@ -818,7 +838,7 @@ const listItems = computed(() => {
   return items.value.map((item) => ({
     model: item,
     key: item[pkName],
-    selected: selectedKeysSet.value.has(item[pkName]),
+    selected: selectedKeysSet.value.has(normalizeKey(item[pkName])),
   }));
 });
 
@@ -971,18 +991,21 @@ function onInput(
       const selectedModels = [...internalModelValue.value];
 
       if (key != null) {
-        const idx = selectedKeys.indexOf(key);
+        const normalizedKey = normalizeKey(key);
+        const idx = selectedKeys.indexOf(normalizedKey);
         if (idx === -1) {
           const newValue = convertValue(value)!;
 
-          selectedKeys.push(key);
+          selectedKeys.push(normalizedKey);
           selectedModels.push(newValue);
-          internallyFetchedModels.set(key, new WeakRef(newValue));
+          internallyFetchedModels.set(normalizedKey, new WeakRef(newValue));
           selectionChanged([newValue], true);
         } else {
           if (!props.canDeselect) return;
           selectedKeys.splice(idx, 1);
-          const modelIdx = selectedModels.findIndex((x) => x[pkName] == key);
+          const modelIdx = selectedModels.findIndex(
+            (x) => normalizeKey(x[pkName]) === normalizedKey,
+          );
           if (modelIdx !== -1) {
             value = selectedModels[modelIdx] ?? value;
             selectedModels.splice(idx, 1);
@@ -1014,8 +1037,8 @@ function onInput(
     const newValue = convertValue(value);
     newObjectValue = newValue;
     newKey = key;
-    if (newValue) {
-      internallyFetchedModels.set(key, new WeakRef(newValue));
+    if (newValue && key != null) {
+      internallyFetchedModels.set(normalizeKey(key), new WeakRef(newValue));
     }
   }
 

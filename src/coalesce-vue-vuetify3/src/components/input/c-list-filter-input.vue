@@ -54,23 +54,11 @@
 
       <!-- Foreign key / primary key / reference navigation dropdown -->
       <c-select
-        v-else-if="
-          filter.propMeta &&
-          (filter.propMeta.role == 'foreignKey' ||
-            filter.propMeta.role == 'primaryKey' ||
-            filter.propMeta.role == 'referenceNavigation')
-        "
+        v-else-if="filter.selectFor"
         v-model:keyValue="filter.value"
-        :for="
-          filter.propMeta.role == 'primaryKey'
-            ? list.$metadata.name
-            : filter.propMeta.role == 'referenceNavigation'
-              ? filter.propMeta
-              : (filter.propMeta.navigationProp ??
-                filter.propMeta.principalType)
-        "
+        :for="filter.selectFor"
+        :multiple="filter.selectForMultiple"
         clearable
-        :multiple="filter.propMeta.type != 'string'"
         autofocus
         hide-details
         density="compact"

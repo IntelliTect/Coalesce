@@ -13,7 +13,7 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
@@ -40,7 +40,7 @@ jobs:
         working-directory: playground/Coalesce.Web.Vue3
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-dotnet@v5
         with:
@@ -65,7 +65,7 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # setup-node and update npm are only here to preemptively test
       # the required install of npm@11 that's needed for OIDC npm publish
@@ -113,7 +113,7 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - run: npm ci
         working-directory: ${{ github.workspace }}
@@ -144,7 +144,7 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - run: npm ci
         working-directory: ${{ github.workspace }}
@@ -172,7 +172,7 @@ jobs:
         working-directory: docs
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           # fetch all commits to get last updated time or other git log info
           fetch-depth: 0
@@ -217,7 +217,7 @@ jobs:
       COALESCE_VERSION: ${{ inputs.COALESCE_VERSION }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5

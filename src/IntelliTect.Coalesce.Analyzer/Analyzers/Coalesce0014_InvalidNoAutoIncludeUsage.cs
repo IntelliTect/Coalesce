@@ -68,9 +68,9 @@ public class Coalesce0014_InvalidNoAutoIncludeUsage : DiagnosticAnalyzer
     private static bool IsNavigationProperty(IPropertySymbol propertySymbol)
     {
         // A navigation property is one that:
-        // 1. Has a [ForeignKey] attribute pointing to it (reference navigation), OR
+        // 1. Is a complex type (not primitive/string) AND has a [ForeignKey] attribute (reference navigation), OR
         // 2. Has an [InverseProperty] attribute (collection navigation), OR
-        // 3. Is a collection type AND has a property on the containing type that has [ForeignKey] pointing to this property
+        // 3. Is a collection of complex types (collection navigation)
 
         var propertyType = propertySymbol.Type;
 
@@ -78,8 +78,13 @@ public class Coalesce0014_InvalidNoAutoIncludeUsage : DiagnosticAnalyzer
         var foreignKeyAttr = propertySymbol.GetAttributeByName("System.ComponentModel.DataAnnotations.Schema.ForeignKeyAttribute");
         if (foreignKeyAttr is not null)
         {
-            // This property is decorated with [ForeignKey], which means it's a reference navigation
-            return true;
+            // [ForeignKey] can be on either the FK property or the navigation property
+            // If the property is a complex type, it's a navigation property
+            // If the property is a primitive type (int, Guid, etc.), it's the FK property itself, not the navigation
+            if (propertyType is INamedTypeSymbol fkPropertyType && IsComplexType(fkPropertyType))
+            {
+                return true;
+            }
         }
 
         // Check if the property has InverseProperty attribute

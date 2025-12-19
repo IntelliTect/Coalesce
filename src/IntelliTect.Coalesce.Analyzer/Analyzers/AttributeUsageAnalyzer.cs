@@ -86,7 +86,17 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: "Types can only have one of the following: [Service], [StandaloneEntity], [SimpleModel] attributes, or inherit from DbContext, IDataSource<T>, IBehaviors<T>, or IClassDto<T>.");
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule, InvalidSemanticKernelAttributeUsageRule, GenericInvalidAttributeUsageRule, MutuallyExclusiveCoalesceTypesRule);
+    public static readonly DiagnosticDescriptor NoAutoIncludeOnNonObjectPropertyRule = new(
+        id: "COA0014",
+        title: "NoAutoInclude has no effect on non-object properties",
+        messageFormat: "NoAutoInclude has no effect on non-object properties",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        customTags: [WellKnownDiagnosticTags.Unnecessary],
+        description: "NoAutoInclude only affects navigation properties (objects or collections). It has no effect on simple data properties like strings, numbers, or dates.");
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule, InvalidSemanticKernelAttributeUsageRule, GenericInvalidAttributeUsageRule, MutuallyExclusiveCoalesceTypesRule, NoAutoIncludeOnNonObjectPropertyRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -94,6 +104,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
         context.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
+        context.RegisterSymbolAction(AnalyzeProperty, SymbolKind.Property);
     }
 
     private static void AnalyzeNamedType(SymbolAnalysisContext context)
@@ -283,6 +294,51 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
                     return true;
             }
         }
+
+        return false;
+    }
+
+    private static void AnalyzeProperty(SymbolAnalysisContext context)
+    {
+        var propertySymbol = (IPropertySymbol)context.Symbol;
+
+        // COA0014: Check for NoAutoInclude on non-object properties
+        var readAttr = propertySymbol.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.ReadAttribute");
+        if (readAttr is not null)
+        {
+            var noAutoIncludeArg = readAttr.NamedArguments.FirstOrDefault(arg => arg.Key == "NoAutoInclude");
+            if (noAutoIncludeArg.Key is not null && noAutoIncludeArg.Value.Value is true && !IsPOCO(propertySymbol.Type))
+            {
+                var location = readAttr.GetLocation() ?? propertySymbol.Locations[0];
+                context.ReportDiagnostic(Diagnostic.Create(NoAutoIncludeOnNonObjectPropertyRule, location));
+            }
+        }
+    }
+
+    private static bool IsPOCO(ITypeSymbol type)
+    {
+        // Unwrap nullable types
+        if (type is INamedTypeSymbol namedType && namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+        {
+            type = namedType.TypeArguments[0];
+        }
+
+        // String is not an object type for our purposes
+        if (type.SpecialType == SpecialType.System_String)
+            return false;
+
+        // byte[] is not a collection type for our purposes (it's typically binary data)
+        if (type is IArrayTypeSymbol arrayType && arrayType.ElementType.SpecialType == SpecialType.System_Byte)
+            return false;
+
+        // Arrays of non-byte types are collections
+        if (type is IArrayTypeSymbol)
+            return true;
+
+        // Class or interface types (excluding string which we already checked)
+        // These are "object-like" types that could be navigation properties
+        if (type.TypeKind == TypeKind.Class || type.TypeKind == TypeKind.Interface)
+            return true;
 
         return false;
     }

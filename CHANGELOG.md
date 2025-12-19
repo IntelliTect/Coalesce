@@ -1,3 +1,6 @@
+# 6.1.2
+- Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
+
 # 6.1.1
 - Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.
 - Fix errors thrown when filtering and searching on `System.DateOnly` properties.

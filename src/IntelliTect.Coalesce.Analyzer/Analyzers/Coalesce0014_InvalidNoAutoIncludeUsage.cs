@@ -8,6 +8,17 @@ namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class Coalesce0014_InvalidNoAutoIncludeUsage : DiagnosticAnalyzer
 {
+    private const string ForeignKeyAttributeName = "System.ComponentModel.DataAnnotations.Schema.ForeignKeyAttribute";
+    private const string InversePropertyAttributeName = "System.ComponentModel.DataAnnotations.Schema.InversePropertyAttribute";
+    
+    private static readonly HashSet<string> BclAssemblyNames = new(StringComparer.Ordinal)
+    {
+        "System.Runtime",
+        "System.Private.CoreLib",
+        "mscorlib",
+        "netstandard"
+    };
+    
     private static readonly DiagnosticDescriptor _Rule = new(
         id: "COA0014",
         title: "Invalid NoAutoInclude usage on non-navigation property",
@@ -75,7 +86,7 @@ public class Coalesce0014_InvalidNoAutoIncludeUsage : DiagnosticAnalyzer
         var propertyType = propertySymbol.Type;
 
         // Check if the property has ForeignKey attribute
-        var foreignKeyAttr = propertySymbol.GetAttributeByName("System.ComponentModel.DataAnnotations.Schema.ForeignKeyAttribute");
+        var foreignKeyAttr = propertySymbol.GetAttributeByName(ForeignKeyAttributeName);
         if (foreignKeyAttr is not null)
         {
             // [ForeignKey] can be on either the FK property or the navigation property
@@ -88,7 +99,7 @@ public class Coalesce0014_InvalidNoAutoIncludeUsage : DiagnosticAnalyzer
         }
 
         // Check if the property has InverseProperty attribute
-        var inversePropertyAttr = propertySymbol.GetAttributeByName("System.ComponentModel.DataAnnotations.Schema.InversePropertyAttribute");
+        var inversePropertyAttr = propertySymbol.GetAttributeByName(InversePropertyAttributeName);
         if (inversePropertyAttr is not null)
         {
             // This property is decorated with [InverseProperty], which means it's a collection navigation
@@ -161,10 +172,7 @@ public class Coalesce0014_InvalidNoAutoIncludeUsage : DiagnosticAnalyzer
         {
             // Check if it's from a well-known BCL assembly
             var assemblyName = typeSymbol.ContainingAssembly?.Name;
-            if (assemblyName == "System.Runtime" || 
-                assemblyName == "System.Private.CoreLib" ||
-                assemblyName == "mscorlib" ||
-                assemblyName == "netstandard")
+            if (assemblyName is not null && BclAssemblyNames.Contains(assemblyName))
             {
                 return false;
             }

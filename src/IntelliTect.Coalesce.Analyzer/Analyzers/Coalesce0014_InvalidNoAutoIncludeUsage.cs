@@ -154,10 +154,20 @@ public class Coalesce0014_InvalidNoAutoIncludeUsage : DiagnosticAnalyzer
             return false;
         }
 
-        // Check if it's a struct (value type) from System namespace (like Guid, DateTime, etc.)
-        if (typeSymbol.TypeKind == TypeKind.Struct && typeSymbol.ContainingNamespace?.ToString().StartsWith("System") == true)
+        // Check if it's a well-known BCL struct (value type) 
+        // Most BCL value types we care about are already covered by SpecialType,
+        // but some like Guid, DateOnly, TimeOnly are not.
+        if (typeSymbol.TypeKind == TypeKind.Struct)
         {
-            return false;
+            // Check if it's from a well-known BCL assembly
+            var assemblyName = typeSymbol.ContainingAssembly?.Name;
+            if (assemblyName == "System.Runtime" || 
+                assemblyName == "System.Private.CoreLib" ||
+                assemblyName == "mscorlib" ||
+                assemblyName == "netstandard")
+            {
+                return false;
+            }
         }
 
         // It's a complex reference type or a user-defined struct

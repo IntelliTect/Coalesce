@@ -3,6 +3,7 @@
 - Fix errors thrown when filtering and searching on `System.DateOnly` properties.
 - `c-select` now properly performs key equality operations on date primary keys.
 - `c-list-filters` now properly handles filtering by date foreign keys.
+- Added analyzer COA0014 to detect invalid usage of `NoAutoInclude` on non-navigation properties, where it has no effect.
 
 # 6.1.0
 - Added support for .NET 10

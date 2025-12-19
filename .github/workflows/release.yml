@@ -52,30 +52,6 @@ jobs:
       skipNuget: ${{ inputs.skipNuget }}
       skipNpm: ${{ inputs.skipNpm }}
 
-  create-release:
-    runs-on: ubuntu-latest
-    needs: [meta, publish]
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Extract changelog for current version
-        if: ${{ !inputs.prereleaseSlug }}
-        id: changelog
-        run: |
-          # Extract content between the first # heading and the next # heading
-          awk '/^# /{if(found) exit; found=1; next} found' CHANGELOG.md > release_notes.md
-          cat release_notes.md
-
-      - name: Create GitHub Release
-        if: ${{ !inputs.prereleaseSlug }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.meta.outputs.COALESCE_VERSION }}
-          name: ${{ needs.meta.outputs.COALESCE_VERSION }}
-          body_path: release_notes.md
-
   build-template:
     uses: ./.github/workflows/part-template-build.yml
     secrets: inherit
@@ -107,3 +83,27 @@ jobs:
       - name: dotnet nuget push
         if: ${{ !inputs.skipTemplate }}
         run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [meta, publish-template]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Extract changelog for current version
+        if: ${{ !inputs.prereleaseSlug }}
+        id: changelog
+        run: |
+          # Extract content between the first # heading and the next # heading
+          awk '/^# /{if(found) exit; found=1; next} found' CHANGELOG.md > release_notes.md
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        if: ${{ !inputs.prereleaseSlug }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.meta.outputs.COALESCE_VERSION }}
+          name: ${{ needs.meta.outputs.COALESCE_VERSION }}
+          body_path: release_notes.md

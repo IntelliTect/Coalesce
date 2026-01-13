@@ -1,4 +1,5 @@
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
+import { generateW3CId } from "@microsoft/applicationinsights-core-js";
 import { watch } from "vue";
 
 import { userInfo } from "../user-service";
@@ -46,6 +47,8 @@ watch(
 );
 
 let flushPageView: (() => void) | undefined;
+let isFirstNavigation = true;
+
 router.beforeEach((to, from) => {
   if (to.path != from.path) {
     // If there's a previous page view still unsent,
@@ -58,6 +61,15 @@ router.beforeEach((to, from) => {
 
 router.afterEach((to, from) => {
   if (to.path != from.path) {
+    if (!isFirstNavigation) {
+      // Generate a new trace ID for each navigation (except the initial page load)
+      // Otherwise, each successive page view will get lumped in with the root page view.
+      // This will also split up telemetry by page view in Aspire (but the wrapping page view
+      // span itself will be missing from Aspire since we don't do OTLP ingest here).
+      appInsights.context.telemetryTrace.traceID = generateW3CId();
+    }
+    isFirstNavigation = false;
+
     const time = new Date();
     let hasSent = false;
 
@@ -66,7 +78,10 @@ router.afterEach((to, from) => {
       hasSent = true;
       appInsights.trackPageView({
         startTime: time,
-        properties: { duration: 0 },
+        properties: {
+          // Since this is a SPA, there's no meaningful loading time of the page itself.
+          duration: 0,
+        },
       });
     };
 

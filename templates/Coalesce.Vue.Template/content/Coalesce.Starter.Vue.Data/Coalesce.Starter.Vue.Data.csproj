@@ -28,8 +28,8 @@
     <PackageReference Include="Hangfire.Core" Version="1.8.21" />
     <!--#endif -->
     <!--#if(AIChat) -->
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.65.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.65.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.68.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.68.0" />
     <!--#endif -->
   </ItemGroup>
 </Project>

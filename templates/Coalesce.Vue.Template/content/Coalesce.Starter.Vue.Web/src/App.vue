@@ -26,7 +26,7 @@
         <v-list min-width="300px">
           <!--#if Identity -->
           <v-list-item
-            :title="$userInfo.fullName!"
+            title="My Profile"
             :subtitle="$userInfo.userName!"
             :to="`/user/${$userInfo.id}`"
           >

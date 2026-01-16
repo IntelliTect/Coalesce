@@ -1,5 +1,5 @@
 <template>
-  <v-container max-width="1000px">
+  <v-container max-width="800px">
     <v-card>
       <v-card-title>User Profile</v-card-title>
       <c-loader-status
@@ -124,13 +124,13 @@
 
         <!--#if LocalAuth -->
         <template v-if="isMe">
-          <v-card-title> Password </v-card-title>
-          <v-card-text>
+          <v-card-title>
+            Password
             <v-dialog width="400px">
               <template #activator="{ props }">
                 <v-btn
                   color="primary"
-                  variant="text"
+                  variant="tonal"
                   class="ml-3"
                   v-bind="props"
                 >
@@ -175,6 +175,71 @@
                 </v-card>
               </template>
             </v-dialog>
+          </v-card-title>
+        </template>
+        <!--#endif -->
+
+        <!--#if Passkeys -->
+        <template v-if="isMe">
+          <v-card-title>
+            Passkeys
+            <v-btn
+              color="primary"
+              variant="tonal"
+              class="ml-3"
+              prepend-icon="fa fa-plus"
+              @click="addPasskey"
+            >
+              Add a new passkey
+            </v-btn>
+          </v-card-title>
+          <v-card-text v-if="!supportsPasskeys">
+            Passkeys are not supported by this browser.
+          </v-card-text>
+          <v-card-text v-else>
+            <c-loader-status
+              :loaders="{
+                'no-initial-content': [passkeyService.getPasskeys],
+                '': [
+                  passkeyService.getPasskeys,
+                  passkeyService.addPasskey,
+                  passkeyService.deletePasskey,
+                  passkeyService.renamePasskey,
+                ],
+              }"
+              progress-absolute
+            >
+              <v-list v-if="passkeys.length > 0" bg-color="transparent">
+                <v-list-item
+                  v-for="passkey in passkeys"
+                  :key="passkey.credentialId!"
+                  :title="passkey.name!"
+                  :subtitle="`Created ${formatDistanceToNow(new Date(passkey.createdOn!), { addSuffix: true })}`"
+                  prepend-icon="fa fa-key"
+                >
+                  <template #append>
+                    <v-btn
+                      size="small"
+                      variant="tonal"
+                      color="primary"
+                      class="mr-1"
+                      @click="renamePasskey(passkey.credentialId!)"
+                    >
+                      Rename
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      variant="tonal"
+                      color="error"
+                      @click="deletePasskey(passkey.credentialId!)"
+                    >
+                      Delete
+                    </v-btn>
+                  </template>
+                </v-list-item>
+              </v-list>
+              <p v-else>No passkeys are registered.</p>
+            </c-loader-status>
           </v-card-text>
         </template>
         <!--#endif -->
@@ -260,6 +325,10 @@
 import { UserViewModel } from "@/viewmodels.g";
 import { Permission } from "@/models.g";
 import { Permission as PermissionMeta } from "@/metadata.g";
+//#if Passkeys
+import { formatDistanceToNow } from "date-fns";
+import { PasskeyServiceViewModel } from "@/viewmodels.g";
+//#endif
 
 const router = useRouter();
 const { can, userInfo } = useUser();
@@ -291,4 +360,91 @@ if (!isUserAdmin.value && !isMe.value) {
 } else {
   user.$load(props.id);
 }
+
+//#if Passkeys
+// Passkey Management
+const supportsPasskeys =
+  typeof navigator.credentials !== "undefined" &&
+  typeof window.PublicKeyCredential !== "undefined" &&
+  typeof window.PublicKeyCredential.parseCreationOptionsFromJSON === "function";
+
+const passkeyService = new PasskeyServiceViewModel();
+passkeyService.getPasskeys();
+
+const passkeys = computed(() => passkeyService.getPasskeys.result ?? []);
+
+let addAttempt = 0;
+async function addPasskey() {
+  const attempt = ++addAttempt;
+  try {
+    // Get creation options from server
+    const creationOption = await passkeyService.getCreationOptions();
+    const options = PublicKeyCredential.parseCreationOptionsFromJSON(
+      JSON.parse(creationOption),
+    );
+
+    // Create credential
+    const credential = (await navigator.credentials.create({
+      publicKey: options,
+    })) as PublicKeyCredential;
+
+    const credentialJson = JSON.stringify(credential);
+
+    const name = prompt("Enter a name for your passkey:")?.trim();
+    if (!name) return;
+
+    if (name.length >= 200) {
+      alert("Names must be less than 200 characters.");
+      return;
+    }
+
+    // Add to server with name
+    await passkeyService.addPasskey(credentialJson, name);
+    await passkeyService.getPasskeys();
+  } catch (error) {
+    if (attempt == addAttempt && error instanceof Error) {
+      const errorMessage =
+        error.name === "NotAllowedError"
+          ? "No passkey was provided by the authenticator."
+          : error.message || "Failed to create passkey";
+
+      passkeyService.addPasskey.wasSuccessful = false;
+      passkeyService.addPasskey.message = errorMessage;
+    }
+  }
+}
+
+async function renamePasskey(credentialId: string) {
+  const passkey = passkeys.value.find((p) => p.credentialId == credentialId);
+
+  const newName = prompt(
+    "Enter a new name for your passkey:",
+    passkey?.name || "",
+  )?.trim();
+  if (!newName) return;
+
+  if (newName.length >= 200) {
+    alert("Names must be less than 200 characters.");
+    return;
+  }
+
+  await passkeyService.renamePasskey(credentialId, newName.trim());
+  await passkeyService.getPasskeys();
+}
+
+async function deletePasskey(credentialId: string) {
+  const passkey = passkeys.value.find((p) => p.credentialId == credentialId);
+
+  if (
+    !confirm(
+      `Really delete the "${passkey?.name || "Unnamed passkey"}" passkey?`,
+    )
+  ) {
+    return;
+  }
+
+  await passkeyService.deletePasskey(credentialId);
+  await passkeyService.getPasskeys();
+}
+//#endif
 </script>

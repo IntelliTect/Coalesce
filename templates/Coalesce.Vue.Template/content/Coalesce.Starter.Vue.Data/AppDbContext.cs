@@ -142,7 +142,18 @@ public class AppDbContext
         base.OnModelCreating(builder);
 
         // Remove cascading deletes.
-        foreach (var relationship in builder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+        HashSet<Type> allowedCascadePrincipals = [];
+        HashSet<Type> allowedCascadeDependents = [
+//#if Passkeys
+            typeof(IdentityPasskeyData)
+//#endif
+        ];
+
+        foreach (var relationship in builder.Model
+            .GetEntityTypes()
+            .SelectMany(e => e.GetForeignKeys())
+            .Where(fk => !allowedCascadePrincipals.Contains(fk.PrincipalEntityType.ClrType)
+                && !allowedCascadeDependents.Contains(fk.DeclaringEntityType.ClrType)))
         {
             relationship.DeleteBehavior = DeleteBehavior.Restrict;
         }

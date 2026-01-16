@@ -202,7 +202,7 @@ jobs:
           - "--Identity --MicrosoftAuth --GoogleAuth --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI --Hangfire --AIChat"
           # Assorted partial variants:
           - "--Identity --UserPictures --TrackingBase"
-          - "--Identity --MicrosoftAuth --AuditLogs --Hangfire"
+          - "--Identity --MicrosoftAuth --AuditLogs --Hangfire --Passkeys"
           # Tenancy variants:
           - "--Identity --Tenancy --TenantCreateExternal --GoogleAuth"
           - "--Identity --Tenancy --TenantCreateSelf --TenantMemberInvites --AuditLogs --LocalAuth --EmailSendGrid"

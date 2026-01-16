@@ -23,6 +23,11 @@ public class SignInModel(SignInManager<User> signInManager) : PageModel
     [DataType(DataType.Password)]
     public required string Password { get; set; }
 
+#if Passkeys
+    [BindProperty]
+    public string? CredentialJson { get; set; }
+#endif
+
 #endif
     public void OnGet()
     {
@@ -31,9 +36,24 @@ public class SignInModel(SignInManager<User> signInManager) : PageModel
 #if LocalAuth
     public async Task<IActionResult> OnPostAsync()
     {
+
+#if Passkeys
+        Microsoft.AspNetCore.Identity.SignInResult result;
+        if (!string.IsNullOrEmpty(CredentialJson))
+        {
+            result = await signInManager.PasskeySignInAsync(CredentialJson);
+        }
+        else
+        {
+            if (!ModelState.IsValid) return Page();
+            result = await signInManager.PasswordSignInAsync(Username, Password, true, true);
+        }
+#else
         if (!ModelState.IsValid) return Page();
 
         var result = await signInManager.PasswordSignInAsync(Username, Password, true, true);
+#endif
+
         if (result.Succeeded)
         {
             return LocalRedirect(ReturnUrl ?? "/");

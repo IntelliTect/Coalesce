@@ -979,6 +979,34 @@ export const UserInfo = domain.types.UserInfo = {
     },
   },
 }
+export const UserPasskeyInfo = domain.types.UserPasskeyInfo = {
+  name: "UserPasskeyInfo" as const,
+  displayName: "User Passkey Info",
+  get displayProp() { return this.props.name }, 
+  type: "object",
+  props: {
+    credentialId: {
+      name: "credentialId",
+      displayName: "Credential Id",
+      type: "binary",
+      base64: true,
+      role: "value",
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    createdOn: {
+      name: "createdOn",
+      displayName: "Created On",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+    },
+  },
+}
 export const AIAgentService = domain.services.AIAgentService = {
   name: "AIAgentService",
   displayName: "AI Agent Service",
@@ -1012,6 +1040,153 @@ export const AIAgentService = domain.services.AIAgentService = {
         displayName: "Result",
         type: "object",
         get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
+  },
+}
+export const PasskeyService = domain.services.PasskeyService = {
+  name: "PasskeyService",
+  displayName: "Passkey Service",
+  type: "service",
+  controllerRoute: "PasskeyService",
+  methods: {
+    getRequestOptions: {
+      name: "getRequestOptions",
+      displayName: "Get Request Options",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        username: {
+          name: "username",
+          displayName: "Username",
+          type: "string",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "string",
+        role: "value",
+      },
+    },
+    getCreationOptions: {
+      name: "getCreationOptions",
+      displayName: "Get Creation Options",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "string",
+        role: "value",
+      },
+    },
+    getPasskeys: {
+      name: "getPasskeys",
+      displayName: "Get Passkeys",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "collection",
+        itemType: {
+          name: "$collectionItem",
+          displayName: "",
+          role: "value",
+          type: "object",
+          get typeDef() { return (domain.types.UserPasskeyInfo as ObjectType & { name: "UserPasskeyInfo" }) },
+        },
+        role: "value",
+      },
+    },
+    addPasskey: {
+      name: "addPasskey",
+      displayName: "Add Passkey",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        credentialJson: {
+          name: "credentialJson",
+          displayName: "Credential Json",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Credential Json is required.",
+          }
+        },
+        name: {
+          name: "name",
+          displayName: "Name",
+          type: "string",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    renamePasskey: {
+      name: "renamePasskey",
+      displayName: "Rename Passkey",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        credentialId: {
+          name: "credentialId",
+          displayName: "Credential Id",
+          type: "binary",
+          role: "value",
+          rules: {
+            required: val => val != null || "Credential Id is required.",
+          }
+        },
+        name: {
+          name: "name",
+          displayName: "Name",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Name is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    deletePasskey: {
+      name: "deletePasskey",
+      displayName: "Delete Passkey",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        credentialId: {
+          name: "credentialId",
+          displayName: "Credential Id",
+          type: "binary",
+          role: "value",
+          rules: {
+            required: val => val != null || "Credential Id is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
         role: "value",
       },
     },
@@ -1055,11 +1230,13 @@ interface AppDomain extends Domain {
     Tenant: typeof Tenant
     User: typeof User
     UserInfo: typeof UserInfo
+    UserPasskeyInfo: typeof UserPasskeyInfo
     UserRole: typeof UserRole
     Widget: typeof Widget
   }
   services: {
     AIAgentService: typeof AIAgentService
+    PasskeyService: typeof PasskeyService
     SecurityService: typeof SecurityService
   }
 }

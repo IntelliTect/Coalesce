@@ -143,7 +143,7 @@ type Message = { role: "user" | "ai"; content: string };
 const input = ref("");
 const messages = ref<Message[]>([]);
 const history = ref<string>("");
-const minimized = ref(false);
+const minimized = ref(true);
 const inputRef = useTemplateRef("inputRef");
 const historyRef = useTemplateRef("historyRef");
 

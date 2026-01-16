@@ -334,6 +334,32 @@ export class UserInfo {
 }
 
 
+export interface UserPasskeyInfo extends Model<typeof metadata.UserPasskeyInfo> {
+  credentialId: string | null
+  name: string | null
+  createdOn: Date | null
+}
+export class UserPasskeyInfo {
+  
+  /** Mutates the input object and its descendants into a valid UserPasskeyInfo implementation. */
+  static convert(data?: Partial<UserPasskeyInfo>): UserPasskeyInfo {
+    return convertToModel<UserPasskeyInfo>(data || {}, metadata.UserPasskeyInfo) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid UserPasskeyInfo implementation. */
+  static map(data?: Partial<UserPasskeyInfo>): UserPasskeyInfo {
+    return mapToModel<UserPasskeyInfo>(data || {}, metadata.UserPasskeyInfo) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.UserPasskeyInfo; }
+  
+  /** Instantiate a new UserPasskeyInfo, optionally basing it on the given data. */
+  constructor(data?: Partial<UserPasskeyInfo> | {[k: string]: any}) {
+    Object.assign(this, UserPasskeyInfo.map(data || {}));
+  }
+}
+
+
 declare module "coalesce-vue/lib/model" {
   interface EnumTypeLookup {
     AuditEntryState: AuditEntryState
@@ -348,6 +374,7 @@ declare module "coalesce-vue/lib/model" {
     Tenant: Tenant
     User: User
     UserInfo: UserInfo
+    UserPasskeyInfo: UserPasskeyInfo
     UserRole: UserRole
     Widget: Widget
   }

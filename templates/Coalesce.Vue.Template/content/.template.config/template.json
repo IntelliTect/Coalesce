@@ -96,6 +96,14 @@
       "$coalesceRequires": ["and", "Identity"],
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/individual"
     },
+    "Passkeys": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Sign-in with Passkeys",
+      "description": "Adds infrastructure for supporting passwordless authentication using passkeys (WebAuthn).",
+      "$coalesceRequires": ["and", "LocalAuth"],
+      "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/passkeys"
+    },
     "UserPictures": {
       "type": "parameter",
       "datatype": "bool",
@@ -290,6 +298,10 @@
             "**/ConfirmEmail.*",
             "**/UserManagementService.cs"
           ]
+        },
+        {
+          "condition": "!Passkeys",
+          "exclude": ["**/PasskeyService.cs", "**/passkey.js"]
         },
         {
           "condition": "!(LocalAuth || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)",

@@ -308,6 +308,80 @@ export class AIAgentServiceViewModel extends ServiceViewModel<typeof $metadata.A
 }
 
 
+export class PasskeyServiceViewModel extends ServiceViewModel<typeof $metadata.PasskeyService, $apiClients.PasskeyServiceApiClient> {
+  
+  public get getRequestOptions() {
+    const getRequestOptions = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getRequestOptions,
+      (c, username?: string | null) => c.getRequestOptions(username),
+      () => ({username: null as string | null, }),
+      (c, args) => c.getRequestOptions(args.username))
+    
+    Object.defineProperty(this, 'getRequestOptions', {value: getRequestOptions});
+    return getRequestOptions
+  }
+  
+  public get getCreationOptions() {
+    const getCreationOptions = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCreationOptions,
+      (c) => c.getCreationOptions(),
+      () => ({}),
+      (c, args) => c.getCreationOptions())
+    
+    Object.defineProperty(this, 'getCreationOptions', {value: getCreationOptions});
+    return getCreationOptions
+  }
+  
+  public get getPasskeys() {
+    const getPasskeys = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getPasskeys,
+      (c) => c.getPasskeys(),
+      () => ({}),
+      (c, args) => c.getPasskeys())
+    
+    Object.defineProperty(this, 'getPasskeys', {value: getPasskeys});
+    return getPasskeys
+  }
+  
+  public get addPasskey() {
+    const addPasskey = this.$apiClient.$makeCaller(
+      this.$metadata.methods.addPasskey,
+      (c, credentialJson: string | null, name?: string | null) => c.addPasskey(credentialJson, name),
+      () => ({credentialJson: null as string | null, name: null as string | null, }),
+      (c, args) => c.addPasskey(args.credentialJson, args.name))
+    
+    Object.defineProperty(this, 'addPasskey', {value: addPasskey});
+    return addPasskey
+  }
+  
+  public get renamePasskey() {
+    const renamePasskey = this.$apiClient.$makeCaller(
+      this.$metadata.methods.renamePasskey,
+      (c, credentialId: string | Uint8Array | null, name: string | null) => c.renamePasskey(credentialId, name),
+      () => ({credentialId: null as string | Uint8Array | null, name: null as string | null, }),
+      (c, args) => c.renamePasskey(args.credentialId, args.name))
+    
+    Object.defineProperty(this, 'renamePasskey', {value: renamePasskey});
+    return renamePasskey
+  }
+  
+  public get deletePasskey() {
+    const deletePasskey = this.$apiClient.$makeCaller(
+      this.$metadata.methods.deletePasskey,
+      (c, credentialId: string | Uint8Array | null) => c.deletePasskey(credentialId),
+      () => ({credentialId: null as string | Uint8Array | null, }),
+      (c, args) => c.deletePasskey(args.credentialId))
+    
+    Object.defineProperty(this, 'deletePasskey', {value: deletePasskey});
+    return deletePasskey
+  }
+  
+  constructor() {
+    super($metadata.PasskeyService, new $apiClients.PasskeyServiceApiClient())
+  }
+}
+
+
 export class SecurityServiceViewModel extends ServiceViewModel<typeof $metadata.SecurityService, $apiClients.SecurityServiceApiClient> {
   
   public get whoAmI() {
@@ -347,6 +421,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   AIAgentService: AIAgentServiceViewModel,
+  PasskeyService: PasskeyServiceViewModel,
   SecurityService: SecurityServiceViewModel,
 }
 

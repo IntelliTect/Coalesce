@@ -124,6 +124,65 @@ export class AIAgentServiceApiClient extends ServiceApiClient<typeof $metadata.A
 }
 
 
+export class PasskeyServiceApiClient extends ServiceApiClient<typeof $metadata.PasskeyService> {
+  constructor() { super($metadata.PasskeyService) }
+  
+  public getRequestOptions(username?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
+    const $method = this.$metadata.methods.getRequestOptions
+    const $params =  {
+      username,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public getCreationOptions($config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
+    const $method = this.$metadata.methods.getCreationOptions
+    const $params =  {
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public getPasskeys($config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.UserPasskeyInfo[]>> {
+    const $method = this.$metadata.methods.getPasskeys
+    const $params =  {
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public addPasskey(credentialJson: string | null, name?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.addPasskey
+    const $params =  {
+      credentialJson,
+      name,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public renamePasskey(credentialId: string | Uint8Array | null, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.renamePasskey
+    const $params =  {
+      credentialId,
+      name,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public deletePasskey(credentialId: string | Uint8Array | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.deletePasskey
+    const $params =  {
+      credentialId,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+
 export class SecurityServiceApiClient extends ServiceApiClient<typeof $metadata.SecurityService> {
   constructor() { super($metadata.SecurityService) }
   

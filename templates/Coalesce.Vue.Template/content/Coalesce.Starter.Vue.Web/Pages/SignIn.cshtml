@@ -22,17 +22,26 @@
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
 
     <div>
-        <label asp-for="Username" class="form-label" autocomplete="username"></label>
-        <input asp-for="Username" class="form-control" autofocus required />
+        <label asp-for="Username" class="form-label"></label>
+        <input asp-for="Username" class="form-control" autocomplete="username webauthn" autofocus />
     </div>
     <div>
-        <label asp-for="Password" class="form-label" autocomplete="current-password"></label>
-        <input asp-for="Password" class="form-control" required />
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" autocomplete="current-password" />
     </div>
 
     <div asp-validation-summary="All" class="text-danger" style="margin-bottom: -0.5rem"></div>
 
     <button type="submit" class="btn btn-primary rounded-pill">Sign in</button>
+
+    @*#if Passkeys *@
+    <div class="d-flex flex-column">
+        <button type="submit" formnovalidate name="__passkeySubmit" class="btn btn-link mx-auto">Sign in with a
+            passkey</button>
+        <passkey-submit name="Passkey" email-name="Username">
+        </passkey-submit>
+    </div>
+    @*#endif *@
 
     <div class="d-flex gap-2 mt-2 justify-content-center">
         <a asp-page="Register" asp-route-ReturnUrl="@Model.ReturnUrl">Sign up</a>
@@ -71,5 +80,11 @@
         You will need to <a href="https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social">setup some
             other login provider</a>.
     </div>
+}
+@*#endif *@
+
+@*#if Passkeys *@
+@section Scripts {
+    <script src="/passkey.js"></script>
 }
 @*#endif *@

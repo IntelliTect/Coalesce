@@ -33,6 +33,7 @@ public static class ProgramAuthConfiguration
                 c.Password.RequireLowercase = false;
                 c.Password.RequiredLength = 15;
 #endif
+                c.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders()
@@ -40,6 +41,9 @@ public static class ProgramAuthConfiguration
 
 #if LocalAuth
         builder.Services.AddScoped<UserManagementService>();
+#endif
+#if Passkeys
+        builder.Services.AddScoped<PasskeyService>();
 #endif
 
         builder.Services

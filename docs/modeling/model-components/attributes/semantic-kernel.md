@@ -56,11 +56,19 @@ public class ProductDataSource : StandardDataSource<Product, AppDbContext>
 public class Person
 {
     // Can also annotate with [Coalesce] to expose via HTTP.
-    [SemanticKernel("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
-    public ItemResult<Person> ChangeFirstName(AppDbContext db, string firstName, Titles? title)
+    [SemanticKernel("Changes a person's first name, and optionally updates their title.")]
+    public ItemResult<Person> ChangeFirstName(
+      AppDbContext db, 
+      string firstName, 
+      [SemanticKernel("A new title for the person. Provide null to leave the title unchanged.")]
+      string? newTitle = null
+    )
     {
         FirstName = firstName;
-        Title ??= title;
+        if (newTitle != null)
+        {
+            Title = newTitle;
+        }
         db.SaveChanges();
         return this;
     }

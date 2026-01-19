@@ -506,19 +506,21 @@ public class Person
     public string FirstName { get; set; }
     public string? Title { get; set; }
 
-    [SemanticKernel("Changes a person's first name, and optionally assigns a title.")]
-    public string Rename(
-      string newFirstName,
+    [SemanticKernel("Changes a person's first name, and optionally updates their title.")]
+    public ItemResult<Person> ChangeFirstName(
+      AppDbContext db, 
+      string firstName, 
       [SemanticKernel("A new title for the person. Provide null to leave the title unchanged.")]
       string? newTitle = null
-    ) 
+    )
     {
-        FirstName = newFirstName;
+        FirstName = firstName;
         if (newTitle != null)
         {
             Title = newTitle;
         }
-        return $"Hello, {FirstName}!";
+        db.SaveChanges();
+        return this;
     }
 }
 ```

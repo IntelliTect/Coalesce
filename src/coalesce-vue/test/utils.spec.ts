@@ -10,6 +10,7 @@ describe("parseDateUserInput", () => {
     ["date", "12-7", new Date(2019, 11, 7), new Date(2020, 1, 24)],
     ["date", "1.4", new Date(2020, 0, 4), new Date(2020, 1, 24)],
     ["date", "3/4/19", new Date(2019, 2, 4), null],
+    ["date", "2020-12-06", new Date(2020, 11, 6), null],
     ["time", "3a", new Date(2020, 10, 7, 3), null],
     ["time", "3 a", new Date(2020, 10, 7, 3), null],
     ["time", "313 am", new Date(2020, 10, 7, 3, 13), null],
@@ -35,6 +36,13 @@ describe("parseDateUserInput", () => {
     ["datetime", "1", undefined, null],
     ["datetime", "1 7", new Date(2021, 0, 7), null],
     ["datetime", "1 7 2022", new Date(2022, 0, 7), null],
+
+    ["date", "", undefined, null],
+    ["date", null as any, undefined, null],
+    ["time", "", undefined, null],
+    ["time", null as any, undefined, null],
+    ["datetime", "", undefined, null],
+    ["datetime", null as any, undefined, null],
   ])("%s => %s", (kind, input, expected, today) => {
     expect(
       parseDateUserInput(input, today || defaultDefaultDate, kind),

@@ -121,7 +121,7 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
 }
 
 export function parseDateUserInput(
-  input: string,
+  input: string | null | undefined,
   defaultDate: Date,
   dateKind: DateKind,
 ) {
@@ -129,7 +129,9 @@ export function parseDateUserInput(
   // Behavior of new Date() is generally always Invalid Date if you just give it a time,
   // except if you're on Chrome and give it an invalid time like "8:98 AM" - it'll give you "Thu Jan 01 1998 08:00:00".
   // Since the user wouldn't ever see the date part when only entering a time, there's no chance to detect this error.
-  input = input.trim();
+  input = input?.trim();
+  if (!input) return undefined;
+
   if (dateKind !== "time") {
     // Space is treated as a valid separator here because new Date() treats it like a separator.
     const mmddyy = /^(\d+)([\-\/\\\. ])(\d+)(?:\2(\d+))?/.exec(input);

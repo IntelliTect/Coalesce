@@ -52,6 +52,8 @@ public class AppDbContext : DbContext
     public DbSet<DateOnlyPk> DateOnlyPks { get; set; }
     public DbSet<TimeOnlyPk> TimeOnlyPks { get; set; }
 
+    public DbSet<SuppressedDefaultOrdering> SuppressedDefaultOrderings { get; set; }
+
 
     public AppDbContext() : this(Guid.NewGuid().ToString()) { }
 

@@ -28,6 +28,12 @@ public class DefaultOrderByAttribute : System.Attribute
     /// </summary>
     public string? FieldName { get; set; }
 
+    /// <summary>
+    /// When true, suppresses using this property as a fallback ordering.
+    /// Useful for preventing automatic ordering by Name or primary key properties.
+    /// </summary>
+    public bool Suppress { get; set; }
+
     public DefaultOrderByAttribute(int fieldOrder = 0, OrderByDirections orderByDirection = OrderByDirections.Ascending)
     {
         this.OrderByDirection = orderByDirection;
@@ -66,7 +72,7 @@ public record OrderByInformation
     {
         string text = Properties.Count > 1 ? "(" : "";
         string propAccessor = prependText;
-        propAccessor += (propAccessor == "" ? "" : ".")  + Properties[0].Name;
+        propAccessor += (propAccessor == "" ? "" : ".") + Properties[0].Name;
         foreach (var prop in Properties.Skip(1))
         {
             text += $"{propAccessor} == null ? {prop.Type.CsDefaultValue} : ";

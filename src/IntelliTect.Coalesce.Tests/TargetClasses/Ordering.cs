@@ -46,3 +46,12 @@ public class UnspecifiedParent
 {
     public string Field { get; set; }
 }
+
+public class SuppressedDefaultOrdering
+{
+    [DefaultOrderBy(Suppress = true)]
+    public int Id { get; set; }
+
+    [DefaultOrderBy(Suppress = true)]
+    public string Name { get; set; }
+}

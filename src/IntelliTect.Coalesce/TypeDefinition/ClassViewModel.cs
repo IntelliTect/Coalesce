@@ -341,7 +341,8 @@ public abstract class ClassViewModel : IAttributeProvider
 
             // Nothing found, order by ListText and then ID.
             var nameProp = PropertyByName("Name");
-            if (nameProp?.IsDbMapped == true && nameProp.IsClientProperty)
+            if (nameProp?.IsDbMapped == true && nameProp.IsClientProperty
+                && nameProp.GetAttributeValue<DefaultOrderByAttribute, bool>(a => a.Suppress) != true)
             {
                 result.Add(new OrderByInformation()
                 {
@@ -350,7 +351,8 @@ public abstract class ClassViewModel : IAttributeProvider
                     FieldOrder = 1
                 });
             }
-            else if (PrimaryKey != null)
+            else if (PrimaryKey != null
+                && PrimaryKey.GetAttributeValue<DefaultOrderByAttribute, bool>(a => a.Suppress) != true)
             {
                 result.Add(new OrderByInformation()
                 {

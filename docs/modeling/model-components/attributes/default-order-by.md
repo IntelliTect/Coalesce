@@ -59,3 +59,19 @@ Enum values are:
 <Prop def="public string FieldName { get; set; }" />
 
 When using the `DefaultOrderByAttribute` on an object property, specifies the field on the object to use for sorting. See the first example above.
+
+<Prop def="public bool Suppress { get; set; } = false;" />
+
+When set to `true`, prevents this property from being used as a fallback ordering.
+
+If no properties are decorated with `[DefaultOrderBy]`, Coalesce will automatically sort by a property named `Name` if one exists, otherwise by the primary key. Setting `Suppress = true` on the `Name` or primary key property prevents them from being used for this fallback behavior.
+
+``` c#
+public class RandomOrder
+{
+    public int Id { get; set; }
+    
+    [DefaultOrderBy(Suppress = true)]
+    public string Name { get; set; }
+}
+```

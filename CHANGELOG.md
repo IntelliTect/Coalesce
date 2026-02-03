@@ -1,5 +1,6 @@
 # 6.1.2
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
+- Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.
 
 # 6.1.1
 - Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.

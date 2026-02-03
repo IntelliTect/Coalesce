@@ -621,6 +621,35 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertOrder(m => m.PersonId, 1, 2, 3);
     }
 
+    [Fact]
+    public void ApplyListDefaultSorting_RespectsSuppressFallback()
+    {
+        var models = new[]
+        {
+            new TargetClasses.SuppressedDefaultOrdering { Id = 2, Name = "abc" },
+            new TargetClasses.SuppressedDefaultOrdering { Id = 1, Name = "def" },
+            new TargetClasses.SuppressedDefaultOrdering { Id = 3, Name = "def" },
+        };
+
+        var source = Source<TargetClasses.SuppressedDefaultOrdering>();
+        source.Db.AddRange(models);
+        source.Db.SaveChanges();
+
+        // Precondition: should have no default ordering
+        var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
+        Assert.Empty(defaultOrdering);
+
+        source.User.LogIn();
+        // Without any sorting specified, the query should maintain database/insertion order
+        // (no ordering will be applied)
+        var results = source
+            .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
+            .ToList();
+        
+        // Results should be in insertion order (2, 1, 3) since no ordering was applied
+        Assert.Equal(3, results.Count);
+    }
+
     [Theory]
     [InlineData(true, "propVal", "string:propV")]
     [InlineData(false, "propVal", "string:proppV")]

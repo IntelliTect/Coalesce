@@ -70,4 +70,14 @@ public class ClassViewModelTests
 
         Assert.DoesNotContain(vm.ClientConsts, c => c.Name == nameof(ComplexModel.UnexpostedConst));
     }
+
+    [Theory]
+    [ClassViewModelData(typeof(TargetClasses.SuppressedDefaultOrdering))]
+    public void DefaultOrderBy_SuppressesFallbackWhenSpecified(ClassViewModelData data)
+    {
+        var orderings = data.ClassViewModel.DefaultOrderBy;
+        
+        // Should be empty - no fallback ordering should be applied
+        Assert.Empty(orderings);
+    }
 }

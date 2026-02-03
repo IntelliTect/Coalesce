@@ -651,6 +651,14 @@ public abstract class PropertyViewModel : ValueViewModel
             var order = this.GetAttributeValue<DefaultOrderByAttribute, int>(a => a.FieldOrder);
             var direction = this.GetAttributeValue<DefaultOrderByAttribute, DefaultOrderByAttribute.OrderByDirections>(nameof(DefaultOrderByAttribute.OrderByDirection));
             var fieldName = this.GetAttributeValue<DefaultOrderByAttribute>(a => a.FieldName);
+            var suppress = this.GetAttributeValue<DefaultOrderByAttribute, bool>(a => a.Suppress);
+
+            // If Suppress is true, this property should not be used for ordering at all
+            if (suppress == true)
+            {
+                return null;
+            }
+
             if (order != null && direction != null)
             {
                 var name = Name;

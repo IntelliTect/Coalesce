@@ -20,7 +20,7 @@ jobs:
       COALESCE_VERSION: ${{ steps.version.outputs.COALESCE_VERSION }}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     
     - name: "Verify and set COALESCE_VERSION variable"
       id: version

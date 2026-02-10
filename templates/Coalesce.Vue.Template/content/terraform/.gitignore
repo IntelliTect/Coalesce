@@ -1,5 +1,6 @@
 # Local .terraform directories
 **/.terraform/*
+*tfplan*
 
 # .tfstate files
 *.tfstate
@@ -24,5 +25,4 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-# Lock file (commit this to version control)
-# .terraform.lock.hcl
+.terraform.lock.hcl

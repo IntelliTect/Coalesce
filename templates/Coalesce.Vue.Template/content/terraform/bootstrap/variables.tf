@@ -18,3 +18,8 @@ variable "storage_account_name" {
   description = "The storage account name for Terraform state. Must be globally unique."
   type        = string
 }
+
+variable "github_repository" {
+  description = "The GitHub repository in 'owner/repo' format, for OIDC federation."
+  type        = string
+}

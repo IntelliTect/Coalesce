@@ -59,7 +59,7 @@ backend locally without modifying committed files.
 ## Architecture
 
 ```
-bootstrap/          # One-time setup: creates shared RG + state storage account
+bootstrap/          # One-time setup: shared RG, state storage, CI identity
 modules/
   environment/      # Per-environment resources (dev, prod)
   container_app/    # Azure Container Apps + environment
@@ -69,9 +69,12 @@ modules/
   key_vault/        # Azure Key Vault
   storage/          # Azure Blob Storage
   app_insights/     # Application Insights + Log Analytics
-  ci_identity/      # Per-environment CI/CD managed identity
 ```
 
 The shared resource group (`<project>-shared-rg`) is created by bootstrap and
 referenced as a data source in the main config. Each environment (dev, prod)
 gets its own resource group.
+
+Managed identities:
+- `<project>-ci` — shared CI identity created by bootstrap (build, deploy, and Terraform; Contributor + User Access Administrator on subscription, since Terraform creates role assignments on resources like ACR, Key Vault, and Storage)
+- `<project>-<env>-app-id` — per-environment app runtime identity

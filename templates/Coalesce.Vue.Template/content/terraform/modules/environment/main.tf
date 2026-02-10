@@ -27,20 +27,22 @@ resource "azurerm_user_assigned_identity" "app" {
   tags                = local.context.tags
 }
 
+# Federated credential for CI identity to deploy via this GitHub Environment
+resource "azurerm_federated_identity_credential" "ci_deploy" {
+  name                = "github-environment-${var.environment_name}"
+  resource_group_name = local.context.resource_group_name
+  parent_id           = var.ci_identity_id
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = "https://token.actions.githubusercontent.com"
+  subject             = "repo:${var.github_repository}:environment:${var.environment_name}"
+}
+
 module "vnet" {
   source = "../vnet"
 
   context                      = local.context
   address_space                = var.vnet_address_space
   container_apps_subnet_prefix = var.container_apps_subnet_prefix
-}
-
-module "ci_identity" {
-  source = "../ci_identity"
-
-  context            = local.context
-  github_repository  = var.github_repository
-  github_environment = var.github_environment
 }
 
 module "app_insights" {

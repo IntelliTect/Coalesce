@@ -90,12 +90,12 @@ variable "log_retention_in_days" {
 # CI/CD
 
 variable "github_repository" {
-  description = "The GitHub repository in 'owner/repo' format."
+  description = "The GitHub repository in 'owner/repo' format, for OIDC federation."
   type        = string
 }
 
-variable "github_environment" {
-  description = "The GitHub environment name for OIDC federation."
+variable "ci_identity_id" {
+  description = "The resource ID of the CI managed identity, for federated credentials."
   type        = string
 }
 

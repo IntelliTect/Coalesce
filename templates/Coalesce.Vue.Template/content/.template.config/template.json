@@ -401,7 +401,8 @@
           "condition": "!Terraform",
           "exclude": [
             "**/terraform/**",
-            "**/.github/workflows/deploy-container-app.yml"
+            "**/.github/workflows/deploy-container-app.yml",
+            "**/.github/workflows/terraform.yml"
           ]
         }
       ]

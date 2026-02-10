@@ -20,7 +20,7 @@ variable "github_repository" {
 }
 
 variable "tags" {
-  description = "Common tags applied to all resources."
+  description = "Additional tags applied to all resources. `project` and `managedBy` are always included."
   type        = map(string)
   default     = {}
 }

@@ -10,7 +10,7 @@ resource "azurerm_container_app_environment" "this" {
   infrastructure_subnet_id   = var.subnet_id
   tags                       = var.context.tags
 
-  infrastructure_resource_group_name = "ME_${local.cae_name}_${var.context.resource_group_name}_${var.context.location}"
+  infrastructure_resource_group_name = "${var.context.resource_group_name}-cae-managed"
 
   workload_profile {
     name                  = "Consumption"
@@ -19,7 +19,7 @@ resource "azurerm_container_app_environment" "this" {
 }
 
 resource "azurerm_container_app" "this" {
-  name                         = "${var.context.project_name}-${var.context.environment_name}-ca"
+  name                         = "${var.context.project_name}-${var.context.environment_name}-app"
   container_app_environment_id = azurerm_container_app_environment.this.id
   resource_group_name          = var.context.resource_group_name
   revision_mode                = "Single"
@@ -41,7 +41,8 @@ resource "azurerm_container_app" "this" {
     max_replicas = var.max_replicas
 
     container {
-      name   = "app"
+      name = "app"
+      // NOTE: Initial container image will be replaced by azure pipelines deploy
       image  = "${var.container_registry_login_server}/crccheck/hello-world:latest"
       cpu    = var.cpu
       memory = var.memory

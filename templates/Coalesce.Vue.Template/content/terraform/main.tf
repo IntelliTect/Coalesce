@@ -1,3 +1,10 @@
+locals {
+  tags = merge({
+    project   = var.project_name
+    managedBy = "terraform"
+  }, var.tags)
+}
+
 # Shared resource group - created by bootstrap
 data "azurerm_resource_group" "shared" {
   name = "${var.project_name}-shared-rg"
@@ -11,7 +18,7 @@ module "acr" {
   location            = data.azurerm_resource_group.shared.location
   resource_group_name = data.azurerm_resource_group.shared.name
   sku                 = "Basic"
-  tags                = var.tags
+  tags                = local.tags
 
   pull_identity_principal_ids = {
     dev  = module.dev.identity_principal_id
@@ -20,27 +27,17 @@ module "acr" {
 }
 
 # ============================================================
-# Shared identity for CI build (main branch, outside environments)
+# CI identity - created by bootstrap, referenced here for ACR access
 # ============================================================
-resource "azurerm_user_assigned_identity" "ci_build" {
-  name                = "${var.project_name}-ci-build"
+data "azurerm_user_assigned_identity" "ci" {
+  name                = "${var.project_name}-ci"
   resource_group_name = data.azurerm_resource_group.shared.name
-  location            = var.location
 }
 
-resource "azurerm_federated_identity_credential" "github_branch" {
-  name                = "github-branch-main"
-  resource_group_name = data.azurerm_resource_group.shared.name
-  parent_id           = azurerm_user_assigned_identity.ci_build.id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://token.actions.githubusercontent.com"
-  subject             = "repo:${var.github_repository}:ref:refs/heads/main"
-}
-
-resource "azurerm_role_assignment" "acr_push_build" {
+resource "azurerm_role_assignment" "ci_acr_push" {
   scope                = module.acr.id
   role_definition_name = "AcrPush"
-  principal_id         = azurerm_user_assigned_identity.ci_build.principal_id
+  principal_id         = data.azurerm_user_assigned_identity.ci.principal_id
 }
 
 # ============================================================
@@ -52,6 +49,10 @@ module "dev" {
   project_name     = var.project_name
   environment_name = "dev"
   location         = var.location
+
+  # CI/CD
+  github_repository = var.github_repository
+  ci_identity_id    = data.azurerm_user_assigned_identity.ci.id
 
   # Networking
   vnet_address_space           = "10.0.0.0/16"
@@ -70,11 +71,7 @@ module "dev" {
   # Storage
   storage_replication_type = "LRS"
 
-  # CI/CD
-  github_repository  = var.github_repository
-  github_environment = "dev"
-
-  tags = var.tags
+  tags = local.tags
 }
 
 # ============================================================
@@ -86,6 +83,10 @@ module "prod" {
   project_name     = var.project_name
   environment_name = "prod"
   location         = var.location
+
+  # CI/CD
+  github_repository = var.github_repository
+  ci_identity_id    = data.azurerm_user_assigned_identity.ci.id
 
   # Networking
   vnet_address_space           = "10.1.0.0/16"
@@ -104,9 +105,5 @@ module "prod" {
   # Storage
   storage_replication_type = "GRS"
 
-  # CI/CD
-  github_repository  = var.github_repository
-  github_environment = "prod"
-
-  tags = var.tags
+  tags = local.tags
 }

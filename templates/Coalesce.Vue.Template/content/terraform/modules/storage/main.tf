@@ -4,14 +4,10 @@ resource "azurerm_storage_account" "this" {
   resource_group_name             = var.context.resource_group_name
   account_tier                    = "Standard"
   account_replication_type        = var.replication_type
+  public_network_access_enabled   = true
   shared_access_key_enabled       = false
   allow_nested_items_to_be_public = false
   tags                            = var.context.tags
-
-  network_rules {
-    default_action             = "Deny"
-    virtual_network_subnet_ids = var.allowed_subnet_ids
-  }
 }
 
 data "azurerm_client_config" "current" {}
@@ -34,7 +30,9 @@ resource "azurerm_storage_container" "this" {
 }
 
 resource "azurerm_role_assignment" "blob_contributor" {
+  for_each = var.blob_contributors
+
   scope                = azurerm_storage_account.this.id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = var.identity_principal_id
+  principal_id         = each.value
 }

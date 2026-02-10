@@ -391,7 +391,11 @@
         },
         {
           "condition": "!AIChat",
-          "exclude": ["**/AIChat.vue", "**/AIAgentService.cs"]
+          "exclude": [
+            "**/AIChat.vue",
+            "**/AIAgentService.cs",
+            "**/terraform/modules/ai_services"
+          ]
         },
         {
           "condition": "!AzurePipelines",

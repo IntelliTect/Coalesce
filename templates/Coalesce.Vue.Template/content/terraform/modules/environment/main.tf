@@ -61,11 +61,12 @@ module "app_insights" {
 module "storage" {
   source = "../storage"
 
-  context               = local.context
-  container_name        = "data"
-  replication_type      = var.storage_replication_type
-  identity_principal_id = azurerm_user_assigned_identity.app.principal_id
-  allowed_subnet_ids    = [module.vnet.container_apps_subnet_id]
+  context          = local.context
+  container_name   = "data"
+  replication_type = var.storage_replication_type
+  blob_contributors = {
+    app = azurerm_user_assigned_identity.app.principal_id
+  }
 }
 
 module "sql" {
@@ -78,13 +79,30 @@ module "sql" {
   subnet_id           = module.vnet.container_apps_subnet_id
 }
 
+#if (AIChat)
+module "ai_services" {
+  source = "../ai_services"
+
+  context = local.context
+  allowed_users = {
+    app = azurerm_user_assigned_identity.app.principal_id
+  }
+}
+#endif
+
 module "key_vault" {
   source = "../key_vault"
 
-  context               = local.context
-  identity_principal_id = azurerm_user_assigned_identity.app.principal_id
-  allowed_subnet_ids    = [module.vnet.container_apps_subnet_id]
-  secrets               = var.additional_secrets
+  context = local.context
+  secrets_users = {
+    app = azurerm_user_assigned_identity.app.principal_id
+  }
+  secrets = merge(
+    var.additional_secrets,
+    #if (AIChat)
+    { "ConnectionStrings--OpenAI" = module.openai.connection_string },
+    #endif
+  )
 }
 
 module "container_app" {

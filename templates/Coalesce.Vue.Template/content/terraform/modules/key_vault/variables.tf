@@ -9,19 +9,14 @@ variable "context" {
   })
 }
 
-variable "identity_principal_id" {
-  description = "The principal ID of the managed identity to grant Key Vault Secrets User."
-  type        = string
+variable "secrets_users" {
+  description = "Map of descriptive keys to principal IDs to grant Key Vault Secrets User role."
+  type        = map(string)
+  default     = {}
 }
 
 variable "secrets" {
   description = "Map of secret names to values to store in the Key Vault."
   type        = map(string)
   default     = {}
-}
-
-variable "allowed_subnet_ids" {
-  description = "List of subnet IDs allowed through network rules."
-  type        = list(string)
-  default     = []
 }

@@ -21,13 +21,8 @@ variable "replication_type" {
   default     = "LRS"
 }
 
-variable "identity_principal_id" {
-  description = "The principal ID of the managed identity to grant Storage Blob Data Contributor."
-  type        = string
-}
-
-variable "allowed_subnet_ids" {
-  description = "List of subnet IDs allowed through network rules."
-  type        = list(string)
-  default     = []
+variable "blob_contributors" {
+  description = "Map of descriptive keys to principal IDs to grant Storage Blob Data Contributor role."
+  type        = map(string)
+  default     = {}
 }

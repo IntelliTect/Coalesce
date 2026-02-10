@@ -1,0 +1,10 @@
+# Rename this file to terraform.tfvars and fill in your values.
+project_name      = "myapp"
+location          = "westus2"
+subscription_id   = "00000000-0000-0000-0000-000000000000"
+github_repository = "my-org/my-repo"
+
+tags = {
+  project   = "myapp"
+  managedBy = "terraform"
+}

@@ -249,6 +249,13 @@
       "displayName": "CI: Github Actions",
       "description": "Include a build-test-and-deploy.yml github action file template.",
       "$coalesceLink": "https://docs.github.com/actions/use-cases-and-examples/deploying/deploying-net-to-azure-app-service"
+    },
+    "Terraform": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Infrastructure: Terraform for Azure",
+      "description": "Include Terraform configurations for provisioning Azure infrastructure with Container Apps, Azure SQL, Key Vault, Blob Storage, VNet, and managed identity. Defines dev and prod environments.",
+      "$coalesceLink": "https://developer.hashicorp.com/terraform/tutorials/azure-get-started"
     }
   },
   "sources": [
@@ -388,6 +395,13 @@
         {
           "condition": "!GithubActions",
           "exclude": ["**/.github/workflows/build-test-and-deploy.yml"]
+        },
+        {
+          "condition": "!Terraform",
+          "exclude": [
+            "**/terraform/**",
+            "**/.github/workflows/deploy-container-app.yml"
+          ]
         }
       ]
     }

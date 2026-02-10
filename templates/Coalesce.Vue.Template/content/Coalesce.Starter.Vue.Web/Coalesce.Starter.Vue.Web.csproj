@@ -3,6 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <DotnetCliToolTargetFramework>net10.0</DotnetCliToolTargetFramework>
     <UserSecretsId>8474a2d7-c044-4e5e-81dd-55e78596f186</UserSecretsId>
+    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
   </PropertyGroup>
 
   <ItemGroup>

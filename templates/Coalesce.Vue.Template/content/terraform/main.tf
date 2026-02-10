@@ -19,11 +19,6 @@ module "acr" {
   resource_group_name = data.azurerm_resource_group.shared.name
   sku                 = "Basic"
   tags                = local.tags
-
-  pull_identity_principal_ids = {
-    dev  = module.dev.identity_principal_id
-    prod = module.prod.identity_principal_id
-  }
 }
 
 # ============================================================
@@ -60,6 +55,7 @@ module "dev" {
 
   # Container App
   container_registry_login_server = module.acr.login_server
+  container_registry_id           = module.acr.id
   container_app_cpu               = 0.5
   container_app_memory            = "1Gi"
   container_app_min_replicas      = 0
@@ -94,6 +90,7 @@ module "prod" {
 
   # Container App
   container_registry_login_server = module.acr.login_server
+  container_registry_id           = module.acr.id
   container_app_cpu               = 1.0
   container_app_memory            = "2Gi"
   container_app_min_replicas      = 1

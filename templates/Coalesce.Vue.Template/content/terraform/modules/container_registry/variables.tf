@@ -19,12 +19,6 @@ variable "sku" {
   default     = "Basic"
 }
 
-variable "pull_identity_principal_ids" {
-  description = "Map of identity names to principal IDs to grant AcrPull role."
-  type        = map(string)
-  default     = {}
-}
-
 variable "tags" {
   description = "Tags to apply to resources."
   type        = map(string)

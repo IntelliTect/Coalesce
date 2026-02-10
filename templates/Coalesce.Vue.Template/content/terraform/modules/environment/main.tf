@@ -27,10 +27,16 @@ resource "azurerm_user_assigned_identity" "app" {
   tags                = local.context.tags
 }
 
+resource "azurerm_role_assignment" "acr_pull" {
+  scope                = var.container_registry_id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.app.principal_id
+}
+
 # Federated credential for CI identity to deploy via this GitHub Environment
 resource "azurerm_federated_identity_credential" "ci_deploy" {
   name                = "github-environment-${var.environment_name}"
-  resource_group_name = local.context.resource_group_name
+  resource_group_name = regex("/resourceGroups/([^/]+)/", var.ci_identity_id)[0]
   parent_id           = var.ci_identity_id
   audience            = ["api://AzureADTokenExchange"]
   issuer              = "https://token.actions.githubusercontent.com"

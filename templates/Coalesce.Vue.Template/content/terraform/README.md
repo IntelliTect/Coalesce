@@ -16,15 +16,15 @@ Create the shared resource group, state storage, and CI identity:
 
 ```bash
 cd bootstrap
-cp ../terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values, and add storage_account_name and github_repository
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
 terraform init
 terraform apply
 ```
 
-Copy the `backend_config` output into `../backend.tf` (uncomment and fill in the values).
-Copy the `github_vars_summary` output into your GitHub repository settings (Variables).
-Create `dev`, `prod`, and `terraform` GitHub Environments (add **required reviewers** to `terraform` and `prod`).
+After apply successfully completes, copy the content of `backend_config` from the terminal into `../backend.tf`.
+
+Additionally, add the variables in the `github_vars_summary` output into your GitHub repository settings (Variables). Create `dev`, `prod`, and `terraform` GitHub Environments (add **required reviewers** to `terraform` and `prod`).
 
 ### 2. Deploy Infrastructure
 

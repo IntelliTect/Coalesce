@@ -12,18 +12,17 @@ Azure subscription. Since `backend.tf` ships as a commented-out placeholder,
 developers use a `backend_override.tf` file (gitignored) to configure a real
 backend locally without modifying committed files.
 
-1. Create `terraform.tfvars` (gitignored) from `terraform.tfvars.example` and fill in real values.
-
-2. Run bootstrap to create the shared resource group and state storage:
+1. Run bootstrap to create the shared resource group and state storage:
 
    ```bash
    cd bootstrap
-   # Create terraform.tfvars with project_name, location, subscription_id, storage_account_name
+   cp terraform.tfvars.example terraform.tfvars
+   # Edit terraform.tfvars with your values
    terraform init
    terraform apply
    ```
 
-3. Create `backend_override.tf` (gitignored) using the values from the bootstrap output:
+2. Create `backend_override.tf` (gitignored) using the values from the bootstrap output:
 
    ```hcl
    terraform {
@@ -36,12 +35,12 @@ backend locally without modifying committed files.
    }
    ```
 
-4. Initialize and apply:
+3. Initialize and apply:
 
    ```bash
    cd ..  # back to terraform/
    terraform init
-   terraform apply
+   terraform apply -var-file="bootstrap/terraform.tfvars"
    ```
 
 ## How It Works

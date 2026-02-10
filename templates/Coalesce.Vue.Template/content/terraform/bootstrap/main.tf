@@ -19,8 +19,12 @@ resource "azurerm_resource_group" "shared" {
   location = var.location
 }
 
+locals {
+  storage_account_name = coalesce(var.storage_account_name, "${var.project_name}tfstate")
+}
+
 resource "azurerm_storage_account" "tfstate" {
-  name                            = var.storage_account_name
+  name                            = local.storage_account_name
   resource_group_name             = azurerm_resource_group.shared.name
   location                        = azurerm_resource_group.shared.location
   account_tier                    = "Standard"

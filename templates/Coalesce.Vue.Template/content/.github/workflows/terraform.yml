@@ -63,7 +63,11 @@ jobs:
 
       - name: Terraform Plan
         run: |
-          terraform plan -no-color -input=false ${{ steps.targets.outputs.args }} -out=tfplan 2>&1 | tee plan_output.txt
+          terraform plan -no-color -input=false \
+            -var="project_name=${{ vars.PROJECT_NAME }}" \
+            -var="subscription_id=${{ vars.AZURE_SUBSCRIPTION_ID }}" \
+            -var="github_repository=${{ github.repository }}" \
+            ${{ steps.targets.outputs.args }} -out=tfplan 2>&1 | tee plan_output.txt
 
       - name: Comment Plan on PR
         if: github.event_name == 'pull_request'

@@ -32,6 +32,11 @@ variable "container_registry_login_server" {
   type        = string
 }
 
+variable "container_registry_id" {
+  description = "The resource ID of the shared container registry."
+  type        = string
+}
+
 variable "container_app_cpu" {
   description = "CPU cores for the container app."
   type        = number

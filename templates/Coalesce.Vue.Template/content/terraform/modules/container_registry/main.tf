@@ -9,14 +9,6 @@ resource "azurerm_container_registry" "this" {
   tags                = var.tags
 }
 
-resource "azurerm_role_assignment" "acr_pull" {
-  for_each = var.pull_identity_principal_ids
-
-  scope                = azurerm_container_registry.this.id
-  role_definition_name = "AcrPull"
-  principal_id         = each.value
-}
-
 // Import hello world image for initial container deployments.
 resource "terraform_data" "import_helloworld_image" {
   provisioner "local-exec" {

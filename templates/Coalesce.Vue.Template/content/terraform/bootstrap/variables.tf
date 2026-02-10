@@ -15,8 +15,9 @@ variable "subscription_id" {
 }
 
 variable "storage_account_name" {
-  description = "The storage account name for Terraform state. Must be globally unique."
+  description = "The storage account name for Terraform state. Must be globally unique. Defaults to '{project_name}tfstate'."
   type        = string
+  default     = null
 }
 
 variable "github_repository" {

@@ -159,6 +159,6 @@ jobs:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/deploy-container-app.yml
     with:
-      environment_name: production
+      environment_name: prod
     secrets: inherit
 #endif

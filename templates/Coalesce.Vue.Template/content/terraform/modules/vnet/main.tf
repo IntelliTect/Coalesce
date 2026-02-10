@@ -14,7 +14,7 @@ resource "azurerm_subnet" "container_apps" {
   service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage", "Microsoft.KeyVault"]
 
   delegation {
-    name = "container-apps-delegation"
+    name = "Microsoft.App.environments"
     service_delegation {
       name    = "Microsoft.App/environments"
       actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]

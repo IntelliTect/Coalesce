@@ -18,7 +18,6 @@ variable "secrets" {
   description = "Map of secret names to values to store in the Key Vault."
   type        = map(string)
   default     = {}
-  sensitive   = true
 }
 
 variable "allowed_subnet_ids" {

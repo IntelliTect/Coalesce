@@ -14,15 +14,15 @@ provider "azurerm" {
   subscription_id = var.subscription_id
 }
 
-resource "azurerm_resource_group" "tfstate" {
-  name     = "${var.project_name}-tfstate-rg"
+resource "azurerm_resource_group" "shared" {
+  name     = "${var.project_name}-shared-rg"
   location = var.location
 }
 
 resource "azurerm_storage_account" "tfstate" {
   name                            = var.storage_account_name
-  resource_group_name             = azurerm_resource_group.tfstate.name
-  location                        = azurerm_resource_group.tfstate.location
+  resource_group_name             = azurerm_resource_group.shared.name
+  location                        = azurerm_resource_group.shared.location
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   shared_access_key_enabled       = true # Required for Terraform state backend

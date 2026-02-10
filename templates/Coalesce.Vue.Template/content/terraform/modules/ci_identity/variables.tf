@@ -1,6 +1,12 @@
-variable "project_name" {
-  description = "The project name."
-  type        = string
+variable "context" {
+  description = "The shared context object containing project_name, environment_name, location, resource_group_name, and tags."
+  type = object({
+    project_name        = string
+    environment_name    = string
+    location            = string
+    resource_group_name = string
+    tags                = map(string)
+  })
 }
 
 variable "github_repository" {
@@ -8,22 +14,7 @@ variable "github_repository" {
   type        = string
 }
 
-variable "github_environments" {
-  description = "Map of environment names to GitHub environment names for OIDC federation."
-  type        = map(string)
-  default = {
-    dev  = "dev"
-    prod = "production"
-  }
-}
-
-variable "acr_id" {
-  description = "The resource ID of the container registry to grant AcrPush."
+variable "github_environment" {
+  description = "The GitHub environment name for OIDC federation."
   type        = string
-}
-
-variable "environment_resource_group_ids" {
-  description = "Map of environment names to resource group IDs to grant Contributor for deployments."
-  type        = map(string)
-  default     = {}
 }

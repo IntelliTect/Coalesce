@@ -32,17 +32,6 @@ variable "container_registry_login_server" {
   type        = string
 }
 
-variable "container_image_name" {
-  description = "The container image name (without registry or tag)."
-  type        = string
-}
-
-variable "container_image_tag" {
-  description = "The container image tag."
-  type        = string
-  default     = "latest"
-}
-
 variable "container_app_cpu" {
   description = "CPU cores for the container app."
   type        = number
@@ -98,13 +87,24 @@ variable "log_retention_in_days" {
   default     = 30
 }
 
+# CI/CD
+
+variable "github_repository" {
+  description = "The GitHub repository in 'owner/repo' format."
+  type        = string
+}
+
+variable "github_environment" {
+  description = "The GitHub environment name for OIDC federation."
+  type        = string
+}
+
 # Extensibility
 
 variable "additional_secrets" {
   description = "Additional secrets to store in Key Vault."
   type        = map(string)
   default     = {}
-  sensitive   = true
 }
 
 variable "additional_env_vars" {
@@ -115,12 +115,6 @@ variable "additional_env_vars" {
     secret_name = optional(string)
   }))
   default = []
-}
-
-variable "tags" {
-  description = "Tags to apply to all resources."
-  type        = map(string)
-  default     = {}
 }
 
 variable "tags" {

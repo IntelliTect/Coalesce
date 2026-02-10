@@ -4,9 +4,7 @@ locals {
   })
 }
 
-module "resource_group" {
-  source = "../resource_group"
-
+resource "azurerm_resource_group" "this" {
   name     = "${var.project_name}-${var.environment_name}-rg"
   location = var.location
   tags     = local.tags
@@ -16,10 +14,17 @@ locals {
   context = {
     project_name        = var.project_name
     environment_name    = var.environment_name
-    location            = module.resource_group.location
-    resource_group_name = module.resource_group.name
+    location            = azurerm_resource_group.this.location
+    resource_group_name = azurerm_resource_group.this.name
     tags                = local.tags
   }
+}
+
+resource "azurerm_user_assigned_identity" "app" {
+  name                = "${local.context.project_name}-${local.context.environment_name}-app-id"
+  location            = local.context.location
+  resource_group_name = local.context.resource_group_name
+  tags                = local.context.tags
 }
 
 module "vnet" {
@@ -30,10 +35,12 @@ module "vnet" {
   container_apps_subnet_prefix = var.container_apps_subnet_prefix
 }
 
-module "identity" {
-  source = "../identity"
+module "ci_identity" {
+  source = "../ci_identity"
 
-  context = local.context
+  context            = local.context
+  github_repository  = var.github_repository
+  github_environment = var.github_environment
 }
 
 module "app_insights" {
@@ -49,7 +56,7 @@ module "storage" {
   context               = local.context
   container_name        = "data"
   replication_type      = var.storage_replication_type
-  identity_principal_id = module.identity.principal_id
+  identity_principal_id = azurerm_user_assigned_identity.app.principal_id
   allowed_subnet_ids    = [module.vnet.container_apps_subnet_id]
 }
 
@@ -58,8 +65,8 @@ module "sql" {
 
   context             = local.context
   sku_name            = var.sql_sku_name
-  aad_admin_login     = module.identity.client_id
-  aad_admin_object_id = module.identity.principal_id
+  aad_admin_login     = azurerm_user_assigned_identity.app.client_id
+  aad_admin_object_id = azurerm_user_assigned_identity.app.principal_id
   subnet_id           = module.vnet.container_apps_subnet_id
 }
 
@@ -67,7 +74,7 @@ module "key_vault" {
   source = "../key_vault"
 
   context               = local.context
-  identity_principal_id = module.identity.principal_id
+  identity_principal_id = azurerm_user_assigned_identity.app.principal_id
   allowed_subnet_ids    = [module.vnet.container_apps_subnet_id]
   secrets               = var.additional_secrets
 }
@@ -78,10 +85,8 @@ module "container_app" {
   context                         = local.context
   log_analytics_workspace_id      = module.app_insights.log_analytics_workspace_id
   subnet_id                       = module.vnet.container_apps_subnet_id
-  identity_id                     = module.identity.id
+  identity_id                     = azurerm_user_assigned_identity.app.id
   container_registry_login_server = var.container_registry_login_server
-  container_image_name            = var.container_image_name
-  container_image_tag             = var.container_image_tag
   cpu                             = var.container_app_cpu
   memory                          = var.container_app_memory
   min_replicas                    = var.container_app_min_replicas
@@ -97,7 +102,7 @@ module "container_app" {
       },
       {
         name  = "AZURE_CLIENT_ID"
-        value = module.identity.client_id
+        value = azurerm_user_assigned_identity.app.client_id
       },
       {
         name  = "ASPNETCORE_FORWARDEDHEADERS_ENABLED"

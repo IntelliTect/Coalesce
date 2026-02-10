@@ -272,7 +272,8 @@
             "**/*.g.cs",
             "**/*.g.ts",
             "**/*.lock.json",
-            "**/package-lock.json"
+            "**/package-lock.json",
+            "**/DEVELOPMENT.md"
           ]
         },
         {

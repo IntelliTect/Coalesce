@@ -1,10 +1,6 @@
-# Shared resource group for cross-environment resources (ACR)
-module "shared_rg" {
-  source = "./modules/resource_group"
-
-  name     = "${var.project_name}-shared-rg"
-  location = var.location
-  tags     = var.tags
+# Shared resource group - created by bootstrap
+data "azurerm_resource_group" "shared" {
+  name = "${var.project_name}-shared-rg"
 }
 
 # Shared container registry
@@ -12,8 +8,8 @@ module "acr" {
   source = "./modules/container_registry"
 
   name                = replace("${var.project_name}acr", "-", "")
-  location            = module.shared_rg.location
-  resource_group_name = module.shared_rg.name
+  location            = data.azurerm_resource_group.shared.location
+  resource_group_name = data.azurerm_resource_group.shared.name
   sku                 = "Basic"
   tags                = var.tags
 
@@ -24,19 +20,27 @@ module "acr" {
 }
 
 # ============================================================
-# CI/CD Identity (GitHub Actions OIDC)
+# Shared identity for CI build (main branch, outside environments)
 # ============================================================
-module "ci_identity" {
-  source = "./modules/ci_identity"
+resource "azurerm_user_assigned_identity" "ci_build" {
+  name                = "${var.project_name}-ci-build"
+  resource_group_name = data.azurerm_resource_group.shared.name
+  location            = var.location
+}
 
-  project_name      = var.project_name
-  github_repository = var.github_repository
-  acr_id            = module.acr.id
+resource "azurerm_federated_identity_credential" "github_branch" {
+  name                = "github-branch-main"
+  resource_group_name = data.azurerm_resource_group.shared.name
+  parent_id           = azurerm_user_assigned_identity.ci_build.id
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = "https://token.actions.githubusercontent.com"
+  subject             = "repo:${var.github_repository}:ref:refs/heads/main"
+}
 
-  environment_resource_group_ids = {
-    dev  = module.dev.resource_group_id
-    prod = module.prod.resource_group_id
-  }
+resource "azurerm_role_assignment" "acr_push_build" {
+  scope                = module.acr.id
+  role_definition_name = "AcrPush"
+  principal_id         = azurerm_user_assigned_identity.ci_build.principal_id
 }
 
 # ============================================================
@@ -51,12 +55,10 @@ module "dev" {
 
   # Networking
   vnet_address_space           = "10.0.0.0/16"
-  container_apps_subnet_prefix = "10.0.0.0/23"
+  container_apps_subnet_prefix = "10.0.8.0/21"
 
   # Container App
   container_registry_login_server = module.acr.login_server
-  container_image_name            = var.project_name
-  container_image_tag             = var.container_image_tag
   container_app_cpu               = 0.5
   container_app_memory            = "1Gi"
   container_app_min_replicas      = 0
@@ -67,6 +69,10 @@ module "dev" {
 
   # Storage
   storage_replication_type = "LRS"
+
+  # CI/CD
+  github_repository  = var.github_repository
+  github_environment = "dev"
 
   tags = var.tags
 }
@@ -83,12 +89,10 @@ module "prod" {
 
   # Networking
   vnet_address_space           = "10.1.0.0/16"
-  container_apps_subnet_prefix = "10.1.0.0/23"
+  container_apps_subnet_prefix = "10.1.8.0/21"
 
   # Container App
   container_registry_login_server = module.acr.login_server
-  container_image_name            = var.project_name
-  container_image_tag             = var.container_image_tag
   container_app_cpu               = 1.0
   container_app_memory            = "2Gi"
   container_app_min_replicas      = 1
@@ -99,6 +103,10 @@ module "prod" {
 
   # Storage
   storage_replication_type = "GRS"
+
+  # CI/CD
+  github_repository  = var.github_repository
+  github_environment = "prod"
 
   tags = var.tags
 }

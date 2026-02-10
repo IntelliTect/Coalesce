@@ -1,10 +1,21 @@
+locals {
+  cae_name = "${var.context.project_name}-${var.context.environment_name}-cae"
+}
+
 resource "azurerm_container_app_environment" "this" {
-  name                       = "${var.context.project_name}-${var.context.environment_name}-cae"
+  name                       = local.cae_name
   location                   = var.context.location
   resource_group_name        = var.context.resource_group_name
   log_analytics_workspace_id = var.log_analytics_workspace_id
   infrastructure_subnet_id   = var.subnet_id
   tags                       = var.context.tags
+
+  infrastructure_resource_group_name = "ME_${local.cae_name}_${var.context.resource_group_name}_${var.context.location}"
+
+  workload_profile {
+    name                  = "Consumption"
+    workload_profile_type = "Consumption"
+  }
 }
 
 resource "azurerm_container_app" "this" {
@@ -12,6 +23,7 @@ resource "azurerm_container_app" "this" {
   container_app_environment_id = azurerm_container_app_environment.this.id
   resource_group_name          = var.context.resource_group_name
   revision_mode                = "Single"
+  workload_profile_name        = "Consumption"
   tags                         = var.context.tags
 
   identity {
@@ -30,9 +42,20 @@ resource "azurerm_container_app" "this" {
 
     container {
       name   = "app"
-      image  = "${var.container_registry_login_server}/${var.container_image_name}:${var.container_image_tag}"
+      image  = "${var.container_registry_login_server}/crccheck/hello-world:latest"
       cpu    = var.cpu
       memory = var.memory
+
+      env {
+        # Port for crccheck/hello-world to listen on
+        name  = "PORT"
+        value = "8080"
+      }
+
+      env {
+        name  = "ASPNETCORE_HTTP_PORTS"
+        value = "8080"
+      }
 
       dynamic "env" {
         for_each = var.env_vars
@@ -86,5 +109,11 @@ resource "azurerm_container_app" "this" {
       percentage      = 100
       latest_revision = true
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      template[0].container[0].image
+    ]
   }
 }

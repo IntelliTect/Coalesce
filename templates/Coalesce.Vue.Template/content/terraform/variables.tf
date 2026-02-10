@@ -14,12 +14,6 @@ variable "subscription_id" {
   type        = string
 }
 
-variable "container_image_tag" {
-  description = "The container image tag to deploy. Override during CI/CD."
-  type        = string
-  default     = "latest"
-}
-
 variable "github_repository" {
   description = "The GitHub repository in 'owner/repo' format, for OIDC federation."
   type        = string

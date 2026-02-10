@@ -1,3 +1,5 @@
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_container_registry" "this" {
   name                = var.name
   location            = var.location

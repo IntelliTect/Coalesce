@@ -29,17 +29,6 @@ variable "container_registry_login_server" {
   type        = string
 }
 
-variable "container_image_name" {
-  description = "The container image name (without registry or tag)."
-  type        = string
-}
-
-variable "container_image_tag" {
-  description = "The container image tag."
-  type        = string
-  default     = "latest"
-}
-
 variable "cpu" {
   description = "CPU cores allocated to the container (e.g. 0.5, 1.0)."
   type        = number

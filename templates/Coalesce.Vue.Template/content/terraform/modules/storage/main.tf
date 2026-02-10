@@ -14,10 +14,23 @@ resource "azurerm_storage_account" "this" {
   }
 }
 
+data "azurerm_client_config" "current" {}
+
+# Grant the Terraform executor access so blob containers can be managed
+# when shared_access_key_enabled = false.
+resource "azurerm_role_assignment" "deployer_blob_contributor" {
+  scope                = azurerm_storage_account.this.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+
 resource "azurerm_storage_container" "this" {
   name                  = var.container_name
   storage_account_id    = azurerm_storage_account.this.id
   container_access_type = "private"
+
+  depends_on = [azurerm_role_assignment.deployer_blob_contributor]
 }
 
 resource "azurerm_role_assignment" "blob_contributor" {

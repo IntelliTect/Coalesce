@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: "Which environment to target (blank for all)"
+        description: "Which environment to target"
         type: choice
         options:
           - all
@@ -86,7 +86,7 @@ jobs:
 
             <details><summary>Show Plan</summary>
 
-            \`\`\`
+            \`\`\` hcl
             ${truncated}
             \`\`\`
 

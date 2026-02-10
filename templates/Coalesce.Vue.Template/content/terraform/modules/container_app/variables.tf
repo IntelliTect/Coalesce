@@ -55,12 +55,8 @@ variable "max_replicas" {
 
 variable "env_vars" {
   description = "List of environment variables for the container."
-  type = list(object({
-    name        = string
-    value       = optional(string)
-    secret_name = optional(string)
-  }))
-  default = []
+  type        = map(string)
+  default     = {}
 }
 
 variable "secrets" {

@@ -10,7 +10,7 @@ resource "azurerm_container_app_environment" "this" {
   infrastructure_subnet_id   = var.subnet_id
   tags                       = var.context.tags
 
-  infrastructure_resource_group_name = "${var.context.resource_group_name}-cae-managed"
+  infrastructure_resource_group_name = "${var.context.resource_group_name}-aca-managed"
 
   workload_profile {
     name                  = "Consumption"

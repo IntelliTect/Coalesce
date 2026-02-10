@@ -19,9 +19,9 @@ output "backend_config" {
 output "github_vars_summary" {
   description = "GitHub repository variables to configure after bootstrap."
   value       = <<-EOT
-    -----------------------------------
-    Configure these in your GitHub repository settings (Variables):
-    -----------------------------------
+    --------------------------------------------
+    Add these as Repository Variables in GitHub:
+    --------------------------------------------
 
       AZURE_TENANT_ID:       ${azurerm_user_assigned_identity.ci.tenant_id}
       AZURE_SUBSCRIPTION_ID: ${var.subscription_id}

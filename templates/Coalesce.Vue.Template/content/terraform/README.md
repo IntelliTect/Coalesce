@@ -22,12 +22,14 @@ terraform init
 terraform apply
 ```
 
-After apply successfully completes, copy the content of `backend_config` from the terminal into `../backend.tf`.
+### 2. Configure Variables and GitHub
 
-Additionally, add the variables in the `github_vars_summary` output into your GitHub repository settings (Variables). Create `dev`, `prod`, and `terraform` GitHub Environments (add **required reviewers** to `terraform` and `prod`).
+After apply successfully completes, follow the instructions in your terminal to copy values into `backend.tf` and your GitHub repository's Repository Variables.
 
-### 2. Deploy Infrastructure
+Create `dev`, `prod`, and `terraform` GitHub Environments (add **required reviewers** to `terraform` and `prod`).
 
-Run the **Terraform** GitHub Actions workflow with the "Run workflow" button on the action within your repository's Actions on GitHub.com.
+### 3. Deploy Infrastructure
+
+Run the **Terraform** GitHub Actions workflow with the "Run workflow" button in your repository's Actions tab.
 
 Changes to `terraform/` trigger a plan automatically on PR. Plans are posted as PR comments. To apply, use the **Run workflow** button on the Terraform workflow. A reviewer must approve in the `terraform` environment before apply runs.

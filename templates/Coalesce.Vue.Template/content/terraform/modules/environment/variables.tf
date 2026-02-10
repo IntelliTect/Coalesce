@@ -77,21 +77,6 @@ variable "storage_replication_type" {
   default     = "LRS"
 }
 
-# App Insights
-
-variable "app_insights_connection_string" {
-  description = "The App Insights connection string to inject into the container. Set to null to disable."
-  type        = string
-  default     = null
-  sensitive   = true
-}
-
-variable "log_retention_in_days" {
-  description = "Log retention period in days."
-  type        = number
-  default     = 30
-}
-
 # CI/CD
 
 variable "github_repository" {
@@ -112,14 +97,10 @@ variable "additional_secrets" {
   default     = {}
 }
 
-variable "additional_env_vars" {
+variable "env_vars" {
   description = "Additional environment variables for the container app."
-  type = list(object({
-    name        = string
-    value       = optional(string)
-    secret_name = optional(string)
-  }))
-  default = []
+  type        = map(string)
+  default     = {}
 }
 
 variable "tags" {

@@ -29,7 +29,8 @@ jobs:
       - name: Deploy to Container App
         uses: azure/container-apps-deploy-action@v2
         with:
+          disableTelemetry: true
           containerAppName: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-app
           resourceGroup: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-rg
-          imageToDeploy: ${{ vars.ACR_NAME }}.azurecr.io/${{ github.event.repository.name }}:${{ github.sha }}
+          imageToDeploy: ${{ vars.ACR_NAME }}.azurecr.io/app:${{ github.sha }}
 #endif

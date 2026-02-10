@@ -2,15 +2,7 @@ locals {
   tags = merge(var.tags, {
     environment = var.environment_name
   })
-}
 
-resource "azurerm_resource_group" "this" {
-  name     = "${var.project_name}-${var.environment_name}-rg"
-  location = var.location
-  tags     = local.tags
-}
-
-locals {
   context = {
     project_name        = var.project_name
     environment_name    = var.environment_name
@@ -18,6 +10,12 @@ locals {
     resource_group_name = azurerm_resource_group.this.name
     tags                = local.tags
   }
+}
+
+resource "azurerm_resource_group" "this" {
+  name     = "${var.project_name}-${var.environment_name}-rg"
+  location = var.location
+  tags     = local.tags
 }
 
 resource "azurerm_user_assigned_identity" "app" {
@@ -51,12 +49,14 @@ module "vnet" {
   container_apps_subnet_prefix = var.container_apps_subnet_prefix
 }
 
+#if (AppInsights)
 module "app_insights" {
   source = "../app_insights"
 
   context           = local.context
-  retention_in_days = var.log_retention_in_days
+  retention_in_days = 30
 }
+#endif
 
 module "storage" {
   source = "../storage"
@@ -102,27 +102,17 @@ module "container_app" {
 
   secrets = []
 
-  env_vars = concat(
-    [
-      {
-        name  = "ConnectionStrings__DefaultConnection"
-        value = module.sql.connection_string
-      },
-      {
-        name  = "AZURE_CLIENT_ID"
-        value = azurerm_user_assigned_identity.app.client_id
-      },
-      {
-        name  = "ASPNETCORE_FORWARDEDHEADERS_ENABLED"
-        value = "true"
-      }
-    ],
-    var.app_insights_connection_string != null ? [
-      {
-        name  = "APPLICATIONINSIGHTS_CONNECTION_STRING"
-        value = var.app_insights_connection_string
-      }
-    ] : [],
-    var.additional_env_vars
+  env_vars = merge(
+    {
+      #if (AppInsights)
+      "APPLICATIONINSIGHTS_CONNECTION_STRING" = module.app_insights.application_insights_connection_string
+      #endif
+      "ASPNETCORE_FORWARDEDHEADERS_ENABLED"  = "true"
+      "AZURE_CLIENT_ID"                      = azurerm_user_assigned_identity.app.client_id
+      "ConnectionStrings__Blobs"             = module.storage.blobs_connection_string
+      "ConnectionStrings__DefaultConnection" = module.sql.connection_string
+      "ConnectionStrings__KeyVault"          = module.key_vault.vault_uri
+    },
+    var.env_vars
   )
 }

@@ -1,4 +1,4 @@
-name: Build, Test, and Deploy Coalesce.Starter.Vue
+name: Build, Test, and Deploy
 
 # https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
 on:
@@ -6,6 +6,7 @@ on:
     branches:
       - main
   pull_request:
+    paths-ignore: ["terraform/**"]
   workflow_dispatch:
 
 #if (!Terraform)
@@ -105,9 +106,9 @@ jobs:
             --configuration Release \
             --no-restore \
             --no-build \
-            -r linux-x64 \
             --self-contained \
             -t:PublishContainer \
+            -p:ContainerRepository=app \
             -p:ContainerRegistry=${{ vars.ACR_NAME }}.azurecr.io \
             -p:ContainerImageTags=${{ github.sha }}
   #endif

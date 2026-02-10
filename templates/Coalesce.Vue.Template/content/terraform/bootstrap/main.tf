@@ -91,3 +91,10 @@ resource "azurerm_role_assignment" "ci_uaa" {
   role_definition_name = "User Access Administrator"
   principal_id         = azurerm_user_assigned_identity.ci.principal_id
 }
+
+# Terraform state backend uses Azure AD auth, which requires data plane access
+resource "azurerm_role_assignment" "ci_tfstate_blob_owner" {
+  scope                = azurerm_storage_account.tfstate.id
+  role_definition_name = "Storage Blob Data Owner"
+  principal_id         = azurerm_user_assigned_identity.ci.principal_id
+}

@@ -255,7 +255,8 @@
       "datatype": "bool",
       "displayName": "Infrastructure: Terraform for Azure",
       "description": "Include Terraform configurations for provisioning Azure infrastructure with Container Apps, Azure SQL, Key Vault, Blob Storage, VNet, and managed identity. Defines dev and prod environments.",
-      "$coalesceLink": "https://developer.hashicorp.com/terraform/tutorials/azure-get-started"
+      "$coalesceLink": "https://developer.hashicorp.com/terraform/tutorials/azure-get-started",
+      "$coalesceRequires": ["and", "GithubActions"]
     }
   },
   "sources": [
@@ -352,7 +353,10 @@
         },
         {
           "condition": "!AppInsights",
-          "exclude": ["**/useAppInsights.ts"]
+          "exclude": [
+            "**/useAppInsights.ts",
+            "**/terraform/modules/app_insights"
+          ]
         },
         {
           "condition": "!GoogleAuth",

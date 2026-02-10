@@ -8,72 +8,21 @@ For end-user instructions, see [README.md](README.md).
 ## Developer Setup
 
 To test changes to the Terraform configuration, you can deploy it to your own
-Azure subscription. Since `backend.tf` ships as a commented-out placeholder,
-developers use a `backend_override.tf` file (gitignored) to configure a real
-backend locally without modifying committed files.
+Azure subscription. 
 
-1. Run bootstrap to create the shared resource group and state storage:
+1. Instantiate the template:
 
-   ```bash
-   cd bootstrap
-   cp terraform.tfvars.example terraform.tfvars
-   # Edit terraform.tfvars with your values
-   terraform init
-   terraform apply
-   ```
+``` pwsh
+Coalesce\templates\Coalesce.Vue.Template\TestLocal.ps1 -- "--Terraform --GithubActions"
+cd (Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "Coalesce.Template.TestInstance")
+```
 
-2. Create `backend_override.tf` (gitignored) using the values from the bootstrap output:
+2. Follow the instructions in terraform/README.md in the new template instance.
 
-   ```hcl
-   terraform {
-     backend "azurerm" {
-       resource_group_name  = "<from bootstrap output>"
-       storage_account_name = "<from bootstrap output>"
-       container_name       = "tfstate"
-       key                  = "terraform.tfstate"
-     }
-   }
-   ```
-
-3. Initialize and apply:
+3. Push the template instance to an actual repo and test there. Otherwise, to apply locally, apply the root with the bootstrap tfvars:
 
    ```bash
    cd ..  # back to terraform/
    terraform init
    terraform apply -var-file="bootstrap/terraform.tfvars"
    ```
-
-## How It Works
-
-- **`backend.tf`** ships with a commented-out backend block with placeholder values.
-  End users uncomment it and fill in their values after running bootstrap.
-
-- **`backend_override.tf`** is gitignored (via the override pattern in `.gitignore`).
-  Template developers use this to point at the real test environment backend
-  without modifying committed files.
-
-- **`terraform.tfvars`** is also gitignored. Both template developers and end users
-  may create this locally from `terraform.tfvars.example`.
-
-## Architecture
-
-```
-bootstrap/          # One-time setup: shared RG, state storage, CI identity
-modules/
-  environment/      # Per-environment resources (dev, prod)
-  container_app/    # Azure Container Apps + environment
-  container_registry/ # Shared ACR
-  vnet/             # Virtual network + subnets
-  sql/              # Azure SQL Server + database
-  key_vault/        # Azure Key Vault
-  storage/          # Azure Blob Storage
-  app_insights/     # Application Insights + Log Analytics
-```
-
-The shared resource group (`<project>-shared-rg`) is created by bootstrap and
-referenced as a data source in the main config. Each environment (dev, prod)
-gets its own resource group.
-
-Managed identities:
-- `<project>-ci` — shared CI identity created by bootstrap (build, deploy, and Terraform; Contributor + User Access Administrator on subscription, since Terraform creates role assignments on resources like ACR, Key Vault, and Storage)
-- `<project>-<env>-app-id` — per-environment app runtime identity

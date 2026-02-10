@@ -183,6 +183,7 @@ app.UseNoCacheResponseHeader();
 #if OpenAPI
 app.MapSwagger();
 app.MapScalarApiReference(c => c.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json");
+
 #endif
 #if Hangfire
 app.MapHangfireDashboard("/hangfire", new() { Authorization = [] }).RequireAuthorization(
@@ -192,7 +193,9 @@ app.MapHangfireDashboard("/hangfire", new() { Authorization = [] }).RequireAutho
     new AuthorizeAttribute { Roles = builder.Environment.IsDevelopment() ? null : nameof(Permission.Admin) }
 #endif
 );
+
 #endif
+app.MapDefaultEndpoints();
 app.MapRazorPages();
 app.MapDefaultControllerRoute();
 

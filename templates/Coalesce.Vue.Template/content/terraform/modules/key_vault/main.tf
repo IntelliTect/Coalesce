@@ -18,7 +18,7 @@ resource "azurerm_key_vault" "this" {
   }
 }
 
-# Allow the managed identity to read secrets
+# Allow the app identity to read secrets
 resource "azurerm_role_assignment" "secrets_user" {
   scope                = azurerm_key_vault.this.id
   role_definition_name = "Key Vault Secrets User"

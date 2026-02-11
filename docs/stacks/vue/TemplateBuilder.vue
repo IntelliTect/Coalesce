@@ -2,10 +2,11 @@
   <div class="template-builder">
     <div class="border" style="padding: 4px">
       <label
-        v-for="param in parameters"
+        v-for="{ param, depth } in treeParameters"
         :key="param.key"
         :style="{
           opacity: !param.meetsReqs ? 0.5 : 1,
+          marginLeft: depth * 32 + 'px',
         }"
         class="template-builder-option"
       >
@@ -41,6 +42,25 @@
               :style="{ maxHeight: !param.meetsReqs ? '30px' : '0px' }"
             >
               Requires {{ param.requires }}
+            </div>
+
+            <div
+              v-if="param.warning"
+              style="
+                font-style: italic;
+                margin-top: 0px;
+                transition: max-height 0.25s;
+                overflow: hidden;
+                color: var(--vp-c-warning-1);
+              "
+              :style="{
+                maxHeight:
+                  param.warning.active && selections.includes(param.key)
+                    ? '30px'
+                    : '0px',
+              }"
+            >
+              ⚠ {{ param.warning.message }}
             </div>
           </div>
         </div>
@@ -112,8 +132,10 @@ type Parameter = {
   description?: string;
   meetsReqs: boolean;
   requires: string;
+  warning: { message: string; active: boolean } | null;
   onlyIf?: string[];
   link?: string;
+  parent?: string;
 };
 
 const options = defineModel<string>("options");
@@ -129,7 +151,18 @@ const parameters = Object.entries(templateJson.symbols)
     get requires() {
       return !("$coalesceRequires" in v)
         ? null
-        : displayReq(v.$coalesceRequires as any);
+        : displayReq(v.$coalesceRequires as any, getAncestors(k));
+    },
+    get warning() {
+      if (!("$coalesceWarning" in v)) return null;
+      const w = v.$coalesceWarning as {
+        condition: Requirements;
+        message: string;
+      };
+      return {
+        message: w.message,
+        active: !evalReq(w.condition),
+      };
     },
     link:
       "$coalesceLink" in v
@@ -137,8 +170,33 @@ const parameters = Object.entries(templateJson.symbols)
           ? withBase(v.$coalesceLink)
           : v.$coalesceLink
         : undefined,
+    parent: "$coalesceParent" in v ? (v.$coalesceParent as string) : undefined,
   }))
   .filter((x) => x.type == "parameter") as Parameter[];
+
+const treeParameters = (() => {
+  const result: { param: Parameter; depth: number }[] = [];
+  function addChildren(parentKey: string | undefined, depth: number) {
+    for (const p of parameters) {
+      if (p.parent === parentKey) {
+        result.push({ param: p, depth });
+        addChildren(p.key, depth + 1);
+      }
+    }
+  }
+  addChildren(undefined, 0);
+  return result;
+})();
+
+function getAncestors(key: string): Set<string> {
+  const ancestors = new Set<string>();
+  let current = parameters.find((p) => p.key === key);
+  while (current?.parent) {
+    ancestors.add(current.parent);
+    current = parameters.find((p) => p.key === current!.parent);
+  }
+  return ancestors;
+}
 
 const selections = ref([
   "Identity",
@@ -147,6 +205,13 @@ const selections = ref([
   "AuditLogs",
   "UserPictures",
   "LocalAuth", // https://github.com/IntelliTect/Coalesce/issues/522
+  "Passkeys",
+
+  // Azure
+  "GithubActions",
+  "BlobStorage",
+  "KeyVault",
+  "AppInsights",
 ]);
 
 watch(
@@ -178,25 +243,27 @@ function evalReq(req: Requirements): boolean {
     return false;
   }
 }
-function displayReq(req: Requirements): string | null {
+function displayReq(req: Requirements, exclude?: Set<string>): string | null {
   if (req[0] == "and") {
-    return req
+    const parts = req
       .slice(1)
+      .filter((r) => !(typeof r == "string" && exclude?.has(r)))
       .map((req) =>
         typeof req == "string"
           ? parameters.find((p) => p.key == req)?.displayName
-          : "(" + displayReq(req) + ")",
-      )
-      .join(" and ");
+          : "(" + displayReq(req, exclude) + ")",
+      );
+    return parts.length ? parts.join(" and ") : null;
   } else if (req[0] == "or") {
-    return req
+    const parts = req
       .slice(1)
+      .filter((r) => !(typeof r == "string" && exclude?.has(r)))
       .map((req) =>
         typeof req == "string"
           ? parameters.find((p) => p.key == req)?.displayName
-          : "(" + displayReq(req) + ")",
-      )
-      .join(" or ");
+          : "(" + displayReq(req, exclude) + ")",
+      );
+    return parts.length ? parts.join(" or ") : null;
   } else {
     return null;
   }

@@ -12,6 +12,7 @@ variable "context" {
 variable "log_analytics_workspace_id" {
   description = "The ID of the Log Analytics workspace for the Container App Environment."
   type        = string
+  default     = null
 }
 
 variable "subnet_id" {
@@ -57,13 +58,4 @@ variable "env_vars" {
   description = "List of environment variables for the container."
   type        = map(string)
   default     = {}
-}
-
-variable "secrets" {
-  description = "List of secrets sourced from Key Vault."
-  type = list(object({
-    name                = string
-    key_vault_secret_id = string
-  }))
-  default = []
 }

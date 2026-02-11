@@ -11,7 +11,14 @@ var sqlDb = OperatingSystem.IsWindows() && OSArchitecture != Architecture.Arm64
     // Fall back to a container
     : builder.AddSqlServer("sql").WithLifetime(ContainerLifetime.Persistent).AddDatabase(nameof(Coalesce_Starter_Vue_Web));
 
-#if AIChat
+#if BlobStorage
+var blobs = builder.AddAzureStorage("storage").RunAsEmulator().AddBlobContainer("blobs");
+#endif
+#if KeyVault
+var keyVault = builder.AddConnectionString("KeyVault");
+#endif
+
+#if AIChat && !KeyVault
 // https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration
 var openAi = builder.AddAzureOpenAI("OpenAI");
 openAi.AddDeployment(name: "chat", modelName: "gpt-4.1", modelVersion: "2025-04-14")
@@ -21,7 +28,13 @@ openAi.AddDeployment(name: "chat", modelName: "gpt-4.1", modelVersion: "2025-04-
 var app = builder.AddProject<Coalesce_Starter_Vue_Web>("app")
     .WithReference(sqlDb, "DefaultConnection")
     .WaitFor(sqlDb)
-#if AIChat
+#if BlobStorage
+    .WithReference(blobs)
+#endif
+#if KeyVault
+    .WithReference(keyVault)
+#endif
+#if AIChat && !KeyVault
     .WithReference(openAi)
     .WaitFor(openAi)
 #endif

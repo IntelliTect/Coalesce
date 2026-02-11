@@ -63,6 +63,7 @@ jobs:
 
       - name: Terraform Plan
         run: |
+          set -o pipefail
           terraform plan -no-color -input=false \
             -var="project_name=${{ vars.PROJECT_NAME }}" \
             -var="subscription_id=${{ vars.AZURE_SUBSCRIPTION_ID }}" \

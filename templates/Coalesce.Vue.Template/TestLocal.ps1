@@ -47,6 +47,22 @@ foreach ($testCase in $testCases) {
         npm run lint:fix # ensure all lint issues are auto-fixable
         # CS9113: Parameter '<param>' is unread. (too annoying to fix this for every possible combination of template params)
         dotnet build .. /nowarn:CS9113
+
+        if ($testCase -match 'AzureTerraform' -and (Get-Command terraform -ErrorAction SilentlyContinue)) {
+            Push-Location $outDir/terraform
+            try {
+                terraform init -backend=false
+                terraform validate
+            }
+            finally { Pop-Location }
+            
+            Push-Location $outDir/terraform/bootstrap
+            try {
+                terraform init -backend=false
+                terraform validate
+            }
+            finally { Pop-Location }
+        }
     }
     finally {
         Pop-Location

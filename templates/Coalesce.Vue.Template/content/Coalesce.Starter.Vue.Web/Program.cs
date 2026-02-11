@@ -49,6 +49,15 @@ builder.Configuration
     .AddJsonFile("appsettings.localhost.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
+#if KeyVault
+if (builder.Configuration.GetConnectionString("KeyVault") is {})
+{
+    builder.Configuration.AddAzureKeyVaultSecrets("KeyVault",
+        options: new() { ReloadInterval = TimeSpan.FromMinutes(1) }
+    );
+}
+#endif
+
 builder.AddServiceDefaults();
 
 #region Configure Services
@@ -68,6 +77,10 @@ services.AddCoalesce<AppDbContext>();
 services.AddDataProtection().PersistKeysToDbContext<AppDbContext>();
 services.AddMvc();
 
+#if BlobStorage
+builder.AddAzureBlobContainerClient("Blobs");
+
+#endif
 #if Identity
 builder.ConfigureAuthentication();
 

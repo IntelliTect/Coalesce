@@ -13,7 +13,7 @@ Azure subscription.
 1. Instantiate the template:
 
 ``` pwsh
-Coalesce\templates\Coalesce.Vue.Template\TestLocal.ps1 -- "--Terraform --GithubActions"
+Coalesce\templates\Coalesce.Vue.Template\TestLocal.ps1 -- "--AzureTerraform --GithubActions"
 cd (Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "Coalesce.Template.TestInstance")
 ```
 

@@ -199,7 +199,7 @@ jobs:
           # Nothing:
           - ""
           # Everything (except tenancy):
-          - "--Identity --MicrosoftAuth --GoogleAuth --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI --Hangfire --AIChat"
+          - "--Identity --MicrosoftAuth --GoogleAuth --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI --Hangfire --AIChat --AzureTerraform --KeyVault --BlobStorage --EmailAzure --GithubActions"
           # Assorted partial variants:
           - "--Identity --UserPictures --TrackingBase"
           - "--Identity --MicrosoftAuth --AuditLogs --Hangfire --Passkeys"

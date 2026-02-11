@@ -99,7 +99,7 @@
         </v-card>
         <!--#endif -->
         <br />
-        <!--#if Terraform -->
+        <!--#if AzureTerraform -->
         <v-card title="Terraform Infrastructure">
           <v-card-text>
             <p>

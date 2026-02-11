@@ -88,7 +88,7 @@ public static class ProgramServiceDefaults
         }
 
 #if AppInsights
-        if (builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"] is string { Length: > 0 } aiConnStr)
+        if (builder.Configuration.GetConnectionString("AppInsights") is string { Length: > 0 } aiConnStr)
         {
             builder.Services.AddOpenTelemetry().UseAzureMonitor(opt => opt.ConnectionString = aiConnStr);
         }

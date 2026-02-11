@@ -58,6 +58,7 @@ module "app_insights" {
 }
 #endif
 
+#if (BlobStorage)
 module "storage" {
   source = "../storage"
 
@@ -68,6 +69,7 @@ module "storage" {
     app = azurerm_user_assigned_identity.app.principal_id
   }
 }
+#endif
 
 module "sql" {
   source = "../sql"
@@ -90,6 +92,7 @@ module "ai_services" {
 }
 #endif
 
+#if (KeyVault)
 module "key_vault" {
   source = "../key_vault"
 
@@ -99,17 +102,29 @@ module "key_vault" {
   }
   secrets = merge(
     var.additional_secrets,
-    #if (AIChat)
-    { "ConnectionStrings--OpenAI" = module.openai.connection_string },
-    #endif
+#if (AIChat)
+    { "ConnectionStrings--OpenAI" = module.ai_services.connection_string },
+#endif
   )
 }
+#endif
+
+#if (EmailAzure)
+module "acs" {
+  source = "../acs"
+
+  context               = local.context
+  identity_principal_id = azurerm_user_assigned_identity.app.principal_id
+}
+#endif
 
 module "container_app" {
   source = "../container_app"
 
-  context                         = local.context
-  log_analytics_workspace_id      = module.app_insights.log_analytics_workspace_id
+  context = local.context
+#if (AppInsights)
+  log_analytics_workspace_id = module.app_insights.log_analytics_workspace_id
+#endif
   subnet_id                       = module.vnet.container_apps_subnet_id
   identity_id                     = azurerm_user_assigned_identity.app.id
   container_registry_login_server = var.container_registry_login_server
@@ -118,18 +133,24 @@ module "container_app" {
   min_replicas                    = var.container_app_min_replicas
   max_replicas                    = var.container_app_max_replicas
 
-  secrets = []
-
   env_vars = merge(
     {
-      #if (AppInsights)
-      "APPLICATIONINSIGHTS_CONNECTION_STRING" = module.app_insights.application_insights_connection_string
-      #endif
       "ASPNETCORE_FORWARDEDHEADERS_ENABLED"  = "true"
       "AZURE_CLIENT_ID"                      = azurerm_user_assigned_identity.app.client_id
+      #if (AppInsights)
+      "ConnectionStrings__AppInsights"       = module.app_insights.connection_string
+      #endif
+      #if (BlobStorage)
       "ConnectionStrings__Blobs"             = module.storage.blobs_connection_string
+      #endif
       "ConnectionStrings__DefaultConnection" = module.sql.connection_string
+      #if (KeyVault)
       "ConnectionStrings__KeyVault"          = module.key_vault.vault_uri
+      #endif
+      #if (EmailAzure)
+      "Communication__Azure__Endpoint"       = module.acs.endpoint
+      "Communication__Azure__SenderEmail"    = module.acs.sender_email
+      #endif
     },
     var.env_vars
   )

@@ -61,9 +61,8 @@ resource "azurerm_container_app" "this" {
       dynamic "env" {
         for_each = var.env_vars
         content {
-          name        = env.value.name
-          value       = try(env.value.value, null)
-          secret_name = try(env.value.secret_name, null)
+          name  = env.key
+          value = env.value
         }
       }
 
@@ -89,15 +88,6 @@ resource "azurerm_container_app" "this" {
         interval_seconds        = 5
         failure_count_threshold = 30
       }
-    }
-  }
-
-  dynamic "secret" {
-    for_each = var.secrets
-    content {
-      name                = secret.value.name
-      key_vault_secret_id = secret.value.key_vault_secret_id
-      identity            = var.identity_id
     }
   }
 

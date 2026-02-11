@@ -1,4 +1,4 @@
-#if (Terraform)
+#if (AzureTerraform)
 name: Deploy Container App
 
 on:

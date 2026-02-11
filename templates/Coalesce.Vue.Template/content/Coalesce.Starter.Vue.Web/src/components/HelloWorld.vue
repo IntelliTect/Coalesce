@@ -50,8 +50,8 @@
             <!--#endif -->
           </v-card-text>
         </v-card>
-        <br />
         <!--#if Tenancy -->
+        <br />
         <v-card title="Tenancy">
           <v-card-text>
             <p>
@@ -98,66 +98,15 @@
           </v-card-text>
         </v-card>
         <!--#endif -->
-        <br />
         <!--#if AzureTerraform -->
+        <br />
         <v-card title="Terraform Infrastructure">
           <v-card-text>
             <p>
-              This project includes Terraform configurations in the
-              <code>terraform/</code> directory for provisioning Azure
-              infrastructure. See <code>terraform/README.md</code> for full
-              details.
-            </p>
-            <br />
-
-            <h3>Prerequisites</h3>
-            <ul class="mt-1">
-              <li>
-                <a href="https://developer.hashicorp.com/terraform/install">
-                  Terraform
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://learn.microsoft.com/en-us/cli/azure/install-azure-cli"
-                >
-                  Azure CLI
-                </a>
-                &mdash; logged in with <code>az login</code>
-              </li>
-              <li>An Azure subscription</li>
-            </ul>
-            <br />
-
-            <h3>1. Bootstrap</h3>
-            <p>
-              Create the shared resource group, state storage, and CI identity:
-            </p>
-            <pre class="mt-1">
-cd terraform/bootstrap
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your values
-terraform init
-terraform apply</pre
-            >
-            <br />
-            <h3>2. Configure Variables and GitHub</h3>
-            <p class="mt-2">
-              After apply completes, follow the instructions in your terminal to
-              copy values into <code>terraform/backend.tf</code> and your GitHub
-              repository's Repository Variables.
-            </p>
-            <p class="mt-2">
-              Create <code>dev</code>, <code>prod</code>, and
-              <code>terraform</code> GitHub Environments (add required reviewers
-              to <code>terraform</code> and <code>prod</code>).
-            </p>
-            <br />
-
-            <h3>3. Deploy Infrastructure</h3>
-            <p>
-              Run the <strong>Terraform</strong> GitHub Actions workflow with
-              the "Run workflow" button in your repository's Actions tab.
+              This project includes Terraform configurations for provisioning
+              Azure infrastructure. See
+              <code>terraform/README.md</code> in your project for instructions
+              on how to get this configured.
             </p>
           </v-card-text>
         </v-card>

@@ -20,13 +20,6 @@ permissions:
   contents: read
   pull-requests: write
 
-env:
-  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
-  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-  ARM_USE_OIDC: true
-  ARM_USE_AZUREAD: true
-
 jobs:
   plan:
     name: Plan (${{ inputs.target || 'all' }})
@@ -77,24 +70,36 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const plan = fs.readFileSync('terraform/plan_output.txt', 'utf8');
+            let plan = fs.readFileSync('terraform/plan_output.txt', 'utf8');
+
+            // Strip refreshing state output, start at "Terraform used the selected providers"
+            const startMarker = 'Terraform used the selected providers';
+            const startIndex = plan.indexOf(startMarker);
+            if (startIndex !== -1) {
+              plan = plan.substring(startIndex);
+            }
 
             const maxLen = 60000;
-            const truncated = plan.length > maxLen
-              ? plan.substring(0, maxLen) + '\n\n... (truncated)'
-              : plan;
+            let body;
+            if (plan.length > maxLen) {
+              body = `#### Terraform Plan 📋
 
-            const body = `#### Terraform Plan 📋
+              Plan output exceeds the comment size limit. Please check the [action output](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for the full plan.
 
-            <details><summary>Show Plan</summary>
+              *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            } else {
+              body = `#### Terraform Plan 📋
 
-            \`\`\` hcl
-            ${truncated}
-            \`\`\`
+              <details><summary>Show Plan</summary>
 
-            </details>
+              \`\`\` hcl
+              ${plan}
+              \`\`\`
 
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+              </details>
+
+              *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            }
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,

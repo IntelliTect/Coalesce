@@ -43,7 +43,7 @@ resource "azurerm_storage_container" "tfstate" {
 # CI identity (build, deploy, and Terraform)
 # ============================================================
 resource "azurerm_user_assigned_identity" "ci" {
-  name                = "${var.project_name}-ci"
+  name                = "${var.project_name}-ci-identity"
   resource_group_name = azurerm_resource_group.shared.name
   location            = azurerm_resource_group.shared.location
 }

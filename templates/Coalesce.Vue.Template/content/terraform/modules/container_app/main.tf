@@ -32,7 +32,7 @@ resource "azurerm_container_app" "this" {
   }
 
   registry {
-    server   = var.container_registry_login_server
+    server   = var.container_registry.login_server
     identity = var.identity_id
   }
 
@@ -42,8 +42,8 @@ resource "azurerm_container_app" "this" {
 
     container {
       name = "app"
-      // NOTE: Initial container image will be replaced by azure pipelines deploy
-      image  = "${var.container_registry_login_server}/crccheck/hello-world:latest"
+      // NOTE: Initial container image will be replaced by CI/CD deploy
+      image  = var.container_registry.initial_image
       cpu    = var.cpu
       memory = var.memory
 

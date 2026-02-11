@@ -1,6 +1,8 @@
 using IntelliTect.Coalesce.Helpers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Coalesce.Starter.Vue.Data;
 
@@ -11,8 +13,22 @@ public class DevelopmentAppDbContextFactory : IDesignTimeDbContextFactory<AppDbC
         // This is only used by the EF Core CLI tooling (`dotnet ef`).
         // It shouldn't ever be used in code where it might end up running in production.
 
+#if Identity
+        var services = new ServiceCollection();
+        services.AddDbContext<AppDbContext>(options => options
+            .UseSqlServer(DevelopmentConnectionStringLocator.Find())
+        );
+        services.AddIdentity<User, Role>(c =>
+        {
+            c.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+        })
+        .AddEntityFrameworkStores<AppDbContext>();
+
+        return services.BuildServiceProvider().GetRequiredService<AppDbContext>();
+#else
         var builder = new DbContextOptionsBuilder<AppDbContext>();
         builder.UseSqlServer(DevelopmentConnectionStringLocator.Find());
         return new AppDbContext(builder.Options);
+#endif
     }
 }

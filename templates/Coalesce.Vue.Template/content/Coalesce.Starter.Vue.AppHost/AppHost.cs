@@ -18,7 +18,7 @@ var blobs = builder.AddAzureStorage("storage").RunAsEmulator().AddBlobContainer(
 var keyVault = builder.AddConnectionString("KeyVault");
 #endif
 
-#if AIChat && !KeyVault
+#if (AIChat && !KeyVault)
 // https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration
 var openAi = builder.AddAzureOpenAI("OpenAI");
 openAi.AddDeployment(name: "chat", modelName: "gpt-4.1", modelVersion: "2025-04-14")
@@ -34,7 +34,7 @@ var app = builder.AddProject<Coalesce_Starter_Vue_Web>("app")
 #if KeyVault
     .WithReference(keyVault)
 #endif
-#if AIChat && !KeyVault
+#if (AIChat && !KeyVault)
     .WithReference(openAi)
     .WaitFor(openAi)
 #endif

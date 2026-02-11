@@ -16,13 +16,13 @@ variable "allowed_users" {
 }
 
 variable "chat_model_name" {
-  description = "The model name for the chat deployment (e.g. gpt-5.1)."
+  description = "The model name for the chat deployment (e.g. gpt-4.1)."
   type        = string
-  default     = "gpt-5.1"
+  default     = "gpt-4.1"
 }
 
 variable "chat_model_version" {
   description = "The model version for the chat deployment."
   type        = string
-  default     = "2025-11-13"
+  default     = "2025-04-14"
 }

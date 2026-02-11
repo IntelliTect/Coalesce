@@ -1,5 +1,4 @@
-#if (AzureTerraform)
-name: Deploy Container App
+name: ~Deploy Container App
 
 on:
   workflow_call:
@@ -7,6 +6,9 @@ on:
       environment_name:
         required: true
         type: string
+    outputs:
+      url:
+        value: ${{ jobs.deploy.outputs.url }}
 
 permissions:
   id-token: write
@@ -17,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment_name }}
+      url: ${{ steps.get-url.outputs.url }}
+    outputs:
+      url: ${{ steps.get-url.outputs.url }}
 
     steps:
       - name: Azure Login
@@ -26,6 +31,15 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Verify Container App
+        id: get-url
+        run: |
+          url=$(az containerapp show \
+            -n ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-app \
+            -g ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-rg \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          echo "url=https://$url" >> $GITHUB_OUTPUT
+
       - name: Deploy to Container App
         uses: azure/container-apps-deploy-action@v2
         with:
@@ -33,4 +47,3 @@ jobs:
           containerAppName: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-app
           resourceGroup: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-rg
           imageToDeploy: ${{ vars.ACR_NAME }}.azurecr.io/app:${{ github.sha }}
-#endif

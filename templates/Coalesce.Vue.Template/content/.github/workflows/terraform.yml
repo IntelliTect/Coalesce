@@ -1,4 +1,5 @@
 name: Terraform
+run-name: "Terraform (${{ inputs.target || 'all' }})"
 
 on:
   pull_request:

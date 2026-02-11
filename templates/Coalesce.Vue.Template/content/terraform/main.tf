@@ -25,7 +25,7 @@ module "acr" {
 # CI identity - created by bootstrap, referenced here for ACR access
 # ============================================================
 data "azurerm_user_assigned_identity" "ci" {
-  name                = "${var.project_name}-ci"
+  name                = "${var.project_name}-ci-identity"
   resource_group_name = data.azurerm_resource_group.shared.name
 }
 
@@ -54,12 +54,11 @@ module "dev" {
   container_apps_subnet_prefix = "10.0.8.0/21"
 
   # Container App
-  container_registry_login_server = module.acr.login_server
-  container_registry_id           = module.acr.id
-  container_app_cpu               = 0.5
-  container_app_memory            = "1Gi"
-  container_app_min_replicas      = 0
-  container_app_max_replicas      = 1
+  container_registry         = module.acr
+  container_app_cpu          = 0.5
+  container_app_memory       = "1Gi"
+  container_app_min_replicas = 0
+  container_app_max_replicas = 1
 
   # SQL - Basic tier for dev
   sql_sku_name = "Basic"
@@ -89,12 +88,11 @@ module "prod" {
   container_apps_subnet_prefix = "10.1.8.0/21"
 
   # Container App
-  container_registry_login_server = module.acr.login_server
-  container_registry_id           = module.acr.id
-  container_app_cpu               = 1.0
-  container_app_memory            = "2Gi"
-  container_app_min_replicas      = 1
-  container_app_max_replicas      = 1
+  container_registry         = module.acr
+  container_app_cpu          = 1.0
+  container_app_memory       = "2Gi"
+  container_app_min_replicas = 1
+  container_app_max_replicas = 1
 
   # SQL - S1 tier for prod
   sql_sku_name = "S1"

@@ -27,14 +27,13 @@ variable "container_apps_subnet_prefix" {
 
 # Container App
 
-variable "container_registry_login_server" {
-  description = "The login server of the shared container registry."
-  type        = string
-}
-
-variable "container_registry_id" {
-  description = "The resource ID of the shared container registry."
-  type        = string
+variable "container_registry" {
+  description = "The shared container registry module outputs."
+  type = object({
+    id            = string
+    login_server  = string
+    initial_image = string
+  })
 }
 
 variable "container_app_cpu" {

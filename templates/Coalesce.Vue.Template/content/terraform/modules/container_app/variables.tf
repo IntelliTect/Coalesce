@@ -25,9 +25,12 @@ variable "identity_id" {
   type        = string
 }
 
-variable "container_registry_login_server" {
-  description = "The login server of the container registry."
-  type        = string
+variable "container_registry" {
+  description = "The container registry module outputs."
+  type = object({
+    login_server  = string
+    initial_image = string
+  })
 }
 
 variable "cpu" {

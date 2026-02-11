@@ -15,8 +15,8 @@ resource "terraform_data" "import_helloworld_image" {
     command     = <<-EOT
     az acr import `
       --name ${azurerm_container_registry.this.name} `
-      --source docker.io/crccheck/hello-world:latest `
-      --image crccheck/hello-world:latest `
+      --source docker.io/${var.initial_image} `
+      --image ${var.initial_image} `
       --subscription ${data.azurerm_client_config.current.subscription_id}
     EOT
     interpreter = ["pwsh", "-Command"]

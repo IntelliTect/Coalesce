@@ -24,3 +24,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "initial_image" {
+  description = "The initial image to import for container app deployments before CI/CD pushes the real application."
+  type        = string
+  default     = "crccheck/hello-world:latest"
+}

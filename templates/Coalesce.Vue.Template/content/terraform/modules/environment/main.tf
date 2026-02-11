@@ -19,14 +19,14 @@ resource "azurerm_resource_group" "this" {
 }
 
 resource "azurerm_user_assigned_identity" "app" {
-  name                = "${local.context.project_name}-${local.context.environment_name}-app-id"
+  name                = "${local.context.project_name}-${local.context.environment_name}-app-identity"
   location            = local.context.location
   resource_group_name = local.context.resource_group_name
   tags                = local.context.tags
 }
 
 resource "azurerm_role_assignment" "acr_pull" {
-  scope                = var.container_registry_id
+  scope                = var.container_registry.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.app.principal_id
 }
@@ -102,9 +102,9 @@ module "key_vault" {
   }
   secrets = merge(
     var.additional_secrets,
-#if (AIChat)
+    #if (AIChat)
     { "ConnectionStrings--OpenAI" = module.ai_services.connection_string },
-#endif
+    #endif
   )
 }
 #endif
@@ -122,34 +122,34 @@ module "container_app" {
   source = "../container_app"
 
   context = local.context
-#if (AppInsights)
+  #if (AppInsights)
   log_analytics_workspace_id = module.app_insights.log_analytics_workspace_id
-#endif
-  subnet_id                       = module.vnet.container_apps_subnet_id
-  identity_id                     = azurerm_user_assigned_identity.app.id
-  container_registry_login_server = var.container_registry_login_server
-  cpu                             = var.container_app_cpu
-  memory                          = var.container_app_memory
-  min_replicas                    = var.container_app_min_replicas
-  max_replicas                    = var.container_app_max_replicas
+  #endif
+  subnet_id          = module.vnet.container_apps_subnet_id
+  identity_id        = azurerm_user_assigned_identity.app.id
+  container_registry = var.container_registry
+  cpu                = var.container_app_cpu
+  memory             = var.container_app_memory
+  min_replicas       = var.container_app_min_replicas
+  max_replicas       = var.container_app_max_replicas
 
   env_vars = merge(
     {
-      "ASPNETCORE_FORWARDEDHEADERS_ENABLED"  = "true"
-      "AZURE_CLIENT_ID"                      = azurerm_user_assigned_identity.app.client_id
+      "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true"
+      "AZURE_CLIENT_ID"                     = azurerm_user_assigned_identity.app.client_id
       #if (AppInsights)
-      "ConnectionStrings__AppInsights"       = module.app_insights.connection_string
+      "ConnectionStrings__AppInsights" = module.app_insights.connection_string
       #endif
       #if (BlobStorage)
-      "ConnectionStrings__Blobs"             = module.storage.blobs_connection_string
+      "ConnectionStrings__Blobs" = module.storage.blobs_connection_string
       #endif
       "ConnectionStrings__DefaultConnection" = module.sql.connection_string
       #if (KeyVault)
-      "ConnectionStrings__KeyVault"          = module.key_vault.vault_uri
+      "ConnectionStrings__KeyVault" = module.key_vault.vault_uri
       #endif
       #if (EmailAzure)
-      "Communication__Azure__Endpoint"       = module.acs.endpoint
-      "Communication__Azure__SenderEmail"    = module.acs.sender_email
+      "Communication__Azure__Endpoint"    = module.acs.endpoint
+      "Communication__Azure__SenderEmail" = module.acs.sender_email
       #endif
     },
     var.env_vars

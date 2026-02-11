@@ -11,10 +11,7 @@
   },
   "sourceName": "Coalesce.Starter.Vue",
   "preferNameDirectory": true,
-  "guids": [
-    "a0519206-1884-46ae-9307-ec95105646e5",
-    "8474a2d7-c044-4e5e-81dd-55e78596f186"
-  ],
+  "guids": ["427b7da5-dfe1-43cc-b172-40fe2d2fa505"],
   "symbols": {
     "KestrelPortGenerated": {
       "type": "generated",

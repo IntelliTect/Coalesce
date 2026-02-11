@@ -3,6 +3,7 @@
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>427b7da5-dfe1-43cc-b172-40fe2d2fa505</UserSecretsId>
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 

@@ -13,11 +13,12 @@ var sqlDb = OperatingSystem.IsWindows() && OSArchitecture != Architecture.Arm64
 
 #if BlobStorage
 var blobs = builder.AddAzureStorage("storage").RunAsEmulator().AddBlobContainer("blobs");
+
 #endif
 #if KeyVault
 var keyVault = builder.AddConnectionString("KeyVault");
-#endif
 
+#endif
 #if (AIChat && !KeyVault)
 // https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration
 var openAi = builder.AddAzureOpenAI("OpenAI");
@@ -32,7 +33,7 @@ var app = builder.AddProject<Coalesce_Starter_Vue_Web>("app")
     .WithReference(blobs)
 #endif
 #if KeyVault
-    .WithReference(keyVault)
+    .WithReference(keyVault, optional: true)
 #endif
 #if (AIChat && !KeyVault)
     .WithReference(openAi)

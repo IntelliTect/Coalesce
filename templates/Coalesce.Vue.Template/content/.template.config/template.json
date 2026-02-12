@@ -406,7 +406,10 @@
         },
         {
           "condition": "!MicrosoftAuth",
-          "exclude": ["**/microsoft-logo.svg"]
+          "exclude": [
+            "**/microsoft-logo.svg",
+            "**/terraform/modules/app_registration"
+          ]
         },
         {
           "condition": "!EmailAzure",

@@ -3,6 +3,11 @@ variable "project_name" {
   type        = string
 }
 
+variable "display_name" {
+  description = "An end-user-friendly display name of the application/environment."
+  type        = string
+}
+
 variable "environment_name" {
   description = "The environment name (e.g. dev, prod)."
   type        = string
@@ -23,6 +28,12 @@ variable "vnet_address_space" {
 variable "container_apps_subnet_prefix" {
   description = "The Container Apps subnet prefix (e.g. 10.0.0.0/23). Must be at least /23."
   type        = string
+}
+
+variable "allowed_origins" {
+  description = "A list of origins (without scheme or path) where user tokens are sent for sign-in."
+  type        = list(string)
+  default     = []
 }
 
 # Container App

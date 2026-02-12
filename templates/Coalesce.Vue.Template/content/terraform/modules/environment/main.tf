@@ -18,6 +18,7 @@ resource "azurerm_resource_group" "this" {
   tags     = local.tags
 }
 
+# The identity that the container app runs as
 resource "azurerm_user_assigned_identity" "app" {
   name                = "${local.context.project_name}-${local.context.environment_name}-app-identity"
   location            = local.context.location
@@ -25,6 +26,7 @@ resource "azurerm_user_assigned_identity" "app" {
   tags                = local.context.tags
 }
 
+# Give the container app permission to pull from the container registry.
 resource "azurerm_role_assignment" "acr_pull" {
   scope                = var.container_registry.id
   role_definition_name = "AcrPull"
@@ -48,6 +50,17 @@ module "vnet" {
   address_space                = var.vnet_address_space
   container_apps_subnet_prefix = var.container_apps_subnet_prefix
 }
+
+#if (MicrosoftAuth)
+module "app_registration" {
+  source = "../app_registration"
+
+  display_name = var.display_name
+  redirect_origins = concat(var.allowed_origins, [
+    module.container_app.fqdn
+  ])
+}
+#endif
 
 #if (AppInsights)
 module "app_insights" {
@@ -102,9 +115,15 @@ module "key_vault" {
   }
   secrets = merge(
     var.additional_secrets,
-    #if (AIChat)
-    { "ConnectionStrings--OpenAI" = module.ai_services.connection_string },
-    #endif
+    {
+      #if (AIChat)
+      "ConnectionStrings--OpenAI" = module.ai_services.connection_string
+      #endif
+      #if (MicrosoftAuth)
+      "Authentication--Microsoft--ClientId"     = module.app_registration.client_id
+      "Authentication--Microsoft--ClientSecret" = module.app_registration.client_secret
+      #endif
+    },
   )
 }
 #endif

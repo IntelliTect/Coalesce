@@ -49,3 +49,45 @@ Create `dev`, `prod`, and `terraform` GitHub Environments. Add **required review
 Perform a run of the **Terraform** GitHub Actions workflow with the "Run workflow" button in your repository's Actions tab to setup all remaining infrastructure. Continue to do this every time you make additional changes to your Terraform.
 
 Pull Request changes to `terraform/` trigger a plan automatically, and plans are posted as PR comments.
+
+
+## Azure App Registrations
+If you selected to include Sign-in with Microsoft in this Coalesce project, the Terraform will be configured to create an Azure App Registration in each environment.
+
+In order for this to succeed, one of the following must occur:
+
+
+### Option 1: Grant Unscoped Cloud Application Administrator
+This option is the simplest, but also requires wide permissions across your entire Azure tenant. 
+
+1. Find the CLIENT_ID of the CI Identity that was created in the bootstrap step. This will be the same value that you put in your GitHub repository variables.
+2. Grant that principal the [Cloud Application Administrator](https://portal.azure.com/#view/Microsoft_AAD_IAM/RoleMenuBlade/~/RoleMembers/objectId/158c047a-c907-4556-b7ef-446551a6b5f7/roleName/Cloud%20Application%20Administrator/roleTemplateId/158c047a-c907-4556-b7ef-446551a6b5f7/adminUnitObjectId//customRole~/false/resourceScope/%2F) role within Azure Entra ID.
+3. After observing a few minutes of propagation time, run or re-run Terraform apply, which should now be able to create the App Registration.
+
+### Option 2: Grant Scoped Cloud Application Administrator
+This option uses strictly scoped role assignments so that your CI identity cannot manage other, unrelated applications within your Entra tenant. This is the most ideal long-term option, but it also requires the most work because the CI identity won't be able to initially create the app registration through Terraform.
+
+1. [Create a new App Registration](https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/RegisteredApps), either through the Azure Portal or with the Azure CLI. The details you provide during creation do not matter - not even the name - they'll all become managed by Terraform. After creating the app registration, make a note of its `Object ID` (Azure Portal) or `id` (Azure CLI) property.
+2. Find the `Object (principal) ID` of the CI User-Assigned Managed Identity that was created in the bootstrap step. In the Azure Portal, navigate to the shared resource group (named with your project name and `-shared` suffix), click on the Managed Identity resource, and copy the `Object (principal) ID` value from the Overview page.
+3. Navigate to the Cloud Application Administrator role from [Privileged Identity Management](https://portal.azure.com/#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/roles/resourceId//resourceType/tenant/provider/aadroles) and grant a permanent assignment to the CI identity (using the Object ID from step 2), scoped to the App Registration from step 1. Alternatively, via the Azure CLI, fill in the two placeholder values and run:
+
+```pwsh
+echo '{"roleDefinitionId":"158c047a-c907-4556-b7ef-446551a6b5f7", "principalId":"CI_IDENTITY_OBJECT_ID", "directoryScopeId":"/APP_REG_OBJECT_ID"}' | az rest --method POST --uri "https://graph.microsoft.com/v1.0/roleManagement/directory/roleAssignments" --headers 'Content-Type=application/json' --body "@-"
+```
+
+4. In the root `main.tf` file, add import block(s) so that Terraform can begin managing the app registration. For example, for the dev environment, using the Object ID from step 1:
+
+```hcl
+import {
+  to = module.dev.module.app_registration.azuread_application.this
+  id = "/applications/<APP_REG_OBJECT_ID>"
+}
+```
+5. Once the above terraform has been applied by the Terraform GitHub action, the import block can be deleted.
+
+### Option 3: Fully Manual App Registration
+The last and least ideal option is to create and manage the App Registration entirely manually.
+
+1. Delete the `app_registration` Terraform module and its usages.
+2. Manually create an App Registration, either in the Azure Portal or with the Azure CLI.
+3. Configure the App Registration as desired. Add sign-in redirect URLs in the form `https://my-domain/signin-microsoft`. Generate a Client Secret and manually add it to the environment's Key Vault with the identifier `Authentication--Microsoft--ClientSecret`, with the app registration's Client Id stored into `Authentication--Microsoft--ClientId`.

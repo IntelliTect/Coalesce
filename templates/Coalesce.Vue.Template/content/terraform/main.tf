@@ -3,6 +3,9 @@ locals {
     project   = var.project_name
     managedBy = "terraform"
   }, var.tags)
+
+  # TODO: Update with user-friendly name of application
+  display_name = var.project_name
 }
 
 # Shared resource group - created by bootstrap
@@ -42,8 +45,10 @@ module "dev" {
   source = "./modules/environment"
 
   project_name     = var.project_name
+  display_name     = "${local.display_name} DEV"
   environment_name = "dev"
   location         = var.location
+  allowed_origins  = ["localhost"]
 
   # CI/CD
   github_repository = var.github_repository
@@ -76,8 +81,10 @@ module "prod" {
   source = "./modules/environment"
 
   project_name     = var.project_name
+  display_name     = local.display_name
   environment_name = "prod"
   location         = var.location
+  allowed_origins  = [] # E.g. ["myapp.com"]
 
   # CI/CD
   github_repository = var.github_repository

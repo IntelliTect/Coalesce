@@ -10,7 +10,7 @@ resource "azurerm_container_app_environment" "this" {
   infrastructure_subnet_id   = var.subnet_id
   tags                       = var.context.tags
 
-  infrastructure_resource_group_name = "${var.context.resource_group_name}-aca-managed"
+  infrastructure_resource_group_name = "ME_${var.context.resource_group_name}-aca-managed"
 
   workload_profile {
     name                  = "Consumption"
@@ -37,8 +37,9 @@ resource "azurerm_container_app" "this" {
   }
 
   template {
-    min_replicas = var.min_replicas
-    max_replicas = var.max_replicas
+    min_replicas               = var.min_replicas
+    max_replicas               = var.max_replicas
+    cooldown_period_in_seconds = 3600
 
     container {
       name = "app"

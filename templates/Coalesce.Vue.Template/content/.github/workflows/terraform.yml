@@ -64,19 +64,18 @@ jobs:
             -var="github_repository=${{ github.repository }}" \
             ${{ steps.targets.outputs.args }} -out=tfplan 2>&1 | tee plan_output.txt
 
-      - name: Comment Plan on PR
-        if: github.event_name == 'pull_request'
+      - name: Summarize Plan
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             let plan = fs.readFileSync('terraform/plan_output.txt', 'utf8');
 
-            // Strip refreshing state output, start at "Terraform used the selected providers"
-            const startMarker = 'Terraform used the selected providers';
-            const startIndex = plan.indexOf(startMarker);
-            if (startIndex !== -1) {
-              plan = plan.substring(startIndex);
+            // Strip refreshing state output, start after the last "Refreshing state..." line
+            const lines = plan.split('\n');
+            const lastRefreshIndex = lines.findLastIndex(l => l.includes('Refreshing state...'));
+            if (lastRefreshIndex !== -1) {
+              plan = lines.slice(lastRefreshIndex + 1).join('\n').trimStart();
             }
 
             const maxLen = 60000;
@@ -100,6 +99,10 @@ jobs:
 
               *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
             }
+
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, body);
+
+            if (context.eventName !== 'pull_request') return;
 
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,

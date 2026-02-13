@@ -172,59 +172,59 @@
               </v-list-item-subtitle>
             </v-list-item>
 
-            <template v-for="(item, i) in listItems" :key="item.key">
-              <slot
-                name="list-item-outer"
-                :item="item.model"
-                :search="search"
-                :selected="item.selected"
-                :props="{
-                  value: item.key,
-                  class: { 'pending-selection': pendingSelection === i },
-                  active: item.selected,
-                  role: 'option',
-                  'aria-selected': item.selected,
-                  onClick: () => onInput(item.model),
+            <slot
+              v-for="(item, i) in listItems"
+              :key="item.key"
+              v-memo="[
+                pendingSelection === i,
+                item.selected,
+                hasCustomItemSlots ? search : false,
+              ]"
+              name="list-item-outer"
+              :item="item.model"
+              :search="search"
+              :selected="item.selected"
+              :props="{
+                value: item.key,
+                class: { 'pending-selection': pendingSelection === i },
+                active: item.selected,
+                role: 'option',
+                'aria-selected': item.selected,
+                onClick: () => onInput(item.model),
+              }"
+              :select="
+                (value: boolean) => {
+                  if (value !== item.selected) onInput(item.model);
+                }
+              "
+            >
+              <v-list-item
+                :value="item.key"
+                :class="{
+                  'pending-selection': pendingSelection === i,
                 }"
-                :select="
-                  (value: boolean) => {
-                    if (value !== item.selected) onInput(item.model);
-                  }
-                "
+                :active="item.selected"
+                role="option"
+                :aria-selected="item.selected"
+                @click="onInput(item.model)"
               >
-                <v-list-item
-                  v-memo="[
-                    pendingSelection === i,
-                    item.selected,
-                    hasCustomItemSlots ? search : false,
-                  ]"
-                  :value="item.key"
-                  :class="{
-                    'pending-selection': pendingSelection === i,
-                  }"
-                  :active="item.selected"
-                  role="option"
-                  :aria-selected="item.selected"
-                  @click="onInput(item.model)"
-                >
-                  <template v-if="effectiveMultiple" #prepend>
-                    <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
-                  </template>
-                  <v-list-item-title>
-                    <slot
-                      name="list-item"
-                      :item="item.model"
-                      :search="search"
-                      :selected="item.selected"
-                    >
-                      <slot name="item" :item="item.model" :search="search">
-                        {{ itemTitle(item.model) }}
-                      </slot>
+                <template v-if="effectiveMultiple" #prepend>
+                  <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
+                </template>
+                <v-list-item-title>
+                  <slot
+                    name="list-item"
+                    :item="item.model"
+                    :search="search"
+                    :selected="item.selected"
+                  >
+                    <slot name="item" :item="item.model" :search="search">
+                      {{ itemTitle(item.model) }}
                     </slot>
-                  </v-list-item-title>
-                </v-list-item>
-              </slot>
-            </template>
+                  </slot>
+                </v-list-item-title>
+              </v-list-item>
+            </slot>
 
             <!-- TODO: With this version of c-select (versus the v2 one),
         we can implement infinite scroll much easier. Consider doing this instead of having this message. -->

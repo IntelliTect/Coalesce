@@ -1,3 +1,5 @@
+# 6.2.1
+
 # 6.2.0
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
 - Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.

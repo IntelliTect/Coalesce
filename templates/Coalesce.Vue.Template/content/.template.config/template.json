@@ -215,7 +215,7 @@
       "datatype": "bool",
       "displayName": "Infrastructure: Azure",
       "description": "Include Terraform configurations for provisioning Azure infrastructure with Container Apps and Azure SQL. Defines dev and prod environments.",
-      "$coalesceLink": "https://developer.hashicorp.com/terraform/tutorials/azure-get-started",
+      "$coalesceLink": "https://github.com/IntelliTect/Coalesce/blob/main/templates/Coalesce.Vue.Template/content/terraform/README.md",
       "$coalesceWarning": {
         "ifNot": ["and", "GithubActions"],
         "message": "Terraform CI is only provided for GitHub Actions. Without it, significant manual work and rework will be needed."

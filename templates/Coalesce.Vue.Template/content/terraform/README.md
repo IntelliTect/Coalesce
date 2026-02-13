@@ -7,6 +7,7 @@ This directory contains Terraform configurations for provisioning Azure infrastr
 - [Terraform](https://developer.hashicorp.com/terraform/install) (`winget install -e --id Hashicorp.Terraform`)
 - [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) (`winget install -e --id Microsoft.AzureCLI`)
 - An Azure subscription with Contributor access
+- For some features (Azure App Registrations and SQL Admin Groups), access to a colleague who has directory-level admin permissions.
 
 ## Getting Started
 

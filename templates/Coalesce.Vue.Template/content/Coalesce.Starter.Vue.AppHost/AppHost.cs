@@ -26,9 +26,14 @@ openAi.AddDeployment(name: "chat", modelName: "gpt-4.1", modelVersion: "2025-04-
       .WithProperties(c => c.SkuName = "GlobalStandard");
 
 #endif
-var app = builder.AddProject<Coalesce_Starter_Vue_Web>("app")
+var migrations = builder.AddProject<Coalesce_Starter_Vue_Migrations>("migrations")
     .WithReference(sqlDb, "DefaultConnection")
     .WaitFor(sqlDb)
+    .WithParentRelationship(sqlDb);
+
+var app = builder.AddProject<Coalesce_Starter_Vue_Web>("app")
+    .WithReference(sqlDb, "DefaultConnection")
+    .WaitForCompletion(migrations)
 #if BlobStorage
     .WithReference(blobs)
 #endif

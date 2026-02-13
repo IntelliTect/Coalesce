@@ -41,9 +41,16 @@ jobs:
           echo "url=https://$url" >> $GITHUB_OUTPUT
 
       - name: Deploy to Container App
-        uses: azure/container-apps-deploy-action@v2
-        with:
-          disableTelemetry: true
-          containerAppName: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-app
-          resourceGroup: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-rg
-          imageToDeploy: ${{ vars.ACR_NAME }}.azurecr.io/app:${{ github.sha }}
+        env:
+          APP_NAME: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-app
+          RG: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-rg
+          APP_IMAGE: ${{ vars.ACR_NAME }}.azurecr.io/app:${{ github.sha }}
+          MIGRATIONS_IMAGE: ${{ vars.ACR_NAME }}.azurecr.io/migrations:${{ github.sha }}
+        run: |
+          # Get the current app definition, update images, and redeploy.
+          az containerapp show -n $APP_NAME -g $RG -o yaml > app.yaml
+          yq -i '
+            .properties.template.containers[0].image = strenv(APP_IMAGE) |
+            .properties.template.initContainers[0].image = strenv(MIGRATIONS_IMAGE)
+          ' app.yaml
+          az containerapp update -n $APP_NAME -g $RG --yaml app.yaml

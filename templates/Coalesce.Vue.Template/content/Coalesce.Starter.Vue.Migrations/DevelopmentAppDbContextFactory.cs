@@ -1,10 +1,13 @@
+using Coalesce.Starter.Vue.Data;
 using IntelliTect.Coalesce.Helpers;
+#if Identity
 using Microsoft.AspNetCore.Identity;
+#endif
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Coalesce.Starter.Vue.Data;
+namespace Coalesce.Starter.Vue.Migrations;
 
 public class DevelopmentAppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {

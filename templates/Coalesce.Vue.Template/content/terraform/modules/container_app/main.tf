@@ -41,6 +41,21 @@ resource "azurerm_container_app" "this" {
     max_replicas               = var.max_replicas
     cooldown_period_in_seconds = 3600
 
+    init_container {
+      name   = "migrations"
+      image  = var.container_registry.initial_image
+      cpu    = var.cpu
+      memory = var.memory
+
+      dynamic "env" {
+        for_each = var.env_vars
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
+    }
+
     container {
       name = "app"
       // NOTE: Initial container image will be replaced by CI/CD deploy
@@ -112,7 +127,8 @@ resource "azurerm_container_app" "this" {
 
   lifecycle {
     ignore_changes = [
-      template[0].container[0].image
+      template[0].container[0].image,
+      template[0].init_container[0].image,
     ]
   }
 }

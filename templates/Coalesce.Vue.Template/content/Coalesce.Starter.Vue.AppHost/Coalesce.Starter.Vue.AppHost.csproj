@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Coalesce.Starter.Vue.Migrations\Coalesce.Starter.Vue.Migrations.csproj" />
     <ProjectReference Include="..\Coalesce.Starter.Vue.Web\Coalesce.Starter.Vue.Web.csproj" />
   </ItemGroup>
 

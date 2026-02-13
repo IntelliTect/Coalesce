@@ -6,7 +6,7 @@ resource "azurerm_communication_service" "this" {
 }
 
 resource "azurerm_email_communication_service" "this" {
-  name                = "${var.context.project_name}-${var.context.environment_name}-ecs"
+  name                = "${var.context.project_name}-${var.context.environment_name}-acs-email"
   resource_group_name = var.context.resource_group_name
   data_location       = var.data_location
   tags                = var.context.tags

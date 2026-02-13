@@ -96,7 +96,7 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Push container to ACR
+      - name: Push containers to ACR
         if: github.event_name != 'pull_request'
         run: |
           az acr login --name ${{ vars.ACR_NAME }}
@@ -107,6 +107,16 @@ jobs:
             --no-build \
             -t:PublishContainer \
             -p:ContainerRepository=app \
+            -p:ContainerRegistry=${{ vars.ACR_NAME }}.azurecr.io \
+            -p:ContainerImageTags=${{ github.sha }}
+            
+          dotnet publish \
+            ${{ github.workspace }}/Coalesce.Starter.Vue.Migrations/Coalesce.Starter.Vue.Migrations.csproj \
+            --configuration Release \
+            --no-restore \
+            --no-build \
+            -t:PublishContainer \
+            -p:ContainerRepository=migrations \
             -p:ContainerRegistry=${{ vars.ACR_NAME }}.azurecr.io \
             -p:ContainerImageTags=${{ github.sha }}
   #endif

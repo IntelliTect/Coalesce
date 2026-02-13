@@ -1,3 +1,6 @@
+# Unreleased
+- `c-select` now includes `aria-expanded` and `aria-controls` attributes for improved accessibility compliance with WCAG 2.1 level A guidelines.
+
 # 6.1.2
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
 - Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.

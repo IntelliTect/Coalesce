@@ -35,9 +35,9 @@
         <template #list-item="{ props, item, isSelected, select }">
           <v-list-item v-bind="props">
             <template #prepend>
-              <!-- aria-hidden and inert prevent the checkbox from being tab-navigable
-                   while still showing visual feedback. The parent v-list-item remains clickable. -->
-              <v-list-item-action start aria-hidden="true" inert>
+              <!-- inert prevents the checkbox from being tab-navigable and interactive.
+                   The parent v-list-item remains clickable for selection. -->
+              <v-list-item-action start inert>
                 <v-checkbox-btn
                   :model-value="isSelected"
                   @update:model-value="select"
@@ -72,9 +72,9 @@
         <template #list-item="{ props, item, isSelected, select }">
           <v-list-item v-bind="props">
             <template #prepend>
-              <!-- aria-hidden and inert prevent the checkbox from being tab-navigable
-                   while still showing visual feedback. The parent v-list-item remains clickable. -->
-              <v-list-item-action start aria-hidden="true" inert>
+              <!-- inert prevents the checkbox from being tab-navigable and interactive.
+                   The parent v-list-item remains clickable for selection. -->
+              <v-list-item-action start inert>
                 <v-checkbox-btn
                   :model-value="isSelected"
                   @update:model-value="select"

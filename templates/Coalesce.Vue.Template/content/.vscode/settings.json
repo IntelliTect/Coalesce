@@ -1,6 +1,7 @@
 {
   "typescript.tsdk": "Coalesce.Starter.Vue.Web\\node_modules\\typescript\\lib",
   "dotnet.defaultSolution": "Coalesce.Starter.Vue.slnx",
+  "dotnet.solution.autoOpen": "Coalesce.Starter.Vue.slnx",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"

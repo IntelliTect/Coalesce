@@ -199,7 +199,7 @@ createMethods = {
 
 `#list-item="{ item: TModel, search: string, selected: boolean }"` - Slot used to customize the text of items inside the list. If not provided, falls back to the `item` slot. Contents are wrapped in a `v-list-item-title`.
 
-`#list-item-complete="{ item: TModel, search: string, selected: boolean, props: object, select: (value: boolean) => void }"` - Slot used for full control over the rendering of list items, including the ability to customize accessibility attributes. 
+`#list-item-outer="{ item: TModel, search: string, selected: boolean, props: object, select: (value: boolean) => void }"` - Slot used for full control over the rendering of list items, including the ability to customize accessibility attributes. 
 
 This slot provides:
 - `item` - The model instance being rendered
@@ -208,10 +208,10 @@ This slot provides:
 - `props` - An object containing all props to bind to a [v-list-item](https://vuetifyjs.com/en/api/v-list-item/), including `value`, `class`, `active`, `role`, `aria-selected`, and `onClick` handler
 - `select` - Function to toggle the selection state of the item
 
-Example for accessibility customization:
+Example:
 ```vue
 <c-select for="Person" multiple v-model="selectedPeople">
-  <template #list-item-complete="{ props, item, selected, select }">
+  <template #list-item-outer="{ props, item, selected, select }">
     <v-list-item v-bind="props">
       <template #prepend>
         <v-list-item-action inert>

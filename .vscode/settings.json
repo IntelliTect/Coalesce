@@ -1,5 +1,6 @@
 {
   "dotnet.defaultSolution": "Coalesce.slnx",
+  "dotnet.solution.autoOpen": "Coalesce.slnx",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
@@ -13,5 +14,8 @@
   "typescript.tsdk": "node_modules\\typescript\\lib",
   // XML element content is often whitespace sensitive.
   // Introducing wrapping breaks some csproj elements.
-  "xml.format.maxLineWidth": 0
+  "xml.format.maxLineWidth": 0,
+  "chat.tools.terminal.autoApprove": {
+    "npx vitest": true
+  }
 }

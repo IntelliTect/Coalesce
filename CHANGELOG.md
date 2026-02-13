@@ -1,8 +1,9 @@
 # 6.1.2
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
 - Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.
-- `c-select` now supports `listProps` prop to pass props to the underlying v-list component for accessibility customization.
-- `c-select` now has a `list-item-complete` slot that provides full control over list item rendering with props (`props`, `selected`, `select`) for advanced accessibility customizations.
+- Assorted accessibility improvements
+- `c-select` now supports `listProps` prop to pass props to the underlying v-list component.
+- `c-select` now has a `list-item-outer` slot that provides full control over list item rendering with props (`props`, `selected`, `select`) for advanced customizations.
 
 # 6.1.1
 - Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.

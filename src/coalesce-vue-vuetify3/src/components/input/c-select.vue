@@ -172,7 +172,7 @@
 
             <template v-for="(item, i) in listItems" :key="item.key">
               <slot
-                name="list-item-complete"
+                name="list-item-outer"
                 :item="item.model"
                 :search="search"
                 :selected="item.selected"
@@ -184,7 +184,11 @@
                   'aria-selected': item.selected,
                   onClick: () => onInput(item.model),
                 }"
-                :select="(value: boolean) => { if (value !== item.selected) onInput(item.model); }"
+                :select="
+                  (value: boolean) => {
+                    if (value !== item.selected) onInput(item.model);
+                  }
+                "
               >
                 <v-list-item
                   v-memo="[
@@ -435,7 +439,7 @@ type SlotTypes = {
     search: string | null;
     selected: boolean;
   }): any;
-  ["list-item-complete"]?(props: {
+  ["list-item-outer"]?(props: {
     item: SelectedModelTypeSingle;
     search: string | null;
     selected: boolean;
@@ -495,10 +499,10 @@ const props = withDefaults(
       itemTitle?: (item: SelectedModelTypeSingle) => string | null;
 
       /** Props to pass to the underlying v-menu component */
-      menuProps?: VMenu["$props"];
+      menuProps?: VMenu["$props"] & { [s: string]: any };
 
       /** Props to pass to the underlying v-list component */
-      listProps?: VList["$props"];
+      listProps?: VList["$props"] & { [s: string]: any };
 
       create?: {
         getLabel: (

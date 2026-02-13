@@ -109,7 +109,8 @@ module "ai_services" {
 module "key_vault" {
   source = "../key_vault"
 
-  context = local.context
+  context                  = local.context
+  purge_protection_enabled = var.purge_protection_enabled
   admin_principals = merge(var.admin_principals, {
     app = azurerm_user_assigned_identity.app.principal_id
   })

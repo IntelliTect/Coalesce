@@ -34,7 +34,7 @@ resource "azurerm_mssql_server" "this" {
 }
 
 resource "azurerm_mssql_database" "this" {
-  name      = var.context.project_name
+  name      = "${var.context.project_name}-${var.context.environment_name}-db"
   server_id = azurerm_mssql_server.this.id
   sku_name  = var.sku_name
   tags      = var.context.tags

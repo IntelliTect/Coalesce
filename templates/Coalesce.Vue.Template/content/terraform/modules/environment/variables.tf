@@ -95,6 +95,12 @@ variable "admin_principals" {
   default     = {}
 }
 
+variable "purge_protection_enabled" {
+  description = "Whether to enable purge protection on the Key Vault."
+  type        = bool
+  default     = true
+}
+
 # Extensibility
 
 variable "additional_secrets" {

@@ -39,14 +39,14 @@ resource "azurerm_container_app" "this" {
   template {
     min_replicas               = var.min_replicas
     max_replicas               = var.max_replicas
-    cooldown_period_in_seconds = 3600
+    cooldown_period_in_seconds = 1800
 
     init_container {
       name = "migrations"
       // NOTE: Initial container image will be replaced by CI/CD deploy
       image  = var.container_registry.initial_init_image
-      cpu    = var.cpu
-      memory = var.memory
+      cpu    = 0.25
+      memory = "0.5Gi"
 
       dynamic "env" {
         for_each = var.env_vars
@@ -110,7 +110,7 @@ resource "azurerm_container_app" "this" {
         port                    = 8081
         transport               = "HTTP"
         interval_seconds        = 5
-        failure_count_threshold = 30
+        failure_count_threshold = 15 # 5 * 15 = 75 seconds
       }
     }
   }

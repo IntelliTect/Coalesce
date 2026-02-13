@@ -15,6 +15,12 @@ variable "admin_principals" {
   default     = {}
 }
 
+variable "purge_protection_enabled" {
+  description = "Whether to enable purge protection on the Key Vault."
+  type        = bool
+  default     = true
+}
+
 variable "secrets" {
   description = "Map of secret names to values to store in the Key Vault."
   type        = map(string)

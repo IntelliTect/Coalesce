@@ -84,6 +84,9 @@ module "dev" {
   # SQL - Basic tier for dev
   sql_sku_name = "Basic"
 
+  # Key Vault
+  purge_protection_enabled = false
+
   # Storage
   storage_replication_type = "LRS"
 }
@@ -112,6 +115,9 @@ module "prod" {
 
   # SQL - S1 tier for prod
   sql_sku_name = "S1"
+
+  # Key Vault
+  purge_protection_enabled = true
 
   # Storage
   storage_replication_type = "GRS"

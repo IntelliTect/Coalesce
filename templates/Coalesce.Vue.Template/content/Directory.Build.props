@@ -19,7 +19,4 @@
     <DefineConstants>$(DefineConstants);Tenancy;TenantPerHostname;TenantCreateSelf;TenantCreateExternal;TenantCreateAdmin;TenantMemberInvites</DefineConstants>
     <!--#endif -->
   </PropertyGroup>
-  <PropertyGroup Condition="'$(CI)' == 'true'">
-    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-  </PropertyGroup>
 </Project>

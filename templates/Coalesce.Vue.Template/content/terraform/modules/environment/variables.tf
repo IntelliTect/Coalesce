@@ -1,6 +1,12 @@
-variable "project_name" {
-  description = "The project name, used as a prefix for all resources."
-  type        = string
+variable "context" {
+  description = "The shared context object containing project_name, location, tags, and CI/CD configuration."
+  type = object({
+    project_name      = string
+    location          = string
+    tags              = map(string)
+    github_repository = string
+    ci_identity_id    = string
+  })
 }
 
 variable "display_name" {
@@ -10,11 +16,6 @@ variable "display_name" {
 
 variable "environment_name" {
   description = "The environment name (e.g. dev, prod)."
-  type        = string
-}
-
-variable "location" {
-  description = "The Azure region."
   type        = string
 }
 
@@ -87,18 +88,6 @@ variable "storage_replication_type" {
   default     = "LRS"
 }
 
-# CI/CD
-
-variable "github_repository" {
-  description = "The GitHub repository in 'owner/repo' format, for OIDC federation."
-  type        = string
-}
-
-variable "ci_identity_id" {
-  description = "The resource ID of the CI managed identity, for federated credentials."
-  type        = string
-}
-
 variable "admin_principals" {
   description = "Map of descriptive keys to principal IDs to grant access to environment resources."
   type        = map(string)
@@ -115,12 +104,6 @@ variable "additional_secrets" {
 
 variable "env_vars" {
   description = "Additional environment variables for the container app."
-  type        = map(string)
-  default     = {}
-}
-
-variable "tags" {
-  description = "Tags to apply to all resources."
   type        = map(string)
   default     = {}
 }

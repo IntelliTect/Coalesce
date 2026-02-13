@@ -7,6 +7,14 @@ locals {
   # TODO: Update with user-friendly name of application
   # display_name = "My Awesome App"
   display_name = var.project_name
+
+  context = {
+    project_name      = var.project_name
+    location          = var.location
+    tags              = local.tags
+    github_repository = var.github_repository
+    ci_identity_id    = data.azurerm_user_assigned_identity.ci.id
+  }
 }
 
 # Shared resource group - created by bootstrap
@@ -52,15 +60,10 @@ data "azuread_group" "developers" {
 module "dev" {
   source = "./modules/environment"
 
-  project_name     = var.project_name
+  context          = local.context
   display_name     = "${local.display_name} DEV"
   environment_name = "dev"
-  location         = var.location
   allowed_origins  = ["localhost"]
-
-  # CI/CD
-  github_repository = var.github_repository
-  ci_identity_id    = data.azurerm_user_assigned_identity.ci.id
 
   # Admin principals for dev resources
   admin_principals = {
@@ -83,8 +86,6 @@ module "dev" {
 
   # Storage
   storage_replication_type = "LRS"
-
-  tags = local.tags
 }
 
 # ============================================================
@@ -93,15 +94,10 @@ module "dev" {
 module "prod" {
   source = "./modules/environment"
 
-  project_name     = var.project_name
+  context          = local.context
   display_name     = local.display_name
   environment_name = "prod"
-  location         = var.location
   allowed_origins  = [] # E.g. ["myapp.com"]
-
-  # CI/CD
-  github_repository = var.github_repository
-  ci_identity_id    = data.azurerm_user_assigned_identity.ci.id
 
   # Networking
   vnet_address_space           = "10.1.0.0/16"
@@ -119,6 +115,4 @@ module "prod" {
 
   # Storage
   storage_replication_type = "GRS"
-
-  tags = local.tags
 }

@@ -68,21 +68,22 @@ This option is the simplest, but also requires wide permissions across your enti
 This option uses strictly scoped role assignments so that your CI identity cannot manage other, unrelated applications within your Entra tenant. This is the most ideal long-term option, but it also requires the most work because the CI identity won't be able to initially create the app registration through Terraform.
 
 1. [Create a new App Registration](https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/RegisteredApps), either through the Azure Portal or with the Azure CLI. The details you provide during creation do not matter - not even the name - they'll all become managed by Terraform. After creating the app registration, make a note of its `Object ID` (Azure Portal) or `id` (Azure CLI) property.
-2. Find the `Object (principal) ID` of the CI User-Assigned Managed Identity that was created in the bootstrap step. In the Azure Portal, navigate to the shared resource group (named with your project name and `-shared` suffix), click on the Managed Identity resource, and copy the `Object (principal) ID` value from the Overview page.
-3. Navigate to the Cloud Application Administrator role from [Privileged Identity Management](https://portal.azure.com/#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/roles/resourceId//resourceType/tenant/provider/aadroles) and grant a permanent assignment to the CI identity (using the Object ID from step 2), scoped to the App Registration from step 1. Alternatively, via the Azure CLI, fill in the two placeholder values and run:
 
-```pwsh
-echo '{"roleDefinitionId":"158c047a-c907-4556-b7ef-446551a6b5f7", "principalId":"CI_IDENTITY_OBJECT_ID", "directoryScopeId":"/APP_REG_OBJECT_ID"}' | az rest --method POST --uri "https://graph.microsoft.com/v1.0/roleManagement/directory/roleAssignments" --headers 'Content-Type=application/json' --body "@-"
-```
+2. Find the `Object (principal) ID` of the CI User-Assigned Managed Identity that was created in the bootstrap step. In the Azure Portal, navigate to the shared resource group (named with your project name and `-shared` suffix), click on the Managed Identity resource, and copy the `Object (principal) ID` value from the Overview page.
+
+3. Navigate to the Cloud Application Administrator role from [Privileged Identity Management](https://portal.azure.com/#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/roles/resourceId//resourceType/tenant/provider/aadroles) and grant a permanent assignment to the CI identity (using the Object ID from step 2), scoped to the App Registration from step 1. Alternatively, via the Azure CLI, fill in the two placeholder values and run:
+   ```pwsh
+   echo '{"roleDefinitionId":"158c047a-c907-4556-b7ef-446551a6b5f7", "principalId":"CI_IDENTITY_OBJECT_ID", "directoryScopeId":"/APP_REG_OBJECT_ID"}' | az rest --method POST --uri "https://graph.microsoft.com/v1.0/roleManagement/directory/roleAssignments" --headers 'Content-Type=application/json' --body "@-"
+   ```
 
 4. In the root `main.tf` file, add import block(s) so that Terraform can begin managing the app registration. For example, for the dev environment, using the Object ID from step 1:
+   ```hcl
+   import {
+      to = module.dev.module.app_registration.azuread_application.this
+      id = "/applications/<APP_REG_OBJECT_ID>"
+   }
+   ```
 
-```hcl
-import {
-  to = module.dev.module.app_registration.azuread_application.this
-  id = "/applications/<APP_REG_OBJECT_ID>"
-}
-```
 5. Once the above terraform has been applied by the Terraform GitHub action, the import block can be deleted.
 
 ### Option 3: Fully Manual App Registration
@@ -106,10 +107,9 @@ This option lets Terraform fully manage the group, but requires granting the CI 
 1. Find the **Object (principal) ID** of the CI User-Assigned Managed Identity. In the Azure Portal, navigate to the shared resource group and click on the Managed Identity resource.
 
 2. Run the following Powershell, replacing both occurrences of `CI_IDENTITY_OBJECT_ID` with the value from step 1:
-
-```pwsh
-echo '{"principalId":"CI_IDENTITY_OBJECT_ID","resourceId":"GRAPH_SP_ID","appRoleId":"bf7b1a76-6e77-406b-b258-bf5c7720e98f"}'.Replace("GRAPH_SP_ID", $(az ad sp list --filter "appId eq '00000003-0000-0000-c000-000000000000'" --query "[0].id" -o tsv)) | az rest --method POST --uri "https://graph.microsoft.com/v1.0/servicePrincipals/CI_IDENTITY_OBJECT_ID/appRoleAssignments" --headers "Content-Type=application/json" --body "@-"
-```
+   ```pwsh
+   echo '{"principalId":"CI_IDENTITY_OBJECT_ID","resourceId":"GRAPH_SP_ID","appRoleId":"bf7b1a76-6e77-406b-b258-bf5c7720e98f"}'.Replace("GRAPH_SP_ID", $(az ad sp list --filter "appId eq '00000003-0000-0000-c000-000000000000'" --query "[0].id" -o tsv)) | az rest --method POST --uri "https://graph.microsoft.com/v1.0/servicePrincipals/CI_IDENTITY_OBJECT_ID/appRoleAssignments" --headers "Content-Type=application/json" --body "@-"
+   ```
 
 3. Uncomment the AAD group resources in `modules/sql/main.tf` and the `admin_principals` parameter in `modules/environment/main.tf`.
 
@@ -120,25 +120,24 @@ This option avoids granting broad Graph API permissions. Instead, you create the
 1. Find the **Object (principal) ID** of the CI User-Assigned Managed Identity. In the Azure Portal, navigate to the shared resource group and click on the Managed Identity resource.
 
 2. Create the AAD security group manually, e.g. for the `dev` environment:
-```bash
-az ad group create --display-name "<project-name>-dev-sql-admins" --mail-nickname "<project-name>-dev-sql-admins" --security-enabled
-```
+   ```bash
+   az ad group create --display-name "<project-name>-dev-sql-admins" --mail-nickname "<project-name>-dev-sql-admins" --security-enabled
+   ```
    Note its `id` (Object ID) from the output.
 
 3. Add the CI identity as an **owner** of the group so that Terraform can manage its membership:
-```bash
-az ad group owner add --group "<project-name>-dev-sql-admins" --owner-object-id CI_IDENTITY_OBJECT_ID
-```
+   ```bash
+   az ad group owner add --group "<project-name>-dev-sql-admins" --owner-object-id CI_IDENTITY_OBJECT_ID
+   ```
 
 4. Uncomment the AAD group resources in `modules/sql/main.tf` and the `admin_principals` parameter in `modules/environment/main.tf`.
 
 5. Add an import block in the root `main.tf` so Terraform adopts the existing group. Replace `<GROUP_OBJECT_ID>` with the Object ID from step 2:
-
-```hcl
-import {
-  to = module.dev.module.sql.azuread_group.sql_admins
-  id = "/groups/<GROUP_OBJECT_ID>"
-}
-```
+   ```hcl
+   import {
+      to = module.dev.module.sql.azuread_group.sql_admins
+      id = "/groups/<GROUP_OBJECT_ID>"
+   }
+   ```
 
 6. Run or re-run the Terraform GitHub Action. Once the import has been applied successfully, you can remove the import block.

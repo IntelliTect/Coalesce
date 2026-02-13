@@ -1,10 +1,10 @@
 locals {
-  tags = merge(var.tags, {
+  tags = merge(var.context.tags, {
     environment = var.environment_name
   })
 
   context = {
-    project_name        = var.project_name
+    project_name        = var.context.project_name
     environment_name    = var.environment_name
     location            = azurerm_resource_group.this.location
     resource_group_name = azurerm_resource_group.this.name
@@ -13,8 +13,8 @@ locals {
 }
 
 resource "azurerm_resource_group" "this" {
-  name     = "${var.project_name}-${var.environment_name}-rg"
-  location = var.location
+  name     = "${var.context.project_name}-${var.environment_name}-rg"
+  location = var.context.location
   tags     = local.tags
 }
 
@@ -36,10 +36,10 @@ resource "azurerm_role_assignment" "acr_pull" {
 # Federated credential for CI identity to deploy via this GitHub Environment
 resource "azurerm_federated_identity_credential" "ci_deploy" {
   name      = "github-environment-${var.environment_name}"
-  parent_id = var.ci_identity_id
+  parent_id = var.context.ci_identity_id
   audience  = ["api://AzureADTokenExchange"]
   issuer    = "https://token.actions.githubusercontent.com"
-  subject   = "repo:${var.github_repository}:environment:${var.environment_name}"
+  subject   = "repo:${var.context.github_repository}:environment:${var.environment_name}"
 }
 
 module "vnet" {

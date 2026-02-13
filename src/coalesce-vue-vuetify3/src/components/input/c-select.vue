@@ -187,30 +187,14 @@
               :item="item.model"
               :search="search"
               :selected="item.selected"
-              :props="{
-                value: item.key,
-                class: { 'pending-selection': pendingSelection === i },
-                active: item.selected,
-                role: 'option',
-                'aria-selected': item.selected,
-                onClick: () => onInput(item.model),
-              }"
+              :props="item.props"
               :select="
                 (value: boolean) => {
                   if (value !== item.selected) onInput(item.model);
                 }
               "
             >
-              <v-list-item
-                :value="item.key"
-                :class="{
-                  'pending-selection': pendingSelection === i,
-                }"
-                :active="item.selected"
-                role="option"
-                :aria-selected="item.selected"
-                @click="onInput(item.model)"
-              >
+              <v-list-item v-bind="item.props">
                 <template v-if="effectiveMultiple" #prepend>
                   <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
                 </template>
@@ -446,6 +430,9 @@ type SlotTypes = {
     selected: boolean;
   }): any;
   ["list-item-outer"]?(props: {
+    // Typechecking hack - otherwise we get a type error about `key` being undefined on the slot.
+    key: unknown;
+
     item: SelectedModelTypeSingle;
     search: string | null;
     selected: boolean;
@@ -883,11 +870,23 @@ const items = computed((): SelectedModelTypeSingle[] => {
 
 const listItems = computed(() => {
   const pkName = modelObjectMeta.value.keyProp.name;
-  return items.value.map((item) => ({
-    model: item,
-    key: item[pkName],
-    selected: selectedKeysSet.value.has(normalizeKey(item[pkName])),
-  }));
+  return items.value.map((item, i) => {
+    const key = item[pkName];
+    const selected = selectedKeysSet.value.has(normalizeKey(key));
+    return {
+      model: item,
+      key,
+      selected,
+      props: {
+        value: key,
+        class: { "pending-selection": pendingSelection.value === i },
+        active: selected,
+        role: "option" as const,
+        "aria-selected": selected,
+        onClick: () => onInput(item),
+      },
+    };
+  });
 });
 
 const totalSelectableItems = computed(() => {

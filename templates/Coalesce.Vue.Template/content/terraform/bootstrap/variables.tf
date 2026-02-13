@@ -1,6 +1,11 @@
 variable "project_name" {
   description = "The project name, used as a prefix for all Azure resources."
   type        = string
+
+  validation {
+    condition     = var.project_name == lower(var.project_name)
+    error_message = "project_name must be lowercase."
+  }
 }
 
 variable "location" {

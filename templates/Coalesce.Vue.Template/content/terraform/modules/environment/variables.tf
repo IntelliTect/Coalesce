@@ -31,7 +31,7 @@ variable "container_apps_subnet_prefix" {
 }
 
 variable "allowed_origins" {
-  description = "A list of origins (without scheme or path) where user tokens are sent for sign-in."
+  description = "A list of origins (without scheme or path) where users may use the application."
   type        = list(string)
   default     = []
 }

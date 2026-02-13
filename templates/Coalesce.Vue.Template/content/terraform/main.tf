@@ -5,6 +5,7 @@ locals {
   }, var.tags)
 
   # TODO: Update with user-friendly name of application
+  # display_name = "My Awesome App"
   display_name = var.project_name
 }
 

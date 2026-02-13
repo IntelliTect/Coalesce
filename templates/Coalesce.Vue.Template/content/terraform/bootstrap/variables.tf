@@ -1,5 +1,5 @@
 variable "project_name" {
-  description = "The project name."
+  description = "The project name, used as a prefix for all Azure resources."
   type        = string
 }
 

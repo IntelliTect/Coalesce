@@ -26,7 +26,7 @@ locals {
 
 // https://2mas.github.io/blog/rotating-azure-app-registration-secrets-with-terraform/
 resource "time_rotating" "secret_rotation_1" {
-  # In between rotations, secret_rotation2 will be following 100% out of phase
+  # In between rotations, secret_rotation_2 will be following 100% out of phase
   # so we'll always have a password with lots of time left between rotations.
   rotation_months = secret_duration_months / 2
 }

@@ -1,4 +1,4 @@
-# Uncomment and configure after running terraform/bootstrap to create the storage account.
+# Uncomment and configure after applying terraform/bootstrap.
 # terraform {
 #   backend "azurerm" {
 #     resource_group_name  = "<project_name>-shared-rg"

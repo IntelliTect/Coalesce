@@ -20,5 +20,5 @@ output "database_name" {
 
 output "connection_string" {
   description = "The ADO.NET connection string using managed identity (Azure AD) authentication."
-  value       = "Server=tcp:${azurerm_mssql_server.this.fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.this.name};Authentication=Active Directory Default;TrustServerCertificate=True;"
+  value       = "Server=tcp:${azurerm_mssql_server.this.fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.this.name};Authentication=Active Directory Default;"
 }

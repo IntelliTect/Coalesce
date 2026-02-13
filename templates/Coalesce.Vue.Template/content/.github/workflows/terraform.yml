@@ -24,6 +24,8 @@ jobs:
   plan:
     name: Plan (${{ inputs.target || 'all' }})
     runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.plan.outputs.exitcode == 2 }}
     defaults:
       run:
         working-directory: terraform
@@ -56,13 +58,18 @@ jobs:
           echo "args=$args" >> $GITHUB_OUTPUT
 
       - name: Terraform Plan
+        id: plan
         run: |
           set -o pipefail
-          terraform plan -no-color -input=false \
+          exitcode=0
+          terraform plan -no-color -input=false -detailed-exitcode \
             -var="project_name=${{ vars.PROJECT_NAME }}" \
             -var="subscription_id=${{ vars.AZURE_SUBSCRIPTION_ID }}" \
             -var="github_repository=${{ github.repository }}" \
-            ${{ steps.targets.outputs.args }} -out=tfplan 2>&1 | tee plan_output.txt
+            ${{ steps.targets.outputs.args }} -out=tfplan 2>&1 | tee plan_output.txt || exitcode=$?
+          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+          # Exit code 2 means changes present (success). 1 means error.
+          if [ $exitcode -eq 1 ]; then exit 1; fi
 
       - name: Summarize Plan
         uses: actions/github-script@v7
@@ -130,7 +137,7 @@ jobs:
             }
 
       - name: Upload Plan
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && steps.plan.outputs.exitcode == 2
         uses: actions/upload-artifact@v6
         with:
           name: tfplan
@@ -139,7 +146,7 @@ jobs:
   apply:
     name: Apply (${{ inputs.target || 'all' }})
     needs: plan
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && needs.plan.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     environment: terraform
     defaults:

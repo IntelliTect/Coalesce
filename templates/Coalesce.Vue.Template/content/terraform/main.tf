@@ -39,6 +39,13 @@ resource "azurerm_role_assignment" "ci_acr_push" {
 }
 
 # ============================================================
+# Developers AAD Group - created by bootstrap
+# ============================================================
+data "azuread_group" "developers" {
+  display_name = "${var.project_name}-developers"
+}
+
+# ============================================================
 # Dev Environment
 # ============================================================
 module "dev" {
@@ -53,6 +60,11 @@ module "dev" {
   # CI/CD
   github_repository = var.github_repository
   ci_identity_id    = data.azurerm_user_assigned_identity.ci.id
+
+  # Admin principals for dev resources
+  admin_principals = {
+    developers = data.azuread_group.developers.object_id
+  }
 
   # Networking
   vnet_address_space           = "10.0.0.0/16"

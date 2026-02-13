@@ -78,20 +78,21 @@ module "storage" {
   context          = local.context
   container_name   = "data"
   replication_type = var.storage_replication_type
-  blob_contributors = {
+  admin_principals = merge(var.admin_principals, {
     app = azurerm_user_assigned_identity.app.principal_id
-  }
+  })
 }
 #endif
 
 module "sql" {
   source = "../sql"
 
-  context             = local.context
-  sku_name            = var.sql_sku_name
-  aad_admin_login     = azurerm_user_assigned_identity.app.client_id
-  aad_admin_object_id = azurerm_user_assigned_identity.app.principal_id
-  subnet_id           = module.vnet.container_apps_subnet_id
+  context   = local.context
+  sku_name  = var.sql_sku_name
+  subnet_id = module.vnet.container_apps_subnet_id
+  admin_principals = merge(var.admin_principals, {
+    app = azurerm_user_assigned_identity.app.principal_id
+  })
 }
 
 #if (AIChat)
@@ -99,9 +100,9 @@ module "ai_services" {
   source = "../ai_services"
 
   context = local.context
-  allowed_users = {
+  admin_principals = merge(var.admin_principals, {
     app = azurerm_user_assigned_identity.app.principal_id
-  }
+  })
 }
 #endif
 
@@ -110,9 +111,9 @@ module "key_vault" {
   source = "../key_vault"
 
   context = local.context
-  secrets_users = {
+  admin_principals = merge(var.admin_principals, {
     app = azurerm_user_assigned_identity.app.principal_id
-  }
+  })
   secrets = merge(
     var.additional_secrets,
     {
@@ -132,8 +133,10 @@ module "key_vault" {
 module "acs" {
   source = "../acs"
 
-  context               = local.context
-  identity_principal_id = azurerm_user_assigned_identity.app.principal_id
+  context = local.context
+  admin_principals = merge(var.admin_principals, {
+    app = azurerm_user_assigned_identity.app.principal_id
+  })
 }
 #endif
 

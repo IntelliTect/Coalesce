@@ -24,7 +24,9 @@ resource "azurerm_communication_service_email_domain_association" "this" {
 }
 
 resource "azurerm_role_assignment" "contributor" {
+  for_each = var.admin_principals
+
   scope                = azurerm_communication_service.this.id
   role_definition_name = "Contributor"
-  principal_id         = var.identity_principal_id
+  principal_id         = each.value
 }

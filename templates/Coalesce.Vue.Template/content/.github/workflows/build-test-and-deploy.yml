@@ -24,9 +24,7 @@ on:
 #if (AzureTerraform)
 # CONFIGURATION:
 # Follow the instructions in terraform/README.md to setup infrastructure and variables.
-#endif
 
-#if (AzureTerraform)
 permissions:
   id-token: write
   contents: read

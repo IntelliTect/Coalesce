@@ -99,6 +99,12 @@ variable "ci_identity_id" {
   type        = string
 }
 
+variable "admin_principals" {
+  description = "Map of descriptive keys to principal IDs to grant access to environment resources."
+  type        = map(string)
+  default     = {}
+}
+
 # Extensibility
 
 variable "additional_secrets" {

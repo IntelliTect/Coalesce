@@ -9,7 +9,7 @@ variable "context" {
   })
 }
 
-variable "allowed_users" {
+variable "admin_principals" {
   description = "Map of descriptive keys to principal IDs to grant Azure AI User role."
   type        = map(string)
   default     = {}

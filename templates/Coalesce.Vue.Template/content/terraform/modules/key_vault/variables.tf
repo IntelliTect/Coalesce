@@ -9,7 +9,7 @@ variable "context" {
   })
 }
 
-variable "secrets_users" {
+variable "admin_principals" {
   description = "Map of descriptive keys to principal IDs to grant Key Vault Secrets User role."
   type        = map(string)
   default     = {}

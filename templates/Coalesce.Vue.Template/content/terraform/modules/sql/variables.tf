@@ -15,14 +15,9 @@ variable "sku_name" {
   default     = "Basic"
 }
 
-variable "aad_admin_login" {
-  description = "The login name of the Azure AD administrator."
-  type        = string
-}
-
-variable "aad_admin_object_id" {
-  description = "The object ID of the Azure AD administrator (typically the managed identity)."
-  type        = string
+variable "admin_principals" {
+  description = "Map of descriptive keys to principal IDs to add as SQL admins. Must include 'app' key."
+  type        = map(string)
 }
 
 variable "subnet_id" {

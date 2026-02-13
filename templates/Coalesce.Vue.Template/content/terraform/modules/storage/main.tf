@@ -30,7 +30,7 @@ resource "azurerm_storage_container" "this" {
 }
 
 resource "azurerm_role_assignment" "blob_contributor" {
-  for_each = var.blob_contributors
+  for_each = var.admin_principals
 
   scope                = azurerm_storage_account.this.id
   role_definition_name = "Storage Blob Data Contributor"

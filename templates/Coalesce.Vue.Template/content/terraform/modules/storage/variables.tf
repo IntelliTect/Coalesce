@@ -21,7 +21,7 @@ variable "replication_type" {
   default     = "LRS"
 }
 
-variable "blob_contributors" {
+variable "admin_principals" {
   description = "Map of descriptive keys to principal IDs to grant Storage Blob Data Contributor role."
   type        = map(string)
   default     = {}

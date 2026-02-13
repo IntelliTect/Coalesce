@@ -15,7 +15,8 @@ variable "data_location" {
   default     = "United States"
 }
 
-variable "identity_principal_id" {
-  description = "The principal ID of the managed identity to grant Contributor role."
-  type        = string
+variable "admin_principals" {
+  description = "Map of descriptive keys to principal IDs to grant Contributor role."
+  type        = map(string)
+  default     = {}
 }

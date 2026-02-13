@@ -15,7 +15,7 @@ resource "azurerm_key_vault" "this" {
 
 # Allow the app identity to read secrets
 resource "azurerm_role_assignment" "secrets_user" {
-  for_each = var.secrets_users
+  for_each = var.admin_principals
 
   scope                = azurerm_key_vault.this.id
   role_definition_name = "Key Vault Secrets User"

@@ -56,7 +56,14 @@ resource "azurerm_container_app" "this" {
 
       env {
         name  = "ASPNETCORE_HTTP_PORTS"
-        value = "8080"
+        value = "8080;8081"
+      }
+
+      env {
+        # Health check endpoints are restricted to this port so they
+        # are not publicly accessible through the ingress target port.
+        name  = "HEALTH_PORT"
+        value = "8081"
       }
 
       dynamic "env" {
@@ -69,7 +76,7 @@ resource "azurerm_container_app" "this" {
 
       liveness_probe {
         path             = "/alive"
-        port             = 8080
+        port             = 8081
         transport        = "HTTP"
         initial_delay    = 10
         interval_seconds = 30
@@ -77,14 +84,14 @@ resource "azurerm_container_app" "this" {
 
       readiness_probe {
         path             = "/health"
-        port             = 8080
+        port             = 8081
         transport        = "HTTP"
         interval_seconds = 10
       }
 
       startup_probe {
         path                    = "/health"
-        port                    = 8080
+        port                    = 8081
         transport               = "HTTP"
         interval_seconds        = 5
         failure_count_threshold = 30

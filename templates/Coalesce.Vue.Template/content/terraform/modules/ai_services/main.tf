@@ -43,7 +43,7 @@ resource "azurerm_cognitive_deployment" "chat" {
 }
 
 resource "azurerm_role_assignment" "openai_user" {
-  for_each = var.allowed_users
+  for_each = var.admin_principals
 
   scope                = azurerm_ai_services.this.id
   role_definition_name = "Azure AI User"

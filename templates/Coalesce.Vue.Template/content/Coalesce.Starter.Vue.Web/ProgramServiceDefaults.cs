@@ -108,11 +108,21 @@ public static class ProgramServiceDefaults
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
+        var healthChecks = app.MapGroup("");
+
+        // When a dedicated health port is configured, restrict health endpoints to only
+        // respond on that port. This prevents health endpoints from being publicly accessible
+        // through the main application port when deployed in container environments.
+        if (app.Configuration["HEALTH_PORT"] is string { Length: > 0 } healthPort)
+        {
+            healthChecks.RequireHost($"*:{healthPort}");
+        }
+
         // All health checks must pass for app to be considered ready to accept traffic after starting
-        app.MapHealthChecks(HealthEndpointPath).AllowAnonymous();
+        healthChecks.MapHealthChecks(HealthEndpointPath).AllowAnonymous();
 
         // Only health checks tagged with the "live" tag must pass for app to be considered alive
-        app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+        healthChecks.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
         {
             Predicate = r => r.Tags.Contains("live")
         }).AllowAnonymous();

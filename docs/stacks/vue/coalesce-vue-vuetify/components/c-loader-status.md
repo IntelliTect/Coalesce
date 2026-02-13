@@ -41,7 +41,7 @@ Add an accessible label to the progress bar for screen readers:
 ``` vue-html
 <c-loader-status
   :loaders="events.$load"
-  aria-label="Events progressbar"
+  aria-label="Events progress bar"
   no-error-content
 />
 ```

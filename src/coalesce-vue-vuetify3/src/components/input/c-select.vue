@@ -10,6 +10,8 @@
       'c-select--multiple': effectiveMultiple,
     }"
     v-bind="inputBindAttrs"
+    :aria-expanded="menuOpen"
+    :aria-controls="listboxId"
     :rules="effectiveRules"
     :validationValue="
       effectiveMultiple ? internalModelValue : internalModelValue[0]
@@ -134,6 +136,7 @@
           <!-- This height shows 7 full items, with a final item partially out 
         of the scroll area to improve visual hints to the user that the can scroll the list. -->
           <v-list
+            :id="listboxId"
             class="py-0 d-flex flex-column"
             max-height="302"
             density="compact"
@@ -322,6 +325,7 @@ import {
   watch,
   onBeforeUnmount,
   useTemplateRef,
+  useId,
 } from "vue";
 import {
   useMetadataProps,
@@ -556,6 +560,9 @@ const createItemError = ref("" as string | null);
 const pendingSelection = ref(0);
 const selectionIndex = ref(-1);
 const pendingSearchSelect = ref(false);
+
+// Generate unique ID for the listbox to support aria-controls
+const listboxId = useId();
 
 /** The models representing the current selected item(s)
  * in the case that only the PK was provided to the component.

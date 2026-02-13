@@ -125,7 +125,7 @@ services.AddHangfire((config) =>
 {
     config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new()
     {
-        // The Hangfire schema is installed by the Migrations project.
+        // The Hangfire schema is installed during migrations.
         PrepareSchemaIfNecessary = false,
         TryAutoDetectSchemaDependentOptions = false,
         DisableGlobalLocks = true,
@@ -218,6 +218,27 @@ app.MapFallbackToController("Index", "Home");
 #endregion
 
 #region Launch
+
+#if (!AzureTerraform)
+// Initialize/migrate database.
+using (var scope = app.Services.CreateScope())
+{
+    var serviceScope = scope.ServiceProvider;
+
+    // Run database migrations.
+    using var db = serviceScope.GetRequiredService<AppDbContext>();
+    db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
+    db.Database.Migrate();
+
+#if Hangfire
+    // Install Hangfire storage only after the database has definitely been created.
+    // https://github.com/HangfireIO/Hangfire/issues/2139
+    SqlServerObjectsInstaller.Install(db.Database.GetDbConnection(), null, true);
+
+#endif
+    ActivatorUtilities.GetServiceOrCreateInstance<DatabaseSeeder>(serviceScope).Seed();
+}
+#endif
 
 app.Run();
 #endregion

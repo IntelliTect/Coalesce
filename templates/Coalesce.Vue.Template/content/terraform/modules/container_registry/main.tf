@@ -9,14 +9,18 @@ resource "azurerm_container_registry" "this" {
   tags                = var.tags
 }
 
+// Import initial images - this is done because container apps cannot be created without a container image,
+// and specifying an external container repository directly in the container app will delete
+// the app's managed identity assignment.
+
 // Import hello world image for initial container deployments.
-resource "terraform_data" "import_helloworld_image" {
+resource "terraform_data" "import_initial_http" {
   provisioner "local-exec" {
     command     = <<-EOT
     az acr import `
       --name ${azurerm_container_registry.this.name} `
       --source docker.io/${var.initial_image} `
-      --image ${var.initial_image} `
+      --image hello-world-http `
       --subscription ${data.azurerm_client_config.current.subscription_id}
     EOT
     interpreter = ["pwsh", "-Command"]
@@ -31,13 +35,13 @@ resource "terraform_data" "import_helloworld_image" {
 }
 
 // Import a short-lived image for init containers that need to exit immediately.
-resource "terraform_data" "import_init_image" {
+resource "terraform_data" "import_initial_init" {
   provisioner "local-exec" {
     command     = <<-EOT
     az acr import `
       --name ${azurerm_container_registry.this.name} `
       --source mcr.microsoft.com/${var.initial_init_image} `
-      --image ${var.initial_init_image} `
+      --image hello-world-init `
       --subscription ${data.azurerm_client_config.current.subscription_id}
     EOT
     interpreter = ["pwsh", "-Command"]

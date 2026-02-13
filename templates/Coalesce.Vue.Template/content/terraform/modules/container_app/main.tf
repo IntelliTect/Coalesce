@@ -65,7 +65,7 @@ resource "azurerm_container_app" "this" {
       memory = var.memory
 
       env {
-        # Port for crccheck/hello-world to listen on
+        # Port for initial_image to listen on
         name  = "PORT"
         value = "8080"
       }

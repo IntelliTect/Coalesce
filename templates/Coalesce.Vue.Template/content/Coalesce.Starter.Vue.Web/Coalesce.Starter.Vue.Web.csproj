@@ -7,6 +7,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Coalesce.Starter.Vue.Data\Coalesce.Starter.Vue.Data.csproj" />
+    <!--#if(!AzureTerraform) -->
+    <ProjectReference Include="..\Coalesce.Starter.Vue.Migrations\Coalesce.Starter.Vue.Migrations.csproj" />
+    <!--#endif -->
   </ItemGroup>
 
   <ItemGroup>

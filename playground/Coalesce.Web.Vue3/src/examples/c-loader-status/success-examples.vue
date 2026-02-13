@@ -140,30 +140,6 @@
 
     <v-row>
       <v-col>
-        <h3>Accessibility: Using aria-label</h3>
-        <c-loader-status
-          :loaders="person7.$save"
-          show-success
-          aria-label="Saving person data"
-        >
-          <v-btn
-            color="primary"
-            @click="simulateSuccessWithAriaLabel"
-            :loading="person7.$save.isLoading"
-          >
-            Save with ARIA Label
-          </v-btn>
-        </c-loader-status>
-        <p class="text-caption mt-2">
-          The progress bar has an accessible label "Saving person data" for
-          screen readers. Use browser dev tools to inspect the progress bar's
-          aria-label attribute.
-        </p>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col>
         <v-btn color="secondary" @click="resetAll" variant="outlined">
           Reset All States
         </v-btn>
@@ -182,7 +158,6 @@ const person3 = new PersonViewModel();
 const person4 = new PersonViewModel();
 const person5 = new PersonViewModel();
 const person6 = new PersonViewModel();
-const person7 = new PersonViewModel();
 
 async function simulateSuccessWithMessage() {
   person1.$save.isLoading = true;
@@ -252,24 +227,11 @@ async function simulateSuccessWithSlots() {
     "Success with custom prepend and append slots!\nand some other message too";
 }
 
-async function simulateSuccessWithAriaLabel() {
-  person7.$save.isLoading = true;
-  person7.$save.wasSuccessful = null;
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  person7.$save.isLoading = false;
-  person7.$save.wasSuccessful = true;
-  person7.$save.message = "Person saved successfully!";
-}
-
 function resetAll() {
-  [person1, person2, person3, person4, person5, person6, person7].forEach(
-    (person) => {
-      person.$save.isLoading = false;
-      person.$save.wasSuccessful = null;
-      person.$save.message = null;
-    },
-  );
+  [person1, person2, person3, person4, person5, person6].forEach((person) => {
+    person.$save.isLoading = false;
+    person.$save.wasSuccessful = null;
+    person.$save.message = null;
+  });
 }
 </script>

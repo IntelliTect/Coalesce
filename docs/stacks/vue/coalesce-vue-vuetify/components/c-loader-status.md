@@ -37,15 +37,6 @@ Use ``c-loader-status`` to render a progress bar and any error messages, but don
 <c-loader-status :loaders="list.$load" />
 ```
 
-Add an accessible label to the progress bar for screen readers:
-``` vue-html
-<c-loader-status
-  :loaders="events.$load"
-  aria-label="Events progress bar"
-  no-error-content
-/>
-```
-
 
 Wrap a save/submit button:
 ``` vue-html
@@ -163,10 +154,6 @@ Specifies the title to display in the [v-alert](https://vuetifyjs.com/en/compone
 <Prop def="density: 'compact' | 'comfortable' | 'default'" lang="ts" />
 
 Controls the density of the [v-alert](https://vuetifyjs.com/en/components/alerts/) used for error and success messages. Use `compact` for tighter spacing, `comfortable` for medium spacing, or `default` for standard spacing.
-
-<Prop def="ariaLabel: string" lang="ts" />
-
-Specifies an accessible label for the progress bar. This label is applied to the [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) element with `role="progressbar"` to improve accessibility for screen readers.
 
 <Prop def="
 no-loading-content?: boolean;

@@ -185,7 +185,7 @@
                   onClick: () => onInput(item.model),
                 }"
                 :isSelected="item.selected"
-                :select="(value: boolean) => value !== item.selected && onInput(item.model)"
+                :select="(value: boolean) => { if (value !== item.selected) onInput(item.model); }"
               >
                 <v-list-item
                   v-memo="[

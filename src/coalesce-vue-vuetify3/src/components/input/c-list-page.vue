@@ -21,7 +21,7 @@
       hide-details
       density="compact"
       variant="outlined"
-      title="Current Page Number"
+      aria-label="Current Page Number"
       @update:model-value="list.$page = +$event"
     ></v-text-field>
     <span class="text-no-wrap hidden-sm-and-up">{{ list.$page }}</span>

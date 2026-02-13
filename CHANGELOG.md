@@ -1,6 +1,7 @@
 # 6.1.2
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
 - Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.
+- Improved accessibility: `c-list-page-size` now has `aria-label="Page Size"` and `c-list-page` now has `aria-label="Current Page Number"` on the input field.
 
 # 6.1.1
 - Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.

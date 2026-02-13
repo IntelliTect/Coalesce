@@ -873,6 +873,47 @@ describe("CSelect", () => {
       expect(model.singleTestId).toBeNull();
     });
 
+    test("tab closes menu without toggling selection in multiple mode", async () => {
+      const vm = new ComplexModelViewModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={vm} for="tests"></CSelect>
+      )).findComponent(CSelect<ComplexModel>);
+
+      // Open the menu
+      const menuWrapper = await openMenu(wrapper);
+      await flushPromises();
+      const menuInput = menuWrapper.find("input");
+
+      // Navigate to the first item
+      await menuInput.trigger("keydown.down");
+
+      // Press tab - should close menu without selecting
+      await menuInput.trigger("keydown", { key: "Tab" });
+
+      expect(wrapper.vm.menuOpen).toBeFalsy();
+      expect(vm.tests).toHaveLength(0);
+    });
+
+    test("tab selects pending item in single-select mode", async () => {
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="singleTest"></CSelect>
+      )).findComponent(CSelect<ComplexModel>);
+
+      // Open the menu
+      const menuWrapper = await openMenu(wrapper);
+      await flushPromises();
+      const menuInput = menuWrapper.find("input");
+
+      // Navigate to the second item
+      await menuInput.trigger("keydown.down");
+
+      // Press tab - should select the item
+      await menuInput.trigger("keydown", { key: "Tab" });
+
+      expect(model.singleTestId).toBe(202);
+      expect(wrapper.vm.menuOpen).toBeFalsy();
+    });
+
     test.each([
       {
         position: "start",

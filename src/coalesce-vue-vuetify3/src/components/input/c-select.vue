@@ -98,7 +98,9 @@
             )
           "
           @keydown.capture.enter.stop.prevent="confirmPendingSelection"
-          @keydown.capture.tab.stop.prevent="confirmPendingSelection"
+          @keydown.capture.tab.stop.prevent="
+            effectiveMultiple ? closeMenu(true) : confirmPendingSelection()
+          "
           @blur.capture="onMenuContentBlur"
         >
           <v-text-field

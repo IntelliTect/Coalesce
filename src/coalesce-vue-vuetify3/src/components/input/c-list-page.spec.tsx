@@ -35,6 +35,9 @@ describe("CListPage", () => {
     expect(input.exists()).toBe(true);
     expect((input.element as HTMLInputElement).value).toBe("1");
 
+    // Input should have aria-label for accessibility
+    expect(input.attributes("aria-label")).toBe("Current Page Number");
+
     // Input should have a max attribute set to the page count
     expect(input.attributes("max")).toBe("5");
 
@@ -95,6 +98,9 @@ describe("CListPage", () => {
     const input = wrapper.find('input[type="number"]');
     expect(input.exists()).toBe(true);
     expect((input.element as HTMLInputElement).value).toBe("1");
+
+    // Input should have aria-label for accessibility
+    expect(input.attributes("aria-label")).toBe("Current Page Number");
 
     // Input should NOT have a max attribute when pageCount is -1
     expect(input.attributes("max")).toBeUndefined();

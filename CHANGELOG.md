@@ -1,6 +1,7 @@
 # 6.1.2
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
 - Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.
+- Improved accessibility: `c-list-page-size` now has `aria-label="Page Size"` and `c-list-page` now has `aria-label="Current Page Number"` on the input field.
 
 ## Template Changes
 - Added full suite of Terraform for Azure

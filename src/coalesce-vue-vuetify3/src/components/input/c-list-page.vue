@@ -21,6 +21,7 @@
       hide-details
       density="compact"
       variant="outlined"
+      aria-label="Current Page Number"
       title="Current Page Number"
       @update:model-value="list.$page = +$event"
     ></v-text-field>

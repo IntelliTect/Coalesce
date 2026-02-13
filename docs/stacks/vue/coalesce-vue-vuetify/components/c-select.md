@@ -133,6 +133,19 @@ An optional set of [Data Source Standard Parameters](/modeling/model-components/
 
 If provided and non-false, enables [response caching](/stacks/vue/layers/api-clients.md#useresponsecaching) on the component's internal API callers.
 
+<Prop def="listProps?: VList['$props']" lang="ts" />
+
+Optional props to pass to the underlying [v-list](https://vuetifyjs.com/en/api/v-list/) component. Useful for adding accessibility attributes like `aria-label` or `tabindex`.
+
+Example:
+```vue
+<c-select 
+  for="Person" 
+  v-model="selectedPerson"
+  :list-props="{ ariaLabel: 'List of people', tabindex: 0 }"
+/>
+```
+
 <Prop def="create?: {
   getLabel: (search: string, items: TModel[]) => string | false,
   getItem: (search: string, label: string) => Promise<TModel>,
@@ -184,6 +197,33 @@ createMethods = {
 
 `#item="{ item: TModel, search: string }"` - Slot used to customize the text of both items inside the list, as well as the text of selected items. By default, items are rendered with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md). Slot is passed a parameter `item` containing a [model instance](/stacks/vue/layers/models.md), and `search` containing the current search query.
 
-`#list-item="{ item: TModel, search: string, selected: boolean }"` - Slot used to customize the text of items inside the list. If not provided, falls back to the `item` slot. Contents are wrapped in a `v-list-item-title`.
+`#list-item="{ item: TModel, search: string, selected: boolean, props: object, isSelected: boolean, select: (value: boolean) => void }"` - Slot used to customize the rendering of items inside the list. If not provided, falls back to the `item` slot. 
+
+When used without the additional props, contents are wrapped in a `v-list-item-title` for simple text customization. 
+
+For full control over list item rendering (e.g., for accessibility customizations), the slot also provides:
+- `props` - An object containing all props to bind to a [v-list-item](https://vuetifyjs.com/en/api/v-list-item/), including `value`, `class`, `active`, `role`, `aria-selected`, and `onClick` handler
+- `isSelected` - Boolean indicating whether the item is currently selected (alias for `selected`)
+- `select` - Function to toggle the selection state of the item
+
+Example with full control:
+```vue
+<c-select for="Person" multiple v-model="selectedPeople">
+  <template #list-item="{ props, item, isSelected, select }">
+    <v-list-item v-bind="props">
+      <template #prepend>
+        <v-list-item-action aria-hidden="true">
+          <v-checkbox-btn
+            :model-value="isSelected"
+            @update:model-value="select"
+            tabindex="-1"
+          />
+        </v-list-item-action>
+      </template>
+      <v-list-item-title>{{ item.name }}</v-list-item-title>
+    </v-list-item>
+  </template>
+</c-select>
+```
 
 `#selected-item="{ item: TModel, search: string, index:  number, remove: () => void }"` - Slot used to customize the text of selected items. If not provided, falls back to the `item` slot. The `remove` function will deselect the item and is only valid when using multi-select.

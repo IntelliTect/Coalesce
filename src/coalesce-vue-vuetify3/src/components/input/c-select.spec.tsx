@@ -1218,6 +1218,54 @@ describe("CSelect", () => {
       expect(wrapper.findAll(".v-field--single-line")).toHaveLength(1);
     });
   });
+
+  describe("accessibility attributes", () => {
+    test("has aria-expanded and aria-controls when menu is closed", async () => {
+      const model = new ComplexModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="singleTest"></CSelect>
+      )).findComponent(CSelect);
+
+      const input = wrapper.find("input");
+
+      // Assert - menu should be closed initially
+      expect(input.attributes("aria-expanded")).toBe("false");
+      expect(input.attributes("aria-controls")).toBeTruthy();
+    });
+
+    test("has aria-expanded true when menu is open", async () => {
+      const model = new ComplexModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="singleTest"></CSelect>
+      )).findComponent(CSelect);
+
+      // Act - open the menu
+      await openMenu(wrapper);
+
+      const input = wrapper.find("input");
+
+      // Assert - menu should be open
+      expect(input.attributes("aria-expanded")).toBe("true");
+    });
+
+    test("aria-controls references the listbox element", async () => {
+      const model = new ComplexModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="singleTest"></CSelect>
+      ));
+
+      const input = wrapper.find("input");
+      const ariaControls = input.attributes("aria-controls");
+
+      // Open menu to ensure listbox is rendered
+      const overlay = await openMenu(wrapper.findComponent(CSelect));
+
+      // Assert - the listbox should have the same ID as referenced by aria-controls
+      const listbox = overlay.find(`[role="listbox"]`);
+      expect(listbox.exists()).toBe(true);
+      expect(listbox.attributes("id")).toBe(ariaControls);
+    });
+  });
 });
 
 const menuContents = () => getWrapper(".v-overlay__content");

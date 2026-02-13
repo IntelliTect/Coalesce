@@ -35,12 +35,11 @@ resource "azurerm_role_assignment" "acr_pull" {
 
 # Federated credential for CI identity to deploy via this GitHub Environment
 resource "azurerm_federated_identity_credential" "ci_deploy" {
-  name                = "github-environment-${var.environment_name}"
-  resource_group_name = regex("/resourceGroups/([^/]+)/", var.ci_identity_id)[0]
-  parent_id           = var.ci_identity_id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://token.actions.githubusercontent.com"
-  subject             = "repo:${var.github_repository}:environment:${var.environment_name}"
+  name      = "github-environment-${var.environment_name}"
+  parent_id = var.ci_identity_id
+  audience  = ["api://AzureADTokenExchange"]
+  issuer    = "https://token.actions.githubusercontent.com"
+  subject   = "repo:${var.github_repository}:environment:${var.environment_name}"
 }
 
 module "vnet" {

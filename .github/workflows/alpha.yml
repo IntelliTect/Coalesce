@@ -1,4 +1,4 @@
-name: build-alpha
+name: CI Build
 
 on:
   pull_request:

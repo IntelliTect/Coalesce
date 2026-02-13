@@ -1,3 +1,5 @@
+name: ~Template Build
+
 on:
   workflow_call:
     inputs:
@@ -8,50 +10,50 @@ on:
         # We ignore it when doing CI builds when assets haven't yet been published.
         required: false
         type: string
-  
+
 jobs:
-  build: 
+  build:
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: pwsh
         working-directory: ./templates/Coalesce.Vue.Template
-    
+
     env:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
-      
+
     steps:
-    - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: | 
-          8.0.x
-          9.0.x
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
 
-    - name: "Set dependency versions"
-      if: success() && env.COALESCE_VERSION
-      run: |
-        $filePath = "./content/Directory.Build.props"
-        $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
-        (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
-        
-        cat $filePath
+      - name: "Set dependency versions"
+        if: success() && env.COALESCE_VERSION
+        run: |
+          $filePath = "./content/Directory.Build.props"
+          $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
+          (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
 
-        cd ./content/*.Web
-        echo $env:COALESCE_VERSION
-        npm i coalesce-vue@$env:COALESCE_VERSION --save
-        npm i coalesce-vue-vuetify3@$env:COALESCE_VERSION --save
+          cat $filePath
 
-        cat package.json
+          cd ./content/*.Web
+          echo $env:COALESCE_VERSION
+          npm i coalesce-vue@$env:COALESCE_VERSION --save
+          npm i coalesce-vue-vuetify3@$env:COALESCE_VERSION --save
 
-    - name: dotnet pack
-      run: |
-        dotnet pack -p:Version=$(!$env:COALESCE_VERSION ? '0.1.0' : $env:COALESCE_VERSION) -p:PackageOutputPath="${{ github.workspace }}/out/packages"
-    
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v6
-      with:
-        name: template-packages
-        path: ${{ github.workspace }}/out/packages
+          cat package.json
+
+      - name: dotnet pack
+        run: |
+          dotnet pack -p:Version=$(!$env:COALESCE_VERSION ? '0.1.0' : $env:COALESCE_VERSION) -p:PackageOutputPath="${{ github.workspace }}/out/packages"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: template-packages
+          path: ${{ github.workspace }}/out/packages

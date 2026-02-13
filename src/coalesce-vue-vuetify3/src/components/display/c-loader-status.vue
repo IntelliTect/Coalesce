@@ -81,6 +81,7 @@
         indeterminate
         :height="height"
         :color="color"
+        :aria-label="ariaLabel"
       >
       </v-progress-linear>
     </transition-group>
@@ -181,6 +182,8 @@ const props = withDefaults(
       title?: string;
       /** Density of the alert (compact, comfortable, default) */
       density?: "compact" | "comfortable" | "default";
+      /** Accessible label for the progress bar */
+      ariaLabel?: string;
     } & { [K in CamelFlags]?: boolean } & { [K in CamelYesFlags]?: boolean }
   >(),
   {

@@ -156,12 +156,12 @@ const parameters = Object.entries(templateJson.symbols)
     get warning() {
       if (!("$coalesceWarning" in v)) return null;
       const w = v.$coalesceWarning as {
-        condition: Requirements;
+        ifNot: Requirements;
         message: string;
       };
       return {
         message: w.message,
-        active: !evalReq(w.condition),
+        active: !evalReq(w.ifNot),
       };
     },
     link:

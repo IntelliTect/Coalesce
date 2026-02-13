@@ -50,7 +50,7 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 #if KeyVault
-if (builder.Configuration.GetConnectionString("KeyVault") is {})
+if (builder.Configuration.GetConnectionString("KeyVault") is string { Length: > 0 })
 {
     builder.Configuration.AddAzureKeyVaultSecrets("KeyVault", options: new() { ReloadInterval = TimeSpan.FromMinutes(1) });
 }

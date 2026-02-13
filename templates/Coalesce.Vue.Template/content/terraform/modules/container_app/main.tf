@@ -83,7 +83,7 @@ resource "azurerm_container_app" "this" {
       }
 
       readiness_probe {
-        path             = "/health"
+        path             = "/alive"
         port             = 8081
         transport        = "HTTP"
         interval_seconds = 10

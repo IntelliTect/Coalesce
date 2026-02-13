@@ -124,7 +124,10 @@ public static class ProgramServiceDefaults
         // Only health checks tagged with the "live" tag must pass for app to be considered alive
         healthChecks.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
         {
-            Predicate = r => r.Tags.Contains("live")
+            Predicate = r =>
+            {
+                return r.Tags.Contains("live");
+            }
         }).AllowAnonymous();
 
         return app;

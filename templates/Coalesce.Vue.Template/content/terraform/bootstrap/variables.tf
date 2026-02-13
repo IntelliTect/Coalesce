@@ -6,6 +6,11 @@ variable "project_name" {
     condition     = var.project_name == lower(var.project_name)
     error_message = "project_name must be lowercase."
   }
+
+  validation {
+    condition     = length(var.project_name) <= 16
+    error_message = "project_name must not exceed 16 characters."
+  }
 }
 
 variable "location" {

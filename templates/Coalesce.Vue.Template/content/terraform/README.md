@@ -23,7 +23,7 @@ Perform this one-time setup with the following steps:
    ```
 
 2. Edit `terraform.tfvars`, filling in your own values. 
-    - `project_name` must be lowercase alphanumeric (a–z, 0–9) and should not exceed 17 characters to allow for the `tfstate` suffix used in the Azure Storage Account name (which has a 24-character maximum).
+    - `project_name` must be lowercase alphanumeric (a–z, 0–9) and should not exceed 16 characters to allow for environment and resource suffixes, which generally have a total limit of 24-characters.
     - `subscription_id` should be the Azure subscription where you intend to deploy your Azure resources.
     - `github_repository` is the GitHub repo where your code and actions will live and run, in `org-name/repo-name` format. This is used to setup federated authentication to Azure.
 

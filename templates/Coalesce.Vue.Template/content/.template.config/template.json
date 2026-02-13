@@ -217,7 +217,7 @@
       "description": "Include Terraform configurations for provisioning Azure infrastructure with Container Apps and Azure SQL. Defines dev and prod environments.",
       "$coalesceLink": "https://developer.hashicorp.com/terraform/tutorials/azure-get-started",
       "$coalesceWarning": {
-        "condition": ["and", "GithubActions"],
+        "ifNot": ["and", "GithubActions"],
         "message": "Terraform CI is only provided for GitHub Actions. Without it, significant manual work and rework will be needed."
       }
     },

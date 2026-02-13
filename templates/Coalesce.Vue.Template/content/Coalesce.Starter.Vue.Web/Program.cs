@@ -49,6 +49,13 @@ builder.Configuration
     .AddJsonFile("appsettings.localhost.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
+#if KeyVault
+if (builder.Configuration.GetConnectionString("KeyVault") is string { Length: > 0 })
+{
+    builder.Configuration.AddAzureKeyVaultSecrets("KeyVault", options: new() { ReloadInterval = TimeSpan.FromMinutes(1) });
+}
+#endif
+
 builder.AddServiceDefaults();
 
 #region Configure Services
@@ -59,6 +66,7 @@ services.AddDbContext<AppDbContext>(options => options
     .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
         .EnableRetryOnFailure()
         .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+        .MigrationsAssembly("Coalesce.Starter.Vue.Migrations")
     )
     // Ignored because it interferes with the construction of Coalesce IncludeTrees via .Include()
     .ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored))
@@ -68,6 +76,10 @@ services.AddCoalesce<AppDbContext>();
 services.AddDataProtection().PersistKeysToDbContext<AppDbContext>();
 services.AddMvc();
 
+#if BlobStorage
+builder.AddAzureBlobContainerClient("Blobs");
+
+#endif
 #if Identity
 builder.ConfigureAuthentication();
 
@@ -113,8 +125,7 @@ services.AddHangfire((config) =>
 {
     config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new()
     {
-        // The Hangfire schema is installed manually below after DB migrations are ran
-        // so that the database has a chance to be created before Hangfire starts connecting to it.
+        // The Hangfire schema is installed during migrations.
         PrepareSchemaIfNecessary = false,
         TryAutoDetectSchemaDependentOptions = false,
         DisableGlobalLocks = true,
@@ -183,6 +194,7 @@ app.UseNoCacheResponseHeader();
 #if OpenAPI
 app.MapSwagger();
 app.MapScalarApiReference(c => c.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json");
+
 #endif
 #if Hangfire
 app.MapHangfireDashboard("/hangfire", new() { Authorization = [] }).RequireAuthorization(
@@ -192,7 +204,9 @@ app.MapHangfireDashboard("/hangfire", new() { Authorization = [] }).RequireAutho
     new AuthorizeAttribute { Roles = builder.Environment.IsDevelopment() ? null : nameof(Permission.Admin) }
 #endif
 );
+
 #endif
+app.MapDefaultEndpoints();
 app.MapRazorPages();
 app.MapDefaultControllerRoute();
 
@@ -205,6 +219,7 @@ app.MapFallbackToController("Index", "Home");
 
 #region Launch
 
+#if (!AzureTerraform)
 // Initialize/migrate database.
 using (var scope = app.Services.CreateScope())
 {
@@ -213,14 +228,8 @@ using (var scope = app.Services.CreateScope())
     // Run database migrations.
     using var db = serviceScope.GetRequiredService<AppDbContext>();
     db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
-#if KeepTemplateOnly
-    //db.Database.EnsureDeleted();
-    db.Database.EnsureCreated();
-
-#else
     db.Database.Migrate();
 
-#endif
 #if Hangfire
     // Install Hangfire storage only after the database has definitely been created.
     // https://github.com/HangfireIO/Hangfire/issues/2139
@@ -229,6 +238,7 @@ using (var scope = app.Services.CreateScope())
 #endif
     ActivatorUtilities.GetServiceOrCreateInstance<DatabaseSeeder>(serviceScope).Seed();
 }
+#endif
 
 app.Run();
 #endregion

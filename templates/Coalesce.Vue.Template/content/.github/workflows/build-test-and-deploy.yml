@@ -1,13 +1,16 @@
-name: Build, Test, and Deploy Coalesce.Starter.Vue
+name: Build, Test, and Deploy
 
 # https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
 on:
   push:
     branches:
       - main
+    paths-ignore: ["terraform/**"]
   pull_request:
+    paths-ignore: ["terraform/**"]
   workflow_dispatch:
 
+#if (!AzureTerraform)
 # CONFIGURATION
 # For help, go to https://github.com/Azure/Actions
 
@@ -16,6 +19,16 @@ on:
 #   https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment#deployment-protection-rules
 
 # 2. Set up the `AZURE_WEBAPP_PUBLISH_PROFILE` secret in your repository - https://docs.github.com/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-an-environment
+
+#endif
+#if (AzureTerraform)
+# CONFIGURATION:
+# Follow the instructions in terraform/README.md to setup infrastructure and variables.
+
+permissions:
+  id-token: write
+  contents: read
+#endif
 
 jobs:
   build-and-test:
@@ -62,6 +75,7 @@ jobs:
       - name: dotnet test
         run: dotnet test --configuration Release --no-restore --no-build
 
+      #if (!AzureTerraform)
       - name: dotnet publish
         run: dotnet publish ${{ github.workspace }}/Coalesce.Starter.Vue.Web/Coalesce.Starter.Vue.Web.csproj --configuration Release --output ${{ github.workspace }}/publish --no-restore --no-build
 
@@ -72,7 +86,41 @@ jobs:
           name: web-app
           path: ${{ github.workspace }}/publish
           if-no-files-found: error
+      #endif
+      #if (AzureTerraform)
+      - name: Azure Login
+        if: github.event_name != 'pull_request'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Push containers to ACR
+        if: github.event_name != 'pull_request'
+        run: |
+          az acr login --name ${{ vars.ACR_NAME }}
+          dotnet publish \
+            ${{ github.workspace }}/Coalesce.Starter.Vue.Web/Coalesce.Starter.Vue.Web.csproj \
+            --configuration Release \
+            --no-restore \
+            --no-build \
+            -t:PublishContainer \
+            -p:ContainerRepository=app \
+            -p:ContainerRegistry=${{ vars.ACR_NAME }}.azurecr.io \
+            -p:ContainerImageTags=${{ github.sha }}
+            
+          dotnet publish \
+            ${{ github.workspace }}/Coalesce.Starter.Vue.Migrations/Coalesce.Starter.Vue.Migrations.csproj \
+            --configuration Release \
+            --no-restore \
+            --no-build \
+            -t:PublishContainer \
+            -p:ContainerRepository=migrations \
+            -p:ContainerRegistry=${{ vars.ACR_NAME }}.azurecr.io \
+            -p:ContainerImageTags=${{ github.sha }}
+  #endif
+  #if (!AzureTerraform)
   # Deploys the app to Azure App Service
   # https://docs.github.com/actions/use-cases-and-examples/deploying/deploying-net-to-azure-app-service
   deploy-production:
@@ -97,3 +145,22 @@ jobs:
           slot-name: "production"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
+  #endif
+
+  #if (AzureTerraform)
+  deploy-dev:
+    needs: build-and-test
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/deploy-container-app.yml
+    with:
+      environment_name: dev
+    secrets: inherit
+
+  deploy-prod:
+    needs: deploy-dev
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/deploy-container-app.yml
+    with:
+      environment_name: prod
+    secrets: inherit
+#endif

@@ -6,12 +6,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
-
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
 
     <PackageReference Include="IntelliTect.Coalesce" Version="$(CoalesceVersion)" />
     <!--#if(AuditLogs) -->
@@ -28,8 +23,14 @@
     <PackageReference Include="Hangfire.Core" Version="1.8.21" />
     <!--#endif -->
     <!--#if(AIChat) -->
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.68.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.68.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.70.0" />
+    <!--#endif -->
+    <!--#if(KeyVault) -->
+    <PackageReference Include="Aspire.Azure.Security.KeyVault" Version="13.1.0" />
+    <!--#endif -->
+    <!--#if(BlobStorage) -->
+    <PackageReference Include="Aspire.Azure.Storage.Blobs" Version="13.1.0" />
     <!--#endif -->
   </ItemGroup>
 </Project>

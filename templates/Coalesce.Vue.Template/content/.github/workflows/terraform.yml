@@ -1,0 +1,177 @@
+name: Terraform
+run-name: "Terraform (${{ inputs.target || 'all' }})"
+
+on:
+  pull_request:
+    paths: ["terraform/**"]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which environment to target"
+        type: choice
+        options:
+          - all
+          - dev
+          - prod
+        default: all
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  plan:
+    name: Plan (${{ inputs.target || 'all' }})
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.plan.outputs.exitcode == 2 }}
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Build target args
+        id: targets
+        run: |
+          target="${{ inputs.target || 'all' }}"
+          args=""
+          if [ "$target" != "all" ]; then
+            args="-target=module.$target"
+          fi
+          echo "args=$args" >> $GITHUB_OUTPUT
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          set -o pipefail
+          exitcode=0
+          terraform plan -no-color -input=false -detailed-exitcode \
+            -var="project_name=${{ vars.PROJECT_NAME }}" \
+            -var="subscription_id=${{ vars.AZURE_SUBSCRIPTION_ID }}" \
+            -var="github_repository=${{ github.repository }}" \
+            ${{ steps.targets.outputs.args }} -out=tfplan 2>&1 | tee plan_output.txt || exitcode=$?
+          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+          # Exit code 2 means changes present (success). 1 means error.
+          if [ $exitcode -eq 1 ]; then exit 1; fi
+
+      - name: Summarize Plan
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let plan = fs.readFileSync('terraform/plan_output.txt', 'utf8');
+
+            // Strip refreshing state output, start after the last "Refreshing state..." line
+            const lines = plan.split('\n');
+            const lastRefreshIndex = lines.findLastIndex(l => l.includes('Refreshing state...'));
+            if (lastRefreshIndex !== -1) {
+              plan = lines.slice(lastRefreshIndex + 1).join('\n').trimStart();
+            }
+
+            const maxLen = 60000;
+            let body;
+            if (plan.length > maxLen) {
+              body = `#### Terraform Plan 📋
+
+              Plan output exceeds the comment size limit. Please check the [action output](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for the full plan.
+
+              *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            } else {
+              body = `#### Terraform Plan 📋
+
+              <details><summary>Show Plan</summary>
+
+              \`\`\` hcl
+              ${plan}
+              \`\`\`
+
+              </details>
+
+              *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+            }
+
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, body);
+
+            if (context.eventName !== 'pull_request') return;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Terraform Plan 📋')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Upload Plan
+        if: github.event_name == 'workflow_dispatch' && steps.plan.outputs.exitcode == 2
+        uses: actions/upload-artifact@v6
+        with:
+          name: tfplan
+          path: terraform/tfplan
+
+  apply:
+    name: Apply (${{ inputs.target || 'all' }})
+    needs: plan
+    if: github.event_name == 'workflow_dispatch' && needs.plan.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    environment: terraform
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Download Plan
+        uses: actions/download-artifact@v7
+        with:
+          name: tfplan
+          path: terraform
+
+      - name: Terraform Apply
+        run: terraform apply -input=false tfplan

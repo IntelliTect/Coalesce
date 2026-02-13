@@ -49,6 +49,7 @@ const selectBinds = computed((): any => {
     density: "compact",
     items: props.items,
     class: "c-list-page-size--dropdown",
+    "aria-label": "Page Size",
   };
 });
 </script>

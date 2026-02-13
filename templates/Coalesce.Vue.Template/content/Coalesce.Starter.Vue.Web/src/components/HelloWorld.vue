@@ -50,8 +50,22 @@
             <!--#endif -->
           </v-card-text>
         </v-card>
+        <!--#if AzureTerraform -->
         <br />
+        <v-card title="Terraform Infrastructure">
+          <v-card-text>
+            <p>
+              This project includes Terraform configurations for provisioning
+              Azure infrastructure. See
+              <code>terraform/README.md</code> in your project for instructions
+              on how to get this configured.
+            </p>
+          </v-card-text>
+        </v-card>
+        <br />
+        <!--#endif -->
         <!--#if Tenancy -->
+        <br />
         <v-card title="Tenancy">
           <v-card-text>
             <p>

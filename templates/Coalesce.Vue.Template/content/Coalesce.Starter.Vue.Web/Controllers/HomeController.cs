@@ -38,10 +38,11 @@ public class HomeController() : Controller
         // OPTIONAL: Inject settings or other variables into index.html here.
         // These will then be available as global variables in your Vue app.
         // Declare them as globals in env.d.ts.
-        Dictionary<string, object?> globalVars = new() {
+        Dictionary<string, object?> globalVars = new()
+        {
             ["ASPNETCORE_ENVIRONMENT"] = hostingEnvironment.EnvironmentName,
 #if AppInsights
-            ["APPLICATIONINSIGHTS_CONNECTION_STRING"] = config["APPLICATIONINSIGHTS_CONNECTION_STRING"],
+            ["APPLICATIONINSIGHTS_CONNECTION_STRING"] = config.GetConnectionString("AppInsights"),
 #endif
         };
 

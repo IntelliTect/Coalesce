@@ -5,6 +5,11 @@
 - `c-select` now supports `listProps` prop to pass props to the underlying v-list component.
 - `c-select` now has a `list-item-outer` slot that provides full control over list item rendering with props (`props`, `selected`, `select`) for advanced customizations.
 
+## Template Changes
+- Added full suite of Terraform for Azure
+- Added options for Azure KeyVault and Blob Storage
+- Split EF migrations into a separate migrations assembly
+
 # 6.1.1
 - Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.
 - Fix errors thrown when filtering and searching on `System.DateOnly` properties.

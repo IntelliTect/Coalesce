@@ -7,6 +7,7 @@
     :class="{
       'has-progress-placeholder': usePlaceholder,
     }"
+    v-bind="$attrs"
   >
     <!-- Outer div is needed because a transition can't be a child of another transition  -->
     <div key="messages">
@@ -81,6 +82,7 @@
         indeterminate
         :height="height"
         :color="color"
+        :aria-label="ariaLabel"
       >
       </v-progress-linear>
     </transition-group>
@@ -144,6 +146,7 @@ type Camelize<S extends string> = S extends `${infer F}-${infer R}`
 
 defineOptions({
   name: "c-loader-status",
+  inheritAttrs: false,
 });
 
 defineSlots<{
@@ -181,6 +184,8 @@ const props = withDefaults(
       title?: string;
       /** Density of the alert (compact, comfortable, default) */
       density?: "compact" | "comfortable" | "default";
+      /** Accessible label for the progress bar */
+      ariaLabel?: string;
     } & { [K in CamelFlags]?: boolean } & { [K in CamelYesFlags]?: boolean }
   >(),
   {

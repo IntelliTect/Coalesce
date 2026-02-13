@@ -294,4 +294,28 @@ describe("CLoaderStatus", () => {
       });
     },
   );
+
+  test("aria-label is applied to progress bar", async () => {
+    const vm = new ComplexModelViewModel();
+    vm.$primaryKey = 1;
+
+    const wrapper = mountApp(() => (
+      <CLS loaders={vm.$load} aria-label="Loading progress">
+        <div>Content</div>
+      </CLS>
+    ));
+
+    // Manually set the loader to a loading state to trigger the progress bar
+    vm.$load.isLoading = true;
+    
+    // Wait for next tick so the loading state is reflected in the DOM
+    await wrapper.vm.$nextTick();
+
+    // Find the progress bar
+    const progressBar = wrapper.find(".c-loader-status--progress");
+
+    // Verify the aria-label is present on the progress bar
+    expect(progressBar.exists()).toBe(true);
+    expect(progressBar.attributes("aria-label")).toBe("Loading progress");
+  });
 });

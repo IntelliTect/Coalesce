@@ -1,0 +1,4 @@
+# Rename this file to terraform.tfvars and fill in your values.
+project_name      = "myapp"
+subscription_id   = "00000000-0000-0000-0000-000000000000"
+github_repository = "my-org/my-repo"

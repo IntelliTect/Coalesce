@@ -88,7 +88,7 @@ public static class ProgramServiceDefaults
         }
 
 #if AppInsights
-        if (builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"] is string { Length: > 0 } aiConnStr)
+        if (builder.Configuration.GetConnectionString("AppInsights") is string { Length: > 0 } aiConnStr)
         {
             builder.Services.AddOpenTelemetry().UseAzureMonitor(opt => opt.ConnectionString = aiConnStr);
         }
@@ -108,19 +108,27 @@ public static class ProgramServiceDefaults
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
-        // Adding health checks endpoints to applications in non-development environments has security implications.
-        // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
-        if (app.Environment.IsDevelopment())
-        {
-            // All health checks must pass for app to be considered ready to accept traffic after starting
-            app.MapHealthChecks(HealthEndpointPath).AllowAnonymous();
+        var healthChecks = app.MapGroup("");
 
-            // Only health checks tagged with the "live" tag must pass for app to be considered alive
-            app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            }).AllowAnonymous();
+        // When a dedicated health port is configured, restrict health endpoints to only
+        // respond on that port. This prevents health endpoints from being publicly accessible
+        // through the main application port when deployed in container environments.
+        if (app.Configuration["HEALTH_PORT"] is string { Length: > 0 } healthPort)
+        {
+            healthChecks.RequireHost($"*:{healthPort}");
         }
+
+        // All health checks must pass for app to be considered ready to accept traffic after starting
+        healthChecks.MapHealthChecks(HealthEndpointPath).AllowAnonymous();
+
+        // Only health checks tagged with the "live" tag must pass for app to be considered alive
+        healthChecks.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+        {
+            Predicate = r =>
+            {
+                return r.Tags.Contains("live");
+            }
+        }).AllowAnonymous();
 
         return app;
     }

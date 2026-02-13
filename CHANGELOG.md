@@ -2,6 +2,11 @@
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
 - Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.
 
+## Template Changes
+- Added full suite of Terraform for Azure
+- Added options for Azure KeyVault and Blob Storage
+- Split EF migrations into a separate migrations assembly
+
 # 6.1.1
 - Fix `AddUrlHelper` to create a more full ActionContext when operating outside an MVC action.
 - Fix errors thrown when filtering and searching on `System.DateOnly` properties.

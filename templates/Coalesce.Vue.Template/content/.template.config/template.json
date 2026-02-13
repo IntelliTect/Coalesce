@@ -11,10 +11,7 @@
   },
   "sourceName": "Coalesce.Starter.Vue",
   "preferNameDirectory": true,
-  "guids": [
-    "a0519206-1884-46ae-9307-ec95105646e5",
-    "8474a2d7-c044-4e5e-81dd-55e78596f186"
-  ],
+  "guids": ["427b7da5-dfe1-43cc-b172-40fe2d2fa505"],
   "symbols": {
     "KestrelPortGenerated": {
       "type": "generated",
@@ -70,6 +67,7 @@
       "displayName": "Sign-in with Microsoft",
       "description": "Adds Microsoft as an external authentication and account provider for Identity.",
       "$coalesceRequires": ["and", "Identity"],
+      "$coalesceParent": "Identity",
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/microsoft-logins"
     },
     "GoogleAuth": {
@@ -78,6 +76,7 @@
       "displayName": "Sign-in with Google",
       "description": "Adds Google as an external authentication and account provider for Identity.",
       "$coalesceRequires": ["and", "Identity"],
+      "$coalesceParent": "Identity",
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/google-logins"
     },
     "OtherOAuth": {
@@ -86,6 +85,7 @@
       "displayName": "Sign-in with other OAuth/OIDC",
       "description": "Adds generic code to help you add a different OAuth/OIDC external authentication and account provider for Identity.",
       "$coalesceRequires": ["and", "Identity"],
+      "$coalesceParent": "Identity",
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/other-logins"
     },
     "LocalAuth": {
@@ -94,6 +94,7 @@
       "displayName": "Sign-in with Username/Password",
       "description": "Adds infrastructure for supporting individual user accounts with first-party usernames and passwords.",
       "$coalesceRequires": ["and", "Identity"],
+      "$coalesceParent": "Identity",
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/individual"
     },
     "Passkeys": {
@@ -102,6 +103,7 @@
       "displayName": "Sign-in with Passkeys",
       "description": "Adds infrastructure for supporting passwordless authentication using passkeys (WebAuthn).",
       "$coalesceRequires": ["and", "LocalAuth"],
+      "$coalesceParent": "LocalAuth",
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/passkeys"
     },
     "UserPictures": {
@@ -109,7 +111,8 @@
       "datatype": "bool",
       "displayName": "User Profile Pictures",
       "description": "Adds infrastructure for acquiring, saving, and displaying user profile pictures.",
-      "$coalesceRequires": ["and", "Identity"]
+      "$coalesceRequires": ["and", "Identity"],
+      "$coalesceParent": "Identity"
     },
     "TrackingBase": {
       "type": "parameter",
@@ -142,6 +145,13 @@
       "displayName": "OpenAPI",
       "description": "Include configuration to expose an OpenAPI document, and interactive UI with Scalar."
     },
+    "Hangfire": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Hangfire",
+      "description": "Add packages, configuration, and telemetry for Hangfire, a background job runner.",
+      "$coalesceLink": "https://www.hangfire.io/"
+    },
     "Tenancy": {
       "type": "parameter",
       "datatype": "bool",
@@ -155,39 +165,70 @@
       "datatype": "bool",
       "displayName": "Tenancy: Creation by Self-service",
       "description": "Allows any signed in user to create additional tenants.",
-      "$coalesceRequires": ["and", "Tenancy"]
+      "$coalesceRequires": ["and", "Tenancy"],
+      "$coalesceParent": "Tenancy"
     },
     "TenantCreateAdmin": {
       "type": "parameter",
       "datatype": "bool",
       "displayName": "Tenancy: Creation by Global Admin",
       "description": "Allows global admins to create new tenants.",
-      "$coalesceRequires": ["and", "Tenancy"]
+      "$coalesceRequires": ["and", "Tenancy"],
+      "$coalesceParent": "Tenancy"
     },
     "TenantCreateExternal": {
       "type": "parameter",
       "datatype": "bool",
-      "displayName": "Tenancy: Creation/Membership by OIDC",
+      "displayName": "Tenancy: Creation & Membership by OIDC",
       "description": "Automatically creates a new tenant for external organizations (Microsoft Entra, Google GSuite), and grants automatic tenant membership to other users within those organizations.",
       "$coalesceRequires": [
         "and",
         "Tenancy",
         ["or", "MicrosoftAuth", "GoogleAuth", "OtherOAuth"]
-      ]
+      ],
+      "$coalesceParent": "Tenancy"
     },
     "TenantMemberInvites": {
       "type": "parameter",
       "datatype": "bool",
       "displayName": "Tenancy: Membership by Invitation",
       "description": "Allows administrators within a tenant to create invitation links to grant membership to their tenant.",
-      "$coalesceRequires": ["and", "Tenancy"]
+      "$coalesceRequires": ["and", "Tenancy"],
+      "$coalesceParent": "Tenancy"
+    },
+    "GithubActions": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "CI: GitHub Actions",
+      "description": "Include a GitHub Actions template for build, test, and deploy.",
+      "$coalesceLink": "https://docs.github.com/actions/use-cases-and-examples/deploying/deploying-net-to-azure-app-service"
+    },
+    "AzurePipelines": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "CI: Azure Pipelines",
+      "description": "Include an Azure Pipelines build template. For deployments, a release pipeline is recommended (which don't support YAML config files).",
+      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/devops/pipelines/create-first-pipeline?view=azure-devops&tabs=net%2Cbrowser"
+    },
+    "AzureTerraform": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Infrastructure: Azure",
+      "description": "Include Terraform configurations for provisioning Azure infrastructure with Container Apps and Azure SQL. Defines dev and prod environments.",
+      "$coalesceLink": "https://developer.hashicorp.com/terraform/tutorials/azure-get-started",
+      "$coalesceWarning": {
+        "ifNot": ["and", "GithubActions"],
+        "message": "Terraform CI is only provided for GitHub Actions. Without it, significant manual work and rework will be needed."
+      }
     },
     "AppInsights": {
       "type": "parameter",
       "datatype": "bool",
       "displayName": "Azure Application Insights",
       "description": "Include configuration and integrations for Application Insights, both front-end and back-end.",
-      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview"
+      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview",
+      "$coalesceRequires": ["and", "AzureTerraform"],
+      "$coalesceParent": "AzureTerraform"
     },
     "AppInsightsPackageDependency": {
       "type": "generated",
@@ -208,26 +249,41 @@
         ]
       }
     },
-    "Hangfire": {
+    "BlobStorage": {
       "type": "parameter",
       "datatype": "bool",
-      "displayName": "Hangfire",
-      "description": "Add packages, configuration, and telemetry for Hangfire, a background job runner.",
-      "$coalesceLink": "https://www.hangfire.io/"
+      "displayName": "Azure Blob Storage",
+      "description": "Include configuration and integrations for Azure Blob Storage.",
+      "$coalesceLink": "https://aspire.dev/integrations/cloud/azure/azure-storage-blobs/",
+      "$coalesceRequires": ["and", "AzureTerraform"],
+      "$coalesceParent": "AzureTerraform"
+    },
+    "KeyVault": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Azure Key Vault",
+      "description": "Include configuration and integrations for Azure Key Vault.",
+      "$coalesceLink": "https://aspire.dev/integrations/cloud/azure/azure-key-vault/",
+      "$coalesceRequires": ["and", "AzureTerraform"],
+      "$coalesceParent": "AzureTerraform"
     },
     "AIChat": {
       "type": "parameter",
       "datatype": "bool",
-      "displayName": "AI Chat with Semantic Kernel + Azure Open AI",
-      "description": "Add packages and configuration for creating an AI chat assistant in your application.",
-      "$coalesceLink": "/topics/template-features.html#ai-chat"
+      "displayName": "Azure AI Services + AI Chat",
+      "description": "Include configuration and integrations for Azure AI Services, as well as sample code for creating an AI chat assistant in your application.",
+      "$coalesceLink": "/topics/template-features.html#ai-chat",
+      "$coalesceRequires": ["and", "AzureTerraform"],
+      "$coalesceParent": "AzureTerraform"
     },
     "EmailAzure": {
       "type": "parameter",
       "datatype": "bool",
-      "displayName": "Email: Azure Communication Services",
+      "displayName": "Azure Email Communication Services",
       "description": "Include basic code for sending email with Azure Communication Services. See instructions in appsettings.json - the official ACS documentation is very confusing.",
-      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/communication-services/concepts/email/prepare-email-communication-resource"
+      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/communication-services/concepts/email/prepare-email-communication-resource",
+      "$coalesceRequires": ["and", "AzureTerraform"],
+      "$coalesceParent": "AzureTerraform"
     },
     "EmailSendGrid": {
       "type": "parameter",
@@ -235,20 +291,6 @@
       "displayName": "Email: Twilio SendGrid",
       "description": "Include basic code for sending email with Twilio SendGrid.",
       "$coalesceLink": "https://www.twilio.com/docs/sendgrid/for-developers/sending-email/email-api-quickstart-for-c"
-    },
-    "AzurePipelines": {
-      "type": "parameter",
-      "datatype": "bool",
-      "displayName": "CI: Azure Pipelines",
-      "description": "Include an azure-pipelines.yml build template. For deployments, a release pipeline is recommended (which don't support YAML config files).",
-      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/devops/pipelines/create-first-pipeline?view=azure-devops&tabs=net%2Cbrowser"
-    },
-    "GithubActions": {
-      "type": "parameter",
-      "datatype": "bool",
-      "displayName": "CI: Github Actions",
-      "description": "Include a build-test-and-deploy.yml github action file template.",
-      "$coalesceLink": "https://docs.github.com/actions/use-cases-and-examples/deploying/deploying-net-to-azure-app-service"
     }
   },
   "sources": [
@@ -265,7 +307,8 @@
             "**/*.g.cs",
             "**/*.g.ts",
             "**/*.lock.json",
-            "**/package-lock.json"
+            "**/package-lock.json",
+            "**/DEVELOPMENT.md"
           ]
         },
         {
@@ -344,7 +387,18 @@
         },
         {
           "condition": "!AppInsights",
-          "exclude": ["**/useAppInsights.ts"]
+          "exclude": [
+            "**/useAppInsights.ts",
+            "**/terraform/modules/app_insights"
+          ]
+        },
+        {
+          "condition": "!BlobStorage",
+          "exclude": ["**/terraform/modules/storage"]
+        },
+        {
+          "condition": "!KeyVault",
+          "exclude": ["**/terraform/modules/key_vault"]
         },
         {
           "condition": "!GoogleAuth",
@@ -352,11 +406,18 @@
         },
         {
           "condition": "!MicrosoftAuth",
-          "exclude": ["**/microsoft-logo.svg"]
+          "exclude": [
+            "**/microsoft-logo.svg",
+            "**/terraform/modules/app_registration"
+          ]
         },
         {
           "condition": "!EmailAzure",
-          "exclude": ["**/AzureEmailOptions.cs", "**/AzureEmailService.cs"]
+          "exclude": [
+            "**/AzureEmailOptions.cs",
+            "**/AzureEmailService.cs",
+            "**/terraform/modules/acs"
+          ]
         },
         {
           "condition": "!EmailSendGrid",
@@ -379,7 +440,11 @@
         },
         {
           "condition": "!AIChat",
-          "exclude": ["**/AIChat.vue", "**/AIAgentService.cs"]
+          "exclude": [
+            "**/AIChat.vue",
+            "**/AIAgentService.cs",
+            "**/terraform/modules/ai_services"
+          ]
         },
         {
           "condition": "!AzurePipelines",
@@ -388,11 +453,35 @@
         {
           "condition": "!GithubActions",
           "exclude": ["**/.github/workflows/build-test-and-deploy.yml"]
+        },
+        {
+          "condition": "!AzureTerraform",
+          "exclude": [
+            "**/terraform/**",
+            "**/.github/workflows/deploy-container-app.yml",
+            "**/.github/workflows/terraform.yml"
+          ]
         }
       ]
     }
   ],
   "SpecialCustomOperations": {
+    "**.tf": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "if": ["#if"],
+            "else": ["#else"],
+            "elseif": ["#elseif", "#elif"],
+            "endif": ["#endif"],
+            "trim": true,
+            "wholeLine": true,
+            "evaluator": "C++"
+          }
+        }
+      ]
+    },
     "**.vue": {
       "operations": [
         {

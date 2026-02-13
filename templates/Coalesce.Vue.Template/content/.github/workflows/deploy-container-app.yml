@@ -1,0 +1,51 @@
+name: ~Deploy Container App
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: true
+        type: string
+    outputs:
+      url:
+        value: ${{ jobs.deploy.outputs.url }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_name }}
+      url: ${{ steps.get-url.outputs.url }}
+    outputs:
+      url: ${{ steps.get-url.outputs.url }}
+
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify Container App
+        id: get-url
+        run: |
+          url=$(az containerapp show \
+            -n ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-app \
+            -g ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-rg \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          echo "url=https://$url" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Container App
+        env:
+          APP_NAME: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-app
+          RG: ${{ vars.PROJECT_NAME }}-${{ inputs.environment_name }}-rg
+          APP_IMAGE: ${{ vars.ACR_NAME }}.azurecr.io/app:${{ github.sha }}
+          MIGRATIONS_IMAGE: ${{ vars.ACR_NAME }}.azurecr.io/migrations:${{ github.sha }}
+        run: |
+          az containerapp show -n $APP_NAME -g $RG -o yaml > app.yaml
+
+          yq -i '.properties.template.initContainers[0].image = strenv(MIGRATIONS_IMAGE)' app.yaml
+          yq -i '.properties.template.containers[0].image = strenv(APP_IMAGE)' app.yaml
+
+          az containerapp update -n $APP_NAME -g $RG --yaml app.yaml

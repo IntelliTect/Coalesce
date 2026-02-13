@@ -3,6 +3,7 @@
     <LangVersion>12.0</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>427b7da5-dfe1-43cc-b172-40fe2d2fa505</UserSecretsId>
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 
@@ -14,7 +15,7 @@
     (KeepTemplateOnly) -->
     <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;AuditLogs;TrackingBase;ExampleModel</DefineConstants>
     <DefineConstants>$(DefineConstants);Identity;Passkeys;UserPictures;MicrosoftAuth;GoogleAuth;LocalAuth;OtherOAuth</DefineConstants>
-    <DefineConstants>$(DefineConstants);EmailAzure;EmailSendGrid;Hangfire;AIChat</DefineConstants>
+    <DefineConstants>$(DefineConstants);EmailAzure;EmailSendGrid;Hangfire;AIChat;KeyVault;BlobStorage;AzureTerraform</DefineConstants>
     <DefineConstants>$(DefineConstants);Tenancy;TenantPerHostname;TenantCreateSelf;TenantCreateExternal;TenantCreateAdmin;TenantMemberInvites</DefineConstants>
     <!--#endif -->
   </PropertyGroup>

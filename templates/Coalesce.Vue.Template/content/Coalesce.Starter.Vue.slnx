@@ -12,6 +12,7 @@
   </Folder>
   <Project Path="Coalesce.Starter.Vue.AppHost/Coalesce.Starter.Vue.AppHost.csproj" />
   <Project Path="Coalesce.Starter.Vue.Data/Coalesce.Starter.Vue.Data.csproj" />
+  <Project Path="Coalesce.Starter.Vue.Migrations/Coalesce.Starter.Vue.Migrations.csproj" />
   <Project Path="Coalesce.Starter.Vue.Web/Coalesce.Starter.Vue.Web.csproj" />
   <Project Path="Coalesce.Starter.Vue.Data.Test/Coalesce.Starter.Vue.Data.Test.csproj" />
 </Solution>

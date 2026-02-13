@@ -138,10 +138,14 @@ describe("CSelect", () => {
     //@ts-expect-error invalid `for` type
     () => <CSelect model={complexVm} for={123} />;
 
-    // menuProps:
+    // menuProps/listProps:
     () => <CSelect model={model} for="singleTest" menuProps={{contentClass: 'test'}} />;
+    () => <CSelect model={model} for="singleTest" menuProps={{ariaLabel: 'test'}} />;
+    () => <CSelect model={model} for="singleTest" listProps={{ariaLabel: 'test'}} />;
     //@ts-expect-error invalid `location` type
     () => <CSelect model={model} for="singleTest" menuProps={{location: 'invalid'}} />;
+    //@ts-expect-error invalid `density` type
+    () => <CSelect model={model} for="singleTest" listProps={{density: 'corn'}} />;
 
 
     // ********
@@ -869,6 +873,47 @@ describe("CSelect", () => {
       expect(model.singleTestId).toBeNull();
     });
 
+    test("tab closes menu without toggling selection in multiple mode", async () => {
+      const vm = new ComplexModelViewModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={vm} for="tests"></CSelect>
+      )).findComponent(CSelect<ComplexModel>);
+
+      // Open the menu
+      const menuWrapper = await openMenu(wrapper);
+      await flushPromises();
+      const menuInput = menuWrapper.find("input");
+
+      // Navigate to the first item
+      await menuInput.trigger("keydown.down");
+
+      // Press tab - should close menu without selecting
+      await menuInput.trigger("keydown", { key: "Tab" });
+
+      expect(wrapper.vm.menuOpen).toBeFalsy();
+      expect(vm.tests).toHaveLength(0);
+    });
+
+    test("tab selects pending item in single-select mode", async () => {
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="singleTest"></CSelect>
+      )).findComponent(CSelect<ComplexModel>);
+
+      // Open the menu
+      const menuWrapper = await openMenu(wrapper);
+      await flushPromises();
+      const menuInput = menuWrapper.find("input");
+
+      // Navigate to the second item
+      await menuInput.trigger("keydown.down");
+
+      // Press tab - should select the item
+      await menuInput.trigger("keydown", { key: "Tab" });
+
+      expect(model.singleTestId).toBe(202);
+      expect(wrapper.vm.menuOpen).toBeFalsy();
+    });
+
     test.each([
       {
         position: "start",
@@ -1189,6 +1234,45 @@ describe("CSelect", () => {
     );
     expect(selectedAfterDelete).toHaveLength(1);
     expect(selectedAfterDelete[0].text()).toContain("Test 2");
+  });
+
+  test("listProps are applied to the dropdown list", async () => {
+    const wrapper = mountApp(() => (
+      <CSelect
+        model={model}
+        for="singleTest"
+        listProps={{ ariaLabel: "People list", density: "comfortable" }}
+      ></CSelect>
+    )).findComponent(CSelect);
+
+    const menuWrapper = await openMenu(wrapper);
+    const list = menuWrapper.find(".v-list");
+    expect(list.attributes("aria-label")).toBe("People list");
+    expect(list.classes()).toContain("v-list--density-comfortable");
+  });
+
+  test("list-item-outer slot allows custom list item rendering", async () => {
+    const wrapper = mountApp(() => (
+      <CSelect model={model} for="singleTest">
+        {{
+          "list-item-outer": ({ props, item }: { props: any; item: Test }) => (
+            <div class="custom-outer" {...props}>
+              <span class="custom-name">Custom: {item.testName}</span>
+            </div>
+          ),
+        }}
+      </CSelect>
+    )).findComponent(CSelect);
+
+    const menuWrapper = await openMenu(wrapper);
+    const customItems = menuWrapper.findAll(".custom-outer");
+    expect(customItems).toHaveLength(2);
+    expect(customItems[0].find(".custom-name").text()).toBe("Custom: foo 101");
+    expect(customItems[1].find(".custom-name").text()).toBe("Custom: bar 202");
+
+    // Clicking a custom item should still select it
+    await customItems[0].trigger("click");
+    expect(model.singleTestId).toBe(101);
   });
 
   describe("vuetify props passthrough", () => {

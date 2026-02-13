@@ -100,7 +100,9 @@
             )
           "
           @keydown.capture.enter.stop.prevent="confirmPendingSelection"
-          @keydown.capture.tab.stop.prevent="confirmPendingSelection"
+          @keydown.capture.tab.stop.prevent="
+            effectiveMultiple ? closeMenu(true) : confirmPendingSelection()
+          "
           @blur.capture="onMenuContentBlur"
         >
           <v-text-field
@@ -142,6 +144,7 @@
             density="compact"
             :aria-multiselectable="effectiveMultiple"
             role="listbox"
+            v-bind="listProps"
           >
             <v-list-item
               v-if="createItemLabel"
@@ -172,7 +175,7 @@
               </v-list-item-subtitle>
             </v-list-item>
 
-            <v-list-item
+            <slot
               v-for="(item, i) in listItems"
               :key="item.key"
               v-memo="[
@@ -180,31 +183,35 @@
                 item.selected,
                 hasCustomItemSlots ? search : false,
               ]"
-              :value="item.key"
-              :class="{
-                'pending-selection': pendingSelection === i,
-              }"
-              :active="item.selected"
-              role="option"
-              :aria-selected="item.selected"
-              @click="onInput(item.model)"
+              name="list-item-outer"
+              :item="item.model"
+              :search="search"
+              :selected="item.selected"
+              :props="item.props"
+              :select="
+                (value: boolean) => {
+                  if (value !== item.selected) onInput(item.model);
+                }
+              "
             >
-              <template v-if="effectiveMultiple" #prepend>
-                <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
-              </template>
-              <v-list-item-title>
-                <slot
-                  name="list-item"
-                  :item="item.model"
-                  :search="search"
-                  :selected="item.selected"
-                >
-                  <slot name="item" :item="item.model" :search="search">
-                    {{ itemTitle(item.model) }}
+              <v-list-item v-bind="item.props">
+                <template v-if="effectiveMultiple" #prepend>
+                  <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
+                </template>
+                <v-list-item-title>
+                  <slot
+                    name="list-item"
+                    :item="item.model"
+                    :search="search"
+                    :selected="item.selected"
+                  >
+                    <slot name="item" :item="item.model" :search="search">
+                      {{ itemTitle(item.model) }}
+                    </slot>
                   </slot>
-                </slot>
-              </v-list-item-title>
-            </v-list-item>
+                </v-list-item-title>
+              </v-list-item>
+            </slot>
 
             <!-- TODO: With this version of c-select (versus the v2 one),
         we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
@@ -360,7 +367,7 @@ import {
   ViewModelCollection,
   ModelCollectionNavigationProperty,
 } from "coalesce-vue";
-import { VMenu, VTextField } from "vuetify/components";
+import { VList, VListItem, VMenu, VTextField } from "vuetify/components";
 import { Intersect } from "vuetify/directives";
 
 /* DEV NOTES:
@@ -422,6 +429,24 @@ type SlotTypes = {
     search: string | null;
     selected: boolean;
   }): any;
+  ["list-item-outer"]?(props: {
+    // Typechecking hack - otherwise we get a type error about `key` being undefined on the slot.
+    key: unknown;
+
+    item: SelectedModelTypeSingle;
+    search: string | null;
+    selected: boolean;
+    /** Props to bind to v-list-item for full control over the list item rendering.
+     * Includes value, class, active, and click handler. */
+    props: Partial<VListItem["$props"]> & {
+      onClick: (e: MouseEvent) => void;
+      class: Record<string, boolean>;
+      role: string;
+      "aria-selected": boolean;
+    };
+    /** Function to toggle selection of the item. */
+    select: (value: boolean) => void;
+  }): any;
 } & InheritedSlots;
 const slots = defineSlots<SlotTypes>();
 
@@ -467,7 +492,10 @@ const props = withDefaults(
       itemTitle?: (item: SelectedModelTypeSingle) => string | null;
 
       /** Props to pass to the underlying v-menu component */
-      menuProps?: VMenu["$props"];
+      menuProps?: VMenu["$props"] & { [s: string]: any };
+
+      /** Props to pass to the underlying v-list component */
+      listProps?: VList["$props"] & { [s: string]: any };
 
       create?: {
         getLabel: (
@@ -842,11 +870,23 @@ const items = computed((): SelectedModelTypeSingle[] => {
 
 const listItems = computed(() => {
   const pkName = modelObjectMeta.value.keyProp.name;
-  return items.value.map((item) => ({
-    model: item,
-    key: item[pkName],
-    selected: selectedKeysSet.value.has(normalizeKey(item[pkName])),
-  }));
+  return items.value.map((item, i) => {
+    const key = item[pkName];
+    const selected = selectedKeysSet.value.has(normalizeKey(key));
+    return {
+      model: item,
+      key,
+      selected,
+      props: {
+        value: key,
+        class: { "pending-selection": pendingSelection.value === i },
+        active: selected,
+        role: "option" as const,
+        "aria-selected": selected,
+        onClick: () => onInput(item),
+      },
+    };
+  });
 });
 
 const totalSelectableItems = computed(() => {

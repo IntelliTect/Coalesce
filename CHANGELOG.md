@@ -1,7 +1,9 @@
-# 6.1.2
+# 6.2.0
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
 - Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.
-- Improved accessibility: `c-list-page-size` now has `aria-label="Page Size"` and `c-list-page` now has `aria-label="Current Page Number"` on the input field.
+- Assorted accessibility improvements
+- `c-select` now supports `listProps` prop to pass props to the underlying v-list component.
+- `c-select` now has a `list-item-outer` slot that provides full control over list item rendering with props (`props`, `selected`, `select`) for advanced customizations.
 
 ## Template Changes
 - Added full suite of Terraform for Azure

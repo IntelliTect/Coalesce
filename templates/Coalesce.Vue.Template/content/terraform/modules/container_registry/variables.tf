@@ -34,5 +34,5 @@ variable "initial_image" {
 variable "initial_init_image" {
   description = "The initial image to import for init containers. Must exit successfully."
   type        = string
-  default     = "busybox:latest"
+  default     = "mcr/hello-world:latest"
 }

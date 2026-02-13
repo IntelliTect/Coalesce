@@ -36,7 +36,7 @@ resource "terraform_data" "import_init_image" {
     command     = <<-EOT
     az acr import `
       --name ${azurerm_container_registry.this.name} `
-      --source docker.io/${var.initial_init_image} `
+      --source mcr.microsoft.com/${var.initial_init_image} `
       --image ${var.initial_init_image} `
       --subscription ${data.azurerm_client_config.current.subscription_id}
     EOT

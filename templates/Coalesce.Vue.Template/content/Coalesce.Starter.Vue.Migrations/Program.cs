@@ -3,17 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Identity;
+
 #if Hangfire
 using Hangfire.SqlServer;
 #endif
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(options => options
-    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
-        .EnableRetryOnFailure()
-        .MigrationsAssembly(typeof(Program).Assembly.FullName)
-    )
+builder.Services.AddMigrationDbContext(
+    builder.Configuration.GetConnectionString("DefaultConnection")!
 );
 
 var host = builder.Build();
@@ -35,3 +34,23 @@ SqlServerObjectsInstaller.Install(db.Database.GetDbConnection(), null, true);
 
 #endif
 ActivatorUtilities.GetServiceOrCreateInstance<DatabaseSeeder>(scope.ServiceProvider).Seed();
+
+public static partial class Program
+{
+    public static IServiceCollection AddMigrationDbContext(
+        this IServiceCollection services,
+        string? connectionString
+    )
+    {
+        services.AddDbContext<AppDbContext>(options => options
+            .UseSqlServer(connectionString, opt => opt
+                .EnableRetryOnFailure()
+                .MigrationsAssembly(typeof(Program).Assembly.FullName)
+            )
+        );
+
+        services.Configure<IdentityOptions>(o => o.Stores.SchemaVersion = IdentitySchemaVersions.Version3);
+
+        return services;
+    }
+}

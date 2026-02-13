@@ -42,8 +42,9 @@ resource "azurerm_container_app" "this" {
     cooldown_period_in_seconds = 3600
 
     init_container {
-      name   = "migrations"
-      image  = var.container_registry.initial_image
+      name = "migrations"
+      // NOTE: Initial container image will be replaced by CI/CD deploy
+      image  = var.container_registry.initial_init_image
       cpu    = var.cpu
       memory = var.memory
 

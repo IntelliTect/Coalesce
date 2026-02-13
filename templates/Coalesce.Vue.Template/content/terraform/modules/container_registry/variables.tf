@@ -30,3 +30,9 @@ variable "initial_image" {
   type        = string
   default     = "crccheck/hello-world:latest"
 }
+
+variable "initial_init_image" {
+  description = "The initial image to import for init containers. Must exit successfully."
+  type        = string
+  default     = "busybox:latest"
+}

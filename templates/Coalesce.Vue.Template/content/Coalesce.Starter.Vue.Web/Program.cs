@@ -66,6 +66,7 @@ services.AddDbContext<AppDbContext>(options => options
     .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
         .EnableRetryOnFailure()
         .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+        .MigrationsAssembly("Coalesce.Starter.Vue.Migrations")
     )
     // Ignored because it interferes with the construction of Coalesce IncludeTrees via .Include()
     .ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored))

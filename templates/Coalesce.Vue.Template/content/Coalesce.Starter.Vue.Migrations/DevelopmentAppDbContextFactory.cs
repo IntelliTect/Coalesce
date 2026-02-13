@@ -1,4 +1,5 @@
 using Coalesce.Starter.Vue.Data;
+using Coalesce.Starter.Vue.Data.Models;
 using IntelliTect.Coalesce.Helpers;
 #if Identity
 using Microsoft.AspNetCore.Identity;
@@ -19,7 +20,9 @@ public class DevelopmentAppDbContextFactory : IDesignTimeDbContextFactory<AppDbC
 #if Identity
         var services = new ServiceCollection();
         services.AddDbContext<AppDbContext>(options => options
-            .UseSqlServer(DevelopmentConnectionStringLocator.Find())
+            .UseSqlServer(DevelopmentConnectionStringLocator.Find(), opt => opt
+                .MigrationsAssembly(typeof(DevelopmentAppDbContextFactory).Assembly.FullName)
+            )
         );
         services.AddIdentity<User, Role>(c =>
         {
@@ -30,7 +33,9 @@ public class DevelopmentAppDbContextFactory : IDesignTimeDbContextFactory<AppDbC
         return services.BuildServiceProvider().GetRequiredService<AppDbContext>();
 #else
         var builder = new DbContextOptionsBuilder<AppDbContext>();
-        builder.UseSqlServer(DevelopmentConnectionStringLocator.Find());
+        builder.UseSqlServer(DevelopmentConnectionStringLocator.Find(), opt => opt
+            .MigrationsAssembly(typeof(DevelopmentAppDbContextFactory).Assembly.FullName)
+        );
         return new AppDbContext(builder.Options);
 #endif
     }

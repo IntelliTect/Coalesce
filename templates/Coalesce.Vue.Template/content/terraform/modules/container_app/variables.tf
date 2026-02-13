@@ -28,8 +28,9 @@ variable "identity_id" {
 variable "container_registry" {
   description = "The container registry module outputs."
   type = object({
-    login_server  = string
-    initial_image = string
+    login_server       = string
+    initial_image      = string
+    initial_init_image = string
   })
 }
 

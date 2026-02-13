@@ -37,7 +37,8 @@
           >
             The error above indicates that you have not yet created an Entity
             Framework Migration. You can add one by running
-            <code>dotnet ef migrations add Init</code> in the Migrations project.
+            <code>dotnet ef migrations add Init</code> in the Migrations
+            project.
           </v-alert>
         </v-form>
       </v-card-text>

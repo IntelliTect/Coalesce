@@ -24,7 +24,28 @@ resource "terraform_data" "import_helloworld_image" {
 
   triggers_replace = {
     acr_id  = azurerm_container_registry.this.id
-    version = 2
+    version = 1
+  }
+
+  depends_on = [azurerm_container_registry.this]
+}
+
+// Import a short-lived image for init containers that need to exit immediately.
+resource "terraform_data" "import_init_image" {
+  provisioner "local-exec" {
+    command     = <<-EOT
+    az acr import `
+      --name ${azurerm_container_registry.this.name} `
+      --source docker.io/${var.initial_init_image} `
+      --image ${var.initial_init_image} `
+      --subscription ${data.azurerm_client_config.current.subscription_id}
+    EOT
+    interpreter = ["pwsh", "-Command"]
+  }
+
+  triggers_replace = {
+    acr_id  = azurerm_container_registry.this.id
+    version = 1
   }
 
   depends_on = [azurerm_container_registry.this]

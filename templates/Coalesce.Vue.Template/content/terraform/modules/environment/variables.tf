@@ -42,9 +42,10 @@ variable "allowed_origins" {
 variable "container_registry" {
   description = "The shared container registry module outputs."
   type = object({
-    id            = string
-    login_server  = string
-    initial_image = string
+    id                 = string
+    login_server       = string
+    initial_image      = string
+    initial_init_image = string
   })
 }
 

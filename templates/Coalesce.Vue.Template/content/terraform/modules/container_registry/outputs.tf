@@ -19,4 +19,10 @@ output "initial_image" {
   depends_on  = [terraform_data.import_helloworld_image]
 }
 
+output "initial_init_image" {
+  description = "The initial image for init containers that exits immediately. Depends on the image import."
+  value       = "${azurerm_container_registry.this.login_server}/${var.initial_init_image}"
+  depends_on  = [terraform_data.import_init_image]
+}
+
 

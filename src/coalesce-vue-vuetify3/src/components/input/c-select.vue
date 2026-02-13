@@ -139,6 +139,7 @@
             density="compact"
             :aria-multiselectable="effectiveMultiple"
             role="listbox"
+            v-bind="listProps"
           >
             <v-list-item
               v-if="createItemLabel"
@@ -169,39 +170,49 @@
               </v-list-item-subtitle>
             </v-list-item>
 
-            <v-list-item
-              v-for="(item, i) in listItems"
-              :key="item.key"
-              v-memo="[
-                pendingSelection === i,
-                item.selected,
-                hasCustomItemSlots ? search : false,
-              ]"
-              :value="item.key"
-              :class="{
-                'pending-selection': pendingSelection === i,
-              }"
-              :active="item.selected"
-              role="option"
-              :aria-selected="item.selected"
-              @click="onInput(item.model)"
-            >
-              <template v-if="effectiveMultiple" #prepend>
-                <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
-              </template>
-              <v-list-item-title>
-                <slot
-                  name="list-item"
-                  :item="item.model"
-                  :search="search"
-                  :selected="item.selected"
+            <template v-for="(item, i) in listItems" :key="item.key">
+              <slot
+                name="list-item"
+                :item="item.model"
+                :search="search"
+                :selected="item.selected"
+                :props="{
+                  value: item.key,
+                  class: { 'pending-selection': pendingSelection === i },
+                  active: item.selected,
+                  role: 'option',
+                  'aria-selected': item.selected,
+                  onClick: () => onInput(item.model),
+                }"
+                :isSelected="item.selected"
+                :select="(value: boolean) => value !== item.selected && onInput(item.model)"
+              >
+                <v-list-item
+                  v-memo="[
+                    pendingSelection === i,
+                    item.selected,
+                    hasCustomItemSlots ? search : false,
+                  ]"
+                  :value="item.key"
+                  :class="{
+                    'pending-selection': pendingSelection === i,
+                  }"
+                  :active="item.selected"
+                  role="option"
+                  :aria-selected="item.selected"
+                  @click="onInput(item.model)"
                 >
-                  <slot name="item" :item="item.model" :search="search">
-                    {{ itemTitle(item.model) }}
-                  </slot>
-                </slot>
-              </v-list-item-title>
-            </v-list-item>
+                  <template v-if="effectiveMultiple" #prepend>
+                    <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
+                  </template>
+                  <v-list-item-title>
+                    <slot name="item" :item="item.model" :search="search">
+                      {{ itemTitle(item.model) }}
+                    </slot>
+                  </v-list-item-title>
+                </v-list-item>
+              </slot>
+            </template>
 
             <!-- TODO: With this version of c-select (versus the v2 one),
         we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
@@ -356,7 +367,7 @@ import {
   ViewModelCollection,
   ModelCollectionNavigationProperty,
 } from "coalesce-vue";
-import { VMenu, VTextField } from "vuetify/components";
+import { VList, VListItem, VMenu, VTextField } from "vuetify/components";
 import { Intersect } from "vuetify/directives";
 
 /* DEV NOTES:
@@ -417,6 +428,18 @@ type SlotTypes = {
     item: SelectedModelTypeSingle;
     search: string | null;
     selected: boolean;
+    /** Props to bind to v-list-item for full control over the list item rendering.
+     * Includes value, class, active, and click handler. */
+    props: Partial<VListItem["$props"]> & {
+      onClick: (e: MouseEvent) => void;
+      class: Record<string, boolean>;
+      role: string;
+      "aria-selected": boolean;
+    };
+    /** Whether the item is currently selected. Alias for `selected` for compatibility with Vuetify's v-combobox. */
+    isSelected: boolean;
+    /** Function to toggle selection of the item. */
+    select: (value: boolean) => void;
   }): any;
 } & InheritedSlots;
 const slots = defineSlots<SlotTypes>();
@@ -464,6 +487,9 @@ const props = withDefaults(
 
       /** Props to pass to the underlying v-menu component */
       menuProps?: VMenu["$props"];
+
+      /** Props to pass to the underlying v-list component */
+      listProps?: VList["$props"];
 
       create?: {
         getLabel: (

@@ -20,8 +20,8 @@
     </v-col>
   </v-row>
 
-  <h2>Custom list-item slot with accessibility</h2>
-  <p>Customizing the prepend slot to add aria-hidden and inert to checkboxes</p>
+  <h2>Custom list-item-complete slot with accessibility</h2>
+  <p>Customizing the prepend slot to add inert to checkboxes</p>
   <v-row>
     <v-col>
       <c-select
@@ -32,14 +32,14 @@
           ariaLabel: 'List of people to select',
         }"
       >
-        <template #list-item="{ props, item, isSelected, select }">
+        <template #list-item-complete="{ props, item, selected, select }">
           <v-list-item v-bind="props">
             <template #prepend>
               <!-- inert prevents the checkbox from being tab-navigable and interactive.
                    The parent v-list-item remains clickable for selection. -->
               <v-list-item-action start inert>
                 <v-checkbox-btn
-                  :model-value="isSelected"
+                  :model-value="selected"
                   @update:model-value="select"
                   tabindex="-1"
                 />
@@ -57,7 +57,7 @@
     </v-col>
   </v-row>
 
-  <h2>Custom list-item with additional info</h2>
+  <h2>Custom list-item-complete with additional info</h2>
   <p>Full control over list-item rendering with custom content</p>
   <v-row>
     <v-col>
@@ -69,14 +69,14 @@
           ariaLabel: 'List of cases',
         }"
       >
-        <template #list-item="{ props, item, isSelected, select }">
+        <template #list-item-complete="{ props, item, selected, select }">
           <v-list-item v-bind="props">
             <template #prepend>
               <!-- inert prevents the checkbox from being tab-navigable and interactive.
                    The parent v-list-item remains clickable for selection. -->
               <v-list-item-action start inert>
                 <v-checkbox-btn
-                  :model-value="isSelected"
+                  :model-value="selected"
                   @update:model-value="select"
                   tabindex="-1"
                 />

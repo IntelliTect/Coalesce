@@ -172,7 +172,7 @@
 
             <template v-for="(item, i) in listItems" :key="item.key">
               <slot
-                name="list-item"
+                name="list-item-complete"
                 :item="item.model"
                 :search="search"
                 :selected="item.selected"
@@ -184,7 +184,6 @@
                   'aria-selected': item.selected,
                   onClick: () => onInput(item.model),
                 }"
-                :isSelected="item.selected"
                 :select="(value: boolean) => { if (value !== item.selected) onInput(item.model); }"
               >
                 <v-list-item
@@ -206,8 +205,15 @@
                     <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
                   </template>
                   <v-list-item-title>
-                    <slot name="item" :item="item.model" :search="search">
-                      {{ itemTitle(item.model) }}
+                    <slot
+                      name="list-item"
+                      :item="item.model"
+                      :search="search"
+                      :selected="item.selected"
+                    >
+                      <slot name="item" :item="item.model" :search="search">
+                        {{ itemTitle(item.model) }}
+                      </slot>
                     </slot>
                   </v-list-item-title>
                 </v-list-item>
@@ -428,6 +434,11 @@ type SlotTypes = {
     item: SelectedModelTypeSingle;
     search: string | null;
     selected: boolean;
+  }): any;
+  ["list-item-complete"]?(props: {
+    item: SelectedModelTypeSingle;
+    search: string | null;
+    selected: boolean;
     /** Props to bind to v-list-item for full control over the list item rendering.
      * Includes value, class, active, and click handler. */
     props: Partial<VListItem["$props"]> & {
@@ -436,8 +447,6 @@ type SlotTypes = {
       role: string;
       "aria-selected": boolean;
     };
-    /** Whether the item is currently selected. Alias for `selected` for compatibility with Vuetify's v-combobox. */
-    isSelected: boolean;
     /** Function to toggle selection of the item. */
     select: (value: boolean) => void;
   }): any;

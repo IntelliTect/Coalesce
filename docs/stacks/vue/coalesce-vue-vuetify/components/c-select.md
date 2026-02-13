@@ -197,24 +197,26 @@ createMethods = {
 
 `#item="{ item: TModel, search: string }"` - Slot used to customize the text of both items inside the list, as well as the text of selected items. By default, items are rendered with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md). Slot is passed a parameter `item` containing a [model instance](/stacks/vue/layers/models.md), and `search` containing the current search query.
 
-`#list-item="{ item: TModel, search: string, selected: boolean, props: object, isSelected: boolean, select: (value: boolean) => void }"` - Slot used to customize the rendering of items inside the list. If not provided, falls back to the `item` slot. 
+`#list-item="{ item: TModel, search: string, selected: boolean }"` - Slot used to customize the text of items inside the list. If not provided, falls back to the `item` slot. Contents are wrapped in a `v-list-item-title`.
 
-When used without the additional props, contents are wrapped in a `v-list-item-title` for simple text customization. 
+`#list-item-complete="{ item: TModel, search: string, selected: boolean, props: object, select: (value: boolean) => void }"` - Slot used for full control over the rendering of list items, including the ability to customize accessibility attributes. 
 
-For full control over list item rendering (e.g., for accessibility customizations), the slot also provides:
+This slot provides:
+- `item` - The model instance being rendered
+- `search` - The current search query
+- `selected` - Boolean indicating whether the item is currently selected
 - `props` - An object containing all props to bind to a [v-list-item](https://vuetifyjs.com/en/api/v-list-item/), including `value`, `class`, `active`, `role`, `aria-selected`, and `onClick` handler
-- `isSelected` - Boolean indicating whether the item is currently selected (alias for `selected`)
 - `select` - Function to toggle the selection state of the item
 
-Example with full control:
+Example for accessibility customization:
 ```vue
 <c-select for="Person" multiple v-model="selectedPeople">
-  <template #list-item="{ props, item, isSelected, select }">
+  <template #list-item-complete="{ props, item, selected, select }">
     <v-list-item v-bind="props">
       <template #prepend>
-        <v-list-item-action aria-hidden="true">
+        <v-list-item-action inert>
           <v-checkbox-btn
-            :model-value="isSelected"
+            :model-value="selected"
             @update:model-value="select"
             tabindex="-1"
           />

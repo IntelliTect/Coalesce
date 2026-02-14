@@ -78,9 +78,9 @@ public class OpenApiFixture
 #else
         var openApiDocument = new OpenApiStreamReader()
             .Read(await openApiDoc.Content.ReadAsStreamAsync(), out var diagnostic);
-        Assert.NotNull(openApiDocument);
-        Assert.Empty(diagnostic.Errors);
-        Assert.Empty(diagnostic.Warnings);
+        await Assert.That(openApiDocument).IsNotNull();
+        await Assert.That(diagnostic.Errors).IsEmpty();
+        await Assert.That(diagnostic.Warnings).IsEmpty();
         return openApiDocument;
 #endif
     }

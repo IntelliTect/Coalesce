@@ -5,7 +5,7 @@
     "source.fixAll.eslint": "explicit"
   },
   "editor.formatOnPaste": false,
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.formatOnType": true,
   "[markdown]": {
     // The markdown formatter flat out ruins some of our docs

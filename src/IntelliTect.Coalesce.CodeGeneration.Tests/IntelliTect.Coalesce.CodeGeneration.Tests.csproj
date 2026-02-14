@@ -9,9 +9,6 @@
   <ItemGroup>
     <Compile Remove="out/**/*.cs" />
     <None Include="out/**/*.*" />
-    <None Update="xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -22,15 +19,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.OpenApi.Readers" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Moq" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit" />
     <PackageReference Include="TUnit" />
-    <PackageReference Include="Xunit.SkippableFact" />
   </ItemGroup>
 
 </Project>

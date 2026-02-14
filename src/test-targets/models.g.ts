@@ -1042,6 +1042,31 @@ export class StringIdentity {
 }
 
 
+export interface SuppressedDefaultOrdering extends Model<typeof metadata.SuppressedDefaultOrdering> {
+  id: number | null
+  name: string | null
+}
+export class SuppressedDefaultOrdering {
+  
+  /** Mutates the input object and its descendants into a valid SuppressedDefaultOrdering implementation. */
+  static convert(data?: Partial<SuppressedDefaultOrdering>): SuppressedDefaultOrdering {
+    return convertToModel<SuppressedDefaultOrdering>(data || {}, metadata.SuppressedDefaultOrdering) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid SuppressedDefaultOrdering implementation. */
+  static map(data?: Partial<SuppressedDefaultOrdering>): SuppressedDefaultOrdering {
+    return mapToModel<SuppressedDefaultOrdering>(data || {}, metadata.SuppressedDefaultOrdering) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.SuppressedDefaultOrdering; }
+  
+  /** Instantiate a new SuppressedDefaultOrdering, optionally basing it on the given data. */
+  constructor(data?: Partial<SuppressedDefaultOrdering> | {[k: string]: any}) {
+    Object.assign(this, SuppressedDefaultOrdering.map(data || {}));
+  }
+}
+
+
 export interface Test extends Model<typeof metadata.Test> {
   testId: number | null
   complexModelId: number | null
@@ -1747,6 +1772,7 @@ declare module "coalesce-vue/lib/model" {
     StandaloneReadonly: StandaloneReadonly
     StandaloneReadWrite: StandaloneReadWrite
     StringIdentity: StringIdentity
+    SuppressedDefaultOrdering: SuppressedDefaultOrdering
     Test: Test
     TimeOnlyPk: TimeOnlyPk
     ValidationTarget: ValidationTarget

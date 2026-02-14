@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
+using Assembly = System.Reflection.Assembly;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests;
 
@@ -23,7 +24,7 @@ public class CodeGenTestBase
 {
     public static Lazy<Assembly> WebAssembly { get; } = new(GetWebAssembly);
 
-    private static async Task<Assembly> GetWebAssembly()
+    private static Assembly GetWebAssembly()
     {
         var suite = new GenerationExecutor(
                 new() { WebProject = new() { RootNamespace = "MyProject" } },
@@ -37,7 +38,9 @@ public class CodeGenTestBase
 
         using var ms = new MemoryStream();
         EmitResult emitResult = compilation.Emit(ms);
-        await Assert.That(emitResult.Success).IsTrue();
+        
+        if (!emitResult.Success) throw new Exception("Web project compilation failed");
+        
         var assembly = Assembly.Load(ms.ToArray());
         ReflectionRepository.Global.AddAssembly(assembly);
         return assembly;
@@ -88,7 +91,7 @@ public class CodeGenTestBase
         var validationResult = ValidateContext.Validate(suite.Model);
         await Assert.That(validationResult.Any(r => r.IsError)).IsFalse();
 
-        return Task.FromResult(suite);
+        return suite;
     }
 
     protected Task AssertSuiteCSharpOutputCompiles(IRootGenerator suite)

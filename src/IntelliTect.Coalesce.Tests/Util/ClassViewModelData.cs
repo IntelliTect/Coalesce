@@ -49,38 +49,6 @@ public class ClassViewModelData
         }
     }
 
-    public virtual void Deserialize(IXunitSerializationInfo info)
-    {
-        var targetType = info.GetValue<string>(nameof(TargetType));
-        var viewModelType = info.GetValue<string>(nameof(ViewModelType));
-
-        TargetType = Type.GetType(targetType) ??
-            typeof(ApiResult).Assembly.GetType(targetType) ??
-            throw new Exception($"Unable to locate type {targetType}");
-
-        switch (viewModelType)
-        {
-            case nameof(ReflectionClassViewModel):
-                ViewModelType = typeof(ReflectionClassViewModel);
-                break;
-
-            case nameof(SymbolClassViewModel):
-                ViewModelType = typeof(SymbolClassViewModel);
-                break;
-
-            default:
-                throw new InvalidOperationException($"Unknown type {viewModelType}");
-        }
-
-        SetupProps();
-    }
-
-    public virtual void Serialize(IXunitSerializationInfo info)
-    {
-        info.AddValue(nameof(TargetType), TargetType.FullName);
-        info.AddValue(nameof(ViewModelType), ViewModelType.Name);
-    }
-    
 
 
     public static implicit operator ClassViewModel(ClassViewModelData self)

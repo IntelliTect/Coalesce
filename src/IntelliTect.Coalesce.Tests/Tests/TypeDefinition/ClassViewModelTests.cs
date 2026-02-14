@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
@@ -46,11 +47,11 @@ public class ClassViewModelTests
     {
         var vm = data.ClassViewModel;
 
-        await Assert.That(c => c.Name == nameof(ComplexModel.MagicNumber) && c.Value.Equals(ComplexModel.MagicNumber)).Contains(vm.ClientConsts);
-        await Assert.That(c => c.Name == nameof(ComplexModel.MagicString) && c.Value.Equals(ComplexModel.MagicString)).Contains(vm.ClientConsts);
-        await Assert.That(c => c.Name == nameof(ComplexModel.MagicEnum) && ((int)c.Value).Equals((int)ComplexModel.MagicEnum)).Contains(vm.ClientConsts);
-
-        await Assert.That(c => c.Name == nameof(ComplexModel.UnexpostedConst)).DoesNotContain(vm.ClientConsts);
+        var consts = vm.ClientConsts;
+        await Assert.That(consts).Contains(c => c.Name == nameof(ComplexModel.MagicNumber) && c.Value.Equals(ComplexModel.MagicNumber));
+        await Assert.That(consts).Contains(c => c.Name == nameof(ComplexModel.MagicString) && c.Value.Equals(ComplexModel.MagicString));
+        await Assert.That(consts).Contains(c => c.Name == nameof(ComplexModel.MagicEnum) && ((int)c.Value).Equals((int)ComplexModel.MagicEnum));
+        await Assert.That(consts).DoesNotContain(c => c.Name == nameof(ComplexModel.UnexpostedConst));
     }
 
     [Test]
@@ -58,7 +59,7 @@ public class ClassViewModelTests
     public async Task DefaultOrderBy_SuppressesFallbackWhenSpecified(ClassViewModelData data)
     {
         var orderings = data.ClassViewModel.DefaultOrderBy;
-        
+
         // Should be empty - no fallback ordering should be applied
         await Assert.That(orderings).IsEmpty();
     }

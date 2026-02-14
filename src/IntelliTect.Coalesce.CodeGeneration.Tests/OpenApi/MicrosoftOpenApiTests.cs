@@ -89,4 +89,5 @@ public class MicrosoftOpenApiTests(OpenApiFixture fixture)
     //    var param = Assert.Single(parameters, p => p.Name == "dataSource.IntArray");
     //    Assert.Equal("Used by data sources ParameterTestsSource, ParameterTestsSourceSubclass.", param.Description);
     //}
-}#endif
+}
+#endif

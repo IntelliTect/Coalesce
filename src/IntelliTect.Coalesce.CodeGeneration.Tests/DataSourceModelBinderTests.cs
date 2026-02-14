@@ -16,6 +16,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.Utilities;
 using IntelliTect.Coalesce.Api.Controllers;
+using TypeInfo = System.Reflection.TypeInfo;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests;
 

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Assembly = System.Reflection.Assembly;
 
 namespace IntelliTect.Coalesce.Tests.Util;
 

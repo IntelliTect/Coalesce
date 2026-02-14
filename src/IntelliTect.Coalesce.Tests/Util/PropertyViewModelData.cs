@@ -18,18 +18,6 @@ public class PropertyViewModelData : ClassViewModelData
         PropName = propName;
     }
 
-    public override void Deserialize(IXunitSerializationInfo info)
-    {
-        base.Deserialize(info);
-        PropName = info.GetValue<string>(nameof(PropName));
-    }
-
-    public override void Serialize(IXunitSerializationInfo info)
-    {
-        base.Serialize(info);
-        info.AddValue(nameof(PropName), PropName);
-    }
-
     public static implicit operator PropertyViewModel(PropertyViewModelData self)
         => self.PropertyViewModel;
 

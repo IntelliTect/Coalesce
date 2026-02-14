@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Mapping;
 
-[ClassDataSource<TestDbContextFixture>(Shared = SharedType.PerClass)]
+[ClassDataSource<TestDbContextFixture>(Shared = SharedType.None)]
 public class IncludeTreeTests
 {
     public IncludeTreeTests(TestDbContextFixture dbFixture)

@@ -22,9 +22,9 @@ public class OpenApiDocumentTests
     {
         var doc = await Fixture.GetDocumentAsync();
 
-        await Assert.That(s =>
+        await Assert.That(doc.Components.Schemas).DoesNotContain(s =>
             s.Key.Contains("IDataSource", StringComparison.InvariantCultureIgnoreCase) ||
-            s.Key.Contains("IBehaviors", StringComparison.InvariantCultureIgnoreCase)).DoesNotContain(doc.Components.Schemas);
+            s.Key.Contains("IBehaviors", StringComparison.InvariantCultureIgnoreCase));
     }
 
     [Test]
@@ -44,8 +44,8 @@ public class OpenApiDocumentTests
 
         // These members should not be in the parameters for endpoints that accept a DTO
         // because they cannot be mapped by the incoming DTO back to the entity.
-        await Assert.That(p => p.Key.Contains("AssignedTo.", StringComparison.InvariantCultureIgnoreCase)).DoesNotContain(caseSaveProperties);
-        await Assert.That(p => p.Key.Contains("CaseProducts", StringComparison.InvariantCultureIgnoreCase)).DoesNotContain(caseSaveProperties);
+        await Assert.That(caseSaveProperties).DoesNotContain(p => p.Key.Contains("AssignedTo.", StringComparison.InvariantCultureIgnoreCase));
+        await Assert.That(caseSaveProperties).DoesNotContain(p => p.Key.Contains("CaseProducts", StringComparison.InvariantCultureIgnoreCase));
     }
 
     [Test]

@@ -249,7 +249,7 @@ public class AuditTests
         db.Add(user);
         await db.SaveChangesAsync();
 
-        var typeChangeProp = GetAuditLogProp();
+        var typeChangeProp = await GetAuditLogProp();
         await Assert.That(typeChangeProp.OldValueDescription).IsNull();
         await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("ListTextA");
 
@@ -260,7 +260,7 @@ public class AuditTests
         user.Parent1Id = "B";
         await db.SaveChangesAsync();
 
-        typeChangeProp = GetAuditLogProp();
+        typeChangeProp = await GetAuditLogProp();
         await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("ListTextA");
         await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("ListTextB");
 
@@ -270,7 +270,7 @@ public class AuditTests
         db.Remove(user);
         await db.SaveChangesAsync();
 
-        typeChangeProp = GetAuditLogProp();
+        typeChangeProp = await GetAuditLogProp();
         await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("ListTextB");
         await Assert.That(typeChangeProp.NewValueDescription).IsNull();
 
@@ -279,7 +279,7 @@ public class AuditTests
             db.AuditLogs.ExecuteDelete();
             db.ChangeTracker.Clear();
         }
-        AuditLogProperty GetAuditLogProp()
+        async Task<AuditLogProperty> GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
             return await Assert.That(log.Properties!).HasSingleItem();
@@ -311,11 +311,11 @@ public class AuditTests
         parentB.CustomListTextField = "NewListTextB";
         db.SaveChanges();
 
-        var typeChangeProp = GetAuditLogProp();
+        var typeChangeProp = await GetAuditLogProp();
         await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("ListTextA");
         await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("NewListTextB");
 
-        AuditLogProperty GetAuditLogProp()
+        async Task<AuditLogProperty> GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
             return await Assert.That(log.Properties!).HasSingleItem();
@@ -343,7 +343,7 @@ public class AuditTests
         db.Add(user);
         db.SaveChanges();
 
-        var typeChangeProp = GetAuditLogProp();
+        var typeChangeProp = await GetAuditLogProp();
         await Assert.That(typeChangeProp.OldValueDescription).IsNull();
         await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("Name:ThingA");
 
@@ -354,7 +354,7 @@ public class AuditTests
         user.Parent2Id = "B";
         db.SaveChanges();
 
-        typeChangeProp = GetAuditLogProp();
+        typeChangeProp = await GetAuditLogProp();
         await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("Name:ThingA");
         await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("Name:ThingB");
 
@@ -364,7 +364,7 @@ public class AuditTests
         db.Remove(user);
         db.SaveChanges();
 
-        typeChangeProp = GetAuditLogProp();
+        typeChangeProp = await GetAuditLogProp();
         await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("Name:ThingB");
         await Assert.That(typeChangeProp.NewValueDescription).IsNull();
 
@@ -373,7 +373,7 @@ public class AuditTests
             db.AuditLogs.ExecuteDelete();
             db.ChangeTracker.Clear();
         }
-        AuditLogProperty GetAuditLogProp()
+        async Task<AuditLogProperty> GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
             return await Assert.That(log.Properties!).HasSingleItem();

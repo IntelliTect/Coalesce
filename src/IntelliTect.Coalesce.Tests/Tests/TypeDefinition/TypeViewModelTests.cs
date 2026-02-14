@@ -216,7 +216,7 @@ public class TypeViewModelTests
     public async Task EnumValues_IsCorrect(ClassViewModelData data)
     {
         // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(data.TypeViewModel.EnumValues).HasCount(5);
+        await Assert.That(data.TypeViewModel.EnumValues.Count).IsEqualTo(5);
     }
 
     [Test]

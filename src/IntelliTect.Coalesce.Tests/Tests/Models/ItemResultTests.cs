@@ -102,7 +102,7 @@ public class ItemResultTests
         var result = ItemResult.FromValidation(dto, deep: true, forceRequired: true);
 
         // Assert
-        result.AssertSuccess();
+        await result.AssertSuccess();
     }
 
     [Test]
@@ -132,7 +132,7 @@ public class ItemResultTests
         var result = ItemResult.FromValidation(dto, deep: true, forceRequired: true);
 
         // Assert
-        result.AssertSuccess();
+        await result.AssertSuccess();
     }
 
 
@@ -165,7 +165,7 @@ public class ItemResultTests
         var dto = new ValidationTarget()
         {
             ProductId = "product:1:3",
-            Email = "x@x.com", 
+            Email = "x@x.com",
             Number = 7,
             RequiredChild = new()
             {

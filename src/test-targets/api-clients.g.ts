@@ -770,6 +770,11 @@ export class StringIdentityApiClient extends ModelApiClient<$models.StringIdenti
 }
 
 
+export class SuppressedDefaultOrderingApiClient extends ModelApiClient<$models.SuppressedDefaultOrdering> {
+  constructor() { super($metadata.SuppressedDefaultOrdering) }
+}
+
+
 export class TestApiClient extends ModelApiClient<$models.Test> {
   constructor() { super($metadata.Test) }
 }

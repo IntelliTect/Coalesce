@@ -1609,6 +1609,26 @@ export class StringIdentityListViewModel extends ListViewModel<$models.StringIde
 }
 
 
+export interface SuppressedDefaultOrderingViewModel extends $models.SuppressedDefaultOrdering {
+  id: number | null;
+  name: string | null;
+}
+export class SuppressedDefaultOrderingViewModel extends ViewModel<$models.SuppressedDefaultOrdering, $apiClients.SuppressedDefaultOrderingApiClient, number> implements $models.SuppressedDefaultOrdering  {
+  
+  constructor(initialData?: DeepPartial<$models.SuppressedDefaultOrdering> | null) {
+    super($metadata.SuppressedDefaultOrdering, new $apiClients.SuppressedDefaultOrderingApiClient(), initialData)
+  }
+}
+defineProps(SuppressedDefaultOrderingViewModel, $metadata.SuppressedDefaultOrdering)
+
+export class SuppressedDefaultOrderingListViewModel extends ListViewModel<$models.SuppressedDefaultOrdering, $apiClients.SuppressedDefaultOrderingApiClient, SuppressedDefaultOrderingViewModel> {
+  
+  constructor() {
+    super($metadata.SuppressedDefaultOrdering, new $apiClients.SuppressedDefaultOrderingApiClient())
+  }
+}
+
+
 export interface TestViewModel extends $models.Test {
   testId: number | null;
   complexModelId: number | null;
@@ -1736,6 +1756,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   StandaloneReadonly: StandaloneReadonlyViewModel,
   StandaloneReadWrite: StandaloneReadWriteViewModel,
   StringIdentity: StringIdentityViewModel,
+  SuppressedDefaultOrdering: SuppressedDefaultOrderingViewModel,
   Test: TestViewModel,
   TimeOnlyPk: TimeOnlyPkViewModel,
   ZipCode: ZipCodeViewModel,
@@ -1773,6 +1794,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   StandaloneReadonly: StandaloneReadonlyListViewModel,
   StandaloneReadWrite: StandaloneReadWriteListViewModel,
   StringIdentity: StringIdentityListViewModel,
+  SuppressedDefaultOrdering: SuppressedDefaultOrderingListViewModel,
   Test: TestListViewModel,
   TimeOnlyPk: TimeOnlyPkListViewModel,
   ZipCode: ZipCodeListViewModel,

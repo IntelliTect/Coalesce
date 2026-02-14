@@ -54,7 +54,7 @@ public class StandardBehaviorsTests : TestDbContextFixture
         var dto = new TestDto<Case>(1, c => { c.Description = "new desc"; });
         var result = await Behaviors<Case>().SaveAsync<TestDto<Case>, TestDto<Case>>(dto, ds, new DataSourceParameters());
 
-        result.AssertSuccess();
+        await result.AssertSuccess();
         await Assert.That(result.Object.SourceEntity.Description).IsEqualTo("new desc");
         await Assert.That(result.Object.SourceEntity.Title).IsEqualTo("TRANSFORMED");
     }

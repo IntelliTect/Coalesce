@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Util;
 
-[ClassDataSource<ClassViewModelDataCountTestFixture>(Shared = SharedType.PerClass)]
+[ClassDataSource<ClassViewModelDataCountTestFixture>(Shared = SharedType.PerAssembly)]
 public class ClassViewModelDataTest
 {
     private readonly ClassViewModelDataCountTestFixture fixture;
@@ -31,11 +31,11 @@ public class ClassViewModelDataTest
     }
 }
 
-public class ClassViewModelDataCountTestFixture : IDisposable
+public class ClassViewModelDataCountTestFixture : IAsyncDisposable
 {
     public Dictionary<Type, int> TypeCounts { get; } = new Dictionary<Type, int>();
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         var total = TypeCounts.Values.Sum();
         await Assert.That(total).IsEqualTo(2);

@@ -164,7 +164,7 @@ public class PropertyViewModelTests
     }
 
     [Test]
-    [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), nameof(Test.ComplexModelId))]
+    [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), nameof(TargetClasses.Test.ComplexModelId))]
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.ChildrenWithoutRefNavProp), nameof(ComplexModelDependent.ParentId))]
     public async Task Role_IsCollectionNavigation_IsCorrect(PropertyViewModelData data, string fkName)
     {
@@ -243,12 +243,12 @@ public class PropertyViewModelTests
     public async Task PropertySecurityIsUnused_ReflectsActualUsage(
         ClassViewModelData data, bool read, bool init, bool edit)
     {
-        await Assert.That(data.ClassViewModel.ClientProperties).All(p =>
+        foreach (var p in data.ClassViewModel.ClientProperties)
         {
-            Assert.Equal(read, !p.SecurityInfo.Read.IsUnused);
-            Assert.Equal(init, !p.SecurityInfo.Init.IsUnused);
-            Assert.Equal(edit, !p.SecurityInfo.Edit.IsUnused);
-        });
+            await Assert.That(!p.SecurityInfo.Read.IsUnused).IsEqualTo(read);
+            await Assert.That(!p.SecurityInfo.Init.IsUnused).IsEqualTo(init);
+            await Assert.That(!p.SecurityInfo.Edit.IsUnused).IsEqualTo(edit);
+        }
     }
 
     [Test]
@@ -329,7 +329,7 @@ public class PropertyViewModelTests
     public async Task Comment_IsCorrect(PropertyViewModelData data, string expected)
     {
         PropertyViewModel vm = data;
-        await Assert.That(vm.Comment).IsEqualTo(expected);
+        await Assert.That(vm.Comment.ReplaceLineEndings()).IsEqualTo(expected.ReplaceLineEndings());
     }
 
 

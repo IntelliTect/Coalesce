@@ -9,7 +9,7 @@ public class SqlServerAuditTests
 {
     private static readonly string SqlServerConnString = $"Server=(localdb)\\MSSQLLocalDB;Database=CoalesceAuditLoggingTestsnet{Environment.Version.Major};Trusted_Connection=True;Timeout=5";
 
-    [SkippableFact]
+    [Test]
     public async Task WithSqlServer_UpdatesExistingRecordForLikeChanges()
     {
         // Arrange
@@ -40,7 +40,7 @@ public class SqlServerAuditTests
         await Assert.That(propChange.NewValue).IsEqualTo("CEO");
     }
 
-    [SkippableFact]
+    [Test]
     public async Task WithSqlServer_CreatesNewRecordForLikeChangesOutsideMergeWindow()
     {
         // Arrange
@@ -66,7 +66,7 @@ public class SqlServerAuditTests
         await Assert.That(db.AuditLogs.Count()).IsEqualTo(3); // Now two records for EntityUpdated
     }
 
-    [SkippableFact]
+    [Test]
     public async Task WithSqlServer_CreatesNewRecordForUnlikeChanges()
     {
         // Arrange
@@ -90,7 +90,7 @@ public class SqlServerAuditTests
         await Assert.That(db.AuditLogs.Count()).IsEqualTo(3); // Now two records for EntityUpdated
     }
 
-    [SkippableFact]
+    [Test]
     public async Task WithSqlServer_CreatesNewRecordForUnmergableChanges()
     {
         // Arrange
@@ -119,7 +119,7 @@ public class SqlServerAuditTests
         await Assert.That(db.AuditLogs.Count(l => l.State == AuditEntryState.EntityModified)).IsEqualTo(2);
     }
 
-    [SkippableFact]
+    [Test]
     public async Task WithSqlServer_StoredProceduresWork()
     {
         // Arrange - use stored procedures
@@ -150,7 +150,7 @@ public class SqlServerAuditTests
         await Assert.That(propChange.NewValue).IsEqualTo("CEO");
     }
 
-    [SkippableFact]
+    [Test]
     public async Task WithSqlServer_StoredProcedureIsCreated()
     {
         // Arrange
@@ -176,7 +176,7 @@ public class SqlServerAuditTests
         }
     }
 
-    [SkippableFact]
+    [Test]
     public async Task WithSqlServer_DifferentModelsCreateDifferentStoredProcedures()
     {
         // This test verifies that different entity models result in different stored procedures
@@ -245,13 +245,13 @@ public class SqlServerAuditTests
             || ex.Message.Contains("The server was not found or was not accessible")
         )
         {
-            Skip.If(true, ex.Message);
+            TUnit.Core.Skip.Test(ex.Message);
         }
         catch (PlatformNotSupportedException ex) when (
             ex.Message.Contains("LocalDB is not supported on this platform")
         )
         {
-            Skip.If(true, ex.Message);
+            TUnit.Core.Skip.Test(ex.Message);
         }
         return db;
     }
@@ -275,13 +275,13 @@ public class SqlServerAuditTests
             || ex.Message.Contains("The server was not found or was not accessible")
         )
         {
-            Skip.If(true, ex.Message);
+            TUnit.Core.Skip.Test(ex.Message);
         }
         catch (PlatformNotSupportedException ex) when (
             ex.Message.Contains("LocalDB is not supported on this platform")
         )
         {
-            Skip.If(true, ex.Message);
+            TUnit.Core.Skip.Test(ex.Message);
         }
         return db;
     }

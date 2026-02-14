@@ -54,10 +54,10 @@ public class SearchTests
     };
 
     [Test]
-    [MethodDataSource(nameof(Search_DateTimeOffsetsData))]
-    public void Search_DateTimeOffset_RespectsTimeZone(bool expectedMatch, string searchTerm, int utcOffset, DateTimeOffset searchCandidate)
+    [InstanceMethodDataSource(nameof(Search_DateTimeOffsetsData))]
+    public async Task Search_DateTimeOffset_RespectsTimeZone(bool expectedMatch, string searchTerm, int utcOffset, DateTimeOffset searchCandidate)
     {
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.DateTimeOffset,
             "datetimeoffset:" + searchTerm,
             searchCandidate,
@@ -89,10 +89,10 @@ public class SearchTests
     };
 
     [Test]
-    [MethodDataSource(nameof(Search_MatchesDateTimesData))]
-    public void Search_DateTime_IsTimeZoneAgnostic(bool expectedMatch, string searchTerm, DateTime searchCandidate)
+    [InstanceMethodDataSource(nameof(Search_MatchesDateTimesData))]
+    public async Task Search_DateTime_IsTimeZoneAgnostic(bool expectedMatch, string searchTerm, DateTime searchCandidate)
     {
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.DateTime,
             "datetime:" + searchTerm,
             searchCandidate,
@@ -120,10 +120,10 @@ public class SearchTests
     };
 
     [Test]
-    [MethodDataSource(nameof(Search_MatchesDateOnlyData))]
-    public void Search_DateOnly_SearchesCorrectly(bool expectedMatch, string searchTerm, DateOnly searchCandidate)
+    [InstanceMethodDataSource(nameof(Search_MatchesDateOnlyData))]
+    public async Task Search_DateOnly_SearchesCorrectly(bool expectedMatch, string searchTerm, DateOnly searchCandidate)
     {
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.SystemDateOnly,
             "systemdateonly:" + searchTerm,
             searchCandidate,
@@ -134,10 +134,10 @@ public class SearchTests
     [Arguments(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6")]
     [Arguments(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "fafab015-ffa4-41f8-b4dd-c15eb0ce40b6")]
     [Arguments(false, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "A6740FB5-99DE-4079-B6F7-A1692772A0A4")]
-    public void Search_Guid_SearchesCorrectly(
+    public async Task Search_Guid_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.Guid,
             "guid:" + inputValue,
             Guid.Parse(propValue),
@@ -148,10 +148,10 @@ public class SearchTests
     [Arguments(true, "mailto:test", "mailto:test")]
     [Arguments(true, "mailto:test", "mailto:TEST")]
     [Arguments(false, "mailto:test", "https://www.google.com/")]
-    public void Search_Uri_SearchesCorrectly(
+    public async Task Search_Uri_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.Uri,
             "uri:" + inputValue,
             new Uri(propValue),
@@ -164,10 +164,10 @@ public class SearchTests
     [Arguments(true, "Brisk Breeze", "Brisk Br")]
     [Arguments(true, "Brisk Breeze", "Brisk Bre")]
     [Arguments(false, "Brisk Breeze", "Brisk Brz")]
-    public void Search_SingleDefaultString_SearchesCorrectly(
+    public async Task Search_SingleDefaultString_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (DefaultString t) => t.Name,
             inputValue,
             propValue,
@@ -184,10 +184,10 @@ public class SearchTests
     [Arguments(false, "John Smith", "ohn")]
     [Arguments(false, "John Smith", "mith")]
     [Arguments(false, "John Smith", "Jane")]
-    public void Search_BeginsWith_SplitOnSpaces_SearchesCorrectly(
+    public async Task Search_BeginsWith_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (BeginsWith_SplitOnSpaces t) => t.Name,
             inputValue,
             propValue,
@@ -202,10 +202,10 @@ public class SearchTests
     [Arguments(false, "John Smith", "Smith")]
     [Arguments(false, "John Smith", "Jo Sm")]
     [Arguments(false, "John Smith", "ohn")]
-    public void Search_BeginsWith_NoSplitOnSpaces_SearchesCorrectly(
+    public async Task Search_BeginsWith_NoSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (BeginsWith_NoSplitOnSpaces t) => t.Name,
             inputValue,
             propValue,
@@ -224,10 +224,10 @@ public class SearchTests
     [Arguments(true, "John Smith Jr", "ohn mith")]
     [Arguments(false, "John Smith Jr", "Jane")]
     [Arguments(false, "John Smith Jr", "Senior")]
-    public void Search_Contains_SplitOnSpaces_SearchesCorrectly(
+    public async Task Search_Contains_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (Contains_SplitOnSpaces t) => t.Name,
             inputValue,
             propValue,
@@ -246,10 +246,10 @@ public class SearchTests
     [Arguments(true, "John Smith Jr", "Smith Jr")]
     [Arguments(false, "John Smith Jr", "Jo Sm")]
     [Arguments(false, "John Smith Jr", "Jane")]
-    public void Search_Contains_NoSplitOnSpaces_SearchesCorrectly(
+    public async Task Search_Contains_NoSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (Contains_NoSplitOnSpaces t) => t.Name,
             inputValue,
             propValue,
@@ -264,10 +264,10 @@ public class SearchTests
     [Arguments(false, "John Smith", "John")]
     [Arguments(false, "John Smith", "Smith")]
     [Arguments(false, "John", "Jo")]
-    public void Search_Equals_SplitOnSpaces_SearchesCorrectly(
+    public async Task Search_Equals_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (Equals_SplitOnSpaces t) => t.Name,
             inputValue,
             propValue,
@@ -282,10 +282,10 @@ public class SearchTests
     [Arguments(false, "John Smith", "John")]
     [Arguments(false, "John Smith", "Smith")]
     [Arguments(false, "John Smith", "john")]
-    public void Search_Equals_NoSplitOnSpaces_SearchesCorrectly(
+    public async Task Search_Equals_NoSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (Equals_NoSplitOnSpaces t) => t.Name,
             inputValue,
             propValue,
@@ -299,10 +299,10 @@ public class SearchTests
     [Arguments(false, "JOHN", "john")]
     [Arguments(false, "John Smith", "John")]
     [Arguments(false, "John", "Jo")]
-    public void Search_EqualsNatural_SplitOnSpaces_SearchesCorrectly(
+    public async Task Search_EqualsNatural_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (EqualsNatural_SplitOnSpaces t) => t.Name,
             inputValue,
             propValue,
@@ -316,10 +316,10 @@ public class SearchTests
     [Arguments(false, "JOHN SMITH", "john smith")]
     [Arguments(false, "John Smith", "John")]
     [Arguments(false, "John Smith", "Smith")]
-    public void Search_EqualsNatural_NoSplitOnSpaces_SearchesCorrectly(
+    public async Task Search_EqualsNatural_NoSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (EqualsNatural_NoSplitOnSpaces t) => t.Name,
             inputValue,
             propValue,
@@ -348,10 +348,10 @@ public class SearchTests
     [Arguments(false, "John", "Smith", "john@example.com", "Jane")] // No property matches "Jane"
     [Arguments(true, "John", "Smith", "john@example.com", "ohn")]  // Email contains "ohn" in "john@example.com"
     [Arguments(false, "John", "Smith", "john@example.com", "mith")] // FirstName/LastName use BeginsWith and don't begin with "mith", Email doesn't contain "mith"
-    public void Search_MultipleProperties_SplitOnSpaces_SearchesCorrectly(
+    public async Task Search_MultipleProperties_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string firstName, string lastName, string email, string inputValue)
     {
-        SearchHelper<MultipleProperties_SplitOnSpaces>(
+        await SearchHelper<MultipleProperties_SplitOnSpaces>(
             inputValue,
             model =>
             {
@@ -380,10 +380,10 @@ public class SearchTests
     [Arguments(true, "John Doe", "Software Engineer", "oftware")] // Description contains "oftware" (part of "Software")
     [Arguments(true, "John Doe", "Software Engineer", "neer")]    // Description contains "neer" (part of "Engineer")
     [Arguments(false, "John Doe", "Software Engineer", "John Engineer")] // "John" begins Name but "Engineer" doesn't begin Name, Description contains "Engineer" but not "John"
-    public void Search_MixedSplitOnSpaces_SearchesCorrectly(
+    public async Task Search_MixedSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string name, string description, string inputValue)
     {
-        SearchHelper<MixedSplitOnSpaces>(
+        await SearchHelper<MixedSplitOnSpaces>(
             inputValue,
             model =>
             {
@@ -398,10 +398,10 @@ public class SearchTests
     [Arguments(true, "A1", "a1")]
     [Arguments(true, "a1", "A1")]
     [Arguments(false, "a1b", "a1")]
-    public void Search_StringEqualsInsensitive_SearchesCorrectly(
+    public async Task Search_StringEqualsInsensitive_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.StringSearchedEqualsInsensitive,
             "StringSearchedEqualsInsensitive:" + inputValue,
             propValue,
@@ -413,12 +413,12 @@ public class SearchTests
     [Arguments(false, "A1", "a1")]
     [Arguments(false, "a1", "A1")]
     [Arguments(false, "a1b", "a1")]
-    public void Search_StringEqualsNatural_SearchesCorrectly(
+    public async Task Search_StringEqualsNatural_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
         // Note about this test: the above tests cases should fail when
         // casing matches because all these tests evaluate in memory.
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.StringSearchedEqualsNatural,
             "StringSearchedEqualsNatural:" + inputValue,
             propValue,
@@ -434,10 +434,10 @@ public class SearchTests
     [Arguments(false, 3, "2")]
     [Arguments(false, 2, "22")]
     [Arguments(false, 22, "2")]
-    public void Search_Int_SearchesCorrectly(
+    public async Task Search_Int_SearchesCorrectly(
         bool shouldMatch, int propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.Int,
             "Int:" + inputValue,
             propValue,
@@ -447,13 +447,13 @@ public class SearchTests
     [Test]
     [Arguments(true, "a1", "a1")]
     [Arguments(false, "B1", "a1")]
-    public void Search_Collection_SearchesCorrectly(
+    public async Task Search_Collection_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
-        SearchHelper(
+        await SearchHelper(
             (ComplexModel t) => t.Tests,
             inputValue,
-            new[] { new Test { TestName = propValue } },
+            new[] { new TargetClasses.Test { TestName = propValue } },
             shouldMatch);
     }
 
@@ -462,10 +462,10 @@ public class SearchTests
     [Arguments(true, "needle stack", "needlestack", "stackneedle", "foo")]
     [Arguments(true, "foo stack needle", "needlestack", "stackneedle", "foo")]
     [Arguments(false, "needle stack bar", "needlestack", "stackneedle", "foo")]
-    public void Search_ComplexCollection_SearchesCorrectly(
+    public async Task Search_ComplexCollection_SearchesCorrectly(
         bool shouldMatch, string query, string field1, string field2, string field3)
     {
-        SearchHelper(
+        await SearchHelper(
             (HasCollection t) => t.Children,
             query,
             [new Collected { Field1 = field1, Field2 = field2, Field3 = field3 }],
@@ -490,13 +490,13 @@ public class SearchTests
     }
 
     [Test]
-    public void Search_CollectionWithNoSearchableChildren_DoesNotThrow()
+    public async Task Search_CollectionWithNoSearchableChildren_DoesNotThrow()
     {
         // This test demonstrates the issue where searching on a collection 
         // with no searchable child properties should not throw an exception.
         // The search should simply return no matches.
 
-        SearchHelper(
+        await SearchHelper(
             (HasCollectionNoSearchable t) => t.Children,
             "test query",
             [new CollectedNoSearchable { NonSearchableField = "some value" }],

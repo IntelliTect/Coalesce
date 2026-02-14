@@ -3,10 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using TUnit.Core.Interfaces;
 
 namespace IntelliTect.Coalesce.Tests.Util;
 
-internal class PropertyViewModelDataAttribute : Xunit.Sdk.DataAttribute
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+internal class PropertyViewModelDataAttribute : Attribute, IDataSourceAttribute
 {
     private readonly Type targetClass;
     private readonly string propName;
@@ -22,15 +26,25 @@ internal class PropertyViewModelDataAttribute : Xunit.Sdk.DataAttribute
         this.inlineData = additionalInlineData;
     }
 
-    public override IEnumerable<object[]> GetData(MethodInfo testMethod)
-    {
-        if (reflection) yield return new[] {
-            new PropertyViewModelData(targetClass, propName, typeof(ReflectionClassViewModel))
-        }.Concat(inlineData).ToArray();
+    public bool SkipIfEmpty { get; set; }
 
-        if (symbol) yield return new[] {
-            new PropertyViewModelData(targetClass, propName, typeof(SymbolClassViewModel))
-        }.Concat(inlineData).ToArray();
+    public async IAsyncEnumerable<Func<Task<object[]>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        if (reflection)
+        {
+            yield return () => Task.FromResult(new[] {
+                new PropertyViewModelData(targetClass, propName, typeof(ReflectionClassViewModel))
+            }.Concat(inlineData).ToArray());
+        }
+
+        if (symbol)
+        {
+            yield return () => Task.FromResult(new[] {
+                new PropertyViewModelData(targetClass, propName, typeof(SymbolClassViewModel))
+            }.Concat(inlineData).ToArray());
+        }
+
+        await Task.CompletedTask;
     }
 }
 

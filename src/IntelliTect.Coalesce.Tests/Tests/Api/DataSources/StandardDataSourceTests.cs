@@ -184,7 +184,7 @@ public class StandardDataSourceTests : TestDbContextFixture
     };
 
     [Test]
-    [MethodDataSource(nameof(Filter_MatchesDateTimesData))]
+    [InstanceMethodDataSource(nameof(Filter_MatchesDateTimesData))]
     public async Task ApplyListPropertyFilter_WhenPropIsDateTime_FiltersProp(
         bool shouldMatch, string inputValue, DateTime? fieldValue)
     {
@@ -211,7 +211,7 @@ public class StandardDataSourceTests : TestDbContextFixture
     };
 
     [Test]
-    [MethodDataSource(nameof(Filter_MatchesDateOnlyData))]
+    [InstanceMethodDataSource(nameof(Filter_MatchesDateOnlyData))]
     public async Task ApplyListPropertyFilter_WhenPropIsDateOnly_FiltersProp(
         bool shouldMatch, string inputValue, DateOnly fieldValue)
     {
@@ -235,7 +235,7 @@ public class StandardDataSourceTests : TestDbContextFixture
     };
 
     [Test]
-    [MethodDataSource(nameof(Filter_MatchesTimeOnlyData))]
+    [InstanceMethodDataSource(nameof(Filter_MatchesTimeOnlyData))]
     public async Task ApplyListPropertyFilter_WhenPropIsTimeOnly_FiltersProp(
         bool shouldMatch, string inputValue, TimeOnly fieldValue)
     {
@@ -273,7 +273,7 @@ public class StandardDataSourceTests : TestDbContextFixture
     };
 
     [Test]
-    [MethodDataSource(nameof(Filter_MatchesDateTimeOffsetsData))]
+    [InstanceMethodDataSource(nameof(Filter_MatchesDateTimeOffsetsData))]
     public async Task ApplyListPropertyFilter_WhenPropIsDateTimeOffset_FiltersProp(
         bool shouldMatch, string inputValue, int usersUtcOffset, DateTimeOffset? fieldValue)
     {
@@ -348,7 +348,7 @@ public class StandardDataSourceTests : TestDbContextFixture
     };
 
     [Test]
-    [MethodDataSource(nameof(Filter_MatchesGuidData))]
+    [InstanceMethodDataSource(nameof(Filter_MatchesGuidData))]
     public async Task ApplyListPropertyFilter_WhenPropIsGuid_FiltersProp(
         bool shouldMatch, Guid? propValue, string inputValue)
     {
@@ -375,7 +375,7 @@ public class StandardDataSourceTests : TestDbContextFixture
     };
 
     [Test]
-    [MethodDataSource(nameof(Filter_MatchesUriData))]
+    [InstanceMethodDataSource(nameof(Filter_MatchesUriData))]
     public async Task ApplyListPropertyFilter_WhenPropIsUri_FiltersProp(
         bool shouldMatch, Uri propValue, string inputValue)
     {
@@ -440,7 +440,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
 
     [Test]
-    public void ApplyListClientSpecifiedSorting_ChecksPropAuthorization()
+    public async Task ApplyListClientSpecifiedSorting_ChecksPropAuthorization()
     {
         var models = new[]
         {
@@ -455,16 +455,16 @@ public class StandardDataSourceTests : TestDbContextFixture
         source.Db.SaveChanges();
 
         // Order should be the same for both the unsorted and the unauthorized sorted order.
-        source.Query().AssertOrder(models);
+        await source.Query().AssertOrder(models);
 
         // Order should do nothing because the prop is unauthorized.
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.RestrictedString)}"
             }))
             .AssertOrder(models);
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)}"
@@ -473,7 +473,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Order should do nothing because the prop is unauthorized,
         // and subsequent orderings after any un-handlable ordering are ignored.
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)} ASC, {nameof(ComplexModel.ComplexModelId)} DESC"
@@ -483,7 +483,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Order should work because the user is now part of the required role.
         source.User.LogIn();
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)}"
@@ -492,14 +492,14 @@ public class StandardDataSourceTests : TestDbContextFixture
     }
 
     [Test]
-    public void ApplyListClientSpecifiedSorting_IgnoresInvalidProperties()
+    public async Task ApplyListClientSpecifiedSorting_IgnoresInvalidProperties()
     {
         var source = Source<ComplexModel>()
             .AddModel(new ComplexModel { ComplexModelId = 1, String = "def" })
             .AddModel(new ComplexModel { ComplexModelId = 2, String = "abc" });
 
         // Order should do nothing because "FOOBAR" isn't a valid prop.
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"FOOBAR ASC, {nameof(ComplexModel.String)} ASC"
@@ -507,7 +507,7 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertOrder(m => m.ComplexModelId, 1, 2);
 
         // Order should do nothing because "ComplexModelId" isn't an object prop.
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"ComplexModelId.FooBar ASC"
@@ -539,7 +539,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(defaultOrdering[1].Properties[0].Name).IsEqualTo(nameof(ComplexModel.ComplexModelId));
 
         source.User.LogIn();
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.ReferenceNavigation)} DESC"
@@ -568,7 +568,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(defaultOrdering[1].Properties[0].Name).IsEqualTo(nameof(ComplexModel.ComplexModelId));
 
         source.User.LogIn();
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
             .AssertOrder(m => m.ComplexModelId, 2, 1, 3);
     }
@@ -593,7 +593,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(defaultOrdering[0].Properties[0].Name).IsEqualTo(nameof(Product.Name));
 
         source.User.LogIn();
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
             .AssertOrder(m => m.ProductId, 2, 1, 3);
     }
@@ -618,7 +618,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(defaultOrdering[0].Properties[0].Name).IsEqualTo(nameof(Person.PersonId));
 
         source.User.LogIn();
-        source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
             .AssertOrder(m => m.PersonId, 1, 2, 3);
     }
@@ -647,7 +647,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         var results = source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
             .ToList();
-        
+
         // Results should be in insertion order (2, 1, 3) since no ordering was applied
         await Assert.That(results.Count).IsEqualTo(3);
     }
@@ -655,10 +655,10 @@ public class StandardDataSourceTests : TestDbContextFixture
     [Test]
     [Arguments(true, "propVal", "string:propV")]
     [Arguments(false, "propVal", "string:proppV")]
-    public void ApplyListSearchTerm_WhenTermTargetsField_SearchesField(
+    public async Task ApplyListSearchTerm_WhenTermTargetsField_SearchesField(
         bool shouldMatch, string propValue, string inputValue)
     {
-        Source<ComplexModel>()
+        await Source<ComplexModel>()
             .AddModel(m => m.String, propValue)
             .Query(s => s.ApplyListSearchTerm(s.Query(), new FilterParameters
             {
@@ -687,11 +687,11 @@ public class StandardDataSourceTests : TestDbContextFixture
         // Since searching by prop isn't valid for this specific property,
         // the search will instead treat the entire input as the search term.
         // Since this search term doesn't match the property's value, the results should be empty.
-        query.AssertMatched(false);
+        await query.AssertMatched(false);
     }
 
     [Test]
-    public void ApplyListSearchTerm_WhenTargetedPropRestricted_IgnoresProp()
+    public async Task ApplyListSearchTerm_WhenTargetedPropRestricted_IgnoresProp()
     {
         var query = Source<ComplexModel>()
             .AddModel(m => m.RestrictedString, "propValue", out PropertyViewModel prop)
@@ -701,7 +701,7 @@ public class StandardDataSourceTests : TestDbContextFixture
             }));
 
         // Since this search term doesn't match the property's value, the results should be empty.
-        query.AssertMatched(false);
+        await query.AssertMatched(false);
     }
 
     [Test]

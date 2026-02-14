@@ -57,50 +57,50 @@ internal static class AssortedTestingExtensions
         return source.Db.Set<TModel>();
     }
 
-    public static void AssertMatched<TModel>(this IQueryable<TModel> query, bool shouldMatch)
+    public static async Task AssertMatched<TModel>(this IQueryable<TModel> query, bool shouldMatch)
         where TModel : class, new()
     {
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
-    public static void AssertOrder<TModel, TProp>(this IEnumerable<TModel> models, Func<TModel, TProp> propSelector, params TProp[] expectedOrder)
+    public static async Task AssertOrder<TModel, TProp>(this IEnumerable<TModel> models, Func<TModel, TProp> propSelector, params TProp[] expectedOrder)
     {
         var modelsList = models.ToList();
-        Assert.Equal(expectedOrder.Length, modelsList.Count);
+        await Assert.That(modelsList.Count).IsEqualTo(expectedOrder.Length);
 
         foreach (var (model, expected) in modelsList.Zip(expectedOrder))
         {
             // Model not null because we asserted the length matches
-            Assert.Equal(expected, propSelector(model!));
+            await Assert.That(propSelector(model!)).IsEqualTo(expected);
         }
     }
 
-    public static void AssertOrder<TModel>(this IEnumerable<TModel> models, params TModel[] expectedOrder)
+    public static async Task AssertOrder<TModel>(this IEnumerable<TModel> models, params TModel[] expectedOrder)
     {
         var modelsList = models.ToList();
-        Assert.Equal(expectedOrder.Length, modelsList.Count);
+        await Assert.That(modelsList.Count).IsEqualTo(expectedOrder.Length);
 
-        Assert.All(
-            modelsList.Zip(expectedOrder, (model, expected) => model!.Equals(expected)),
-            Assert.True
-        );
+        foreach (var (model, expected) in modelsList.Zip(expectedOrder))
+        {
+            await Assert.That(model!.Equals(expected)).IsTrue();
+        }
     }
 
     /// <summary>
     /// Asserts that the result was a failure.
     /// </summary>
-    public static void AssertError(this ApiResult result)
+    public static async Task AssertError(this ApiResult result)
     {
-        Assert.False(result.WasSuccessful);
+        await Assert.That(result.WasSuccessful).IsFalse();
     }
 
     /// <summary>
     /// Asserts that the result was a failure.
     /// </summary>
-    public static void AssertError(this ApiResult result, string message)
+    public static async Task AssertError(this ApiResult result, string message)
     {
-        result.AssertError();
-        Assert.Equal(message, result.Message);
+        await result.AssertError();
+        await Assert.That(result.Message).IsEqualTo(message);
     }
 
     /// <summary>
@@ -110,27 +110,27 @@ internal static class AssortedTestingExtensions
         where T : ApiResult
     {
         var result = await resultTask;
-        result.AssertError();
-        Assert.Equal(message, result.Message);
+        await result.AssertError();
+        await Assert.That(result.Message).IsEqualTo(message);
     }
 
     /// <summary>
     /// Asserts that the result was successful.
     /// </summary>
-    public static void AssertSuccess(this ApiResult result, string? message = null)
+    public static async Task AssertSuccess(this ApiResult result, string? message = null)
     {
         // Returns a more useful assertion error than only checking WasSuccessful.
-        Assert.Equal(message, result.Message);
-        Assert.True(result.WasSuccessful);
+        await Assert.That(result.Message).IsEqualTo(message);
+        await Assert.That(result.WasSuccessful).IsTrue();
     }
 
     /// <summary>
     /// Asserts that the result was successful.
     /// </summary>
-    public static T AssertSuccess<T>(this ItemResult<T> result)
+    public static async Task<T> AssertSuccess<T>(this ItemResult<T> result)
     {
-        Assert.Null(result.Message);
-        Assert.True(result.WasSuccessful);
+        await Assert.That(result.Message).IsNull();
+        await Assert.That(result.WasSuccessful).IsTrue();
         return result.Object!;
     }
 
@@ -140,8 +140,8 @@ internal static class AssortedTestingExtensions
     public static async Task<T> AssertSuccess<T>(this Task<ItemResult<T>> resultTask)
     {
         var result = await resultTask;
-        Assert.Null(result.Message);
-        Assert.True(result.WasSuccessful);
+        await Assert.That(result.Message).IsNull();
+        await Assert.That(result.WasSuccessful).IsTrue();
         return result.Object!;
     }
 
@@ -151,16 +151,16 @@ internal static class AssortedTestingExtensions
     public static async Task AssertSuccess(this Task<ItemResult> resultTask)
     {
         var result = await resultTask;
-        Assert.True(result.WasSuccessful);
+        await Assert.That(result.WasSuccessful).IsTrue();
     }
 
     /// <summary>
     /// Asserts that the result was successful.
     /// </summary>
-    public static void AssertSuccess<T>(this ItemResult<T> result, T value)
+    public static async Task AssertSuccess<T>(this ItemResult<T> result, T value)
     {
-        result.AssertSuccess();
-        Assert.Equal(value, result.Object);
+        await result.AssertSuccess();
+        await Assert.That(result.Object).IsEqualTo(value);
     }
 
     public static void LogIn(this ClaimsPrincipal user, string role = RoleNames.Admin)

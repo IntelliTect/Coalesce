@@ -29,7 +29,7 @@ public static class AssertionExtensions
     {
         await Assert.That(result.WasSuccessful)
             .IsTrue()
-            .WithMessage(() => result.Message ?? "");
+            .Because(result.Message ?? "");
         await Assert.That(result.Message).IsEqualTo(message);
     }
 
@@ -40,7 +40,7 @@ public static class AssertionExtensions
     {
         await Assert.That(result.WasSuccessful)
             .IsTrue()
-            .WithMessage(() => result.Message ?? "");
+            .Because(result.Message ?? "");
         await Assert.That(result.Message).IsNull();
         return result.Object ?? throw new ArgumentException("Successful result unexpectedly returned null object");
     }
@@ -62,7 +62,7 @@ public static class AssertionExtensions
         var result = await resultTask;
         await Assert.That(result.WasSuccessful)
             .IsTrue()
-            .WithMessage(() => result.Message ?? "");
+            .Because(result.Message ?? "");
     }
 
     /// <summary>

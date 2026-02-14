@@ -1,5 +1,5 @@
 # 6.4.0
-- Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize types correctly without custom `parse`/`stringify`.
+- Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize their members correctly without custom `parse`/`stringify`.
 - Added `app.UseAppVersionHeader()` middleware and `<CAppUpdateAlert>` component for detecting and notifying users when a new version of the application has been deployed.
 - Assorted template improvements
 - Added `[assembly: CoalesceMetadata<TAttribute>]`, an assembly-level attribute that causes any occurrences of the target attribute and its value to be generated into the TypeScript metadata.
@@ -8,6 +8,9 @@
 
 - Fix: Assorted issues with Microsoft.AspNetCore.OpenAPI generation. This is unfortunately still not likely high enough quality to use as a Swashbuckle replacement.
 - Fix: c-select `autofocus` aggressively stealing focus from other elements.
+
+## Template Changes
+- Template test projects now use TUnit instead of xUnit.
 
 # 6.3.0
 - Added Vuetify 4 compatibility to coalesce-vue-vuetify3.
@@ -20,9 +23,6 @@
 
 # 6.2.1
 - Handle `db.stored_procedure.name` in `AddHangfireSqlServerNoiseFilter`
-
-## Template Changes
-- Template test projects now use TUnit instead of xUnit.
 
 # 6.2.0
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.

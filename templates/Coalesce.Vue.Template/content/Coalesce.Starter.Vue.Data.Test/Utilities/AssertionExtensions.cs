@@ -27,9 +27,14 @@ public static class AssertionExtensions
     /// </summary>
     public static async Task AssertSuccess(this ApiResult result, string? message = null)
     {
-        await Assert.That(result.WasSuccessful)
-            .IsTrue()
-            .Because(result.Message ?? "");
+        if (!string.IsNullOrEmpty(result.Message))
+        {
+            await Assert.That(result.WasSuccessful).IsTrue().Because(result.Message);
+        }
+        else
+        {
+            await Assert.That(result.WasSuccessful).IsTrue();
+        }
         await Assert.That(result.Message).IsEqualTo(message);
     }
 
@@ -38,9 +43,14 @@ public static class AssertionExtensions
     /// </summary>
     public static async Task<T> AssertSuccess<T>(this ItemResult<T> result)
     {
-        await Assert.That(result.WasSuccessful)
-            .IsTrue()
-            .Because(result.Message ?? "");
+        if (!string.IsNullOrEmpty(result.Message))
+        {
+            await Assert.That(result.WasSuccessful).IsTrue().Because(result.Message);
+        }
+        else
+        {
+            await Assert.That(result.WasSuccessful).IsTrue();
+        }
         await Assert.That(result.Message).IsNull();
         return result.Object ?? throw new ArgumentException("Successful result unexpectedly returned null object");
     }
@@ -60,9 +70,14 @@ public static class AssertionExtensions
     public static async Task AssertSuccess(this Task<ItemResult> resultTask)
     {
         var result = await resultTask;
-        await Assert.That(result.WasSuccessful)
-            .IsTrue()
-            .Because(result.Message ?? "");
+        if (!string.IsNullOrEmpty(result.Message))
+        {
+            await Assert.That(result.WasSuccessful).IsTrue().Because(result.Message);
+        }
+        else
+        {
+            await Assert.That(result.WasSuccessful).IsTrue();
+        }
     }
 
     /// <summary>

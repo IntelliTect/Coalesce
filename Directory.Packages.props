@@ -63,15 +63,14 @@
     <PackageVersion Include="Roslynator.Analyzers" Version="4.12.7" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.13.20" />
     <PackageVersion Include="System.Net.Http.Json" Version="8.0.1" />
-    <PackageVersion Include="TUnit" Version="1.14.0" />
-    <PackageVersion Include="TUnit.Core" Version="1.14.0" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.14.0" />
+    <PackageVersion Include="TUnit" Version="1.34.5" />
+    <PackageVersion Include="TUnit.Core" Version="1.34.5" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.34.5" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="2.2.4" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="System.Text.Json" Version="10.0.2" />
     <PackageVersion Include="System.Runtime.Caching" Version="8.0.1" />
     <PackageVersion Include="OpenTelemetry" Version="1.12.0" />
-    <PackageVersion Include="TUnit" Version="1.13.56" />
   </ItemGroup>
 </Project>

@@ -21,6 +21,9 @@
 # 6.2.1
 - Handle `db.stored_procedure.name` in `AddHangfireSqlServerNoiseFilter`
 
+## Template Changes
+- Template test projects now use TUnit instead of xUnit.
+
 # 6.2.0
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.
 - Added `DefaultOrderByAttribute.Suppress` property to prevent properties from being used as fallback ordering.

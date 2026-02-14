@@ -1,8 +1,10 @@
+using System.Threading.Tasks;
+
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0001_InvalidPermissionLevelTests : CSharpAnalyzerVerifier<Coalesce0001_InvalidPermissionLevel>
 {
-    [Fact]
+    [Test]
     public async Task PropertyWithPermissionLevelNamedArgument_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -16,7 +18,7 @@ public class Coalesce0001_InvalidPermissionLevelTests : CSharpAnalyzerVerifier<C
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task PropertyWithPermissionLevelConstructorArgument_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -30,7 +32,7 @@ public class Coalesce0001_InvalidPermissionLevelTests : CSharpAnalyzerVerifier<C
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task PropertyWithRolesOnly_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -47,7 +49,7 @@ public class Coalesce0001_InvalidPermissionLevelTests : CSharpAnalyzerVerifier<C
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ClassWithPermissionLevel_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -62,7 +64,7 @@ public class Coalesce0001_InvalidPermissionLevelTests : CSharpAnalyzerVerifier<C
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NonCoalesceAttribute_NoWarning()
     {
         await VerifyAnalyzerAsync("""

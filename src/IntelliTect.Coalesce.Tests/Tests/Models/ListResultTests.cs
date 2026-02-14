@@ -3,13 +3,14 @@ using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Models;
 
 public class ListResultTests
 {
-    [Fact]
-    public void Constructor_FromListResult_CopiesPagination()
+    [Test]
+    public async Task Constructor_FromListResult_CopiesPagination()
     {
         var model = new ComplexModel();
         var original = new ListResult<ComplexModel>()
@@ -26,19 +27,19 @@ public class ListResultTests
         var replica = new ListResult<TestDto<ComplexModel>>(original);
 
         // List can't be copied over because the type is different.
-        Assert.Null(replica.List);
+        await Assert.That(replica.List).IsNull();
         // Everything else can and should be copied.
-        Assert.Equal(original.IncludeTree, replica.IncludeTree);
-        Assert.Equal(original.Page, replica.Page);
-        Assert.Equal(original.PageSize, replica.PageSize);
-        Assert.Equal(original.PageCount, replica.PageCount);
-        Assert.Equal(original.TotalCount, replica.TotalCount);
-        Assert.Equal(original.WasSuccessful, replica.WasSuccessful);
-        Assert.Equal(original.Message, replica.Message);
+        await Assert.That(replica.IncludeTree).IsEqualTo(original.IncludeTree);
+        await Assert.That(replica.Page).IsEqualTo(original.Page);
+        await Assert.That(replica.PageSize).IsEqualTo(original.PageSize);
+        await Assert.That(replica.PageCount).IsEqualTo(original.PageCount);
+        await Assert.That(replica.TotalCount).IsEqualTo(original.TotalCount);
+        await Assert.That(replica.WasSuccessful).IsEqualTo(original.WasSuccessful);
+        await Assert.That(replica.Message).IsEqualTo(original.Message);
     }
 
-    [Fact]
-    public void Constructor_FromApiResult_CopiesProperties()
+    [Test]
+    public async Task Constructor_FromApiResult_CopiesProperties()
     {
         var original = new ApiResult(false, "error")
         {
@@ -47,13 +48,13 @@ public class ListResultTests
 
         var replica = new ListResult<TestDto<ComplexModel>>(original);
 
-        Assert.Equal(original.IncludeTree, replica.IncludeTree);
-        Assert.Equal(original.WasSuccessful, replica.WasSuccessful);
-        Assert.Equal(original.Message, replica.Message);
+        await Assert.That(replica.IncludeTree).IsEqualTo(original.IncludeTree);
+        await Assert.That(replica.WasSuccessful).IsEqualTo(original.WasSuccessful);
+        await Assert.That(replica.Message).IsEqualTo(original.Message);
     }
 
-    [Fact]
-    public void Constructor_FromQuery_ComputesPagination()
+    [Test]
+    public async Task Constructor_FromQuery_ComputesPagination()
     {
         var query = new List<ComplexModel>(){
             new(),
@@ -68,12 +69,12 @@ public class ListResultTests
 
         var result = new ListResult<ComplexModel>(query, 2, 2);
 
-        Assert.True(result.WasSuccessful);
-        Assert.Null(result.Message);
-        Assert.Equal(2, result.Page);
-        Assert.Equal(2, result.PageSize);
-        Assert.Equal(4, result.PageCount);
-        Assert.Equal(8, result.TotalCount);
-        Assert.Equal("Foo", result.List[0].Name);
+        await Assert.That(result.WasSuccessful).IsTrue();
+        await Assert.That(result.Message).IsNull();
+        await Assert.That(result.Page).IsEqualTo(2);
+        await Assert.That(result.PageSize).IsEqualTo(2);
+        await Assert.That(result.PageCount).IsEqualTo(4);
+        await Assert.That(result.TotalCount).IsEqualTo(8);
+        await Assert.That(result.List[0].Name).IsEqualTo("Foo");
     }
 }

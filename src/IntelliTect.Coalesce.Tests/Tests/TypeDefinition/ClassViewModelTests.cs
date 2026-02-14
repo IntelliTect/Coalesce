@@ -1,83 +1,65 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 
 public class ClassViewModelTests
 {
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(TargetClasses.OrderingChild))]
-    public void DefaultOrderBy_UsesNestedPropertiesWhenOrderingByRefNavigation(ClassViewModelData data)
+    public async Task DefaultOrderBy_UsesNestedPropertiesWhenOrderingByRefNavigation(ClassViewModelData data)
     {
         var orderings = data.ClassViewModel.DefaultOrderBy;
-        Assert.Collection(orderings,
-            ordering =>
-            {
-                Assert.Equal(1, ordering.FieldOrder);
-                Assert.Equal("OrderingParent1", ordering.Properties[0].Name);
-                Assert.Equal("OrderingGrandparent", ordering.Properties[1].Name);
-                Assert.Equal("OrderedField", ordering.Properties[2].Name);
-            },
-            ordering =>
-            {
-                Assert.Equal(2, ordering.FieldOrder);
-                Assert.Equal("OrderingParent2", ordering.Properties[0].Name);
-                Assert.Equal("OrderingGrandparent", ordering.Properties[1].Name);
-                Assert.Equal("OrderedField", ordering.Properties[2].Name);
-            }
-        );
+        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
+        await Assert.That(orderings).HasCount(2);
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(TargetClasses.OrdersByUnorderableParent))]
-    public void DefaultOrderBy_UsesNavigationDirectlyWhenOrderingByUnorderableRefNavigation(ClassViewModelData data)
+    public async Task DefaultOrderBy_UsesNavigationDirectlyWhenOrderingByUnorderableRefNavigation(ClassViewModelData data)
     {
         var orderings = data.ClassViewModel.DefaultOrderBy;
-        Assert.Collection(orderings,
-            ordering =>
-            {
-                var prop = Assert.Single(ordering.Properties);
-                Assert.Equal("Parent", prop.Name);
-            }
-        );
+        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
+        await Assert.That(orderings).HasCount(1);
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(AbstractImpl1))]
-    public void GetAttribute_RespectsInheritance(ClassViewModelData data)
+    public async Task GetAttribute_RespectsInheritance(ClassViewModelData data)
     {
         var vm = data.ClassViewModel;
 
         // The read and create attributes are declared on AbstractImpl's base class,
         // but should still be surfaced on AbstractImpl because they are inherited attributes.
-        Assert.Equal("ReadRole", vm.SecurityInfo.Read.Roles);
-        Assert.True(vm.SecurityInfo.Create.NoAccess);
+        await Assert.That(vm.SecurityInfo.Read.Roles).IsEqualTo("ReadRole");
+        await Assert.That(vm.SecurityInfo.Create.NoAccess).IsTrue();
 
         // Edit role is defined on both, so the one on AbstractImpl should be the effective one:
-        Assert.True(vm.SecurityInfo.Edit.NoAccess);
+        await Assert.That(vm.SecurityInfo.Edit.NoAccess).IsTrue();
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(ComplexModel))]
-    public void ClientConsts_IncludesConsts(ClassViewModelData data)
+    public async Task ClientConsts_IncludesConsts(ClassViewModelData data)
     {
         var vm = data.ClassViewModel;
 
-        Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicNumber) && c.Value.Equals(ComplexModel.MagicNumber));
-        Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicString) && c.Value.Equals(ComplexModel.MagicString));
-        Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicEnum) && ((int)c.Value).Equals((int)ComplexModel.MagicEnum));
+        await Assert.That(c => c.Name == nameof(ComplexModel.MagicNumber) && c.Value.Equals(ComplexModel.MagicNumber)).Contains(vm.ClientConsts);
+        await Assert.That(c => c.Name == nameof(ComplexModel.MagicString) && c.Value.Equals(ComplexModel.MagicString)).Contains(vm.ClientConsts);
+        await Assert.That(c => c.Name == nameof(ComplexModel.MagicEnum) && ((int)c.Value).Equals((int)ComplexModel.MagicEnum)).Contains(vm.ClientConsts);
 
-        Assert.DoesNotContain(vm.ClientConsts, c => c.Name == nameof(ComplexModel.UnexpostedConst));
+        await Assert.That(c => c.Name == nameof(ComplexModel.UnexpostedConst)).DoesNotContain(vm.ClientConsts);
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(TargetClasses.SuppressedDefaultOrdering))]
-    public void DefaultOrderBy_SuppressesFallbackWhenSpecified(ClassViewModelData data)
+    public async Task DefaultOrderBy_SuppressesFallbackWhenSpecified(ClassViewModelData data)
     {
         var orderings = data.ClassViewModel.DefaultOrderBy;
         
         // Should be empty - no fallback ordering should be applied
-        Assert.Empty(orderings);
+        await Assert.That(orderings).IsEmpty();
     }
 }

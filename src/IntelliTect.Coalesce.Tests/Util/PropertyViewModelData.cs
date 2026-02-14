@@ -1,6 +1,5 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
 using System;
-using Xunit.Abstractions;
 
 namespace IntelliTect.Coalesce.Tests.Util;
 

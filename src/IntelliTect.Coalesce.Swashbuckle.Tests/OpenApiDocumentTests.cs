@@ -1,13 +1,13 @@
-using Xunit;
 #if NET10_0_OR_GREATER
 using Microsoft.OpenApi;
+using System.Threading.Tasks;
 #else
 using Microsoft.OpenApi.Models;
 #endif
 
 namespace IntelliTect.Coalesce.Swashbuckle.Tests;
 
-[Collection(OpenApiFixture.Collection)]
+[ClassDataSource<OpenApiFixture>(Shared = SharedType.Keyed, Key = OpenApiFixture.Collection)]
 public class OpenApiDocumentTests
 {
     public OpenApiDocumentTests(OpenApiFixture fixture)
@@ -17,18 +17,17 @@ public class OpenApiDocumentTests
 
     public OpenApiFixture Fixture { get; }
 
-    [Fact]
+    [Test]
     public async Task Schema_DoesNotContainCrudStrategyClasses()
     {
         var doc = await Fixture.GetDocumentAsync();
 
-        Assert.DoesNotContain(doc.Components.Schemas, s =>
+        await Assert.That(s =>
             s.Key.Contains("IDataSource", StringComparison.InvariantCultureIgnoreCase) ||
-            s.Key.Contains("IBehaviors", StringComparison.InvariantCultureIgnoreCase)
-        );
+            s.Key.Contains("IBehaviors", StringComparison.InvariantCultureIgnoreCase)).DoesNotContain(doc.Components.Schemas);
     }
 
-    [Fact]
+    [Test]
     public async Task Schema_DoesNotContainInvalidDtoMembersInRequestBodies()
     {
         var doc = await Fixture.GetDocumentAsync();
@@ -45,11 +44,11 @@ public class OpenApiDocumentTests
 
         // These members should not be in the parameters for endpoints that accept a DTO
         // because they cannot be mapped by the incoming DTO back to the entity.
-        Assert.DoesNotContain(caseSaveProperties, p => p.Key.Contains("AssignedTo.", StringComparison.InvariantCultureIgnoreCase));
-        Assert.DoesNotContain(caseSaveProperties, p => p.Key.Contains("CaseProducts", StringComparison.InvariantCultureIgnoreCase));
+        await Assert.That(p => p.Key.Contains("AssignedTo.", StringComparison.InvariantCultureIgnoreCase)).DoesNotContain(caseSaveProperties);
+        await Assert.That(p => p.Key.Contains("CaseProducts", StringComparison.InvariantCultureIgnoreCase)).DoesNotContain(caseSaveProperties);
     }
 
-    [Fact]
+    [Test]
     public async Task EndpointsWithObjectParameters_IncludeActionParameterNamePrefix()
     {
         var doc = await Fixture.GetDocumentAsync();
@@ -83,11 +82,11 @@ public class OpenApiDocumentTests
             .RequestBody.Content["multipart/form-data"]
             .Schema.Properties;
 
-        Assert.Single(properties, p => p.Key == "complexModelId");
-        Assert.Single(properties, p => p.Key.Equals("model.complexModelId", StringComparison.InvariantCultureIgnoreCase));
+        await Assert.That(properties).HasSingleItem();
+        await Assert.That(properties).HasSingleItem();
     }
 
-    [Fact]
+    [Test]
     public async Task DataSourceWithInheritance_DoesNotDuplicateSharedParameters()
     {
         var doc = await Fixture.GetDocumentAsync();
@@ -101,7 +100,7 @@ public class OpenApiDocumentTests
 #endif
             .Parameters;
 
-        var param = Assert.Single(parameters, p => p.Name == "dataSource.IntArray");
-        Assert.Equal("Used by data sources ParameterTestsSource, ParameterTestsSourceSubclass.", param.Description);
+        var param = await Assert.That(parameters).HasSingleItem();
+        await Assert.That(param.Description).IsEqualTo("Used by data sources ParameterTestsSource, ParameterTestsSourceSubclass.");
     }
 }

@@ -45,7 +45,7 @@ public class StandardBehaviorsTests : TestDbContextFixture
         }
     }
 
-    [Fact]
+    [Test]
     public async Task Save_HydratesResultWithDataSourceTransformAsync()
     {
         var ds = new TransformDs(CrudContext)
@@ -55,8 +55,8 @@ public class StandardBehaviorsTests : TestDbContextFixture
         var result = await Behaviors<Case>().SaveAsync<TestDto<Case>, TestDto<Case>>(dto, ds, new DataSourceParameters());
 
         result.AssertSuccess();
-        Assert.Equal("new desc", result.Object.SourceEntity.Description);
-        Assert.Equal("TRANSFORMED", result.Object.SourceEntity.Title);
+        await Assert.That(result.Object.SourceEntity.Description).IsEqualTo("new desc");
+        await Assert.That(result.Object.SourceEntity.Title).IsEqualTo("TRANSFORMED");
     }
 
 
@@ -66,7 +66,7 @@ public class StandardBehaviorsTests : TestDbContextFixture
         public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => base.GetQuery(parameters).AsNoTracking();
     }
 
-    [Fact]
+    [Test]
     public async Task Save_WhenDataSourceIsUntracked_RetracksEntityAndSaves()
     {
         // Arrange
@@ -80,10 +80,10 @@ public class StandardBehaviorsTests : TestDbContextFixture
 
         // Assert2: Entity saved as expected
         ds.Db.ChangeTracker.Clear();
-        Assert.Equal("new desc", ds.Db.Cases.Single().Description);
+        await Assert.That(ds.Db.Cases.Single().Description).IsEqualTo("new desc");
     }
 
-    [Fact]
+    [Test]
     public async Task DetermineSaveKindAsync_CanDeterminePkFromEfEntity()
     {
         // Arrange
@@ -93,7 +93,7 @@ public class StandardBehaviorsTests : TestDbContextFixture
         var result = await behaviors.DetermineSaveKindAsync(new RequiredAndInitModelParameterDto { Id = 42 }, Source<RequiredAndInitModel>(), new DataSourceParameters());
 
         // Assert
-        Assert.Equal((SaveKind.Update, 42), result);
+        await Assert.That(result).IsEqualTo((SaveKind.Update, 42));
     }
 
     class RequiredAndInitModelParameterDto : IParameterDto<RequiredAndInitModel>
@@ -105,7 +105,7 @@ public class StandardBehaviorsTests : TestDbContextFixture
         public RequiredAndInitModel MapToNew(IMappingContext context) => throw new System.NotImplementedException();
     }
 
-    [Fact]
+    [Test]
     public async Task DetermineSaveKindAsync_CanDeterminePkFromStandaloneEntity()
     {
         // Arrange
@@ -115,7 +115,7 @@ public class StandardBehaviorsTests : TestDbContextFixture
         var result = await behaviors.DetermineSaveKindAsync(new StandaloneReadWriteDto { Id = 42 }, Source<StandaloneReadWrite>(), new DataSourceParameters());
 
         // Assert
-        Assert.Equal((SaveKind.Update, 42), result);
+        await Assert.That(result).IsEqualTo((SaveKind.Update, 42));
     }
 
     class StandaloneReadWriteDto : SparseDto, IGeneratedParameterDto<StandaloneReadWrite>
@@ -127,7 +127,7 @@ public class StandardBehaviorsTests : TestDbContextFixture
         public StandaloneReadWrite MapToNew(IMappingContext context) => throw new System.NotImplementedException();
     }
 
-    [Fact]
+    [Test]
     public async Task DeleteAsync_ReturnsSuccessAndNull()
     {
         // Arrange
@@ -140,11 +140,11 @@ public class StandardBehaviorsTests : TestDbContextFixture
         var result = await behaviors.DeleteAsync<TestDto<Case>>(1, ds, new DataSourceParameters());
 
         // Assert
-        Assert.True(result.WasSuccessful);
-        Assert.Null(result.Object);
+        await Assert.That(result.WasSuccessful).IsTrue();
+        await Assert.That(result.Object).IsNull();
     }
 
-    [Fact]
+    [Test]
     public async Task DeleteAsync_AfterDeleteFailure_ReturnsFailure()
     {
         // Arrange
@@ -161,11 +161,11 @@ public class StandardBehaviorsTests : TestDbContextFixture
         var result = await behaviors.DeleteAsync<TestDto<Case>>(1, ds, new DataSourceParameters());
 
         // Assert
-        Assert.False(result.WasSuccessful);
-        Assert.Equal("AfterDeleteFailure", result.Message);
+        await Assert.That(result.WasSuccessful).IsFalse();
+        await Assert.That(result.Message).IsEqualTo("AfterDeleteFailure");
     }
 
-    [Fact]
+    [Test]
     public async Task DeleteAsync_AfterDeleteReturnsItem_ReturnsItem()
     {
         var expectedResult = new ItemResult<Case>(new Case { Description = "Deleted" }, new IncludeTree());
@@ -184,8 +184,8 @@ public class StandardBehaviorsTests : TestDbContextFixture
         var result = await behaviors.DeleteAsync<TestDto<Case>>(1, ds, new DataSourceParameters());
 
         // Assert
-        Assert.True(result.WasSuccessful);
-        Assert.Equal("Deleted", result.Object.SourceEntity.Description);
-        Assert.Equal(expectedResult.IncludeTree, result.Object.SourceIncludeTree);
+        await Assert.That(result.WasSuccessful).IsTrue();
+        await Assert.That(result.Object.SourceEntity.Description).IsEqualTo("Deleted");
+        await Assert.That(result.Object.SourceIncludeTree).IsEqualTo(expectedResult.IncludeTree);
     }
 }

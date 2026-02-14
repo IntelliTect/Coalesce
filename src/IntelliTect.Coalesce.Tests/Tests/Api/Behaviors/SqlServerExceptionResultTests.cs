@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors;
 
@@ -29,7 +30,7 @@ public class SqlServerExceptionResultTests
         where T : class, new()
         => new StandardBehaviors<T, AppDbContext>(CrudContext);
 
-    [Fact]
+    [Test]
     public void InsertFkConflict()
     {
         Db.Add(new CaseProduct { CaseId = 1, ProductId = 42 });
@@ -44,7 +45,7 @@ public class SqlServerExceptionResultTests
         result.AssertError("The value of Product is not valid.");
     }
 
-    [Fact]
+    [Test]
     public void UpdateFkConflict()
     {
         var entry = Db.Entry(new CaseProduct { CaseId = 1, ProductId = 42 });
@@ -61,8 +62,8 @@ public class SqlServerExceptionResultTests
         result.AssertError("The value of Product is not valid.");
     }
 
-    [Fact]
-    public void FkConstraint_WhenPropIsNotUserChanged_DoesNotProduceFriendlyError()
+    [Test]
+    public async Task FkConstraint_WhenPropIsNotUserChanged_DoesNotProduceFriendlyError()
     {
         var entry = Db.Entry(new CaseProduct { CaseId = 1, ProductId = 42 });
         entry.State = EntityState.Unchanged;
@@ -75,10 +76,10 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<CaseProduct>()
             .GetExceptionResult(exception, new TestSparseDto<CaseProduct>() { ChangedProperties = { /* empty */ } });
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
+    [Test]
     public void DeleteFkConflict()
     {
         var entry = Db.Entry(new Product { ProductId = 42 });
@@ -94,8 +95,8 @@ public class SqlServerExceptionResultTests
         result.AssertError("The Product is still referenced by at least one Case Product.");
     }
 
-    [Fact]
-    public void FkConstraint_UnknownTableName()
+    [Test]
+    public async Task FkConstraint_UnknownTableName()
     {
         Db.Add(new CaseProduct { CaseId = 1, ProductId = 42 });
 
@@ -105,11 +106,11 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<CaseProduct>().GetExceptionResult(exception, new TestSparseDto<CaseProduct>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void FkConstraint_UnknownColumnName()
+    [Test]
+    public async Task FkConstraint_UnknownColumnName()
     {
         Db.Add(new CaseProduct { CaseId = 1, ProductId = 42 });
 
@@ -119,11 +120,11 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<CaseProduct>().GetExceptionResult(exception, new TestSparseDto<CaseProduct>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void FkConstraint_UnknownConstraintName()
+    [Test]
+    public async Task FkConstraint_UnknownConstraintName()
     {
         Db.Add(new CaseProduct { CaseId = 1, ProductId = 42 });
 
@@ -133,10 +134,10 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<CaseProduct>().GetExceptionResult(exception, new TestSparseDto<CaseProduct>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
+    [Test]
     public void UniqueIndexConflict()
     {
         Db.Add(new Product { UniqueId1 = "qwerty" });
@@ -151,8 +152,8 @@ public class SqlServerExceptionResultTests
         result.AssertError("A different item with ID1 'qwerty' already exists.");
     }
 
-    [Fact]
-    public void UniqueIndexConflict_WhenPropIsNotUserChanged_DoesNotProduceFriendlyError()
+    [Test]
+    public async Task UniqueIndexConflict_WhenPropIsNotUserChanged_DoesNotProduceFriendlyError()
     {
         Db.Add(new Product { UniqueId1 = "qwerty" });
 
@@ -163,10 +164,10 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<Product>()
             .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { /* empty */ } });
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
+    [Test]
     public void UniqueIndexConflict_MultiPropIndex()
     {
         Db.Add(new Product { UniqueId1 = "qwe, rty", UniqueId2 = "foo,bar" });
@@ -181,7 +182,7 @@ public class SqlServerExceptionResultTests
         result.AssertError("A different item with ID1 'qwe, rty' and ID2 'foo,bar' already exists.");
     }
 
-    [Fact]
+    [Test]
     public void UniqueIndexConflict_HandlesNull()
     {
         Db.Add(new Product { UniqueId1 = "qwe, rty" });
@@ -196,7 +197,7 @@ public class SqlServerExceptionResultTests
         result.AssertError("A different item with ID1 'qwe, rty' and ID2 <NULL> already exists.");
     }
 
-    [Fact]
+    [Test]
     public void UniqueIndexConflict_MultiPropIndex_PartiallyChanged()
     {
         Db.Add(new Product { UniqueId1 = "qwe, rty", UniqueId2 = "foo,bar" });
@@ -211,7 +212,7 @@ public class SqlServerExceptionResultTests
         result.AssertError("A different item with ID1 'qwe, rty' and ID2 'foo,bar' already exists.");
     }
 
-    [Fact]
+    [Test]
     public void UniqueIndexConflict_PartiallyInternalMultiPropIndex_ReportsNonInternalParts()
     {
         Db.Add(new Product { TenantId = 1, UniqueId1 = "qwerty" });
@@ -227,8 +228,8 @@ public class SqlServerExceptionResultTests
         result.AssertError("A different item with ID1 'qwerty' already exists.");
     }
 
-    [Fact]
-    public void UniqueIndexConflict_UnknownTableName()
+    [Test]
+    public async Task UniqueIndexConflict_UnknownTableName()
     {
         Db.Add(new Product { TenantId = 1, UniqueId1 = "qwerty" });
 
@@ -238,11 +239,11 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<Product>().GetExceptionResult(exception, new TestSparseDto<Product>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void UniqueIndexConflict_UnknownIndex()
+    [Test]
+    public async Task UniqueIndexConflict_UnknownIndex()
     {
         Db.Add(new Product { TenantId = 1, UniqueId1 = "qwerty" });
 
@@ -252,10 +253,10 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<Product>().GetExceptionResult(exception, new TestSparseDto<Product>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
+    [Test]
     public void DbContextIsDisposed()
     {
         Db.Add(new Product { UniqueId1 = "qwerty" });

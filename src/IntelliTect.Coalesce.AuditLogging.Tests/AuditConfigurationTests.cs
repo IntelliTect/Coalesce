@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
@@ -13,8 +14,8 @@ public class AuditConfigurationTests
         SqliteConn.Open();
     }
 
-    [Fact]
-    public void FormatByExpressionSingle()
+    [Test]
+    public async Task FormatByExpressionSingle()
     {
         using var db = BuildDbContext(b => b
             .Format<AppUser>(x => x.Name, v => (v as string)?.Length.ToString())
@@ -23,12 +24,12 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob", Title = "Builder" });
         db.SaveChanges();
 
-        Assert.Equal("3", db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue);
-        Assert.Equal("Builder", db.AuditLogProperties.Single(p => p.PropertyName == "Title").NewValue);
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue).IsEqualTo("3");
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "Title").NewValue).IsEqualTo("Builder");
     }
 
-    [Fact]
-    public void FormatByExpressionMultiple()
+    [Test]
+    public async Task FormatByExpressionMultiple()
     {
         using var db = BuildDbContext(b => b
             .Format<AppUser>(x => new { x.Name, x.Title }, v => (v as string)?.Length.ToString())
@@ -37,12 +38,12 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob", Title = "Builder" });
         db.SaveChanges();
 
-        Assert.Equal("3", db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue);
-        Assert.Equal("7", db.AuditLogProperties.Single(p => p.PropertyName == "Title").NewValue);
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue).IsEqualTo("3");
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "Title").NewValue).IsEqualTo("7");
     }
 
-    [Fact]
-    public void FormatByName()
+    [Test]
+    public async Task FormatByName()
     {
         using var db = BuildDbContext(b => b
             .Format<AppUser>(["Name", "Title"], v => (v as string)?.Length.ToString())
@@ -51,12 +52,12 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob", Title = "Builder" });
         db.SaveChanges();
 
-        Assert.Equal("3", db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue);
-        Assert.Equal("7", db.AuditLogProperties.Single(p => p.PropertyName == "Title").NewValue);
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue).IsEqualTo("3");
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "Title").NewValue).IsEqualTo("7");
     }
 
-    [Fact]
-    public void FormatType()
+    [Test]
+    public async Task FormatType()
     {
         using var db = BuildDbContext(b => b
             .FormatType<string>(v => v.Length.ToString())
@@ -66,12 +67,12 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob", NullableValueType = DateTimeOffset.UnixEpoch });
         db.SaveChanges();
 
-        Assert.Equal("3", db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue);
-        Assert.Equal("1970-01-01T00:00:00.0000000+00:00", db.AuditLogProperties.Single(p => p.PropertyName == "NullableValueType").NewValue);
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue).IsEqualTo("3");
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "NullableValueType").NewValue).IsEqualTo("1970-01-01T00:00:00.0000000+00:00");
     }
 
-    [Fact]
-    public void ExcludeGeneric()
+    [Test]
+    public async Task ExcludeGeneric()
     {
         using var db = BuildDbContext(b => b
             .Exclude<AppUser>()
@@ -80,11 +81,11 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob" });
         db.SaveChanges();
 
-        Assert.Empty(db.AuditLogs);
+        await Assert.That(db.AuditLogs).IsEmpty();
     }
 
-    [Fact]
-    public void ExcludeEntry()
+    [Test]
+    public async Task ExcludeEntry()
     {
         using var db = BuildDbContext(b => b
             .Exclude(entry => entry.Entity is AppUser)
@@ -93,11 +94,11 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob" });
         db.SaveChanges();
 
-        Assert.Empty(db.AuditLogs);
+        await Assert.That(db.AuditLogs).IsEmpty();
     }
 
-    [Fact]
-    public void ExcludePropertyByName()
+    [Test]
+    public async Task ExcludePropertyByName()
     {
         using var db = BuildDbContext(b => b
             .ExcludeProperty<AppUser>("Name")
@@ -106,12 +107,12 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob", Title = "Builder" });
         db.SaveChanges();
 
-        Assert.Empty(db.AuditLogProperties.Where(p => p.PropertyName == "Name"));
-        Assert.Equal("Builder", db.AuditLogProperties.Single(p => p.PropertyName == "Title").NewValue);
+        await Assert.That(db.AuditLogProperties.Where(p => p.PropertyName == "Name")).IsEmpty();
+        await Assert.That(db.AuditLogProperties.Single(p => p.PropertyName == "Title").NewValue).IsEqualTo("Builder");
     }
 
-    [Fact]
-    public void ExcludePropertyByExpressionSingle()
+    [Test]
+    public async Task ExcludePropertyByExpressionSingle()
     {
         using var db = BuildDbContext(b => b
             .ExcludeProperty<AppUser>(u => u.Name)
@@ -120,12 +121,12 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob", Title = "Builder" });
         db.SaveChanges();
 
-        Assert.Empty(db.AuditLogProperties.Where(p => p.PropertyName == "Name"));
-        Assert.NotEmpty(db.AuditLogProperties.Where(p => p.PropertyName == "Title"));
+        await Assert.That(db.AuditLogProperties.Where(p => p.PropertyName == "Name")).IsEmpty();
+        await Assert.That(db.AuditLogProperties.Where(p => p.PropertyName == "Title")).IsNotEmpty();
     }
 
-    [Fact]
-    public void ExcludePropertyByExpressionMultiple()
+    [Test]
+    public async Task ExcludePropertyByExpressionMultiple()
     {
         using var db = BuildDbContext(b => b
             .ExcludeProperty<AppUser>(u => new { u.Name, u.Title })
@@ -134,12 +135,12 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob", Title = "Builder" });
         db.SaveChanges();
 
-        Assert.Empty(db.AuditLogProperties.Where(p => p.PropertyName == "Name"));
-        Assert.Empty(db.AuditLogProperties.Where(p => p.PropertyName == "Title"));
+        await Assert.That(db.AuditLogProperties.Where(p => p.PropertyName == "Name")).IsEmpty();
+        await Assert.That(db.AuditLogProperties.Where(p => p.PropertyName == "Title")).IsEmpty();
     }
 
-    [Fact]
-    public void AllowList()
+    [Test]
+    public async Task AllowList()
     {
         using var db = BuildDbContext(b => b
             .Exclude(x => true)
@@ -150,14 +151,14 @@ public class AuditConfigurationTests
         db.Add(new ParentWithMappedListText { CustomListTextField = "Foo" });
         db.SaveChanges();
 
-        var log = Assert.Single(db.AuditLogs);
-        Assert.Equal(nameof(AppUser), log.Type);
+        var log = await Assert.That(db.AuditLogs).HasSingleItem();
+        await Assert.That(log.Type).IsEqualTo(nameof(AppUser));
     }
 
-    [Theory]
-    [InlineData(true, 1)]
-    [InlineData(false, 0)]
-    public void IncludeAddedDefaultValues(bool include, int expectedCount)
+    [Test]
+    [Arguments(true, 1)]
+    [Arguments(false, 0)]
+    public async Task IncludeAddedDefaultValues(bool include, int expectedCount)
     {
         using var db = BuildDbContext(
             (b, include) => b.IncludeAddedDefaultValues(include),
@@ -167,7 +168,7 @@ public class AuditConfigurationTests
         db.Add(new AppUser { Name = "Bob" });
         db.SaveChanges();
 
-        Assert.Equal(expectedCount, db.AuditLogProperties.Count(p => p.PropertyName == nameof(AppUser.BoolProp)));
+        await Assert.That(db.AuditLogProperties.Count(p => p.PropertyName == nameof(AppUser.BoolProp))).IsEqualTo(expectedCount);
     }
 
     private TestDbContext BuildDbContext(Action<AuditConfiguration> setup)

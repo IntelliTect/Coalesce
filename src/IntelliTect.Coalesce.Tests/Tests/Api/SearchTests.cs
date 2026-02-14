@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Api;
 
@@ -52,8 +53,8 @@ public class SearchTests
         new object[] { true, "2017-11-06 11:00 AM", -6, new DateTimeOffset(2017, 11, 06, 8, 59, 59, TimeSpan.FromHours(-9)) },
     };
 
-    [Theory]
-    [MemberData(nameof(Search_DateTimeOffsetsData))]
+    [Test]
+    [MethodDataSource(nameof(Search_DateTimeOffsetsData))]
     public void Search_DateTimeOffset_RespectsTimeZone(bool expectedMatch, string searchTerm, int utcOffset, DateTimeOffset searchCandidate)
     {
         SearchHelper(
@@ -87,8 +88,8 @@ public class SearchTests
         new object[] { false, "November 6, 2017 11:00 AM", new DateTime(2017, 11, 06, 10, 59, 59) },
     };
 
-    [Theory]
-    [MemberData(nameof(Search_MatchesDateTimesData))]
+    [Test]
+    [MethodDataSource(nameof(Search_MatchesDateTimesData))]
     public void Search_DateTime_IsTimeZoneAgnostic(bool expectedMatch, string searchTerm, DateTime searchCandidate)
     {
         SearchHelper(
@@ -118,8 +119,8 @@ public class SearchTests
         new object[] { true, "6 Nov 17", new DateOnly(2017, 11, 06) },
     };
 
-    [Theory]
-    [MemberData(nameof(Search_MatchesDateOnlyData))]
+    [Test]
+    [MethodDataSource(nameof(Search_MatchesDateOnlyData))]
     public void Search_DateOnly_SearchesCorrectly(bool expectedMatch, string searchTerm, DateOnly searchCandidate)
     {
         SearchHelper(
@@ -129,10 +130,10 @@ public class SearchTests
             expectedMatch);
     }
 
-    [Theory]
-    [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6")]
-    [InlineData(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "fafab015-ffa4-41f8-b4dd-c15eb0ce40b6")]
-    [InlineData(false, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "A6740FB5-99DE-4079-B6F7-A1692772A0A4")]
+    [Test]
+    [Arguments(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6")]
+    [Arguments(true, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "fafab015-ffa4-41f8-b4dd-c15eb0ce40b6")]
+    [Arguments(false, "FAFAB015-FFA4-41F8-B4DD-C15EB0CE40B6", "A6740FB5-99DE-4079-B6F7-A1692772A0A4")]
     public void Search_Guid_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -143,10 +144,10 @@ public class SearchTests
             shouldMatch);
     }
 
-    [Theory]
-    [InlineData(true, "mailto:test", "mailto:test")]
-    [InlineData(true, "mailto:test", "mailto:TEST")]
-    [InlineData(false, "mailto:test", "https://www.google.com/")]
+    [Test]
+    [Arguments(true, "mailto:test", "mailto:test")]
+    [Arguments(true, "mailto:test", "mailto:TEST")]
+    [Arguments(false, "mailto:test", "https://www.google.com/")]
     public void Search_Uri_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -159,10 +160,10 @@ public class SearchTests
 
     class DefaultString { public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "Brisk Breeze", "Brisk Br")]
-    [InlineData(true, "Brisk Breeze", "Brisk Bre")]
-    [InlineData(false, "Brisk Breeze", "Brisk Brz")]
+    [Test]
+    [Arguments(true, "Brisk Breeze", "Brisk Br")]
+    [Arguments(true, "Brisk Breeze", "Brisk Bre")]
+    [Arguments(false, "Brisk Breeze", "Brisk Brz")]
     public void Search_SingleDefaultString_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -175,14 +176,14 @@ public class SearchTests
 
     class BeginsWith_SplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.BeginsWith, IsSplitOnSpaces = true)] public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "John Smith", "John")]
-    [InlineData(false, "John Smith", "Smith")] // BeginsWith with IsSplitOnSpaces=true: "Smith" doesn't match beginning of "John Smith"
-    [InlineData(false, "John Smith", "John Smith")] // BeginsWith with IsSplitOnSpaces=true: "John Smith" split into ["John", "Smith"], "Smith" doesn't begin "John Smith"
-    [InlineData(false, "John Smith", "Jo Sm")] // BeginsWith with IsSplitOnSpaces=true: "Jo" and "Sm" don't begin "John Smith"
-    [InlineData(false, "John Smith", "ohn")]
-    [InlineData(false, "John Smith", "mith")]
-    [InlineData(false, "John Smith", "Jane")]
+    [Test]
+    [Arguments(true, "John Smith", "John")]
+    [Arguments(false, "John Smith", "Smith")] // BeginsWith with IsSplitOnSpaces=true: "Smith" doesn't match beginning of "John Smith"
+    [Arguments(false, "John Smith", "John Smith")] // BeginsWith with IsSplitOnSpaces=true: "John Smith" split into ["John", "Smith"], "Smith" doesn't begin "John Smith"
+    [Arguments(false, "John Smith", "Jo Sm")] // BeginsWith with IsSplitOnSpaces=true: "Jo" and "Sm" don't begin "John Smith"
+    [Arguments(false, "John Smith", "ohn")]
+    [Arguments(false, "John Smith", "mith")]
+    [Arguments(false, "John Smith", "Jane")]
     public void Search_BeginsWith_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -195,12 +196,12 @@ public class SearchTests
 
     class BeginsWith_NoSplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.BeginsWith, IsSplitOnSpaces = false)] public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "John Smith", "John")]
-    [InlineData(true, "John Smith", "John Smith")]
-    [InlineData(false, "John Smith", "Smith")]
-    [InlineData(false, "John Smith", "Jo Sm")]
-    [InlineData(false, "John Smith", "ohn")]
+    [Test]
+    [Arguments(true, "John Smith", "John")]
+    [Arguments(true, "John Smith", "John Smith")]
+    [Arguments(false, "John Smith", "Smith")]
+    [Arguments(false, "John Smith", "Jo Sm")]
+    [Arguments(false, "John Smith", "ohn")]
     public void Search_BeginsWith_NoSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -213,16 +214,16 @@ public class SearchTests
 
     class Contains_SplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.Contains, IsSplitOnSpaces = true)] public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "John Smith Jr", "John")]
-    [InlineData(true, "John Smith Jr", "Smith")]
-    [InlineData(true, "John Smith Jr", "Jr")]
-    [InlineData(true, "John Smith Jr", "ohn")]
-    [InlineData(true, "John Smith Jr", "mith")]
-    [InlineData(true, "John Smith Jr", "Jo Sm")]
-    [InlineData(true, "John Smith Jr", "ohn mith")]
-    [InlineData(false, "John Smith Jr", "Jane")]
-    [InlineData(false, "John Smith Jr", "Senior")]
+    [Test]
+    [Arguments(true, "John Smith Jr", "John")]
+    [Arguments(true, "John Smith Jr", "Smith")]
+    [Arguments(true, "John Smith Jr", "Jr")]
+    [Arguments(true, "John Smith Jr", "ohn")]
+    [Arguments(true, "John Smith Jr", "mith")]
+    [Arguments(true, "John Smith Jr", "Jo Sm")]
+    [Arguments(true, "John Smith Jr", "ohn mith")]
+    [Arguments(false, "John Smith Jr", "Jane")]
+    [Arguments(false, "John Smith Jr", "Senior")]
     public void Search_Contains_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -235,16 +236,16 @@ public class SearchTests
 
     class Contains_NoSplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.Contains, IsSplitOnSpaces = false)] public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "John Smith Jr", "John")]
-    [InlineData(true, "John Smith Jr", "Smith")]
-    [InlineData(true, "John Smith Jr", "Jr")]
-    [InlineData(true, "John Smith Jr", "ohn")]
-    [InlineData(true, "John Smith Jr", "mith")]
-    [InlineData(true, "John Smith Jr", "John Smith")]
-    [InlineData(true, "John Smith Jr", "Smith Jr")]
-    [InlineData(false, "John Smith Jr", "Jo Sm")]
-    [InlineData(false, "John Smith Jr", "Jane")]
+    [Test]
+    [Arguments(true, "John Smith Jr", "John")]
+    [Arguments(true, "John Smith Jr", "Smith")]
+    [Arguments(true, "John Smith Jr", "Jr")]
+    [Arguments(true, "John Smith Jr", "ohn")]
+    [Arguments(true, "John Smith Jr", "mith")]
+    [Arguments(true, "John Smith Jr", "John Smith")]
+    [Arguments(true, "John Smith Jr", "Smith Jr")]
+    [Arguments(false, "John Smith Jr", "Jo Sm")]
+    [Arguments(false, "John Smith Jr", "Jane")]
     public void Search_Contains_NoSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -257,12 +258,12 @@ public class SearchTests
 
     class Equals_SplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.Equals, IsSplitOnSpaces = true)] public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "John", "John")]
-    [InlineData(true, "JOHN", "john")]
-    [InlineData(false, "John Smith", "John")]
-    [InlineData(false, "John Smith", "Smith")]
-    [InlineData(false, "John", "Jo")]
+    [Test]
+    [Arguments(true, "John", "John")]
+    [Arguments(true, "JOHN", "john")]
+    [Arguments(false, "John Smith", "John")]
+    [Arguments(false, "John Smith", "Smith")]
+    [Arguments(false, "John", "Jo")]
     public void Search_Equals_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -275,12 +276,12 @@ public class SearchTests
 
     class Equals_NoSplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.Equals, IsSplitOnSpaces = false)] public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "John Smith", "John Smith")]
-    [InlineData(true, "JOHN SMITH", "john smith")]
-    [InlineData(false, "John Smith", "John")]
-    [InlineData(false, "John Smith", "Smith")]
-    [InlineData(false, "John Smith", "john")]
+    [Test]
+    [Arguments(true, "John Smith", "John Smith")]
+    [Arguments(true, "JOHN SMITH", "john smith")]
+    [Arguments(false, "John Smith", "John")]
+    [Arguments(false, "John Smith", "Smith")]
+    [Arguments(false, "John Smith", "john")]
     public void Search_Equals_NoSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -293,11 +294,11 @@ public class SearchTests
 
     class EqualsNatural_SplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.EqualsNatural, IsSplitOnSpaces = true)] public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "John", "John")]
-    [InlineData(false, "JOHN", "john")]
-    [InlineData(false, "John Smith", "John")]
-    [InlineData(false, "John", "Jo")]
+    [Test]
+    [Arguments(true, "John", "John")]
+    [Arguments(false, "JOHN", "john")]
+    [Arguments(false, "John Smith", "John")]
+    [Arguments(false, "John", "Jo")]
     public void Search_EqualsNatural_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -310,11 +311,11 @@ public class SearchTests
 
     class EqualsNatural_NoSplitOnSpaces { [Search(SearchMethod = SearchAttribute.SearchMethods.EqualsNatural, IsSplitOnSpaces = false)] public string Name { get; set; } }
 
-    [Theory]
-    [InlineData(true, "John Smith", "John Smith")]
-    [InlineData(false, "JOHN SMITH", "john smith")]
-    [InlineData(false, "John Smith", "John")]
-    [InlineData(false, "John Smith", "Smith")]
+    [Test]
+    [Arguments(true, "John Smith", "John Smith")]
+    [Arguments(false, "JOHN SMITH", "john smith")]
+    [Arguments(false, "John Smith", "John")]
+    [Arguments(false, "John Smith", "Smith")]
     public void Search_EqualsNatural_NoSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -337,16 +338,16 @@ public class SearchTests
         public string Email { get; set; }
     }
 
-    [Theory]
-    [InlineData(true, "John", "Smith", "john@example.com", "John")]
-    [InlineData(true, "John", "Smith", "john@example.com", "Smith")]
-    [InlineData(true, "John", "Smith", "john@example.com", "example")]  // Email contains "example"
-    [InlineData(true, "John", "Smith", "john@example.com", "John Smith")] // "John" matches FirstName, "Smith" matches LastName
-    [InlineData(true, "John", "Smith", "john@example.com", "John example")] // "John" matches FirstName, "example" matches Email
-    [InlineData(true, "John", "Smith", "john@example.com", "Smith example")] // "Smith" matches LastName, "example" matches Email
-    [InlineData(false, "John", "Smith", "john@example.com", "Jane")] // No property matches "Jane"
-    [InlineData(true, "John", "Smith", "john@example.com", "ohn")]  // Email contains "ohn" in "john@example.com"
-    [InlineData(false, "John", "Smith", "john@example.com", "mith")] // FirstName/LastName use BeginsWith and don't begin with "mith", Email doesn't contain "mith"
+    [Test]
+    [Arguments(true, "John", "Smith", "john@example.com", "John")]
+    [Arguments(true, "John", "Smith", "john@example.com", "Smith")]
+    [Arguments(true, "John", "Smith", "john@example.com", "example")]  // Email contains "example"
+    [Arguments(true, "John", "Smith", "john@example.com", "John Smith")] // "John" matches FirstName, "Smith" matches LastName
+    [Arguments(true, "John", "Smith", "john@example.com", "John example")] // "John" matches FirstName, "example" matches Email
+    [Arguments(true, "John", "Smith", "john@example.com", "Smith example")] // "Smith" matches LastName, "example" matches Email
+    [Arguments(false, "John", "Smith", "john@example.com", "Jane")] // No property matches "Jane"
+    [Arguments(true, "John", "Smith", "john@example.com", "ohn")]  // Email contains "ohn" in "john@example.com"
+    [Arguments(false, "John", "Smith", "john@example.com", "mith")] // FirstName/LastName use BeginsWith and don't begin with "mith", Email doesn't contain "mith"
     public void Search_MultipleProperties_SplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string firstName, string lastName, string email, string inputValue)
     {
@@ -370,15 +371,15 @@ public class SearchTests
         public string Description { get; set; }
     }
 
-    [Theory]
-    [InlineData(true, "John Doe", "Software Engineer", "John")] // "John" begins "John Doe"
-    [InlineData(false, "John Doe", "Software Engineer", "Doe")] // "Doe" doesn't begin "John Doe", and Description doesn't contain "Doe" 
-    [InlineData(true, "John Doe", "Software Engineer", "Software")] // Description contains "Software"
-    [InlineData(true, "John Doe", "Software Engineer", "Engineer")] // Description contains "Engineer"
-    [InlineData(true, "John Doe", "Software Engineer", "Software Engineer")] // Description contains "Software Engineer"
-    [InlineData(true, "John Doe", "Software Engineer", "oftware")] // Description contains "oftware" (part of "Software")
-    [InlineData(true, "John Doe", "Software Engineer", "neer")]    // Description contains "neer" (part of "Engineer")
-    [InlineData(false, "John Doe", "Software Engineer", "John Engineer")] // "John" begins Name but "Engineer" doesn't begin Name, Description contains "Engineer" but not "John"
+    [Test]
+    [Arguments(true, "John Doe", "Software Engineer", "John")] // "John" begins "John Doe"
+    [Arguments(false, "John Doe", "Software Engineer", "Doe")] // "Doe" doesn't begin "John Doe", and Description doesn't contain "Doe" 
+    [Arguments(true, "John Doe", "Software Engineer", "Software")] // Description contains "Software"
+    [Arguments(true, "John Doe", "Software Engineer", "Engineer")] // Description contains "Engineer"
+    [Arguments(true, "John Doe", "Software Engineer", "Software Engineer")] // Description contains "Software Engineer"
+    [Arguments(true, "John Doe", "Software Engineer", "oftware")] // Description contains "oftware" (part of "Software")
+    [Arguments(true, "John Doe", "Software Engineer", "neer")]    // Description contains "neer" (part of "Engineer")
+    [Arguments(false, "John Doe", "Software Engineer", "John Engineer")] // "John" begins Name but "Engineer" doesn't begin Name, Description contains "Engineer" but not "John"
     public void Search_MixedSplitOnSpaces_SearchesCorrectly(
         bool shouldMatch, string name, string description, string inputValue)
     {
@@ -392,11 +393,11 @@ public class SearchTests
             shouldMatch);
     }
 
-    [Theory]
-    [InlineData(true, "a1", "a1")]
-    [InlineData(true, "A1", "a1")]
-    [InlineData(true, "a1", "A1")]
-    [InlineData(false, "a1b", "a1")]
+    [Test]
+    [Arguments(true, "a1", "a1")]
+    [Arguments(true, "A1", "a1")]
+    [Arguments(true, "a1", "A1")]
+    [Arguments(false, "a1b", "a1")]
     public void Search_StringEqualsInsensitive_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -407,11 +408,11 @@ public class SearchTests
             shouldMatch);
     }
 
-    [Theory]
-    [InlineData(true, "a1", "a1")]
-    [InlineData(false, "A1", "a1")]
-    [InlineData(false, "a1", "A1")]
-    [InlineData(false, "a1b", "a1")]
+    [Test]
+    [Arguments(true, "a1", "a1")]
+    [Arguments(false, "A1", "a1")]
+    [Arguments(false, "a1", "A1")]
+    [Arguments(false, "a1b", "a1")]
     public void Search_StringEqualsNatural_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -424,15 +425,15 @@ public class SearchTests
             shouldMatch);
     }
 
-    [Theory]
-    [InlineData(true, 0, "0")]
-    [InlineData(true, int.MaxValue, "2147483647")]
-    [InlineData(false, int.MaxValue, "2147483648")]
-    [InlineData(true, 2, "2")]
-    [InlineData(true, 22, "22")]
-    [InlineData(false, 3, "2")]
-    [InlineData(false, 2, "22")]
-    [InlineData(false, 22, "2")]
+    [Test]
+    [Arguments(true, 0, "0")]
+    [Arguments(true, int.MaxValue, "2147483647")]
+    [Arguments(false, int.MaxValue, "2147483648")]
+    [Arguments(true, 2, "2")]
+    [Arguments(true, 22, "22")]
+    [Arguments(false, 3, "2")]
+    [Arguments(false, 2, "22")]
+    [Arguments(false, 22, "2")]
     public void Search_Int_SearchesCorrectly(
         bool shouldMatch, int propValue, string inputValue)
     {
@@ -443,9 +444,9 @@ public class SearchTests
             shouldMatch);
     }
 
-    [Theory]
-    [InlineData(true, "a1", "a1")]
-    [InlineData(false, "B1", "a1")]
+    [Test]
+    [Arguments(true, "a1", "a1")]
+    [Arguments(false, "B1", "a1")]
     public void Search_Collection_SearchesCorrectly(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -456,11 +457,11 @@ public class SearchTests
             shouldMatch);
     }
 
-    [Theory]
-    [InlineData(true, "needle", "needlestack", "stackneedle", "foo")]
-    [InlineData(true, "needle stack", "needlestack", "stackneedle", "foo")]
-    [InlineData(true, "foo stack needle", "needlestack", "stackneedle", "foo")]
-    [InlineData(false, "needle stack bar", "needlestack", "stackneedle", "foo")]
+    [Test]
+    [Arguments(true, "needle", "needlestack", "stackneedle", "foo")]
+    [Arguments(true, "needle stack", "needlestack", "stackneedle", "foo")]
+    [Arguments(true, "foo stack needle", "needlestack", "stackneedle", "foo")]
+    [Arguments(false, "needle stack bar", "needlestack", "stackneedle", "foo")]
     public void Search_ComplexCollection_SearchesCorrectly(
         bool shouldMatch, string query, string field1, string field2, string field3)
     {
@@ -488,7 +489,7 @@ public class SearchTests
         public string Field3 { get; set; }
     }
 
-    [Fact]
+    [Test]
     public void Search_CollectionWithNoSearchableChildren_DoesNotThrow()
     {
         // This test demonstrates the issue where searching on a collection 
@@ -519,7 +520,7 @@ public class SearchTests
     {
     }
 
-    private void SearchHelper<T, TProp>(
+    private async Task SearchHelper<T, TProp>(
         Expression<Func<T, TProp>> propSelector,
         string searchTerm,
         TProp searchCandidate,
@@ -542,12 +543,12 @@ public class SearchTests
         var matchedItems = query.ToArray();
 
         if (expectedMatch)
-            Assert.True(matchedItems.Length == 1, $"{searchTerm} didn't match {searchCandidate}.");
+            await Assert.That(matchedItems.Length == 1).IsTrue().Because($"{searchTerm} didn't match {searchCandidate}.");
         else
-            Assert.False(matchedItems.Length == 1, $"{searchTerm} matched on {searchCandidate}, but shouldn't have.");
+            await Assert.That(matchedItems.Length == 1).IsFalse().Because($"{searchTerm} matched on {searchCandidate}, but shouldn't have.");
     }
 
-    private void SearchHelper<T>(
+    private async Task SearchHelper<T>(
         string searchTerm,
         Action<T> configureModel,
         bool expectedMatch,
@@ -567,8 +568,8 @@ public class SearchTests
         var matchedItems = query.ToArray();
 
         if (expectedMatch)
-            Assert.True(matchedItems.Length == 1, $"{searchTerm} didn't match the configured model.");
+            await Assert.That(matchedItems.Length == 1).IsTrue().Because($"{searchTerm} didn't match the configured model.");
         else
-            Assert.False(matchedItems.Length == 1, $"{searchTerm} matched on the configured model, but shouldn't have.");
+            await Assert.That(matchedItems.Length == 1).IsFalse().Because($"{searchTerm} matched on the configured model, but shouldn't have.");
     }
 }

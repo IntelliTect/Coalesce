@@ -1,10 +1,11 @@
 using IntelliTect.Coalesce.Analyzer.Analyzers;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task ServiceWithCoalesceAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -15,7 +16,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task StandaloneEntityWithCoalesceAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -27,7 +28,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task SimpleModelWithCoalesceAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -39,7 +40,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAttributeWithCoalesceAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -51,7 +52,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAttributeWithSemanticKernelAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -63,7 +64,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAttributeOnServiceClass_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
@@ -83,7 +84,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ServiceClassAlone_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
@@ -99,7 +100,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task StandaloneEntityWithoutCoalesceOrSemanticKernel_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
@@ -117,7 +118,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task SimpleModelWithoutCoalesce_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
@@ -135,7 +136,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAttributeOnSimpleMethod_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
@@ -153,7 +154,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ServiceWithExistingAttributes_AddsCoalesceFirst()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
@@ -171,7 +172,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task RegularClassWithoutSpecialAttributes_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -182,7 +183,7 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task RegularMethodWithoutExecuteAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""

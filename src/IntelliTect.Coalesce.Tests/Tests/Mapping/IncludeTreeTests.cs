@@ -5,10 +5,12 @@ using IntelliTect.Coalesce.Tests.Fixtures;
 using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Mapping;
 
-public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
+[ClassDataSource<TestDbContextFixture>(Shared = SharedType.PerClass)]
+public class IncludeTreeTests
 {
     public IncludeTreeTests(TestDbContextFixture dbFixture)
     {
@@ -18,38 +20,38 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
     private readonly AppDbContext db;
 
 
-    private void AssertBasicChecks(IncludeTree tree)
+    private async Task AssertBasicChecks(IncludeTree tree)
     {
         // Basic check to see if IncludeTree works for EF includes.
-        Assert.NotNull(tree
+        await Assert.That(tree
             [nameof(Person.CasesAssigned)]
             [nameof(Case.CaseProducts)]
             [nameof(CaseProduct.Case)]
-            [nameof(Case.AssignedTo)]);
+            [nameof(Case.AssignedTo)]).IsNotNull();
 
         // Make sure that multiple EF include calls merge properly.
         // If this doesn't pass, something is wrong with the way merging is done.
-        Assert.NotNull(tree
+        await Assert.That(tree
             [nameof(Person.CasesAssigned)]
             [nameof(Case.CaseProducts)]
             [nameof(CaseProduct.Case)]
-            [nameof(Case.ReportedBy)]);
+            [nameof(Case.ReportedBy)]).IsNotNull();
 
         // check to see if IncludedSeparately works
-        Assert.NotNull(tree
+        await Assert.That(tree
             [nameof(Person.CasesReported)]
             [nameof(Case.ReportedBy)]
-            [nameof(Person.Company)]);
+            [nameof(Person.Company)]).IsNotNull();
 
         // Make sure that multiple IncludedSeprately calls merge properly.
         // If this doesn't pass, something is wrong with the way merging is done.
-        Assert.NotNull(tree
+        await Assert.That(tree
             [nameof(Person.CasesReported)]
             [nameof(Case.ReportedBy)]
-            [nameof(Person.CasesAssigned)]);
+            [nameof(Person.CasesAssigned)]).IsNotNull();
     }
 
-    [Fact]
+    [Test]
     public void IncludeTree_BasicLambdaChecks()
     {
         IQueryable<Person> queryable = db.People
@@ -69,7 +71,7 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
         AssertBasicChecks(tree);
     }
 
-    [Fact]
+    [Test]
     public void IncludeTree_StaticFor()
     {
         var tree = IncludeTree.For<Person>(q => q
@@ -83,7 +85,7 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
         AssertBasicChecks(tree);
     }
 
-    [Fact]
+    [Test]
     public void IncludeTree_StaticQueryFor()
     {
         var tree = IncludeTree.QueryFor<Person>()
@@ -97,20 +99,20 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
         AssertBasicChecks(tree);
     }
 
-    [Fact]
-    public void IncludeTree_CastedIncludes()
+    [Test]
+    public async Task IncludeTree_CastedIncludes()
     {
         var tree = IncludeTree.QueryFor<AbstractModel>()
             .Include(p => ((AbstractImpl1)p).Parent).ThenInclude(p => (p as AbstractImpl1).Parent).ThenInclude(p => p.AbstractModelPeople)
             .GetIncludeTree();
 
-        Assert.NotNull(tree
+        await Assert.That(tree
             [nameof(AbstractImpl1.Parent)]
             [nameof(AbstractImpl1.Parent)]
-            [nameof(AbstractImpl1.AbstractModelPeople)]);
+            [nameof(AbstractImpl1.AbstractModelPeople)]).IsNotNull();
     }
 
-    [Fact]
+    [Test]
     public void IncludeTree_BasicStringChecks()
     {
         IQueryable<Person> queryable = db.People
@@ -132,7 +134,7 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
         AssertBasicChecks(tree);
     }
 
-    [Fact]
+    [Test]
     public void IncludeTree_FilteredIncludeChecks()
     {
         IQueryable<Person> queryable = db.People
@@ -169,8 +171,8 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
         AssertBasicChecks(tree);
     }
 
-    [Fact]
-    public void IncludeTree_ProjectedQuery_AnonymousTypes()
+    [Test]
+    public async Task IncludeTree_ProjectedQuery_AnonymousTypes()
     {
         var queryable = db.People
             .Select(p => new
@@ -195,14 +197,14 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
             });
 
         IncludeTree tree = queryable.GetIncludeTree();
-        Assert.True(tree is { Count: 2 });
-        Assert.True(tree["SimpleNavigation"] is { Count: 0 });
-        Assert.True(tree["ComplexCollection"] is { Count: 1 });
-        Assert.True(tree["ComplexCollection"]["Products"] is { Count: 0 });
+        await Assert.That(tree is { Count: 2 }).IsTrue();
+        await Assert.That(tree["SimpleNavigation"] is { Count: 0 }).IsTrue();
+        await Assert.That(tree["ComplexCollection"] is { Count: 1 }).IsTrue();
+        await Assert.That(tree["ComplexCollection"]["Products"] is { Count: 0 }).IsTrue();
     }
 
-    [Fact]
-    public void IncludeTree_ProjectedQuery_ConcreteTypes()
+    [Test]
+    public async Task IncludeTree_ProjectedQuery_ConcreteTypes()
     {
         var queryable = db.Cases
             .Select(c => new StandaloneProjected
@@ -214,14 +216,14 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
             });
 
         IncludeTree tree = queryable.GetIncludeTree();
-        Assert.True(tree is { Count: 3 });
-        Assert.True(tree["OpenedBy"] is { Count: 0 });
-        Assert.True(tree["OpenerAllOpenedCases"] is { Count: 0 });
-        Assert.True(tree["Products"] is { Count: 0 });
+        await Assert.That(tree is { Count: 3 }).IsTrue();
+        await Assert.That(tree["OpenedBy"] is { Count: 0 }).IsTrue();
+        await Assert.That(tree["OpenerAllOpenedCases"] is { Count: 0 }).IsTrue();
+        await Assert.That(tree["Products"] is { Count: 0 }).IsTrue();
     }
 
-    [Fact]
-    public void IncludeTree_ProjectedQuery_IncludedSeparately()
+    [Test]
+    public async Task IncludeTree_ProjectedQuery_IncludedSeparately()
     {
         var queryable = db.Cases
             .Select(c => new StandaloneProjected
@@ -233,14 +235,14 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
             ;
 
         IncludeTree tree = queryable.GetIncludeTree();
-        Assert.True(tree is { Count: 2 });
-        Assert.True(tree["OpenedBy"] is { Count: 0 });
-        Assert.True(tree["OpenerAllOpenedCases"] is { Count: 1 });
-        Assert.True(tree["OpenerAllOpenedCases"]["CaseProducts"] is { Count: 0 });
+        await Assert.That(tree is { Count: 2 }).IsTrue();
+        await Assert.That(tree["OpenedBy"] is { Count: 0 }).IsTrue();
+        await Assert.That(tree["OpenerAllOpenedCases"] is { Count: 1 }).IsTrue();
+        await Assert.That(tree["OpenerAllOpenedCases"]["CaseProducts"] is { Count: 0 }).IsTrue();
     }
 
-    [Fact]
-    public void IncludeTree_ProjectedQuery_ProjectedIncludedProp_DoesNotUsePriorIncludes()
+    [Test]
+    public async Task IncludeTree_ProjectedQuery_ProjectedIncludedProp_DoesNotUsePriorIncludes()
     {
         // See comments on https://github.com/IntelliTect/Coalesce/issues/478#issuecomment-2555963059
         // for why we don't want to respect .Includes that happen before a projection
@@ -254,8 +256,8 @@ public class IncludeTreeTests : IClassFixture<TestDbContextFixture>
             ;
 
         IncludeTree tree = queryable.GetIncludeTree();
-        Assert.True(tree is { Count: 1 });
-        Assert.True(tree["OpenedBy"] is { Count: 0 });
+        await Assert.That(tree is { Count: 1 }).IsTrue();
+        await Assert.That(tree["OpenedBy"] is { Count: 0 }).IsTrue();
     }
 
 

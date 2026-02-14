@@ -16,7 +16,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests;
 
@@ -24,7 +23,7 @@ public class CodeGenTestBase
 {
     public static Lazy<Assembly> WebAssembly { get; } = new(GetWebAssembly);
 
-    private static Assembly GetWebAssembly()
+    private static async Task<Assembly> GetWebAssembly()
     {
         var suite = new GenerationExecutor(
                 new() { WebProject = new() { RootNamespace = "MyProject" } },
@@ -38,7 +37,7 @@ public class CodeGenTestBase
 
         using var ms = new MemoryStream();
         EmitResult emitResult = compilation.Emit(ms);
-        Assert.True(emitResult.Success);
+        await Assert.That(emitResult.Success).IsTrue();
         var assembly = Assembly.Load(ms.ToArray());
         ReflectionRepository.Global.AddAssembly(assembly);
         return assembly;
@@ -73,7 +72,7 @@ public class CodeGenTestBase
         );
     }
 
-    protected Task<T> ConfigureAndValidateSuite<T>(T suite)
+    protected async Task<T> ConfigureAndValidateSuite<T>(T suite)
         where T : IRootGenerator
     {
         var cwd = new DirectoryInfo(Directory.GetCurrentDirectory());
@@ -87,10 +86,7 @@ public class CodeGenTestBase
             .WithOutputPath(Path.Combine(project.FullName, "out", tfmAttr.FrameworkName, suiteName));
 
         var validationResult = ValidateContext.Validate(suite.Model);
-        Assert.False(
-            validationResult.Any(r => r.IsError),
-            string.Join("\n", validationResult.Where(r => r.IsError))
-        );
+        await Assert.That(validationResult.Any(r => r.IsError)).IsFalse();
 
         return Task.FromResult(suite);
     }
@@ -188,7 +184,7 @@ public class CodeGenTestBase
 
         await typescriptProcess.WaitForExitAsync();
         var streams = await Task.WhenAll(streamTasks);
-        Assert.True(0 == typescriptProcess.ExitCode, $"Typescript {tsVersion}\n:" + string.Join("\n\n", streams));
+        await Assert.That(0 == typescriptProcess.ExitCode).IsTrue();
     }
 
     protected DirectoryInfo GetRepoRoot()

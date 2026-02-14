@@ -29,6 +29,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit" />
+    <PackageReference Include="TUnit" />
     <PackageReference Include="Xunit.SkippableFact" />
   </ItemGroup>
 

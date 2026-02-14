@@ -1,8 +1,10 @@
+using System.Threading.Tasks;
+
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class InvalidBehaviorsOverrideWithDenyAllTests : CSharpAnalyzerVerifier<InvalidBehaviorsOverrideWithDenyAllAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task SaveMethodOverridesWithOnlyCreateDenied_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -26,7 +28,7 @@ public class InvalidBehaviorsOverrideWithDenyAllTests : CSharpAnalyzerVerifier<I
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task SaveMethodOverridesWithCreateEditDenied_ReportsErrors()
     {
         await VerifyAnalyzerAsync("""
@@ -62,7 +64,7 @@ public class InvalidBehaviorsOverrideWithDenyAllTests : CSharpAnalyzerVerifier<I
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task DeleteMethodOverrideWithDeleteAllowed_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -85,7 +87,7 @@ public class InvalidBehaviorsOverrideWithDenyAllTests : CSharpAnalyzerVerifier<I
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task DeleteMethodOverridesWithDeleteDenied_ReportsErrors()
     {
         await VerifyAnalyzerAsync("""
@@ -120,7 +122,7 @@ public class InvalidBehaviorsOverrideWithDenyAllTests : CSharpAnalyzerVerifier<I
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NestedBehaviorsWithAllCrudDenied_ReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -141,7 +143,7 @@ public class InvalidBehaviorsOverrideWithDenyAllTests : CSharpAnalyzerVerifier<I
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NonNestedBehaviorsClass_StillReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -162,7 +164,7 @@ public class InvalidBehaviorsOverrideWithDenyAllTests : CSharpAnalyzerVerifier<I
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task RegularMethodNotOverride_NoError()
     {
         await VerifyAnalyzerAsync("""

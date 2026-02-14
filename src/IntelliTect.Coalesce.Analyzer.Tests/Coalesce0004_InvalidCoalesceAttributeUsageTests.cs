@@ -1,8 +1,10 @@
+using System.Threading.Tasks;
+
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnDbContext_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -13,7 +15,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnDataSource_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -26,7 +28,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnBehaviors_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -39,7 +41,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnCustomDto_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -55,7 +57,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnService_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -66,7 +68,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnStandaloneEntity_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -78,7 +80,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnSimpleModel_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -90,7 +92,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnRegularClass_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -105,7 +107,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnInterface_ReportsError()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -120,7 +122,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeWithMultipleAttributes_RemovesOnlyCoalesce()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -136,7 +138,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnSeparateAttributeList_RemovesEntireList()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -153,7 +155,7 @@ public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NonCoalesceAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""

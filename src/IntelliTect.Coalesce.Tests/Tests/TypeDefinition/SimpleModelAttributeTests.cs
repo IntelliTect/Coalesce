@@ -2,13 +2,14 @@ using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 
 public class SimpleModelAttributeTests
 {
-    [Fact]
-    public void SimpleModelAttribute_AddsTypeAsSimpleModel()
+    [Test]
+    public async Task SimpleModelAttribute_AddsTypeAsSimpleModel()
     {
         // Arrange
         var repo = ReflectionRepositoryFactory.Reflection;
@@ -19,12 +20,12 @@ public class SimpleModelAttributeTests
             .FirstOrDefault(t => t.Name == nameof(SimpleModelTarget));
         
         // Assert
-        Assert.NotNull(simpleModelTarget);
-        Assert.Equal(nameof(SimpleModelTarget), simpleModelTarget.Name);
+        await Assert.That(simpleModelTarget).IsNotNull();
+        await Assert.That(simpleModelTarget.Name).IsEqualTo(nameof(SimpleModelTarget));
     }
 
-    [Fact]
-    public void TypeWithoutSimpleModelAttribute_NotInExternalTypes()
+    [Test]
+    public async Task TypeWithoutSimpleModelAttribute_NotInExternalTypes()
     {
         // Arrange
         var repo = ReflectionRepositoryFactory.Reflection;
@@ -35,11 +36,11 @@ public class SimpleModelAttributeTests
             .FirstOrDefault(t => t.Name == nameof(NotMarkedAsSimpleModel));
         
         // Assert
-        Assert.Null(notMarkedType);
+        await Assert.That(notMarkedType).IsNull();
     }
 
-    [Fact]
-    public void CoalesceAttributeOnly_DoesNotAddTypeAsSimpleModel()
+    [Test]
+    public async Task CoalesceAttributeOnly_DoesNotAddTypeAsSimpleModel()
     {
         // Arrange
         var repo = ReflectionRepositoryFactory.Reflection;
@@ -50,6 +51,6 @@ public class SimpleModelAttributeTests
             .FirstOrDefault(t => t.Name == nameof(CoalesceOnlyTarget));
         
         // Assert
-        Assert.Null(coalesceOnlyType);
+        await Assert.That(coalesceOnlyType).IsNull();
     }
 }

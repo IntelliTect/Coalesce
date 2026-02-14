@@ -1,37 +1,38 @@
 ﻿using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.TypeDefinition;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Security;
 
 public class ClassSecurityTests
 {
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(EditWithSpaces))]
-    public void WhenRolesHaveSpaces_TrimsRolesCorrectly(ClassViewModelData data)
+    public async Task WhenRolesHaveSpaces_TrimsRolesCorrectly(ClassViewModelData data)
     {
         ClassViewModel vm = data;
 
-        Assert.Contains("RoleA", vm.SecurityInfo.Edit.RoleList);
-        Assert.Contains("RoleB", vm.SecurityInfo.Edit.RoleList);
-        Assert.Contains("RoleC", vm.SecurityInfo.Edit.RoleList);
+        await Assert.That(vm.SecurityInfo.Edit.RoleList).Contains("RoleA");
+        await Assert.That(vm.SecurityInfo.Edit.RoleList).Contains("RoleB");
+        await Assert.That(vm.SecurityInfo.Edit.RoleList).Contains("RoleC");
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(AbstractModel))]
-    public void AbstractEntityWithDbSet_HasReadOnlyApi(ClassViewModelData data)
+    public async Task AbstractEntityWithDbSet_HasReadOnlyApi(ClassViewModelData data)
     {
         // Exposing an API for abstract entities helps support TPT/TPH configurations (#8).
         ClassViewModel vm = data;
 
-        Assert.True(vm.SecurityInfo.Read.IsAllowed());
+        await Assert.That(vm.SecurityInfo.Read.IsAllowed()).IsTrue();
 
-        Assert.False(vm.SecurityInfo.Edit.IsAllowed());
-        Assert.False(vm.SecurityInfo.Create.IsAllowed());
+        await Assert.That(vm.SecurityInfo.Edit.IsAllowed()).IsFalse();
+        await Assert.That(vm.SecurityInfo.Create.IsAllowed()).IsFalse();
 
         // In theory delete could be exposed, but doing so would not work with
         // Behaviors-implemented security (it would bypass the security of the concrete type).
         // So, delete can't be done on a base abstract entity.
-        Assert.False(vm.SecurityInfo.Delete.IsAllowed());
+        await Assert.That(vm.SecurityInfo.Delete.IsAllowed()).IsFalse();
     }
 }

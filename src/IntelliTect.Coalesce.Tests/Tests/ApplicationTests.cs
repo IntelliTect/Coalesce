@@ -1,12 +1,13 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests;
 
 public class ApplicationTests
 {
-    [Fact]
-    public void AddCoalesce_DoesNotExplicitlyRequireWebServices()
+    [Test]
+    public async Task AddCoalesce_DoesNotExplicitlyRequireWebServices()
     {
         // Ensures that esoteric testing scenarios can setup Coalesce services
         // without a full aspnetcore host builder.
@@ -18,6 +19,6 @@ public class ApplicationTests
 
         var sp = services.BuildServiceProvider();
 
-        Assert.NotNull(sp.GetRequiredService<CrudContext<AppDbContext>>());
+        await Assert.That(sp.GetRequiredService<CrudContext<AppDbContext>>()).IsNotNull();
     }
 }

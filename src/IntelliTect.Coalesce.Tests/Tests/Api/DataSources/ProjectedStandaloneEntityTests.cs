@@ -12,7 +12,7 @@ public class ProjectedStandaloneEntityTests : TestDbContextFixture
     private StandaloneProjected.DefaultSource Source()
         => new StandaloneProjected.DefaultSource(CrudContext);
 
-    [Fact]
+    [Test]
     public async Task GetIncludeTree_AccountsForProjectedProperties()
     {
         CrudContext.DbContext.Cases.Add(new()
@@ -36,15 +36,13 @@ public class ProjectedStandaloneEntityTests : TestDbContextFixture
         // We explicitly project OpenerAllOpenedCases, but we do NOT
         // perform any projection of `.ReportedBy.CasesReported`.
         // However, EF still does navigation fixup and populates CasesReported anyway.
-        Assert.Equal(
-            results.Single().OpenedBy.CasesReported.Single(),
-            results.Single().OpenerAllOpenedCases.Single());
+        await Assert.That(results.Single().OpenerAllOpenedCases.Single()).IsEqualTo(results.Single().OpenedBy.CasesReported.Single());
 
         IncludeTree tree = query.GetIncludeTree();
-        Assert.True(tree is { Count: 3 });
-        Assert.True(tree["OpenedBy"] is { Count: 0 });
-        Assert.True(tree["OpenerAllOpenedCases"] is { Count: 0 });
-        Assert.True(tree["Products"] is { Count: 0 });
+        await Assert.That(tree is { Count: 3 }).IsTrue();
+        await Assert.That(tree["OpenedBy"] is { Count: 0 }).IsTrue();
+        await Assert.That(tree["OpenerAllOpenedCases"] is { Count: 0 }).IsTrue();
+        await Assert.That(tree["Products"] is { Count: 0 }).IsTrue();
     }
 }
 

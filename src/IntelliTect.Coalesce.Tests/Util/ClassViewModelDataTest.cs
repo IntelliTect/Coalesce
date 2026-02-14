@@ -3,10 +3,12 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Util;
 
-public class ClassViewModelDataTest : IClassFixture<ClassViewModelDataCountTestFixture>
+[ClassDataSource<ClassViewModelDataCountTestFixture>(Shared = SharedType.PerClass)]
+public class ClassViewModelDataTest
 {
     private readonly ClassViewModelDataCountTestFixture fixture;
 
@@ -20,7 +22,7 @@ public class ClassViewModelDataTest : IClassFixture<ClassViewModelDataCountTestF
     /// been providing ReflectionClassViewModel instances for both Symbol and Reflection versions of the test.
     /// </summary>
     /// <param name="data"></param>
-    [Theory, ClassViewModelData(typeof(Bools))]
+    [Test, ClassViewModelData(typeof(Bools))]
     public void ClassViewModelDataAttribute_EnsureProvidesBothTypesOfModels(ClassViewModelData data)
     {
         var type = data.ClassViewModel.GetType();
@@ -36,8 +38,8 @@ public class ClassViewModelDataCountTestFixture : IDisposable
     public void Dispose()
     {
         var total = TypeCounts.Values.Sum();
-        Assert.Equal(2, total);
-        Assert.Equal(1, TypeCounts[typeof(ReflectionClassViewModel)]);
-        Assert.Equal(1, TypeCounts[typeof(SymbolClassViewModel)]);
+        await Assert.That(total).IsEqualTo(2);
+        await Assert.That(TypeCounts[typeof(ReflectionClassViewModel)]).IsEqualTo(1);
+        await Assert.That(TypeCounts[typeof(SymbolClassViewModel)]).IsEqualTo(1);
     }
 }

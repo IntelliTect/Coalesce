@@ -10,7 +10,6 @@ using Moq;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Xunit;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -26,7 +25,7 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
     /// typescript/javascript tests upon, rather than building out
     /// metadata, models, api clients, and viewmodels by hand.
     /// </summary>
-    [Fact]
+    [Test]
     public async Task CreateVitestTargets()
     {
         var executor = BuildExecutor();
@@ -57,7 +56,7 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
     }
 #endif
 
-    [Fact]
+    [Test]
     public async Task VueOutputCompiles()
     {
         var executor = BuildExecutor();
@@ -79,10 +78,7 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
     {
         var coalesceVue = GetRepoRoot().GetDirectory("src/coalesce-vue");
 
-        Assert.True(
-            coalesceVue.GetDirectory("node_modules").Exists,
-            "Test relies on NPM packages for coalesce-vue being restored."
-        );
+        await Assert.That(coalesceVue.GetDirectory("node_modules").Exists).IsTrue().Because("Test relies on NPM packages for coalesce-vue being restored.");
 
         // We use coalesce-vue as our working directory here
         // because it contains both tsc and all the dependencies of the generated code.
@@ -117,8 +113,8 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
         );
     }
 
-    [Fact]
-    public void SecurityOverviewDataGenerates()
+    [Test]
+    public async Task SecurityOverviewDataGenerates()
     {
         // This test probably doesn't quite belong in this class
 
@@ -141,6 +137,6 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
         // Otherwise, we wouldn't be testing very much here.
         // We're ultimately just testing that this doesn't throw right now.
         // Not looking for any specific output.
-        Assert.NotNull(System.Text.Json.JsonSerializer.Serialize(reflectionData));
+        await Assert.That(System.Text.Json.JsonSerializer.Serialize(reflectionData)).IsNotNull();
     }
 }

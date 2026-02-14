@@ -1,11 +1,12 @@
 using IntelliTect.Coalesce.Analyzer.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0003_InvalidCoalesceAttributeOnNestedTypesTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnTopLevelDataSource_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -18,7 +19,7 @@ public class Coalesce0003_InvalidCoalesceAttributeOnNestedTypesTests : CSharpAna
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnTopLevelBehaviors_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -31,7 +32,7 @@ public class Coalesce0003_InvalidCoalesceAttributeOnNestedTypesTests : CSharpAna
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnNestedDataSource_ReportsWarning()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -52,7 +53,7 @@ public class Coalesce0003_InvalidCoalesceAttributeOnNestedTypesTests : CSharpAna
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeOnNestedBehaviors_ReportsWarning()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -77,7 +78,7 @@ public class Coalesce0003_InvalidCoalesceAttributeOnNestedTypesTests : CSharpAna
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CoalesceAttributeWithMultipleAttributes_RemovesOnlyCoalesce()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""

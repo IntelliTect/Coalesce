@@ -1,11 +1,12 @@
 using IntelliTect.Coalesce.Analyzer.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce2001_SecurityBypassAnalyzerTests : CSharpAnalyzerVerifier<SecurityBypassAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task DataSourceWithClaimsPrincipalAndDefaultDataSource_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -37,7 +38,7 @@ public class Coalesce2001_SecurityBypassAnalyzerTests : CSharpAnalyzerVerifier<S
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task DataSourceWithoutClaimsPrincipal_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -59,7 +60,7 @@ public class Coalesce2001_SecurityBypassAnalyzerTests : CSharpAnalyzerVerifier<S
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task DefaultDataSourceWithClaimsPrincipal_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -82,7 +83,7 @@ public class Coalesce2001_SecurityBypassAnalyzerTests : CSharpAnalyzerVerifier<S
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task DataSourceWithClaimsPrincipalButNoDefaultDataSource_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -105,7 +106,7 @@ public class Coalesce2001_SecurityBypassAnalyzerTests : CSharpAnalyzerVerifier<S
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task DataSourceWithClaimsPrincipalMethodCall_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -128,7 +129,7 @@ public class Coalesce2001_SecurityBypassAnalyzerTests : CSharpAnalyzerVerifier<S
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task DataSourceWithClaimsPrincipalExtensionMethod_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -157,7 +158,7 @@ public class Coalesce2001_SecurityBypassAnalyzerTests : CSharpAnalyzerVerifier<S
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task StandaloneEntityWithSingleDataSourceAndClaimsPrincipal_NoWarning()
     {
         await VerifyAnalyzerAsync("""

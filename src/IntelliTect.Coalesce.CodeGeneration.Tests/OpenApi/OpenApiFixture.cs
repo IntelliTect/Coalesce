@@ -16,12 +16,12 @@ using Microsoft.OpenApi.Readers;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests.OpenApi;
 
-[CollectionDefinition(OpenApiFixture.Collection)]
-public class OpenApiFixtureCollection : ICollectionFixture<OpenApiFixture> { }
+[System.Obsolete]
+public class OpenApiFixtureCollection
+{ }
 
 public class OpenApiFixture
 {
@@ -63,15 +63,15 @@ public class OpenApiFixture
         var client = App.GetTestClient();
 
         var openApiDoc = await client.GetAsync("/openapi/v1.json");
-        Assert.Equal(HttpStatusCode.OK, openApiDoc.StatusCode);
+        await Assert.That(openApiDoc.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
         // OpenApiDocument cannot be parsed directly with a JSON deserializer,
         // as it is a midly non-normalized format that requires special rules to understand.
 #if NET10_0_OR_GREATER
         var result = await OpenApiDocument.LoadAsync(await openApiDoc.Content.ReadAsStreamAsync(), "json");
-        Assert.NotNull(result.Document);
-        Assert.Empty(result.Diagnostic.Errors);
-        Assert.Empty(result.Diagnostic.Warnings);
+        await Assert.That(result.Document).IsNotNull();
+        await Assert.That(result.Diagnostic.Errors).IsEmpty();
+        await Assert.That(result.Diagnostic.Warnings).IsEmpty();
         return result.Document;
 #else
         var openApiDocument = new OpenApiStreamReader()
@@ -82,5 +82,4 @@ public class OpenApiFixture
         return openApiDocument;
 #endif
     }
-}
-#endif
+}#endif

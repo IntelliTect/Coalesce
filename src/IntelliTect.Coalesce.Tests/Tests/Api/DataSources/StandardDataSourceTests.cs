@@ -19,35 +19,35 @@ public class StandardDataSourceTests : TestDbContextFixture
         where T : class, new()
         => new StandardDataSource<T, AppDbContext>(CrudContext);
 
-    [Theory]
-    [InlineData("none")]
-    [InlineData("NONE")]
-    public void GetQuery_WhenIncludesStringNone_DoesNotIncludeChildren(string includes)
+    [Test]
+    [Arguments("none")]
+    [Arguments("NONE")]
+    public async Task GetQuery_WhenIncludesStringNone_DoesNotIncludeChildren(string includes)
     {
         var query = Source<Case>().GetQuery(new DataSourceParameters { Includes = includes });
-        Assert.Empty(query.GetIncludeTree());
+        await Assert.That(query.GetIncludeTree()).IsEmpty();
     }
 
-    [Theory]
-    [InlineData("none")]
-    [InlineData("NONE")]
+    [Test]
+    [Arguments("none")]
+    [Arguments("NONE")]
     public async Task GetQueryAsync_WhenIncludesStringNone_DoesNotIncludeChildren(string includes)
     {
         var query = await Source<Case>().GetQueryAsync(new DataSourceParameters { Includes = includes });
-        Assert.Empty(query.GetIncludeTree());
+        await Assert.That(query.GetIncludeTree()).IsEmpty();
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("CaseListGen")]
-    public void GetQuery_WhenIncludesStringNotNone_IncludesChildren(string includes)
+    [Test]
+    [Arguments(null)]
+    [Arguments("")]
+    [Arguments("CaseListGen")]
+    public async Task GetQuery_WhenIncludesStringNotNone_IncludesChildren(string includes)
     {
         var query = Source<Case>().GetQuery(new DataSourceParameters { Includes = includes });
         var tree = query.GetIncludeTree();
-        Assert.NotNull(tree[nameof(Case.AssignedTo)]);
-        Assert.NotNull(tree[nameof(Case.ReportedBy)]);
-        Assert.NotNull(tree[nameof(Case.CaseProducts)][nameof(CaseProduct.Product)]);
+        await Assert.That(tree[nameof(Case.AssignedTo)]).IsNotNull();
+        await Assert.That(tree[nameof(Case.ReportedBy)]).IsNotNull();
+        await Assert.That(tree[nameof(Case.CaseProducts)][nameof(CaseProduct.Product)]).IsNotNull();
     }
 
 
@@ -73,20 +73,20 @@ public class StandardDataSourceTests : TestDbContextFixture
         return (propInfo, query);
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropNotClientExposed_IgnoresProp()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropNotClientExposed_IgnoresProp()
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
             m => m.InternalUseProperty, "propValue", "inputValue");
 
         // Precondition
-        Assert.True(prop.IsInternalUse);
+        await Assert.That(prop.IsInternalUse).IsTrue();
 
-        Assert.Single(query);
+        await Assert.That(query).HasSingleItem();
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropNotMapped_IgnoresProp()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropNotMapped_IgnoresProp()
     {
         // SPEC RATIONALE: Unmapped properties can't be translated to a query, so they would force
         // server-side evaluation of the filter, which could be staggeringly slow.
@@ -96,66 +96,68 @@ public class StandardDataSourceTests : TestDbContextFixture
             m => m.UnmappedSettableString, "propValue", "inputValue");
 
         // Precondition
-        Assert.True(prop.HasNotMapped);
+        await Assert.That(prop.HasNotMapped).IsTrue();
 
-        Assert.Single(query);
+        await Assert.That(query).HasSingleItem();
     }
 
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropNotAuthorized_IgnoresProp()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropNotAuthorized_IgnoresProp()
     {
         const string role = RoleNames.Admin;
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
             m => m.AdminReadableString, "propValue", "inputValue");
 
         // Preconditions
-        Assert.False(CrudContext.User.IsInRole(role));
-        Assert.Collection(prop.SecurityInfo.Read.RoleList, r => Assert.Equal(role, r));
+        await Assert.That(CrudContext.User.IsInRole(role)).IsFalse();
+        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
+        await Assert.That(prop.SecurityInfo.Read.RoleList).HasCount(1);
 
-        Assert.Single(query);
+        await Assert.That(query).HasSingleItem();
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropRestricted_IgnoresProp()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropRestricted_IgnoresProp()
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
             m => m.RestrictedString, "propValue", "inputValue");
 
         // Preconditions
-        Assert.NotEqual(true, CrudContext.User.Identity?.IsAuthenticated);
-        Assert.NotEmpty(prop.SecurityInfo.Restrictions);
+        await Assert.That(CrudContext.User.Identity?.IsAuthenticated).IsNotEqualTo(true);
+        await Assert.That(prop.SecurityInfo.Restrictions).IsNotEmpty();
 
-        Assert.Single(query);
+        await Assert.That(query).HasSingleItem();
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropAuthorized_FiltersProp()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropAuthorized_FiltersProp()
     {
         const string role = RoleNames.Admin;
         CrudContext.User.AddIdentity(new ClaimsIdentity(new[] { new Claim(ClaimTypes.Role, role) }));
 
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
             m => m.AdminReadableString, "propValue", "inputValue");
+        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
 
         // Precondition
-        Assert.Collection(prop.SecurityInfo.Read.RoleList, r => Assert.Equal(role, r));
+        await Assert.That(prop.SecurityInfo.Read.RoleList).HasCount(1);
 
-        Assert.Empty(query);
+        await Assert.That(query).IsEmpty();
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropRestrictionPasses_FiltersProp()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropRestrictionPasses_FiltersProp()
     {
         CrudContext.User.AddIdentity(new ClaimsIdentity("foo"));
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
             m => m.RestrictedString, "propValue", "inputValue");
 
         // Preconditions
-        Assert.True(CrudContext.User.Identity?.IsAuthenticated);
-        Assert.NotEmpty(prop.SecurityInfo.Restrictions);
+        await Assert.That(CrudContext.User.Identity?.IsAuthenticated).IsTrue();
+        await Assert.That(prop.SecurityInfo.Restrictions).IsNotEmpty();
 
-        Assert.Empty(query);
+        await Assert.That(query).IsEmpty();
     }
 
 
@@ -181,15 +183,15 @@ public class StandardDataSourceTests : TestDbContextFixture
         new object[] { true, null, new DateTime(2017, 08, 2, 12, 34, 57) },
     };
 
-    [Theory]
-    [MemberData(nameof(Filter_MatchesDateTimesData))]
-    public void ApplyListPropertyFilter_WhenPropIsDateTime_FiltersProp(
+    [Test]
+    [MethodDataSource(nameof(Filter_MatchesDateTimesData))]
+    public async Task ApplyListPropertyFilter_WhenPropIsDateTime_FiltersProp(
         bool shouldMatch, string inputValue, DateTime? fieldValue)
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateTime?>(
             m => m.DateTimeNullable, fieldValue, inputValue);
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
     public static IEnumerable<object[]> Filter_MatchesDateOnlyData = new[]
@@ -208,15 +210,15 @@ public class StandardDataSourceTests : TestDbContextFixture
         new object[] { true, null, new DateOnly(2017, 08, 02) },
     };
 
-    [Theory]
-    [MemberData(nameof(Filter_MatchesDateOnlyData))]
-    public void ApplyListPropertyFilter_WhenPropIsDateOnly_FiltersProp(
+    [Test]
+    [MethodDataSource(nameof(Filter_MatchesDateOnlyData))]
+    public async Task ApplyListPropertyFilter_WhenPropIsDateOnly_FiltersProp(
         bool shouldMatch, string inputValue, DateOnly fieldValue)
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateOnly>(
             m => m.SystemDateOnly, fieldValue, inputValue);
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
     public static IEnumerable<object[]> Filter_MatchesTimeOnlyData = new[]
@@ -232,15 +234,15 @@ public class StandardDataSourceTests : TestDbContextFixture
         new object[] { true, null, new TimeOnly(12, 34, 56) },
     };
 
-    [Theory]
-    [MemberData(nameof(Filter_MatchesTimeOnlyData))]
-    public void ApplyListPropertyFilter_WhenPropIsTimeOnly_FiltersProp(
+    [Test]
+    [MethodDataSource(nameof(Filter_MatchesTimeOnlyData))]
+    public async Task ApplyListPropertyFilter_WhenPropIsTimeOnly_FiltersProp(
         bool shouldMatch, string inputValue, TimeOnly fieldValue)
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, TimeOnly>(
             m => m.SystemTimeOnly, fieldValue, inputValue);
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
 
@@ -270,42 +272,42 @@ public class StandardDataSourceTests : TestDbContextFixture
         new object[] { true, null, -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },
     };
 
-    [Theory]
-    [MemberData(nameof(Filter_MatchesDateTimeOffsetsData))]
-    public void ApplyListPropertyFilter_WhenPropIsDateTimeOffset_FiltersProp(
+    [Test]
+    [MethodDataSource(nameof(Filter_MatchesDateTimeOffsetsData))]
+    public async Task ApplyListPropertyFilter_WhenPropIsDateTimeOffset_FiltersProp(
         bool shouldMatch, string inputValue, int usersUtcOffset, DateTimeOffset? fieldValue)
     {
         CrudContext.TimeZone = TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(usersUtcOffset), "test", "test");
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, DateTimeOffset?>(
             m => m.DateTimeOffsetNullable, fieldValue, inputValue);
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
-    [Theory]
-    [InlineData(true, Case.Statuses.ClosedNoSolution, (int)Case.Statuses.ClosedNoSolution)]
-    [InlineData(true, Case.Statuses.ClosedNoSolution, nameof(Case.Statuses.ClosedNoSolution))]
+    [Test]
+    [Arguments(true, Case.Statuses.ClosedNoSolution, (int)Case.Statuses.ClosedNoSolution)]
+    [Arguments(true, Case.Statuses.ClosedNoSolution, nameof(Case.Statuses.ClosedNoSolution))]
     // Erratic spaces intentional
-    [InlineData(true, Case.Statuses.ClosedNoSolution, " 3 , 4 ")]
-    [InlineData(true, Case.Statuses.ClosedNoSolution, "  closednosolution , Cancelled,  Resolved ")]
-    [InlineData(false, Case.Statuses.ClosedNoSolution, 5)]
-    [InlineData(false, Case.Statuses.ClosedNoSolution, "1,2")]
-    [InlineData(false, Case.Statuses.ClosedNoSolution, "closed,Cancelled,Resolved")]
+    [Arguments(true, Case.Statuses.ClosedNoSolution, " 3 , 4 ")]
+    [Arguments(true, Case.Statuses.ClosedNoSolution, "  closednosolution , Cancelled,  Resolved ")]
+    [Arguments(false, Case.Statuses.ClosedNoSolution, 5)]
+    [Arguments(false, Case.Statuses.ClosedNoSolution, "1,2")]
+    [Arguments(false, Case.Statuses.ClosedNoSolution, "closed,Cancelled,Resolved")]
 
     // The exact value "null" should match null values exactly.
-    [InlineData(true, null, "null")]
-    [InlineData(false, Case.Statuses.ClosedNoSolution, "null")]
+    [Arguments(true, null, "null")]
+    [Arguments(false, Case.Statuses.ClosedNoSolution, "null")]
 
     // Null or empty inputs always do nothing - these will always match.
-    [InlineData(true, Case.Statuses.ClosedNoSolution, "")]
-    [InlineData(true, Case.Statuses.ClosedNoSolution, null)]
-    public void ApplyListPropertyFilter_WhenPropIsEnum_FiltersProp(
+    [Arguments(true, Case.Statuses.ClosedNoSolution, "")]
+    [Arguments(true, Case.Statuses.ClosedNoSolution, null)]
+    public async Task ApplyListPropertyFilter_WhenPropIsEnum_FiltersProp(
         bool shouldMatch, Case.Statuses? propValue, object inputValue)
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, Case.Statuses?>(
             m => m.EnumNullable, propValue, inputValue?.ToString());
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
     public static IEnumerable<object[]> Filter_MatchesGuidData = new[]
@@ -345,15 +347,15 @@ public class StandardDataSourceTests : TestDbContextFixture
         new object[] { true, Guid.Parse("{1358AEE1-4CFF-4957-961C-2A60F769BD41}"), null },
     };
 
-    [Theory]
-    [MemberData(nameof(Filter_MatchesGuidData))]
-    public void ApplyListPropertyFilter_WhenPropIsGuid_FiltersProp(
+    [Test]
+    [MethodDataSource(nameof(Filter_MatchesGuidData))]
+    public async Task ApplyListPropertyFilter_WhenPropIsGuid_FiltersProp(
         bool shouldMatch, Guid? propValue, string inputValue)
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, Guid?>(
             m => m.GuidNullable, propValue, inputValue);
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
     public static IEnumerable<object[]> Filter_MatchesUriData = new[]
@@ -372,72 +374,72 @@ public class StandardDataSourceTests : TestDbContextFixture
         new object[] { true, null, "null" },
     };
 
-    [Theory]
-    [MemberData(nameof(Filter_MatchesUriData))]
-    public void ApplyListPropertyFilter_WhenPropIsUri_FiltersProp(
+    [Test]
+    [MethodDataSource(nameof(Filter_MatchesUriData))]
+    public async Task ApplyListPropertyFilter_WhenPropIsUri_FiltersProp(
         bool shouldMatch, Uri propValue, string inputValue)
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, Uri>(
             m => m.Uri, propValue, inputValue);
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
-    [Theory]
-    [InlineData(true, 1, "1")]
-    [InlineData(true, 1, "1,2")]
-    [InlineData(true, 1, " 1 , 2 ")]
-    [InlineData(true, 1, " 1 ,  ")]
-    [InlineData(true, 1, " 1 , $0.0 ")]
-    [InlineData(true, 1, " 1 , string ")]
+    [Test]
+    [Arguments(true, 1, "1")]
+    [Arguments(true, 1, "1,2")]
+    [Arguments(true, 1, " 1 , 2 ")]
+    [Arguments(true, 1, " 1 ,  ")]
+    [Arguments(true, 1, " 1 , $0.0 ")]
+    [Arguments(true, 1, " 1 , string ")]
 
     // Null or empty inputs always do nothing - these will always match.
-    [InlineData(true, 1, "")]
-    [InlineData(true, 1, null)]
+    [Arguments(true, 1, "")]
+    [Arguments(true, 1, null)]
 
     // String "null" input should match null values
-    [InlineData(true, null, "null")]
-    [InlineData(false, 1, "null")]
+    [Arguments(true, null, "null")]
+    [Arguments(false, 1, "null")]
 
-    [InlineData(false, 1, " 3 , 2 ")]
-    [InlineData(false, 1, "2")]
-    [InlineData(false, 1, "string")]
-    public void ApplyListPropertyFilter_WhenPropIsNumeric_FiltersProp(
+    [Arguments(false, 1, " 3 , 2 ")]
+    [Arguments(false, 1, "2")]
+    [Arguments(false, 1, "string")]
+    public async Task ApplyListPropertyFilter_WhenPropIsNumeric_FiltersProp(
         bool shouldMatch, int? propValue, string inputValue)
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, int?>(
             m => m.IntNullable, propValue, inputValue);
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
-    [Theory]
-    [InlineData(true, "propVal", "propVal")]
-    [InlineData(true, "propVal", "")]
+    [Test]
+    [Arguments(true, "propVal", "propVal")]
+    [Arguments(true, "propVal", "")]
 
     // Null or empty inputs always do nothing - these will always match.
-    [InlineData(true, "propVal", null)]
-    [InlineData(true, null, null)]
-    [InlineData(true, null, "")]
+    [Arguments(true, "propVal", null)]
+    [Arguments(true, null, null)]
+    [Arguments(true, null, "")]
 
-    [InlineData(true, "propVal", "prop*")]
-    [InlineData(false, null, "prop")]
-    [InlineData(false, "propVal", "proppVal")]
-    [InlineData(false, "propVal", "3")]
-    [InlineData(false, "propVal", "propp*")]
-    [InlineData(false, "propVal", "propp**")]
-    [InlineData(false, "propVal", "propp***")]
-    public void ApplyListPropertyFilter_WhenPropIsString_FiltersProp(
+    [Arguments(true, "propVal", "prop*")]
+    [Arguments(false, null, "prop")]
+    [Arguments(false, "propVal", "proppVal")]
+    [Arguments(false, "propVal", "3")]
+    [Arguments(false, "propVal", "propp*")]
+    [Arguments(false, "propVal", "propp**")]
+    [Arguments(false, "propVal", "propp***")]
+    public async Task ApplyListPropertyFilter_WhenPropIsString_FiltersProp(
         bool shouldMatch, string propValue, string inputValue)
     {
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
             m => m.String, propValue, inputValue);
 
-        Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
 
-    [Fact]
+    [Test]
     public void ApplyListClientSpecifiedSorting_ChecksPropAuthorization()
     {
         var models = new[]
@@ -489,7 +491,7 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertOrder(m => m.ComplexModelId, 10, 9, 2, 1);
     }
 
-    [Fact]
+    [Test]
     public void ApplyListClientSpecifiedSorting_IgnoresInvalidProperties()
     {
         var source = Source<ComplexModel>()
@@ -513,8 +515,8 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertOrder(m => m.ComplexModelId, 1, 2);
     }
 
-    [Fact]
-    public void ApplyListClientSpecifiedSorting_UsesDefaultOrderingForPoco()
+    [Test]
+    public async Task ApplyListClientSpecifiedSorting_UsesDefaultOrderingForPoco()
     {
         var models = new[]
         {
@@ -532,9 +534,9 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Precondition:
         var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
-        Assert.Equal(2, defaultOrdering.Count);
-        Assert.Equal(nameof(ComplexModel.Name), defaultOrdering[0].Properties[0].Name);
-        Assert.Equal(nameof(ComplexModel.ComplexModelId), defaultOrdering[1].Properties[0].Name);
+        await Assert.That(defaultOrdering.Count).IsEqualTo(2);
+        await Assert.That(defaultOrdering[0].Properties[0].Name).IsEqualTo(nameof(ComplexModel.Name));
+        await Assert.That(defaultOrdering[1].Properties[0].Name).IsEqualTo(nameof(ComplexModel.ComplexModelId));
 
         source.User.LogIn();
         source
@@ -545,8 +547,8 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertOrder(m => m.ComplexModelId, 1, 2, 3);
     }
 
-    [Fact]
-    public void ApplyListDefaultSorting_UsesAttributeOrdering()
+    [Test]
+    public async Task ApplyListDefaultSorting_UsesAttributeOrdering()
     {
         var models = new[]
         {
@@ -561,9 +563,9 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Precondition:
         var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
-        Assert.Equal(2, defaultOrdering.Count());
-        Assert.Equal(nameof(ComplexModel.Name), defaultOrdering[0].Properties[0].Name);
-        Assert.Equal(nameof(ComplexModel.ComplexModelId), defaultOrdering[1].Properties[0].Name);
+        await Assert.That(defaultOrdering.Count()).IsEqualTo(2);
+        await Assert.That(defaultOrdering[0].Properties[0].Name).IsEqualTo(nameof(ComplexModel.Name));
+        await Assert.That(defaultOrdering[1].Properties[0].Name).IsEqualTo(nameof(ComplexModel.ComplexModelId));
 
         source.User.LogIn();
         source
@@ -571,8 +573,8 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertOrder(m => m.ComplexModelId, 2, 1, 3);
     }
 
-    [Fact]
-    public void ApplyListDefaultSorting_UsesNameIfNoAttribute()
+    [Test]
+    public async Task ApplyListDefaultSorting_UsesNameIfNoAttribute()
     {
         var models = new[]
         {
@@ -587,8 +589,8 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Precondition:
         var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
-        Assert.Single(defaultOrdering);
-        Assert.Equal(nameof(Product.Name), defaultOrdering[0].Properties[0].Name);
+        await Assert.That(defaultOrdering).HasSingleItem();
+        await Assert.That(defaultOrdering[0].Properties[0].Name).IsEqualTo(nameof(Product.Name));
 
         source.User.LogIn();
         source
@@ -596,8 +598,8 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertOrder(m => m.ProductId, 2, 1, 3);
     }
 
-    [Fact]
-    public void ApplyListDefaultSorting_FallsBackToId()
+    [Test]
+    public async Task ApplyListDefaultSorting_FallsBackToId()
     {
         var models = new[]
         {
@@ -612,8 +614,8 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Precondition:
         var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
-        Assert.Single(defaultOrdering);
-        Assert.Equal(nameof(Person.PersonId), defaultOrdering[0].Properties[0].Name);
+        await Assert.That(defaultOrdering).HasSingleItem();
+        await Assert.That(defaultOrdering[0].Properties[0].Name).IsEqualTo(nameof(Person.PersonId));
 
         source.User.LogIn();
         source
@@ -621,8 +623,8 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertOrder(m => m.PersonId, 1, 2, 3);
     }
 
-    [Fact]
-    public void ApplyListDefaultSorting_RespectsSuppressFallback()
+    [Test]
+    public async Task ApplyListDefaultSorting_RespectsSuppressFallback()
     {
         var models = new[]
         {
@@ -637,7 +639,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Precondition: should have no default ordering
         var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
-        Assert.Empty(defaultOrdering);
+        await Assert.That(defaultOrdering).IsEmpty();
 
         source.User.LogIn();
         // Without any sorting specified, the query should maintain database/insertion order
@@ -647,12 +649,12 @@ public class StandardDataSourceTests : TestDbContextFixture
             .ToList();
         
         // Results should be in insertion order (2, 1, 3) since no ordering was applied
-        Assert.Equal(3, results.Count);
+        await Assert.That(results.Count).IsEqualTo(3);
     }
 
-    [Theory]
-    [InlineData(true, "propVal", "string:propV")]
-    [InlineData(false, "propVal", "string:proppV")]
+    [Test]
+    [Arguments(true, "propVal", "string:propV")]
+    [Arguments(false, "propVal", "string:proppV")]
     public void ApplyListSearchTerm_WhenTermTargetsField_SearchesField(
         bool shouldMatch, string propValue, string inputValue)
     {
@@ -665,8 +667,8 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AssertMatched(shouldMatch);
     }
 
-    [Fact]
-    public void ApplyListSearchTerm_WhenTargetedPropNotAuthorized_IgnoresProp()
+    [Test]
+    public async Task ApplyListSearchTerm_WhenTargetedPropNotAuthorized_IgnoresProp()
     {
         var query = Source<ComplexModel>()
             .AddModel(m => m.AdminReadableString, "propValue", out PropertyViewModel prop)
@@ -677,9 +679,10 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Preconditions
         const string role = RoleNames.Admin;
-        Assert.False(CrudContext.User.IsInRole(role));
-        Assert.True(prop.SearchMethod == DataAnnotations.SearchAttribute.SearchMethods.BeginsWith);
-        Assert.Collection(prop.SecurityInfo.Read.RoleList, r => Assert.Equal(role, r));
+        await Assert.That(CrudContext.User.IsInRole(role)).IsFalse();
+        await Assert.That(prop.SearchMethod == DataAnnotations.SearchAttribute.SearchMethods.BeginsWith).IsTrue();
+        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
+        await Assert.That(prop.SecurityInfo.Read.RoleList).HasCount(1);
 
         // Since searching by prop isn't valid for this specific property,
         // the search will instead treat the entire input as the search term.
@@ -687,7 +690,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         query.AssertMatched(false);
     }
 
-    [Fact]
+    [Test]
     public void ApplyListSearchTerm_WhenTargetedPropRestricted_IgnoresProp()
     {
         var query = Source<ComplexModel>()
@@ -701,8 +704,8 @@ public class StandardDataSourceTests : TestDbContextFixture
         query.AssertMatched(false);
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_ContainsFilter()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_ContainsFilter()
     {
         var source = Source<ComplexModel>();
         var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
@@ -720,13 +723,13 @@ public class StandardDataSourceTests : TestDbContextFixture
         var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
 
         // Should match only model1 (contains 2)
-        Assert.True(prop.IsUrlFilterParameter);
-        Assert.Single(query);
-        Assert.Equal(model1.ComplexModelId, query.Single().ComplexModelId);
+        await Assert.That(prop.IsUrlFilterParameter).IsTrue();
+        await Assert.That(query).HasSingleItem();
+        await Assert.That(query.Single().ComplexModelId).IsEqualTo(model1.ComplexModelId);
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_MultipleValues()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_MultipleValues()
     {
         var source = Source<ComplexModel>();
         var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
@@ -744,11 +747,11 @@ public class StandardDataSourceTests : TestDbContextFixture
         var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
 
         // Should match model1 only (only one with both 2 and 3)
-        Assert.Equal(1, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(1);
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_NoMatch()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_NoMatch()
     {
         var source = Source<ComplexModel>();
         var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
@@ -765,11 +768,11 @@ public class StandardDataSourceTests : TestDbContextFixture
         var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
 
         // Should match no models
-        Assert.Empty(query);
+        await Assert.That(query).IsEmpty();
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_EmptyCollection()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropertyIsPrimitiveCollection_EmptyCollection()
     {
         var source = Source<ComplexModel>();
         var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.IntCollection));
@@ -786,12 +789,12 @@ public class StandardDataSourceTests : TestDbContextFixture
         var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
 
         // Should match only model2 (model1 has empty collection)
-        Assert.Single(query);
-        Assert.Equal(model2.ComplexModelId, query.Single().ComplexModelId);
+        await Assert.That(query).HasSingleItem();
+        await Assert.That(query.Single().ComplexModelId).IsEqualTo(model2.ComplexModelId);
     }
 
-    [Fact]
-    public void ApplyListPropertyFilters_WhenPropertyIsEnumCollection_ContainsFilter()
+    [Test]
+    public async Task ApplyListPropertyFilters_WhenPropertyIsEnumCollection_ContainsFilter()
     {
         var source = Source<ComplexModel>();
         var prop = source.ClassViewModel.PropertyByName(nameof(ComplexModel.EnumCollection));
@@ -809,6 +812,6 @@ public class StandardDataSourceTests : TestDbContextFixture
         var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
 
         // Should match model1 and model3 (both contain Open status)
-        Assert.Equal(2, query.Count());
+        await Assert.That(query.Count()).IsEqualTo(2);
     }
 }

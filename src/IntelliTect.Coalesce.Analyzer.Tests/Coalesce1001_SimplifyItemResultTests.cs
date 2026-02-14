@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis.Testing;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
@@ -9,7 +10,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
         DisabledDiagnostics = ["COA1002"];
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_BooleanConstructor_True_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -31,7 +32,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_BooleanConstructorTargetTypedNew_True_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -53,7 +54,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_PropertyInitializer_True_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -75,7 +76,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_BooleanConstructor_False_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -97,7 +98,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_PropertyInitializer_False_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -119,7 +120,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_StringConstructor_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -141,7 +142,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_PropertyInitializer_ErrorMessage_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -163,7 +164,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_StringConstructor_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -185,7 +186,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_PropertyInitializer_ErrorMessage_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -207,7 +208,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_ObjectConstructor_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -229,7 +230,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_PropertyInitializer_Object_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -251,7 +252,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_ObjectVariable_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -275,7 +276,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_PropertyInitializer_ObjectVariable_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -299,7 +300,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_MultiArgumentWithObject_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -321,7 +322,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_PropertyInitializer_SuccessWithObject_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -343,7 +344,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultString_StringConstructor_NoWarning()
     {
         // ItemResult<string> with string constructor is ambiguous, should not report
@@ -363,7 +364,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_BooleanWithNullMessage_True_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -385,7 +386,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_PropertyInitializer_TrueWithNullMessage_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -407,7 +408,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_BooleanFalseWithStringMessage_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -429,7 +430,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_PropertyInitializer_FalseWithStringMessage_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -451,7 +452,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_BooleanTrueWithNonNullMessage_NoWarning()
     {
         // Cannot simplify if we have a meaningful message with true
@@ -466,7 +467,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_BooleanWithValidationIssues_NoWarning()
     {
         // Cannot simplify if we have validation issues
@@ -484,7 +485,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             }
             """);
     }
-    [Fact]
+    [Test]
     public async Task ItemResult_WithVariable_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -508,7 +509,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_WithVariableString_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -532,7 +533,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResult_EmptyConstructor_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -546,7 +547,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NonItemResult_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -565,7 +566,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_ObjectValue_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -579,7 +580,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultString_BooleanConstructor_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -601,7 +602,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultString_PropertyInitializer_True_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -623,7 +624,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_MultiArgumentWithNonDefaultMessage_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -637,7 +638,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NonTargetTypedExpression_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -651,7 +652,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task WrappedNonTargetTypedExpression_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -665,7 +666,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ArgumentToObjectParameter_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -682,7 +683,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_PropertyInitializer_ErrorMessageWithObjectNull_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -713,7 +714,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_Interface_ObjectValue_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -732,7 +733,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ItemResultGeneric_Interface_PropertyInitializer_ObjectValue_NoWarning()
     {
         await VerifyAnalyzerAsync("""

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
@@ -22,21 +23,21 @@ public class SqlServerAuditTests
         user.Title = "Manager";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(2); // Two records: EntityAdded, and EntityUpdated
 
         // Act/Assert
         user.Title = "CEO";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(2); // Two records: EntityAdded, and EntityUpdated
 
         // Assert
-        var entry = Assert.Single(db.AuditLogs.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
+        var entry = await Assert.That(db.AuditLogs.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified)).HasSingleItem();
 
-        var propChange = Assert.Single(entry.Properties!);
-        Assert.Equal(nameof(AppUser.Title), propChange.PropertyName);
-        Assert.Equal("Intern", propChange.OldValue);
-        Assert.Equal("CEO", propChange.NewValue);
+        var propChange = await Assert.That(entry.Properties!).HasSingleItem();
+        await Assert.That(propChange.PropertyName).IsEqualTo(nameof(AppUser.Title));
+        await Assert.That(propChange.OldValue).IsEqualTo("Intern");
+        await Assert.That(propChange.NewValue).IsEqualTo("CEO");
     }
 
     [SkippableFact]
@@ -53,7 +54,7 @@ public class SqlServerAuditTests
         user.Title = "Manager";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(2); // Two records: EntityAdded, and EntityUpdated
 
         // Make the original Updated entry old such that it is outside the merge window.
         db.AuditLogs.First(c => c.State == AuditEntryState.EntityModified).Date -= TimeSpan.FromMinutes(1);
@@ -62,7 +63,7 @@ public class SqlServerAuditTests
         // Act/Assert
         user.Title = "CEO";
         await db.SaveChangesAsync();
-        Assert.Equal(3, db.AuditLogs.Count()); // Now two records for EntityUpdated
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(3); // Now two records for EntityUpdated
     }
 
     [SkippableFact]
@@ -79,14 +80,14 @@ public class SqlServerAuditTests
         user.Name = "bob2";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(2); // Two records: EntityAdded, and EntityUpdated
 
         // Act/Assert
         user.Name = "bob3";
         user.Title = "Associate";
         await db.SaveChangesAsync();
 
-        Assert.Equal(3, db.AuditLogs.Count()); // Now two records for EntityUpdated
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(3); // Now two records for EntityUpdated
     }
 
     [SkippableFact]
@@ -107,7 +108,7 @@ public class SqlServerAuditTests
         user.Parent1 = parent2;
         await db.SaveChangesAsync();
 
-        Assert.Equal(4, db.AuditLogs.Count()); // 3 adds, 1 update
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(4); // 3 adds, 1 update
 
         // Act/Assert
         user.Parent1 = parent1;
@@ -115,7 +116,7 @@ public class SqlServerAuditTests
 
         // Now two records for EntityModified because Parent1Id is a foreign key
         // and is therefore not a default candidate for merges.
-        Assert.Equal(2, db.AuditLogs.Count(l => l.State == AuditEntryState.EntityModified));
+        await Assert.That(db.AuditLogs.Count(l => l.State == AuditEntryState.EntityModified)).IsEqualTo(2);
     }
 
     [SkippableFact]
@@ -132,21 +133,21 @@ public class SqlServerAuditTests
         user.Title = "Manager";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(2); // Two records: EntityAdded, and EntityUpdated
 
         // Act/Assert - second change should merge like raw SQL
         user.Title = "CEO";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(2); // Two records: EntityAdded, and EntityUpdated
 
         // Assert - verify the merge happened correctly
-        var entry = Assert.Single(db.AuditLogs.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
+        var entry = await Assert.That(db.AuditLogs.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified)).HasSingleItem();
 
-        var propChange = Assert.Single(entry.Properties!);
-        Assert.Equal(nameof(AppUser.Title), propChange.PropertyName);
-        Assert.Equal("Intern", propChange.OldValue);
-        Assert.Equal("CEO", propChange.NewValue);
+        var propChange = await Assert.That(entry.Properties!).HasSingleItem();
+        await Assert.That(propChange.PropertyName).IsEqualTo(nameof(AppUser.Title));
+        await Assert.That(propChange.OldValue).IsEqualTo("Intern");
+        await Assert.That(propChange.NewValue).IsEqualTo("CEO");
     }
 
     [SkippableFact]
@@ -171,7 +172,7 @@ public class SqlServerAuditTests
                 await db.Database.GetDbConnection().OpenAsync();
             var result = await command.ExecuteScalarAsync();
             var procedureCount = Convert.ToInt32(result);
-            Assert.True(procedureCount > 0, "Expected at least one AuditMerge stored procedure to be created");
+            await Assert.That(procedureCount > 0).IsTrue().Because("Expected at least one AuditMerge stored procedure to be created");
         }
     }
 
@@ -223,7 +224,7 @@ public class SqlServerAuditTests
         }
 
         // Should be the same count since the same model is used
-        Assert.Equal(initialCount, finalCount);
+        await Assert.That(finalCount).IsEqualTo(initialCount);
     }
 
     private static TestDbContext BuildDbContext()

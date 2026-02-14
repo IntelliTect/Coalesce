@@ -3,11 +3,10 @@ using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
-using Xunit.Abstractions;
 
 namespace IntelliTect.Coalesce.Tests.Util;
 
-public class ClassViewModelData : IXunitSerializable
+public class ClassViewModelData
 {
     public Type TargetType { get; private set; }
     public Type ViewModelType { get; private set; }

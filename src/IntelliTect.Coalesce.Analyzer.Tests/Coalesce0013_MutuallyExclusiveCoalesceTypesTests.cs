@@ -1,8 +1,10 @@
+using System.Threading.Tasks;
+
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task ServiceAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -13,7 +15,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task StandaloneEntityAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -24,7 +26,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task SimpleModelAttribute_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -35,7 +37,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task DbContextInheritance_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -46,7 +48,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task IDataSourceImplementation_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -59,7 +61,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task IBehaviorsImplementation_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -72,7 +74,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task IClassDtoImplementation_NoError()
     {
         await VerifyAnalyzerAsync("""
@@ -87,7 +89,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ServiceAndStandaloneEntity_ReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -98,7 +100,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ServiceAndSimpleModel_ReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -109,7 +111,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task StandaloneEntityAndSimpleModel_ReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -120,7 +122,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ServiceAndDbContext_ReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -131,7 +133,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task StandaloneEntityAndIDataSource_ReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -144,7 +146,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task SimpleModelAndIBehaviors_ReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -157,7 +159,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task ServiceAndIClassDto_ReportsError()
     {
         await VerifyAnalyzerAsync("""
@@ -171,7 +173,7 @@ public class Coalesce0013_MutuallyExclusiveCoalesceTypesTests : CSharpAnalyzerVe
             public class Person { }
             """);
     }
-    [Fact]
+    [Test]
     public async Task MultipleAttributes_ReportsError()
     {
         await VerifyAnalyzerAsync("""

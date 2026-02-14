@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests.OpenApi;
 
-[Collection(OpenApiFixture.Collection)]
+[ClassDataSource<OpenApiFixture>(Shared = SharedType.Keyed, Key = OpenApiFixture.Collection)]
 public class MicrosoftOpenApiTests(OpenApiFixture fixture)
 {
     public OpenApiFixture Fixture { get; } = fixture;
@@ -90,5 +89,4 @@ public class MicrosoftOpenApiTests(OpenApiFixture fixture)
     //    var param = Assert.Single(parameters, p => p.Name == "dataSource.IntArray");
     //    Assert.Equal("Used by data sources ParameterTestsSource, ParameterTestsSourceSubclass.", param.Description);
     //}
-}
-#endif
+}#endif

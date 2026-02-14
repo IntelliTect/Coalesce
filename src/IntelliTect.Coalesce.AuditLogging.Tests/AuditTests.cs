@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
@@ -22,9 +23,9 @@ public class AuditTests
         SqliteConn.Open();
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task WithSqlite_PopulatesContextAndSavesEntries(bool async)
     {
         // Arrange
@@ -38,9 +39,9 @@ public class AuditTests
             expectedCustom2: null);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task SuppressAudit_SuppressesAudit(bool async)
     {
         // Arrange
@@ -55,12 +56,12 @@ public class AuditTests
         int rows = async ? await db.SaveChangesAsync() : db.SaveChanges();
 
         // Assert
-        Assert.Equal(0, db.AuditLogs.Count());
-        Assert.Equal(1, rows);
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(0);
+        await Assert.That(rows).IsEqualTo(1);
     }
 
-    [Fact]
-    public void ConfigureAudit_IsCached()
+    [Test]
+    public async Task ConfigureAudit_IsCached()
     {
         // Arrange
         int calls1 = 0;
@@ -99,20 +100,20 @@ public class AuditTests
         db.Add(new AppUser { Name = "bob" });
         db.SaveChanges();
 
-        Assert.Equal(0, db.AuditLogs.Count());
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(0);
         // Our config functions should have each been called:
-        Assert.Equal(1, calls1);
-        Assert.Equal(1, calls2.Value);
+        await Assert.That(calls1).IsEqualTo(1);
+        await Assert.That(calls2.Value).IsEqualTo(1);
 
         // Act/Assert 2
         db = MakeDb();
         db.Users.Single().Name = "bob2";
         db.SaveChanges();
 
-        Assert.Equal(0, db.AuditLogs.Count());
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(0);
         // Our config functions should have still only been called once.
-        Assert.Equal(1, calls1);
-        Assert.Equal(1, calls2.Value);
+        await Assert.That(calls1).IsEqualTo(1);
+        await Assert.That(calls2.Value).IsEqualTo(1);
 
         // Act/Assert 3
         db = MakeDb(excludeUser: false);
@@ -123,12 +124,12 @@ public class AuditTests
         // because it is turned off for `excludeUser: false`,
         // and the second config function will now be called twice
         // since it is being chained off a different base state than before.
-        Assert.Equal(1, db.AuditLogs.Count());
-        Assert.Equal(1, calls1);
-        Assert.Equal(2, calls2.Value);
+        await Assert.That(db.AuditLogs.Count()).IsEqualTo(1);
+        await Assert.That(calls1).IsEqualTo(1);
+        await Assert.That(calls2.Value).IsEqualTo(2);
     }
 
-    [Fact]
+    [Test]
     public async Task WithFullApp_CanAccessApplicationServicesFromOperationContext()
     {
         // Arrange
@@ -155,7 +156,7 @@ public class AuditTests
         );
     }
 
-    [Fact]
+    [Test]
     public async Task WithFullApp_WhenDependencyIsOptionalAndMissing_DoesNotFailToConstructOperationContext()
     {
         // Arrange
@@ -180,7 +181,7 @@ public class AuditTests
         );
     }
 
-    [Fact]
+    [Test]
     public async Task WithFullApp_CanInjectInterfaceRegisteredOperationContext()
     {
         // Arrange
@@ -205,9 +206,9 @@ public class AuditTests
     }
 
 
-    [Theory]
-    [InlineData(PropertyDescriptionMode.None, null)]
-    [InlineData(PropertyDescriptionMode.FkListText, "ListTextA")]
+    [Test]
+    [Arguments(PropertyDescriptionMode.None, null)]
+    [Arguments(PropertyDescriptionMode.FkListText, "ListTextA")]
     public async Task PropertyDesc_RespectsConfig(PropertyDescriptionMode mode, string? expected)
     {
         // Arrange
@@ -222,12 +223,12 @@ public class AuditTests
         await db.SaveChangesAsync();
 
         var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-        var typeChangeProp = Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
+        var typeChangeProp = await Assert.That(log.Properties!).HasSingleItem();
 
-        Assert.Equal(expected, typeChangeProp.NewValueDescription);
+        await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo(expected);
     }
 
-    [Fact]
+    [Test]
     public async Task PropertyDesc_PopulatesValuesForMappedListText()
     {
         // Arrange
@@ -249,8 +250,8 @@ public class AuditTests
         await db.SaveChangesAsync();
 
         var typeChangeProp = GetAuditLogProp();
-        Assert.Null(typeChangeProp.OldValueDescription);
-        Assert.Equal("ListTextA", typeChangeProp.NewValueDescription);
+        await Assert.That(typeChangeProp.OldValueDescription).IsNull();
+        await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("ListTextA");
 
 
         // Act/Assert: Update
@@ -260,8 +261,8 @@ public class AuditTests
         await db.SaveChangesAsync();
 
         typeChangeProp = GetAuditLogProp();
-        Assert.Equal("ListTextA", typeChangeProp.OldValueDescription);
-        Assert.Equal("ListTextB", typeChangeProp.NewValueDescription);
+        await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("ListTextA");
+        await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("ListTextB");
 
 
         // Act/Assert: Delete
@@ -270,8 +271,8 @@ public class AuditTests
         await db.SaveChangesAsync();
 
         typeChangeProp = GetAuditLogProp();
-        Assert.Equal("ListTextB", typeChangeProp.OldValueDescription);
-        Assert.Null(typeChangeProp.NewValueDescription);
+        await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("ListTextB");
+        await Assert.That(typeChangeProp.NewValueDescription).IsNull();
 
         void Cleanup()
         {
@@ -281,12 +282,12 @@ public class AuditTests
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
+            return await Assert.That(log.Properties!).HasSingleItem();
         }
     }
 
-    [Fact]
-    public void PropertyDesc_PopulatesValuesCorrectlyWhenPrincipalAlsoChanges()
+    [Test]
+    public async Task PropertyDesc_PopulatesValuesCorrectlyWhenPrincipalAlsoChanges()
     {
         // Arrange
         using var db = BuildDbContext(b => b
@@ -311,18 +312,18 @@ public class AuditTests
         db.SaveChanges();
 
         var typeChangeProp = GetAuditLogProp();
-        Assert.Equal("ListTextA", typeChangeProp.OldValueDescription);
-        Assert.Equal("NewListTextB", typeChangeProp.NewValueDescription);
+        await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("ListTextA");
+        await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("NewListTextB");
 
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
+            return await Assert.That(log.Properties!).HasSingleItem();
         }
     }
 
-    [Fact]
-    public void PropertyDesc_PopulatesValuesForUnMappedListText()
+    [Test]
+    public async Task PropertyDesc_PopulatesValuesForUnMappedListText()
     {
         // Arrange
         using var db = BuildDbContext(b => b
@@ -343,8 +344,8 @@ public class AuditTests
         db.SaveChanges();
 
         var typeChangeProp = GetAuditLogProp();
-        Assert.Null(typeChangeProp.OldValueDescription);
-        Assert.Equal("Name:ThingA", typeChangeProp.NewValueDescription);
+        await Assert.That(typeChangeProp.OldValueDescription).IsNull();
+        await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("Name:ThingA");
 
 
         // Act/Assert: Update
@@ -354,8 +355,8 @@ public class AuditTests
         db.SaveChanges();
 
         typeChangeProp = GetAuditLogProp();
-        Assert.Equal("Name:ThingA", typeChangeProp.OldValueDescription);
-        Assert.Equal("Name:ThingB", typeChangeProp.NewValueDescription);
+        await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("Name:ThingA");
+        await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo("Name:ThingB");
 
 
         // Act/Assert: Delete
@@ -364,8 +365,8 @@ public class AuditTests
         db.SaveChanges();
 
         typeChangeProp = GetAuditLogProp();
-        Assert.Equal("Name:ThingB", typeChangeProp.OldValueDescription);
-        Assert.Null(typeChangeProp.NewValueDescription);
+        await Assert.That(typeChangeProp.OldValueDescription).IsEqualTo("Name:ThingB");
+        await Assert.That(typeChangeProp.NewValueDescription).IsNull();
 
         void Cleanup()
         {
@@ -375,11 +376,11 @@ public class AuditTests
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent2Id));
+            return await Assert.That(log.Properties!).HasSingleItem();
         }
     }
 
-    [Fact]
+    [Test]
     public async Task PropertyDesc_OnlyLoadsPrincipalWhenChanged()
     {
         // Arrange
@@ -403,11 +404,11 @@ public class AuditTests
         // Assert
         // Navigation prop should not be loaded because it wasn't changed.
         // This ensures we don't waste database calls loading principal entities for no reason.
-        Assert.Empty(db.ParentWithMappedListTexts.Local);
-        Assert.Null(user.Parent1);
+        await Assert.That(db.ParentWithMappedListTexts.Local).IsEmpty();
+        await Assert.That(user.Parent1).IsNull();
     }
 
-    [Fact]
+    [Test]
     public async Task PropertyDesc_DoesntBreakForOneToOneWhenPkIsFk()
     {
         // Arrange
@@ -423,11 +424,11 @@ public class AuditTests
 
 
         // Assert
-        var log = Assert.Single(db.AuditLogs.Include(l => l.Properties));
+        var log = await Assert.That(db.AuditLogs.Include(l => l.Properties)).HasSingleItem();
     }
 
-    [Fact]
-    public void FormatsPrimitiveCollections()
+    [Test]
+    public async Task FormatsPrimitiveCollections()
     {
         using var db = BuildDbContext(b => b
             .UseCoalesceAuditLogging<TestAuditLog>(x => x
@@ -437,9 +438,9 @@ public class AuditTests
         db.Add(new AppUser { Name = "Bob", EnumArray = [SecurityPermissionLevels.DenyAll, SecurityPermissionLevels.AllowAuthenticated] });
         db.SaveChanges();
 
-        var log = Assert.Single(db.AuditLogs);
-        var prop = Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.EnumArray));
-        Assert.Equal("[DenyAll, AllowAuthenticated]", prop.NewValue);
+        var log = await Assert.That(db.AuditLogs).HasSingleItem();
+        var prop = await Assert.That(log.Properties!).HasSingleItem();
+        await Assert.That(prop.NewValue).IsEqualTo("[DenyAll, AllowAuthenticated]");
     }
 
     private WebApplicationBuilder CreateAppBuilder()
@@ -479,22 +480,22 @@ public class AuditTests
         else db.SaveChanges();
 
         // Assert
-        var entry = Assert.Single(db.AuditLogs.Include(c => c.Properties));
-        Assert.Equal(expectedCustom1, entry.CustomField1);
-        Assert.Equal(expectedCustom2, entry.CustomField2);
-        Assert.Equal(nameof(AppUser), entry.Type);
-        Assert.Equal(user.Id, entry.KeyValue);
-        Assert.Equal(user.Name, entry.Description);
-        Assert.Equal(AuditEntryState.EntityAdded, entry.State);
-        Assert.Equal(DateTimeOffset.Now.UtcDateTime, entry.Date.UtcDateTime, TimeSpan.FromSeconds(10));
+        var entry = await Assert.That(db.AuditLogs.Include(c => c.Properties)).HasSingleItem();
+        await Assert.That(entry.CustomField1).IsEqualTo(expectedCustom1);
+        await Assert.That(entry.CustomField2).IsEqualTo(expectedCustom2);
+        await Assert.That(entry.Type).IsEqualTo(nameof(AppUser));
+        await Assert.That(entry.KeyValue).IsEqualTo(user.Id);
+        await Assert.That(entry.Description).IsEqualTo(user.Name);
+        await Assert.That(entry.State).IsEqualTo(AuditEntryState.EntityAdded);
+        await Assert.That(entry.Date.UtcDateTime).IsEqualTo(DateTimeOffset.Now.UtcDateTime);
 
         var idProp = entry.Properties!.ElementAt(0);
-        Assert.Equal(nameof(AppUser.Id), idProp.PropertyName);
-        Assert.Equal(user.Id, idProp.NewValue);
+        await Assert.That(idProp.PropertyName).IsEqualTo(nameof(AppUser.Id));
+        await Assert.That(idProp.NewValue).IsEqualTo(user.Id);
 
         var nameProp = entry.Properties!.ElementAt(1);
-        Assert.Equal(nameof(AppUser.Name), nameProp.PropertyName);
-        Assert.Equal(user.Name, nameProp.NewValue);
+        await Assert.That(nameProp.PropertyName).IsEqualTo(nameof(AppUser.Name));
+        await Assert.That(nameProp.NewValue).IsEqualTo(user.Name);
     }
 }
 

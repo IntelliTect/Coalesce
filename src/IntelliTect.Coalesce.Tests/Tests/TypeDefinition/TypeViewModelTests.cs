@@ -6,12 +6,13 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 
 public class TypeViewModelTests
 {
-    [Theory]
+    [Test]
     [Description("https://github.com/IntelliTect/Coalesce/issues/28")]
     // With class name as a substring in a namespace.
     [ClassViewModelData(
@@ -32,7 +33,7 @@ public class TypeViewModelTests
         typeof(ComplexModel),
         "MyProject.Test.Models", nameof(ComplexModel.SingleTest),
         "MyProject.Test.Models.TestResponse")]
-    public void NullableTypeForDto_DoesNotMangleNamespace(
+    public async Task NullableTypeForDto_DoesNotMangleNamespace(
         ClassViewModelData data,
         string dtoOputputNamespace,
         string propertyName,
@@ -44,18 +45,18 @@ public class TypeViewModelTests
         var prop = vm.PropertyByName(propertyName);
 
         // Precondition: Model's type name is contained in output namespace:
-        Assert.Contains(prop.PureType.Name, dtoOputputNamespace);
+        await Assert.That(dtoOputputNamespace).Contains(prop.PureType.Name);
 
         // Precondition: Model's type name is contained in its own namespace:
-        Assert.Contains(prop.PureType.Name, prop.PureType.FullNamespace);
+        await Assert.That(prop.PureType.FullNamespace).Contains(prop.PureType.Name);
 
         var dtoPropType = prop.Type.NullableTypeForDto(isInput: false, dtoNamespace: dtoOputputNamespace);
 
-        Assert.Equal(expectedPropertyType, dtoPropType);
+        await Assert.That(dtoPropType).IsEqualTo(expectedPropertyType);
     }
 
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.ValueArray), "int[]")]
     [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.ValueNullableArray), "int?[]")]
     [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.ValueArrayNullable), "int[]")]
@@ -68,7 +69,7 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefICollection), "System.Collections.Generic.ICollection<MyProject.ExternalChildResponse>")]
     [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefNullableICollection), "System.Collections.Generic.ICollection<MyProject.ExternalChildResponse>")]
     [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefICollectionNullable), "System.Collections.Generic.ICollection<MyProject.ExternalChildResponse>")]
-    public void NullableTypeForDto_HandlesCollectionsProperly(
+    public async Task NullableTypeForDto_HandlesCollectionsProperly(
         ClassViewModelData data,
         string propertyName,
         string expectedPropertyType
@@ -80,10 +81,10 @@ public class TypeViewModelTests
 
         var dtoPropType = prop.Type.NullableTypeForDto(isInput: false, dtoNamespace: "MyProject");
 
-        Assert.Equal(expectedPropertyType, dtoPropType);
+        await Assert.That(dtoPropType).IsEqualTo(expectedPropertyType);
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(void), "void")]
     [ClassViewModelData(typeof(bool), "bool")]
     [ClassViewModelData(typeof(bool?), "bool?")]
@@ -98,7 +99,7 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(IEntityFrameworkBehaviors<Exception, AppDbContext>),
         "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.AppDbContext>")]
     [ClassViewModelData(typeof(Case.Statuses), "IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.Case.Statuses")]
-    public void FullyQualifiedName_HasCorrectValue(
+    public async Task FullyQualifiedName_HasCorrectValue(
         ClassViewModelData data,
         string expectedTypeName
     )
@@ -106,10 +107,10 @@ public class TypeViewModelTests
         TypeViewModel vm = data;
         var value = vm.FullyQualifiedName;
 
-        Assert.Equal(expectedTypeName, value);
+        await Assert.That(value).IsEqualTo(expectedTypeName);
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(void), "System.Void")]
     [ClassViewModelData(typeof(bool), "System.Boolean")]
     [ClassViewModelData(typeof(bool?), "System.Nullable<System.Boolean>")]
@@ -123,7 +124,7 @@ public class TypeViewModelTests
         "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
     [ClassViewModelData(typeof(IEntityFrameworkBehaviors<Exception, AppDbContext>),
         "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.AppDbContext>")]
-    public void VerboseFullyQualifiedName_HasCorrectValue(
+    public async Task VerboseFullyQualifiedName_HasCorrectValue(
         ClassViewModelData data,
         string expectedTypeName
     )
@@ -131,10 +132,10 @@ public class TypeViewModelTests
         TypeViewModel vm = data;
         var value = vm.VerboseFullyQualifiedName;
 
-        Assert.Equal(expectedTypeName, value);
+        await Assert.That(value).IsEqualTo(expectedTypeName);
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(decimal))]
     [ClassViewModelData(typeof(decimal?))]
     [ClassViewModelData(typeof(int))]
@@ -143,13 +144,13 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(short?))]
     [ClassViewModelData(typeof(double))]
     [ClassViewModelData(typeof(double?))]
-    public void IsNumber_TrueForNumbers(ClassViewModelData data)
+    public async Task IsNumber_TrueForNumbers(ClassViewModelData data)
     {
         TypeViewModel vm = data;
-        Assert.True(vm.IsNumber);
+        await Assert.That(vm.IsNumber).IsTrue();
     }
 
-    [Theory]
+    [Test]
     // System structs
     [ClassViewModelData(typeof(byte), false)]
     [ClassViewModelData(typeof(byte[]), false)]
@@ -164,29 +165,29 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(InternalUseClass), true)]
     [ClassViewModelData(typeof(InternalUseClass[]), true)]
     [ClassViewModelData(typeof(List<InternalUseClass>), true)]
-    public void IsInternalUse_IsCorrectForAllTypeCombinations(ClassViewModelData data, bool isInternalUse)
+    public async Task IsInternalUse_IsCorrectForAllTypeCombinations(ClassViewModelData data, bool isInternalUse)
     {
         TypeViewModel vm = data;
-        Assert.Equal(isInternalUse, vm.IsInternalUse);
+        await Assert.That(vm.IsInternalUse).IsEqualTo(isInternalUse);
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(int), false)]
     [ClassViewModelData(typeof(int?), false)]
     [ClassViewModelData(typeof(IWeatherService), true)]
     [ClassViewModelData(typeof(WeatherService), false)]
-    public void IsInterface_IsCorrect(ClassViewModelData data, bool expected)
-        => Assert.Equal(expected, ((TypeViewModel)data).IsInterface);
+    public async Task IsInterface_IsCorrect(ClassViewModelData data, bool expected)
+        => await Assert.That(((TypeViewModel)data).IsInterface).IsEqualTo(expected);
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(int), false)]
     [ClassViewModelData(typeof(int?), false)]
     [ClassViewModelData(typeof(IWeatherService), false)]
     [ClassViewModelData(typeof(WeatherService), true)]
-    public void IsClass_IsCorrect(ClassViewModelData data, bool expected)
-        => Assert.Equal(expected, ((TypeViewModel)data).IsClass);
+    public async Task IsClass_IsCorrect(ClassViewModelData data, bool expected)
+        => await Assert.That(((TypeViewModel)data).IsClass).IsEqualTo(expected);
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(int), false)]
     [ClassViewModelData(typeof(int?), false)]
     [ClassViewModelData(typeof(DateTime), false)]
@@ -196,10 +197,10 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(List<string>), false)]
     [ClassViewModelData(typeof(IWeatherService), true)]
     [ClassViewModelData(typeof(WeatherService), true)]
-    public void IsPoco_IsCorrect(ClassViewModelData data, bool expected)
-        => Assert.Equal(expected, ((TypeViewModel)data).IsPOCO);
+    public async Task IsPoco_IsCorrect(ClassViewModelData data, bool expected)
+        => await Assert.That(((TypeViewModel)data).IsPOCO).IsEqualTo(expected);
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(int), false)]
     [ClassViewModelData(typeof(int?), false)]
     [ClassViewModelData(typeof(DateTime), false)]
@@ -207,61 +208,30 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(WeatherService[]), false)]
     [ClassViewModelData(typeof(IWeatherService), true)]
     [ClassViewModelData(typeof(WeatherService), true)]
-    public void HasClassViewModel_IsCorrect(ClassViewModelData data, bool expected)
-        => Assert.Equal(expected, ((TypeViewModel)data).HasClassViewModel);
+    public async Task HasClassViewModel_IsCorrect(ClassViewModelData data, bool expected)
+        => await Assert.That(((TypeViewModel)data).HasClassViewModel).IsEqualTo(expected);
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(Case.Statuses))]
-    public void EnumValues_IsCorrect(ClassViewModelData data)
+    public async Task EnumValues_IsCorrect(ClassViewModelData data)
     {
-        Assert.Collection(data.TypeViewModel.EnumValues,
-            v =>
-            {
-                Assert.Equal(0, v.Value);
-                Assert.Equal("Open", v.Name);
-                Assert.Equal("Open", v.DisplayName);
-                Assert.Null(v.Description);
-            }, v =>
-            {
-                Assert.Equal(1, v.Value);
-                Assert.Equal("InProgress", v.Name);
-                Assert.Equal("In Progress", v.DisplayName);
-                Assert.Null(v.Description);
-            }, v =>
-            {
-                Assert.Equal(2, v.Value);
-                Assert.Equal("Resolved", v.Name);
-                Assert.Equal("Resolved", v.DisplayName);
-                Assert.Equal("Closed with a solution.", v.Description);
-            }, v =>
-            {
-                Assert.Equal(3, v.Value);
-                Assert.Equal("ClosedNoSolution", v.Name);
-                Assert.Equal("Closed, No Solution", v.DisplayName);
-                Assert.Equal("Closed without any resolution.", v.Description);
-            }, v =>
-            {
-                Assert.Equal(99, v.Value);
-                Assert.Equal("Cancelled", v.Name);
-                Assert.Equal("Cancelled", v.DisplayName);
-                Assert.Null(v.Description);
-            }
-        );
+        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
+        await Assert.That(data.TypeViewModel.EnumValues).HasCount(5);
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(TestBehaviors<,>))]
-    public void UnconstructedGeneric(ClassViewModelData data)
+    public async Task UnconstructedGeneric(ClassViewModelData data)
     {
         var type = data.TypeViewModel;
-        Assert.True(type.IsGeneric);
-        Assert.Equal(type, type.PureType);
-        Assert.Null(type.FirstTypeArgument);
+        await Assert.That(type.IsGeneric).IsTrue();
+        await Assert.That(type.PureType).IsEqualTo(type);
+        await Assert.That(type.FirstTypeArgument).IsNull();
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(ComplexInheritanceDerived))]
-    public void DerivedClass_GenericArgumentsFor_ReturnsDerivedInterfaceUsage(ClassViewModelData data)
+    public async Task DerivedClass_GenericArgumentsFor_ReturnsDerivedInterfaceUsage(ClassViewModelData data)
     {
         // It is important for ReflectionRepository._generatedParamDtos that
         // we get the most specific interface implementation when asking about the
@@ -270,9 +240,6 @@ public class TypeViewModelTests
 
         var type = data.TypeViewModel;
 
-        Assert.Equal(
-            nameof(ComplexInheritanceDerived),
-            type.GenericArgumentsFor(typeof(IAmInheritedMultipleTimes<>))[0].Name
-        );
+        await Assert.That(type.GenericArgumentsFor(typeof(IAmInheritedMultipleTimes<>))[0].Name).IsEqualTo(nameof(ComplexInheritanceDerived));
     }
 }

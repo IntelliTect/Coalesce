@@ -1,11 +1,12 @@
 using IntelliTect.Coalesce.Analyzer.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrderingAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task GetQuery_WithOrderBy_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -27,7 +28,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQuery_WithOrderByDescending_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -49,7 +50,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQuery_WithThenBy_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -73,7 +74,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQuery_WithThenByDescending_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -97,7 +98,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQueryAsync_WithOrderBy_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -119,7 +120,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQuery_WithOrderByInSubquery_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -151,7 +152,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQuery_WithOrderByInSelectSubquery_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -188,7 +189,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NonGetQueryMethod_WithOrderBy_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -209,7 +210,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQuery_WithIncludeButNoOrdering_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -231,7 +232,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQuery_WithMultipleOrderingOperations_ReportsMultipleWarnings()
     {
         await VerifyAnalyzerAsync("""
@@ -254,7 +255,7 @@ public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrde
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task GetQuery_InClassNotInheritingFromStandardDataSource_NoWarning()
     {
         await VerifyAnalyzerAsync("""

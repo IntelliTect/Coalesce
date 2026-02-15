@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;

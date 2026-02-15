@@ -1,10 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
+[NotInParallel]
 public class SqlServerAuditTests
 {
     private static readonly string SqlServerConnString = $"Server=(localdb)\\MSSQLLocalDB;Database=CoalesceAuditLoggingTestsnet{Environment.Version.Major};Trusted_Connection=True;Timeout=5";

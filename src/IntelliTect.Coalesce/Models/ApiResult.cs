@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce.Models;
+namespace IntelliTect.Coalesce.Models;
 
 public class ApiResult
 {

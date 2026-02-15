@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce.Validation;
+namespace IntelliTect.Coalesce.Validation;
 
 internal class ValidationResult
 {

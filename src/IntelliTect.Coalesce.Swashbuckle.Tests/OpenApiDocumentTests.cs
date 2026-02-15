@@ -82,8 +82,8 @@ public class OpenApiDocumentTests
             .RequestBody.Content["multipart/form-data"]
             .Schema.Properties;
 
-        await Assert.That(properties).HasSingleItem();
-        await Assert.That(properties).HasSingleItem();
+        await Assert.That(properties.Where(p => p.Key == "complexModelId")).HasSingleItem();
+        await Assert.That(properties.Where(p => p.Key.Equals("model.complexModelId", StringComparison.InvariantCultureIgnoreCase))).HasSingleItem();
     }
 
     [Test]
@@ -99,8 +99,8 @@ public class OpenApiDocumentTests
             .Operations[OperationType.Get]
 #endif
             .Parameters;
-
-        var param = await Assert.That(parameters).HasSingleItem();
+            
+        var param = await Assert.That(parameters.Where(p => p.Name == "dataSource.IntArray")).HasSingleItem();
         await Assert.That(param.Description).IsEqualTo("Used by data sources ParameterTestsSource, ParameterTestsSourceSubclass.");
     }
 }

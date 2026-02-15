@@ -1,7 +1,7 @@
-﻿using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Tests.Fixtures;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Testing.Fixtures;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
@@ -112,7 +112,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         // Preconditions
         await Assert.That(CrudContext.User.IsInRole(role)).IsFalse();
         // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(prop.SecurityInfo.Read.RoleList).HasCount(1);
+        await Assert.That(prop.SecurityInfo.Read.RoleList).Count().IsEqualTo(1);
 
         await Assert.That(query).HasSingleItem();
     }
@@ -141,7 +141,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
 
         // Precondition
-        await Assert.That(prop.SecurityInfo.Read.RoleList).HasCount(1);
+        await Assert.That(prop.SecurityInfo.Read.RoleList).Count().IsEqualTo(1);
 
         await Assert.That(query).IsEmpty();
     }
@@ -628,12 +628,12 @@ public class StandardDataSourceTests : TestDbContextFixture
     {
         var models = new[]
         {
-            new TargetClasses.SuppressedDefaultOrdering { Id = 2, Name = "abc" },
-            new TargetClasses.SuppressedDefaultOrdering { Id = 1, Name = "def" },
-            new TargetClasses.SuppressedDefaultOrdering { Id = 3, Name = "def" },
+            new Testing.TargetClasses.SuppressedDefaultOrdering { Id = 2, Name = "abc" },
+            new Testing.TargetClasses.SuppressedDefaultOrdering { Id = 1, Name = "def" },
+            new Testing.TargetClasses.SuppressedDefaultOrdering { Id = 3, Name = "def" },
         };
 
-        var source = Source<TargetClasses.SuppressedDefaultOrdering>();
+        var source = Source<Testing.TargetClasses.SuppressedDefaultOrdering>();
         source.Db.AddRange(models);
         source.Db.SaveChanges();
 
@@ -682,7 +682,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(CrudContext.User.IsInRole(role)).IsFalse();
         await Assert.That(prop.SearchMethod == DataAnnotations.SearchAttribute.SearchMethods.BeginsWith).IsTrue();
         // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(prop.SecurityInfo.Read.RoleList).HasCount(1);
+        await Assert.That(prop.SecurityInfo.Read.RoleList).Count().IsEqualTo(1);
 
         // Since searching by prop isn't valid for this specific property,
         // the search will instead treat the entire input as the search term.

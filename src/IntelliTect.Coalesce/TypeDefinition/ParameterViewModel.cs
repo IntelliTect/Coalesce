@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;

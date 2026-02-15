@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.DataAnnotations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition;
 using System;
 
 namespace IntelliTect.Coalesce.TypeUsage;

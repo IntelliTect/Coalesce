@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Configuration;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 

@@ -1,5 +1,5 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors;
 
-public class SqlServerExceptionResultTests
+public class SqlServerExceptionResultTests : IDisposable
 {
     public SqlServerExceptionResultTests()
     {
@@ -21,6 +21,11 @@ public class SqlServerExceptionResultTests
         {
             ReflectionRepository = ReflectionRepositoryFactory.Reflection
         };
+    }
+
+    public void Dispose()
+    {
+        Db?.Dispose();
     }
 
     public AppDbContext Db { get; }

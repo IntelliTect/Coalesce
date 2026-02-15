@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using System.Threading;
 

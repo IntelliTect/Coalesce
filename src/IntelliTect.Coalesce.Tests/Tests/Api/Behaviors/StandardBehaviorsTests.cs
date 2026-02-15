@@ -1,9 +1,9 @@
-﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Tests.Fixtures;
-using IntelliTect.Coalesce.Tests.TargetClasses;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Testing.Fixtures;
+using IntelliTect.Coalesce.Testing.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Collections.Generic;

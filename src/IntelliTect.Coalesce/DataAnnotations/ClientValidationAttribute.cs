@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce.DataAnnotations;
+namespace IntelliTect.Coalesce.DataAnnotations;
 
 [System.AttributeUsage(System.AttributeTargets.Property)]
 public class ClientValidationAttribute: System.Attribute

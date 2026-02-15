@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Mapping.IncludeTrees;
+using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 using System;

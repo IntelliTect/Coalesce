@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Helpers;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests;

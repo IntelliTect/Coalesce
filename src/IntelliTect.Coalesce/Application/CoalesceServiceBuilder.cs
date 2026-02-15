@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

@@ -1,10 +1,10 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
-public class AuditConfigurationTests
+public class AuditConfigurationTests : IDisposable
 {
     public SqliteConnection SqliteConn { get; }
 
@@ -12,6 +12,11 @@ public class AuditConfigurationTests
     {
         SqliteConn = new SqliteConnection("Data Source=:memory:");
         SqliteConn.Open();
+    }
+
+    public void Dispose()
+    {
+        SqliteConn?.Dispose();
     }
 
     [Test]

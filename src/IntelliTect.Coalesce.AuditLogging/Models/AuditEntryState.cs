@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce.AuditLogging;
+namespace IntelliTect.Coalesce.AuditLogging;
 
 /// <summary>
 /// Represents the kind of operation that was performed on an entity.

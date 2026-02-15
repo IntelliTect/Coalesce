@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 

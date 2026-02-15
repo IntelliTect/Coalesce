@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Utilities;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Formatting;

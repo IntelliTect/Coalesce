@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 

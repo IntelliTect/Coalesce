@@ -37,6 +37,7 @@
     <Project Path="src/IntelliTect.Coalesce.AuditLogging.Tests/IntelliTect.Coalesce.AuditLogging.Tests.csproj" />
     <Project Path="src/IntelliTect.Coalesce.CodeGeneration.Tests/IntelliTect.Coalesce.CodeGeneration.Tests.csproj" />
     <Project Path="src/IntelliTect.Coalesce.Swashbuckle.Tests/IntelliTect.Coalesce.Swashbuckle.Tests.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.Testing/IntelliTect.Coalesce.Testing.csproj" />
     <Project Path="src/IntelliTect.Coalesce.Tests/IntelliTect.Coalesce.Tests.csproj" />
   </Folder>
 </Solution>

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
-public class AuditTests
+public class AuditTests : IDisposable
 {
     public SqliteConnection SqliteConn { get; }
 
@@ -21,6 +21,11 @@ public class AuditTests
     {
         SqliteConn = new SqliteConnection("Data Source=:memory:");
         SqliteConn.Open();
+    }
+
+    public void Dispose()
+    {
+        SqliteConn?.Dispose();
     }
 
     [Test]
@@ -61,6 +66,9 @@ public class AuditTests
     }
 
     [Test]
+    // Volatility of underlying ConcurrentDictionary of underlying MemoryCache causes sporadic failures of this test
+    // when run in parallel with the other tests
+    [NotInParallel] 
     public async Task ConfigureAudit_IsCached()
     {
         // Arrange
@@ -223,7 +231,7 @@ public class AuditTests
         await db.SaveChangesAsync();
 
         var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-        var typeChangeProp = await Assert.That(log.Properties!).HasSingleItem();
+        var typeChangeProp = await Assert.That(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id))).HasSingleItem();
 
         await Assert.That(typeChangeProp.NewValueDescription).IsEqualTo(expected);
     }
@@ -282,7 +290,7 @@ public class AuditTests
         async Task<AuditLogProperty> GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return await Assert.That(log.Properties!).HasSingleItem();
+            return await Assert.That(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id))).HasSingleItem();
         }
     }
 
@@ -318,7 +326,7 @@ public class AuditTests
         async Task<AuditLogProperty> GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return await Assert.That(log.Properties!).HasSingleItem();
+            return await Assert.That(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id))).HasSingleItem();
         }
     }
 
@@ -376,7 +384,7 @@ public class AuditTests
         async Task<AuditLogProperty> GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return await Assert.That(log.Properties!).HasSingleItem();
+            return await Assert.That(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent2Id))).HasSingleItem();
         }
     }
 
@@ -439,7 +447,7 @@ public class AuditTests
         db.SaveChanges();
 
         var log = await Assert.That(db.AuditLogs).HasSingleItem();
-        var prop = await Assert.That(log.Properties!).HasSingleItem();
+        var prop = await Assert.That(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.EnumArray))).HasSingleItem();
         await Assert.That(prop.NewValue).IsEqualTo("[DenyAll, AllowAuthenticated]");
     }
 
@@ -487,7 +495,7 @@ public class AuditTests
         await Assert.That(entry.KeyValue).IsEqualTo(user.Id);
         await Assert.That(entry.Description).IsEqualTo(user.Name);
         await Assert.That(entry.State).IsEqualTo(AuditEntryState.EntityAdded);
-        await Assert.That(entry.Date.UtcDateTime).IsEqualTo(DateTimeOffset.Now.UtcDateTime);
+        await Assert.That(entry.Date.UtcDateTime).IsEqualTo(DateTimeOffset.Now.UtcDateTime).Within(TimeSpan.FromSeconds(10));
 
         var idProp = entry.Properties!.ElementAt(0);
         await Assert.That(idProp.PropertyName).IsEqualTo(nameof(AppUser.Id));

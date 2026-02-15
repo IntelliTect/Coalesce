@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Templating;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;

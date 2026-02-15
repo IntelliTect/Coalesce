@@ -1,6 +1,6 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Testing.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -164,7 +164,7 @@ public class PropertyViewModelTests
     }
 
     [Test]
-    [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), nameof(TargetClasses.Test.ComplexModelId))]
+    [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), nameof(Testing.TargetClasses.Test.ComplexModelId))]
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.ChildrenWithoutRefNavProp), nameof(ComplexModelDependent.ParentId))]
     public async Task Role_IsCollectionNavigation_IsCorrect(PropertyViewModelData data, string fkName)
     {

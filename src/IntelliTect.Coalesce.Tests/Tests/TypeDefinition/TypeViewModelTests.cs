@@ -1,7 +1,7 @@
-﻿using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Tests.TargetClasses;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Testing.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
@@ -93,12 +93,12 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(bool?[]), "bool?[]")]
     [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool>), "System.Collections.Generic.ICollection<bool>")]
     [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool?>), "System.Collections.Generic.ICollection<bool?>")]
-    [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Tests.TargetClasses.Bools")]
+    [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Testing.TargetClasses.Bools")]
     [ClassViewModelData(typeof(System.Collections.Generic.ICollection<ExternalParent>),
-        "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
+        "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.ExternalParent>")]
     [ClassViewModelData(typeof(IEntityFrameworkBehaviors<Exception, AppDbContext>),
-        "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.AppDbContext>")]
-    [ClassViewModelData(typeof(Case.Statuses), "IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.Case.Statuses")]
+        "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.AppDbContext>")]
+    [ClassViewModelData(typeof(Case.Statuses), "IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Case.Statuses")]
     public async Task FullyQualifiedName_HasCorrectValue(
         ClassViewModelData data,
         string expectedTypeName
@@ -119,11 +119,11 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(bool?[]), "System.Nullable<System.Boolean>[]")]
     [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool>), "System.Collections.Generic.ICollection<System.Boolean>")]
     [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool?>), "System.Collections.Generic.ICollection<System.Nullable<System.Boolean>>")]
-    [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Tests.TargetClasses.Bools")]
+    [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Testing.TargetClasses.Bools")]
     [ClassViewModelData(typeof(System.Collections.Generic.ICollection<ExternalParent>),
-        "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
+        "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.ExternalParent>")]
     [ClassViewModelData(typeof(IEntityFrameworkBehaviors<Exception, AppDbContext>),
-        "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.AppDbContext>")]
+        "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.AppDbContext>")]
     public async Task VerboseFullyQualifiedName_HasCorrectValue(
         ClassViewModelData data,
         string expectedTypeName

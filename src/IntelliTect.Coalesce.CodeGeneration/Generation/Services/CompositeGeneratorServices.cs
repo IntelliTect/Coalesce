@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.Logging;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.TypeDefinition;

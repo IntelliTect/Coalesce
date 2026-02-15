@@ -20,10 +20,7 @@ public abstract class CSharpAnalyzerVerifier<TAnalyzer>
 #elif NET9_0
         solutionState.ReferenceAssemblies = ReferenceAssemblies.Net.Net90;
 #elif NET10_0
-        solutionState.ReferenceAssemblies = new ReferenceAssemblies(
-            targetFramework: "net10.0",
-            referenceAssemblyPackage: new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"),
-            referenceAssemblyPath: System.IO.Path.Combine("ref", "net10.0"));
+        solutionState.ReferenceAssemblies = ReferenceAssemblies.Net.Net100;
 #else
 #error "Add reference assemblies for new target framework.
 #endif

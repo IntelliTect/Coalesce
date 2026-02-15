@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.AuditLogging.Internal;
+using IntelliTect.Coalesce.AuditLogging.Internal;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Collections.Generic;
 

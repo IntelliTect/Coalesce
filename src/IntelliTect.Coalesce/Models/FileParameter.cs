@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Api.Controllers;
+using IntelliTect.Coalesce.Api.Controllers;
 using System.IO;
 
 namespace IntelliTect.Coalesce.Models;

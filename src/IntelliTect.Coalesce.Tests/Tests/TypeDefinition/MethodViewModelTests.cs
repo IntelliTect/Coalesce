@@ -1,5 +1,5 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,8 +9,8 @@ public class MethodViewModelTests
 {
     [Test]
     [ClassViewModelData(
-        typeof(TargetClasses.Github31.Person),
-        nameof(TargetClasses.Github31.Person.GetMyPeeps),
+        typeof(Testing.TargetClasses.Github31.Person),
+        nameof(Testing.TargetClasses.Github31.Person.GetMyPeeps),
         "ItemResult<System.Collections.Generic.ICollection<PersonResponse>>")]
     public async Task ReturnTypeNameForApi_UsesDtoForCollection(
         ClassViewModelData data, string methodName, string expectedReturn)
@@ -23,7 +23,7 @@ public class MethodViewModelTests
     [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalCancellationToken), "cancellationToken",
         "default")]
     [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalEnumParam), "status",
-        "IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.Case.Statuses.Open")]
+        "IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Case.Statuses.Open")]
     public async Task OptionalParameter_HasCorrectDefaultValue(
         ClassViewModelData data, string methodName, string paramName, string expected)
     {

@@ -1,5 +1,5 @@
-﻿using IntelliTect.Coalesce.Tests.Util;
-using IntelliTect.Coalesce.Tests.TargetClasses;
+using IntelliTect.Coalesce.Testing.Util;
+using IntelliTect.Coalesce.Testing.TargetClasses;
 using IntelliTect.Coalesce.TypeDefinition;
 using System.Threading.Tasks;
 

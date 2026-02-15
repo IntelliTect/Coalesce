@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Api.Behaviors;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;

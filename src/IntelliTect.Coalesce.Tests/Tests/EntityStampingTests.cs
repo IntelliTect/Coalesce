@@ -1,4 +1,4 @@
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
-public class EntityStampingTests
+public class EntityStampingTests : IDisposable
 {
     public AppDbContext Db { get; }
 
@@ -34,6 +34,11 @@ public class EntityStampingTests
             .UseApplicationServiceProvider(appSp)
             .Options
         );
+    }
+
+    public void Dispose()
+    {
+        Db?.Dispose();
     }
 
     [Test]

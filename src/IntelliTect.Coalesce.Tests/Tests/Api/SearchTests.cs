@@ -1,7 +1,7 @@
-﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Tests.TargetClasses;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
@@ -453,7 +453,7 @@ public class SearchTests
         await SearchHelper(
             (ComplexModel t) => t.Tests,
             inputValue,
-            new[] { new TargetClasses.Test { TestName = propValue } },
+            new[] { new Testing.TargetClasses.Test { TestName = propValue } },
             shouldMatch);
     }
 

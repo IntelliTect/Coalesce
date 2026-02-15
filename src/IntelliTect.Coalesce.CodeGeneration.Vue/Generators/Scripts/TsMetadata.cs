@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;

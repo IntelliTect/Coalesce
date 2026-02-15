@@ -1,7 +1,7 @@
-﻿using IntelliTect.Coalesce.Models;
-using IntelliTect.Coalesce.Tests.TargetClasses;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Testing.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using System.Threading.Tasks;

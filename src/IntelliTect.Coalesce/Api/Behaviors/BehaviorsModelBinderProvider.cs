@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using System;

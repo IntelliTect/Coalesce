@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using IntelliTect.Coalesce;
-using IntelliTect.Coalesce.Tests.Fixtures;
-using IntelliTect.Coalesce.Tests.TargetClasses;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Fixtures;
+using IntelliTect.Coalesce.Testing.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -52,7 +52,7 @@ public class IncludeTreeTests
     }
 
     [Test]
-    public void IncludeTree_BasicLambdaChecks()
+    public async Task IncludeTree_BasicLambdaChecks()
     {
         IQueryable<Person> queryable = db.People
             .Where(e => e.FirstName != null)
@@ -68,11 +68,11 @@ public class IncludeTreeTests
         Person obj = queryable.FirstOrDefault();
         IncludeTree tree = queryable.GetIncludeTree();
 
-        AssertBasicChecks(tree);
+        await AssertBasicChecks(tree);
     }
 
     [Test]
-    public void IncludeTree_StaticFor()
+    public async Task IncludeTree_StaticFor()
     {
         var tree = IncludeTree.For<Person>(q => q
             .Include(p => p.Company)
@@ -82,11 +82,11 @@ public class IncludeTreeTests
             .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned)
         );
 
-        AssertBasicChecks(tree);
+        await AssertBasicChecks(tree);
     }
 
     [Test]
-    public void IncludeTree_StaticQueryFor()
+    public async Task IncludeTree_StaticQueryFor()
     {
         var tree = IncludeTree.QueryFor<Person>()
             .Include(p => p.Company)
@@ -96,7 +96,7 @@ public class IncludeTreeTests
             .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned)
             .GetIncludeTree();
 
-        AssertBasicChecks(tree);
+        await AssertBasicChecks(tree);
     }
 
     [Test]
@@ -113,7 +113,7 @@ public class IncludeTreeTests
     }
 
     [Test]
-    public void IncludeTree_BasicStringChecks()
+    public async Task IncludeTree_BasicStringChecks()
     {
         IQueryable<Person> queryable = db.People
             .Where(e => e.FirstName != null)
@@ -131,11 +131,11 @@ public class IncludeTreeTests
         Person obj = queryable.FirstOrDefault();
         IncludeTree tree = queryable.GetIncludeTree();
 
-        AssertBasicChecks(tree);
+        await AssertBasicChecks(tree);
     }
 
     [Test]
-    public void IncludeTree_FilteredIncludeChecks()
+    public async Task IncludeTree_FilteredIncludeChecks()
     {
         IQueryable<Person> queryable = db.People
             .Where(e => e.FirstName != null)
@@ -168,7 +168,7 @@ public class IncludeTreeTests
         Person obj = queryable.FirstOrDefault();
 
         IncludeTree tree = queryable.GetIncludeTree();
-        AssertBasicChecks(tree);
+        await AssertBasicChecks(tree);
     }
 
     [Test]

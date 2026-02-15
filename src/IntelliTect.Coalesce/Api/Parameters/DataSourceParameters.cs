@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce.Api;
+namespace IntelliTect.Coalesce.Api;
 
 public class DataSourceParameters : IDataSourceParameters
 {

@@ -1,8 +1,8 @@
-﻿using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Testing.Util;
 using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.Tests.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses;
 using System.Security.Claims;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Mapping;
 using System.Threading.Tasks;
@@ -32,7 +32,7 @@ public class PropertySecurityTests
         PropertyViewModel prop = data;
         // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
 
-        await Assert.That(prop.SecurityInfo.Edit.RoleLists).HasCount(2);
+        await Assert.That(prop.SecurityInfo.Edit.RoleLists).Count().IsEqualTo(2);
 
         await Assert.That(prop.SecurityInfo.Edit.IsAllowed(new (new ClaimsIdentity(new[]
         {
@@ -72,7 +72,7 @@ public class PropertySecurityTests
         PropertyViewModel prop = data;
         // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
 
-        await Assert.That(prop.SecurityInfo.Restrictions).HasCount(2);
+        await Assert.That(prop.SecurityInfo.Restrictions).Count().IsEqualTo(2);
     }
 
     [Test]

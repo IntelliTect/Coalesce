@@ -1,5 +1,5 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Tests;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -16,10 +16,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Swashbuckle.Tests;
-
-[System.Obsolete]
-public class OpenApiFixtureCollection
-{ }
 
 public class OpenApiFixture
 {

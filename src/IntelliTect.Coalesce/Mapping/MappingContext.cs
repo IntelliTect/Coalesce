@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.DependencyInjection;
 using System;

@@ -1,7 +1,8 @@
-﻿
+
 #if NET9_0_OR_GREATER
 
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;

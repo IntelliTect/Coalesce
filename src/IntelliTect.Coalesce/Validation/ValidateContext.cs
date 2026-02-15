@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Api.DataSources;
+using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;

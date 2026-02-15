@@ -1,6 +1,6 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Testing.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,21 +9,21 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 public class ClassViewModelTests
 {
     [Test]
-    [ClassViewModelData(typeof(TargetClasses.OrderingChild))]
+    [ClassViewModelData(typeof(Testing.TargetClasses.OrderingChild))]
     public async Task DefaultOrderBy_UsesNestedPropertiesWhenOrderingByRefNavigation(ClassViewModelData data)
     {
         var orderings = data.ClassViewModel.DefaultOrderBy;
         // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(orderings).HasCount(2);
+        await Assert.That(orderings).Count().IsEqualTo(2);
     }
 
     [Test]
-    [ClassViewModelData(typeof(TargetClasses.OrdersByUnorderableParent))]
+    [ClassViewModelData(typeof(Testing.TargetClasses.OrdersByUnorderableParent))]
     public async Task DefaultOrderBy_UsesNavigationDirectlyWhenOrderingByUnorderableRefNavigation(ClassViewModelData data)
     {
         var orderings = data.ClassViewModel.DefaultOrderBy;
         // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(orderings).HasCount(1);
+        await Assert.That(orderings).Count().IsEqualTo(1);
     }
 
     [Test]
@@ -55,7 +55,7 @@ public class ClassViewModelTests
     }
 
     [Test]
-    [ClassViewModelData(typeof(TargetClasses.SuppressedDefaultOrdering))]
+    [ClassViewModelData(typeof(Testing.TargetClasses.SuppressedDefaultOrdering))]
     public async Task DefaultOrderBy_SuppressesFallbackWhenSpecified(ClassViewModelData data)
     {
         var orderings = data.ClassViewModel.DefaultOrderBy;

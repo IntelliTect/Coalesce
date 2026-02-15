@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Helpers.Search;
 using IntelliTect.Coalesce.TypeUsage;
 using IntelliTect.Coalesce.Utilities;

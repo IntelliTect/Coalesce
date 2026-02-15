@@ -1,0 +1,26 @@
+using IntelliTect.Coalesce.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+
+[Table("CaseProduct")]
+public class CaseProduct
+{
+    public int CaseProductId { get; set; }
+    public int CaseId { get; set; }
+
+    [Search]
+    [DefaultOrderBy(FieldOrder = 2)]
+    public Case Case { get; set; }
+
+    public int ProductId { get; set; }
+
+    [Search]
+    [DefaultOrderBy(FieldOrder = 1)]
+    public Product Product { get; set; }
+
+    [Read]
+    public int? CreatedById { get; set; }
+    [ForeignKey(nameof(CreatedById))]
+    public Person CreatedBy { get; set; }
+}

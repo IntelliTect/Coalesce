@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Models;
 #if NET10_0_OR_GREATER
 using Microsoft.OpenApi;
 #else

@@ -19,10 +19,6 @@ using System.Reflection;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests.OpenApi;
 
-[System.Obsolete]
-public class OpenApiFixtureCollection
-{ }
-
 public class OpenApiFixture
 {
     public const string Collection = "OpenApi";

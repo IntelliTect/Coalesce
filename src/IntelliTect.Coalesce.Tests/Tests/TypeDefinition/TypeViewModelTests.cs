@@ -212,8 +212,43 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(Case.Statuses))]
     public async Task EnumValues_IsCorrect(ClassViewModelData data)
     {
-        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(data.TypeViewModel.EnumValues.Count).IsEqualTo(5);
+        await data.TypeViewModel.EnumValues.AssertCollection(
+            async v =>
+            {
+                await Assert.That(v.Value).IsEqualTo(0);
+                await Assert.That(v.Name).IsEqualTo("Open");
+                await Assert.That(v.DisplayName).IsEqualTo("Open");
+                await Assert.That(v.Description).IsNull();
+            },
+            async v =>
+            {
+                await Assert.That(v.Value).IsEqualTo(1);
+                await Assert.That(v.Name).IsEqualTo("InProgress");
+                await Assert.That(v.DisplayName).IsEqualTo("In Progress");
+                await Assert.That(v.Description).IsNull();
+            },
+            async v =>
+            {
+                await Assert.That(v.Value).IsEqualTo(2);
+                await Assert.That(v.Name).IsEqualTo("Resolved");
+                await Assert.That(v.DisplayName).IsEqualTo("Resolved");
+                await Assert.That(v.Description).IsEqualTo("Closed with a solution.");
+            },
+            async v =>
+            {
+                await Assert.That(v.Value).IsEqualTo(3);
+                await Assert.That(v.Name).IsEqualTo("ClosedNoSolution");
+                await Assert.That(v.DisplayName).IsEqualTo("Closed, No Solution");
+                await Assert.That(v.Description).IsEqualTo("Closed without any resolution.");
+            },
+            async v =>
+            {
+                await Assert.That(v.Value).IsEqualTo(99);
+                await Assert.That(v.Name).IsEqualTo("Cancelled");
+                await Assert.That(v.DisplayName).IsEqualTo("Cancelled");
+                await Assert.That(v.Description).IsNull();
+            }
+        );
     }
 
     [Test]

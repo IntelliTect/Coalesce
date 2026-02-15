@@ -29,9 +29,10 @@ public class PropertySecurityTests
     public async Task ReadWriteDifferentExplicitRoles_RequiresBothRolesForEdit(PropertyViewModelData data)
     {
         PropertyViewModel prop = data;
-        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-
-        await Assert.That(prop.SecurityInfo.Edit.RoleLists).Count().IsEqualTo(2);
+        await prop.SecurityInfo.Edit.RoleLists.AssertCollection(
+            async l => await Assert.That(l).IsEquivalentTo(new[] { "ReadRole" }),
+            async l => await Assert.That(l).IsEquivalentTo(new[] { "EditRole" })
+        );
 
         await Assert.That(prop.SecurityInfo.Edit.IsAllowed(new(new ClaimsIdentity(new[]
         {
@@ -69,9 +70,10 @@ public class PropertySecurityTests
     public async Task MappingRestrictions_AreDiscovered(PropertyViewModelData data)
     {
         PropertyViewModel prop = data;
-        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-
-        await Assert.That(prop.SecurityInfo.Restrictions).Count().IsEqualTo(2);
+        await prop.SecurityInfo.Restrictions.AssertCollection(
+            async r => await Assert.That(r.Name).IsEqualTo(typeof(AuthenticatedRestriction).Name),
+            async r => await Assert.That(r.Name).IsEqualTo(typeof(Restrict2).Name)
+        );
     }
 
     [Test]

@@ -10,18 +10,35 @@ public class ClassViewModelTests
     [ClassViewModelData(typeof(Testing.TargetClasses.OrderingChild))]
     public async Task DefaultOrderBy_UsesNestedPropertiesWhenOrderingByRefNavigation(ClassViewModelData data)
     {
-        var orderings = data.ClassViewModel.DefaultOrderBy;
-        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(orderings).Count().IsEqualTo(2);
+        await data.ClassViewModel.DefaultOrderBy.AssertCollection(
+            async ordering =>
+            {
+                await Assert.That(ordering.FieldOrder).IsEqualTo(1);
+                await Assert.That(ordering.Properties[0].Name).IsEqualTo("OrderingParent1");
+                await Assert.That(ordering.Properties[1].Name).IsEqualTo("OrderingGrandparent");
+                await Assert.That(ordering.Properties[2].Name).IsEqualTo("OrderedField");
+            },
+            async ordering =>
+            {
+                await Assert.That(ordering.FieldOrder).IsEqualTo(2);
+                await Assert.That(ordering.Properties[0].Name).IsEqualTo("OrderingParent2");
+                await Assert.That(ordering.Properties[1].Name).IsEqualTo("OrderingGrandparent");
+                await Assert.That(ordering.Properties[2].Name).IsEqualTo("OrderedField");
+            }
+        );
     }
 
     [Test]
     [ClassViewModelData(typeof(Testing.TargetClasses.OrdersByUnorderableParent))]
     public async Task DefaultOrderBy_UsesNavigationDirectlyWhenOrderingByUnorderableRefNavigation(ClassViewModelData data)
     {
-        var orderings = data.ClassViewModel.DefaultOrderBy;
-        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(orderings).Count().IsEqualTo(1);
+        await data.ClassViewModel.DefaultOrderBy.AssertCollection(
+            async ordering =>
+            {
+                await Assert.That(ordering.Properties).Count().IsEqualTo(1);
+                await Assert.That(ordering.Properties[0].Name).IsEqualTo("Parent");
+            }
+        );
     }
 
     [Test]

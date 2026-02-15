@@ -107,8 +107,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Preconditions
         await Assert.That(CrudContext.User.IsInRole(role)).IsFalse();
-        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(prop.SecurityInfo.Read.RoleList).Count().IsEqualTo(1);
+        await prop.SecurityInfo.Read.RoleList.AssertCollection(async r => await Assert.That(r).IsEqualTo(role));
 
         await Assert.That(query).HasSingleItem();
     }
@@ -134,10 +133,9 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
             m => m.AdminReadableString, "propValue", "inputValue");
-        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
 
         // Precondition
-        await Assert.That(prop.SecurityInfo.Read.RoleList).Count().IsEqualTo(1);
+        await prop.SecurityInfo.Read.RoleList.AssertCollection(async r => await Assert.That(r).IsEqualTo(role));
 
         await Assert.That(query).IsEmpty();
     }
@@ -677,8 +675,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         const string role = RoleNames.Admin;
         await Assert.That(CrudContext.User.IsInRole(role)).IsFalse();
         await Assert.That(prop.SearchMethod == DataAnnotations.SearchAttribute.SearchMethods.BeginsWith).IsTrue();
-        // TODO: TUnit migration - Assert.Collection had element inspectors. Manually add assertions for each element.
-        await Assert.That(prop.SecurityInfo.Read.RoleList).Count().IsEqualTo(1);
+        await prop.SecurityInfo.Read.RoleList.AssertCollection(async r => await Assert.That(r).IsEqualTo(role));
 
         // Since searching by prop isn't valid for this specific property,
         // the search will instead treat the entire input as the search term.

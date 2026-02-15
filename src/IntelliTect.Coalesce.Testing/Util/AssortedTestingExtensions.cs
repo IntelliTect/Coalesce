@@ -168,4 +168,19 @@ public static class AssortedTestingExtensions
         Claim[] claims = role == null ? [] : [new Claim(ClaimTypes.Role, RoleNames.Admin)];
         user.AddIdentity(new ClaimsIdentity(claims, "TestAuth"));
     }
+
+    /// <summary>
+    /// Asserts that a collection contains the expected number of elements and invokes element inspectors for each element.
+    /// Similar to xUnit's Assert.Collection but using TUnit's fluent assertion style within the inspectors.
+    /// </summary>
+    public static async Task AssertCollection<T>(this IEnumerable<T> collection, params Func<T, Task>[] elementInspectors)
+    {
+        var list = collection.ToList();
+        await Assert.That(list).Count().IsEqualTo(elementInspectors.Length);
+        for (int i = 0; i < elementInspectors.Length; i++)
+        {
+            using var _ = Assert.Multiple();
+            await elementInspectors[i](list[i]);
+        }
+    }
 }

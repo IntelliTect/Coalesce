@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Models;
+using HttpMethod = IntelliTect.Coalesce.DataAnnotations.HttpMethod;
 
 namespace IntelliTect.Coalesce.TypeDefinition;
 

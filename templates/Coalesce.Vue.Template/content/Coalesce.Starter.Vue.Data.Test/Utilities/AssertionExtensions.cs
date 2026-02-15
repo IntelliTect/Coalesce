@@ -7,37 +7,51 @@ public static class AssertionExtensions
     /// <summary>
     /// Asserts that the result was a failure.
     /// </summary>
-    public static void AssertError(this ApiResult result)
+    public static async Task AssertError(this ApiResult result)
     {
-        Assert.False(result.WasSuccessful);
+        await Assert.That(result.WasSuccessful).IsFalse();
     }
 
     /// <summary>
     /// Asserts that the result was a failure.
     /// </summary>
     /// <param name="message">Expected error message.</param>
-    public static void AssertError(this ApiResult result, string message)
+    public static async Task AssertError(this ApiResult result, string message)
     {
-        result.AssertError();
-        Assert.Equal(message, result.Message);
+        await result.AssertError();
+        await Assert.That(result.Message).IsEqualTo(message);
     }
 
     /// <summary>
     /// Asserts that the result was successful.
     /// </summary>
-    public static void AssertSuccess(this ApiResult result, string? message = null)
+    public static async Task AssertSuccess(this ApiResult result, string? message = null)
     {
-        Assert.True(result.WasSuccessful, result.Message);
-        Assert.Equal(message, result.Message);
+        if (!string.IsNullOrEmpty(result.Message))
+        {
+            await Assert.That(result.WasSuccessful).IsTrue().Because(result.Message);
+        }
+        else
+        {
+            await Assert.That(result.WasSuccessful).IsTrue();
+        }
+        await Assert.That(result.Message).IsEqualTo(message);
     }
 
     /// <summary>
     /// Asserts that the result was successful.
     /// </summary>
-    public static T AssertSuccess<T>(this ItemResult<T> result)
+    public static async Task<T> AssertSuccess<T>(this ItemResult<T> result)
     {
-        Assert.True(result.WasSuccessful, result.Message);
-        Assert.Null(result.Message);
+        if (!string.IsNullOrEmpty(result.Message))
+        {
+            await Assert.That(result.WasSuccessful).IsTrue().Because(result.Message);
+        }
+        else
+        {
+            await Assert.That(result.WasSuccessful).IsTrue();
+        }
+        await Assert.That(result.Message).IsNull();
         return result.Object ?? throw new ArgumentException("Successful result unexpectedly returned null object");
     }
 
@@ -47,7 +61,7 @@ public static class AssertionExtensions
     public static async Task<T> AssertSuccess<T>(this Task<ItemResult<T>> resultTask)
     {
         var result = await resultTask;
-        return result.AssertSuccess();
+        return await result.AssertSuccess();
     }
 
     /// <summary>
@@ -56,16 +70,23 @@ public static class AssertionExtensions
     public static async Task AssertSuccess(this Task<ItemResult> resultTask)
     {
         var result = await resultTask;
-        Assert.True(result.WasSuccessful, result.Message);
+        if (!string.IsNullOrEmpty(result.Message))
+        {
+            await Assert.That(result.WasSuccessful).IsTrue().Because(result.Message);
+        }
+        else
+        {
+            await Assert.That(result.WasSuccessful).IsTrue();
+        }
     }
 
     /// <summary>
     /// Asserts that the result was successful.
     /// </summary>
     /// <param name="expectedValue">Expected value on the result.</param>
-    public static void AssertSuccess<T>(this ItemResult<T> result, T expectedValue)
+    public static async Task AssertSuccess<T>(this ItemResult<T> result, T expectedValue)
     {
-        result.AssertSuccess();
-        Assert.Equal(expectedValue, result.Object);
+        await result.AssertSuccess();
+        await Assert.That(result.Object).IsEqualTo(expectedValue);
     }
 }

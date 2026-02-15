@@ -1,14 +1,12 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 using System.Reflection;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors;
 
-public class SqlServerExceptionResultTests
+public class SqlServerExceptionResultTests : IDisposable
 {
     public SqlServerExceptionResultTests()
     {
@@ -22,6 +20,11 @@ public class SqlServerExceptionResultTests
         };
     }
 
+    public void Dispose()
+    {
+        Db?.Dispose();
+    }
+
     public AppDbContext Db { get; }
     public CrudContext<AppDbContext> CrudContext { get; }
 
@@ -29,8 +32,8 @@ public class SqlServerExceptionResultTests
         where T : class, new()
         => new StandardBehaviors<T, AppDbContext>(CrudContext);
 
-    [Fact]
-    public void InsertFkConflict()
+    [Test]
+    public async Task InsertFkConflict()
     {
         Db.Add(new CaseProduct { CaseId = 1, ProductId = 42 });
 
@@ -41,11 +44,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<CaseProduct>()
             .GetExceptionResult(exception, new TestSparseDto<CaseProduct>() { ChangedProperties = { "ProductId" } });
 
-        result.AssertError("The value of Product is not valid.");
+        await result.AssertError("The value of Product is not valid.");
     }
 
-    [Fact]
-    public void UpdateFkConflict()
+    [Test]
+    public async Task UpdateFkConflict()
     {
         var entry = Db.Entry(new CaseProduct { CaseId = 1, ProductId = 42 });
         entry.State = EntityState.Unchanged;
@@ -58,11 +61,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<CaseProduct>()
             .GetExceptionResult(exception, new TestSparseDto<CaseProduct>() { ChangedProperties = { "ProductId" } });
 
-        result.AssertError("The value of Product is not valid.");
+        await result.AssertError("The value of Product is not valid.");
     }
 
-    [Fact]
-    public void FkConstraint_WhenPropIsNotUserChanged_DoesNotProduceFriendlyError()
+    [Test]
+    public async Task FkConstraint_WhenPropIsNotUserChanged_DoesNotProduceFriendlyError()
     {
         var entry = Db.Entry(new CaseProduct { CaseId = 1, ProductId = 42 });
         entry.State = EntityState.Unchanged;
@@ -75,11 +78,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<CaseProduct>()
             .GetExceptionResult(exception, new TestSparseDto<CaseProduct>() { ChangedProperties = { /* empty */ } });
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void DeleteFkConflict()
+    [Test]
+    public async Task DeleteFkConflict()
     {
         var entry = Db.Entry(new Product { ProductId = 42 });
         entry.State = EntityState.Deleted;
@@ -91,11 +94,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<Product>()
             .GetExceptionResult(exception, null);
 
-        result.AssertError("The Product is still referenced by at least one Case Product.");
+        await result.AssertError("The Product is still referenced by at least one Case Product.");
     }
 
-    [Fact]
-    public void FkConstraint_UnknownTableName()
+    [Test]
+    public async Task FkConstraint_UnknownTableName()
     {
         Db.Add(new CaseProduct { CaseId = 1, ProductId = 42 });
 
@@ -105,11 +108,11 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<CaseProduct>().GetExceptionResult(exception, new TestSparseDto<CaseProduct>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void FkConstraint_UnknownColumnName()
+    [Test]
+    public async Task FkConstraint_UnknownColumnName()
     {
         Db.Add(new CaseProduct { CaseId = 1, ProductId = 42 });
 
@@ -119,11 +122,11 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<CaseProduct>().GetExceptionResult(exception, new TestSparseDto<CaseProduct>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void FkConstraint_UnknownConstraintName()
+    [Test]
+    public async Task FkConstraint_UnknownConstraintName()
     {
         Db.Add(new CaseProduct { CaseId = 1, ProductId = 42 });
 
@@ -133,11 +136,11 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<CaseProduct>().GetExceptionResult(exception, new TestSparseDto<CaseProduct>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void UniqueIndexConflict()
+    [Test]
+    public async Task UniqueIndexConflict()
     {
         Db.Add(new Product { UniqueId1 = "qwerty" });
 
@@ -148,11 +151,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<Product>()
             .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { "UniqueId1" } });
 
-        result.AssertError("A different item with ID1 'qwerty' already exists.");
+        await result.AssertError("A different item with ID1 'qwerty' already exists.");
     }
 
-    [Fact]
-    public void UniqueIndexConflict_WhenPropIsNotUserChanged_DoesNotProduceFriendlyError()
+    [Test]
+    public async Task UniqueIndexConflict_WhenPropIsNotUserChanged_DoesNotProduceFriendlyError()
     {
         Db.Add(new Product { UniqueId1 = "qwerty" });
 
@@ -163,11 +166,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<Product>()
             .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { /* empty */ } });
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void UniqueIndexConflict_MultiPropIndex()
+    [Test]
+    public async Task UniqueIndexConflict_MultiPropIndex()
     {
         Db.Add(new Product { UniqueId1 = "qwe, rty", UniqueId2 = "foo,bar" });
 
@@ -178,11 +181,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<Product>()
             .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { "UniqueId1", "UniqueId2" } });
 
-        result.AssertError("A different item with ID1 'qwe, rty' and ID2 'foo,bar' already exists.");
+        await result.AssertError("A different item with ID1 'qwe, rty' and ID2 'foo,bar' already exists.");
     }
 
-    [Fact]
-    public void UniqueIndexConflict_HandlesNull()
+    [Test]
+    public async Task UniqueIndexConflict_HandlesNull()
     {
         Db.Add(new Product { UniqueId1 = "qwe, rty" });
 
@@ -193,11 +196,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<Product>()
             .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { "UniqueId1" } });
 
-        result.AssertError("A different item with ID1 'qwe, rty' and ID2 <NULL> already exists.");
+        await result.AssertError("A different item with ID1 'qwe, rty' and ID2 <NULL> already exists.");
     }
 
-    [Fact]
-    public void UniqueIndexConflict_MultiPropIndex_PartiallyChanged()
+    [Test]
+    public async Task UniqueIndexConflict_MultiPropIndex_PartiallyChanged()
     {
         Db.Add(new Product { UniqueId1 = "qwe, rty", UniqueId2 = "foo,bar" });
 
@@ -208,11 +211,11 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<Product>()
             .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { "UniqueId2" } });
 
-        result.AssertError("A different item with ID1 'qwe, rty' and ID2 'foo,bar' already exists.");
+        await result.AssertError("A different item with ID1 'qwe, rty' and ID2 'foo,bar' already exists.");
     }
 
-    [Fact]
-    public void UniqueIndexConflict_PartiallyInternalMultiPropIndex_ReportsNonInternalParts()
+    [Test]
+    public async Task UniqueIndexConflict_PartiallyInternalMultiPropIndex_ReportsNonInternalParts()
     {
         Db.Add(new Product { TenantId = 1, UniqueId1 = "qwerty" });
 
@@ -224,11 +227,11 @@ public class SqlServerExceptionResultTests
             .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { "UniqueId1" } });
 
         // Doesn't report the tenantID, which is internal.
-        result.AssertError("A different item with ID1 'qwerty' already exists.");
+        await result.AssertError("A different item with ID1 'qwerty' already exists.");
     }
 
-    [Fact]
-    public void UniqueIndexConflict_UnknownTableName()
+    [Test]
+    public async Task UniqueIndexConflict_UnknownTableName()
     {
         Db.Add(new Product { TenantId = 1, UniqueId1 = "qwerty" });
 
@@ -238,11 +241,11 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<Product>().GetExceptionResult(exception, new TestSparseDto<Product>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void UniqueIndexConflict_UnknownIndex()
+    [Test]
+    public async Task UniqueIndexConflict_UnknownIndex()
     {
         Db.Add(new Product { TenantId = 1, UniqueId1 = "qwerty" });
 
@@ -252,11 +255,11 @@ public class SqlServerExceptionResultTests
 
         var result = Behaviors<Product>().GetExceptionResult(exception, new TestSparseDto<Product>());
 
-        Assert.Null(result);
+        await Assert.That(result).IsNull();
     }
 
-    [Fact]
-    public void DbContextIsDisposed()
+    [Test]
+    public async Task DbContextIsDisposed()
     {
         Db.Add(new Product { UniqueId1 = "qwerty" });
 
@@ -271,7 +274,7 @@ public class SqlServerExceptionResultTests
         var result = Behaviors<Product>()
             .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { "UniqueId1" } });
 
-        result.AssertError("A different item with ID1 'qwerty' already exists.");
+        await result.AssertError("A different item with ID1 'qwerty' already exists.");
     }
 
     private DbUpdateException CreateException(string error)

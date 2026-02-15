@@ -1,14 +1,8 @@
-﻿#if NET9_0_OR_GREATER
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+#if NET9_0_OR_GREATER
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests.OpenApi;
 
-[Collection(OpenApiFixture.Collection)]
+[ClassDataSource<OpenApiFixture>(Shared = SharedType.Keyed, Key = OpenApiFixture.Collection)]
 public class MicrosoftOpenApiTests(OpenApiFixture fixture)
 {
     public OpenApiFixture Fixture { get; } = fixture;

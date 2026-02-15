@@ -1,13 +1,9 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Utilities;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 using static IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators;

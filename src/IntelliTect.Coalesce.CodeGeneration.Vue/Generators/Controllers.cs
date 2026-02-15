@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators;
 

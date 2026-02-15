@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;

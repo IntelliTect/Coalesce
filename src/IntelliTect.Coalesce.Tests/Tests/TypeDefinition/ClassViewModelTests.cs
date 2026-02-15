@@ -1,83 +1,81 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using IntelliTect.Coalesce.Tests.Util;
+﻿using IntelliTect.Coalesce.Testing.TargetClasses;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.Util;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 
 public class ClassViewModelTests
 {
-    [Theory]
-    [ClassViewModelData(typeof(TargetClasses.OrderingChild))]
-    public void DefaultOrderBy_UsesNestedPropertiesWhenOrderingByRefNavigation(ClassViewModelData data)
+    [Test]
+    [ClassViewModelData(typeof(Testing.TargetClasses.OrderingChild))]
+    public async Task DefaultOrderBy_UsesNestedPropertiesWhenOrderingByRefNavigation(ClassViewModelData data)
     {
-        var orderings = data.ClassViewModel.DefaultOrderBy;
-        Assert.Collection(orderings,
-            ordering =>
+        await data.ClassViewModel.DefaultOrderBy.AssertCollection(
+            async ordering =>
             {
-                Assert.Equal(1, ordering.FieldOrder);
-                Assert.Equal("OrderingParent1", ordering.Properties[0].Name);
-                Assert.Equal("OrderingGrandparent", ordering.Properties[1].Name);
-                Assert.Equal("OrderedField", ordering.Properties[2].Name);
+                await Assert.That(ordering.FieldOrder).IsEqualTo(1);
+                await Assert.That(ordering.Properties[0].Name).IsEqualTo("OrderingParent1");
+                await Assert.That(ordering.Properties[1].Name).IsEqualTo("OrderingGrandparent");
+                await Assert.That(ordering.Properties[2].Name).IsEqualTo("OrderedField");
             },
-            ordering =>
+            async ordering =>
             {
-                Assert.Equal(2, ordering.FieldOrder);
-                Assert.Equal("OrderingParent2", ordering.Properties[0].Name);
-                Assert.Equal("OrderingGrandparent", ordering.Properties[1].Name);
-                Assert.Equal("OrderedField", ordering.Properties[2].Name);
+                await Assert.That(ordering.FieldOrder).IsEqualTo(2);
+                await Assert.That(ordering.Properties[0].Name).IsEqualTo("OrderingParent2");
+                await Assert.That(ordering.Properties[1].Name).IsEqualTo("OrderingGrandparent");
+                await Assert.That(ordering.Properties[2].Name).IsEqualTo("OrderedField");
             }
         );
     }
 
-    [Theory]
-    [ClassViewModelData(typeof(TargetClasses.OrdersByUnorderableParent))]
-    public void DefaultOrderBy_UsesNavigationDirectlyWhenOrderingByUnorderableRefNavigation(ClassViewModelData data)
+    [Test]
+    [ClassViewModelData(typeof(Testing.TargetClasses.OrdersByUnorderableParent))]
+    public async Task DefaultOrderBy_UsesNavigationDirectlyWhenOrderingByUnorderableRefNavigation(ClassViewModelData data)
     {
-        var orderings = data.ClassViewModel.DefaultOrderBy;
-        Assert.Collection(orderings,
-            ordering =>
+        await data.ClassViewModel.DefaultOrderBy.AssertCollection(
+            async ordering =>
             {
-                var prop = Assert.Single(ordering.Properties);
-                Assert.Equal("Parent", prop.Name);
+                await Assert.That(ordering.Properties).Count().IsEqualTo(1);
+                await Assert.That(ordering.Properties[0].Name).IsEqualTo("Parent");
             }
         );
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(AbstractImpl1))]
-    public void GetAttribute_RespectsInheritance(ClassViewModelData data)
+    public async Task GetAttribute_RespectsInheritance(ClassViewModelData data)
     {
         var vm = data.ClassViewModel;
 
         // The read and create attributes are declared on AbstractImpl's base class,
         // but should still be surfaced on AbstractImpl because they are inherited attributes.
-        Assert.Equal("ReadRole", vm.SecurityInfo.Read.Roles);
-        Assert.True(vm.SecurityInfo.Create.NoAccess);
+        await Assert.That(vm.SecurityInfo.Read.Roles).IsEqualTo("ReadRole");
+        await Assert.That(vm.SecurityInfo.Create.NoAccess).IsTrue();
 
         // Edit role is defined on both, so the one on AbstractImpl should be the effective one:
-        Assert.True(vm.SecurityInfo.Edit.NoAccess);
+        await Assert.That(vm.SecurityInfo.Edit.NoAccess).IsTrue();
     }
 
-    [Theory]
+    [Test]
     [ClassViewModelData(typeof(ComplexModel))]
-    public void ClientConsts_IncludesConsts(ClassViewModelData data)
+    public async Task ClientConsts_IncludesConsts(ClassViewModelData data)
     {
         var vm = data.ClassViewModel;
 
-        Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicNumber) && c.Value.Equals(ComplexModel.MagicNumber));
-        Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicString) && c.Value.Equals(ComplexModel.MagicString));
-        Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicEnum) && ((int)c.Value).Equals((int)ComplexModel.MagicEnum));
-
-        Assert.DoesNotContain(vm.ClientConsts, c => c.Name == nameof(ComplexModel.UnexpostedConst));
+        var consts = vm.ClientConsts;
+        await Assert.That(consts).Contains(c => c.Name == nameof(ComplexModel.MagicNumber) && c.Value.Equals(ComplexModel.MagicNumber));
+        await Assert.That(consts).Contains(c => c.Name == nameof(ComplexModel.MagicString) && c.Value.Equals(ComplexModel.MagicString));
+        await Assert.That(consts).Contains(c => c.Name == nameof(ComplexModel.MagicEnum) && ((int)c.Value).Equals((int)ComplexModel.MagicEnum));
+        await Assert.That(consts).DoesNotContain(c => c.Name == nameof(ComplexModel.UnexpostedConst));
     }
 
-    [Theory]
-    [ClassViewModelData(typeof(TargetClasses.SuppressedDefaultOrdering))]
-    public void DefaultOrderBy_SuppressesFallbackWhenSpecified(ClassViewModelData data)
+    [Test]
+    [ClassViewModelData(typeof(Testing.TargetClasses.SuppressedDefaultOrdering))]
+    public async Task DefaultOrderBy_SuppressesFallbackWhenSpecified(ClassViewModelData data)
     {
         var orderings = data.ClassViewModel.DefaultOrderBy;
-        
+
         // Should be empty - no fallback ordering should be applied
-        Assert.Empty(orderings);
+        await Assert.That(orderings).IsEmpty();
     }
 }

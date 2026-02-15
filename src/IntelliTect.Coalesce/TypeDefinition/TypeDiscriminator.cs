@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce.TypeDefinition;
+namespace IntelliTect.Coalesce.TypeDefinition;
 
 public enum TypeDiscriminator
 {

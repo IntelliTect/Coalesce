@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Common.props" />
+  <PropertyGroup>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Api\IntelliTect.Coalesce.CodeGeneration.Api.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.CodeGeneration.Vue\IntelliTect.Coalesce.CodeGeneration.Vue.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.OpenApi.Readers" />
+    <PackageReference Include="TUnit.Core" />
+    <PackageReference Include="TUnit.Assertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="TargetClasses/**/*.cs" />
+  </ItemGroup>
+
+  <!-- Add current preprocessor directives into an attributes 
+    so we can feed them back into roslyn when we analyze our TargetClasses. -->
+  <Target Name="AddDefinesAsAttribute" BeforeTargets="CoreGenerateAssemblyInfo" DependsOnTargets="AddImplicitDefineConstants">
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>DefineConstants</_Parameter1>
+        <_Parameter2>$(DefineConstants)</_Parameter2>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
+</Project>

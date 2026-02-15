@@ -1,20 +1,16 @@
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 #nullable enable
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
-public class EntityStampingTests
+public class EntityStampingTests : IDisposable
 {
     public AppDbContext Db { get; }
 
@@ -36,9 +32,14 @@ public class EntityStampingTests
         );
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    public void Dispose()
+    {
+        Db?.Dispose();
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task WithCustomApplicationService_SetsStampValue(bool async)
     {
         var appSp = new ServiceCollection()
@@ -58,12 +59,12 @@ public class EntityStampingTests
 
         // Assert
         var entity = db.Cases.Single();
-        Assert.Equal("42", entity.Title);
+        await Assert.That(entity.Title).IsEqualTo("42");
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task WithApplicationServiceDefinedHttpContextAccessor_SetsStampValueFromAppServiceHttpContext(bool async)
     {
         // Arrange
@@ -92,7 +93,7 @@ public class EntityStampingTests
 
         // Assert
         var entity = db.Cases.Single();
-        Assert.Equal("TestAuth", entity.Title);
+        await Assert.That(entity.Title).IsEqualTo("TestAuth");
     }
 
     /// <summary>
@@ -116,9 +117,9 @@ public class EntityStampingTests
         public void Validate(IDbContextOptions options) { }
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task WhenUserUnavailable_InjectsNull(bool async)
     {
         // Arrange
@@ -133,12 +134,12 @@ public class EntityStampingTests
 
         // Assert
         var entity = db.Cases.Single();
-        Assert.Equal("null", entity.Title);
+        await Assert.That(entity.Title).IsEqualTo("null");
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task WhenServiceUnavailable_InjectsNull(bool async)
     {
         // Arrange
@@ -153,12 +154,12 @@ public class EntityStampingTests
 
         // Assert
         var entity = db.Cases.Single();
-        Assert.Equal("null", entity.Title);
+        await Assert.That(entity.Title).IsEqualTo("null");
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task CanInjectContext(bool async)
     {
         // Arrange
@@ -173,7 +174,7 @@ public class EntityStampingTests
 
         // Assert
         var entity = db.Cases.Single();
-        Assert.Equal("Microsoft.EntityFrameworkCore.InMemory", entity.Title);
+        await Assert.That(entity.Title).IsEqualTo("Microsoft.EntityFrameworkCore.InMemory");
     }
 
     private AppDbContext BuildDbContext(Func<DbContextOptionsBuilder<AppDbContext>, DbContextOptionsBuilder> setup)

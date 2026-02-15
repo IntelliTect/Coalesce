@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
+namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
 
 public interface ITemplateResolver
 {

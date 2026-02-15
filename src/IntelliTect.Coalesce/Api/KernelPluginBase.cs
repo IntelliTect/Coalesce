@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Security.Claims;

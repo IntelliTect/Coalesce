@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild;
 using Microsoft.Extensions.Logging;

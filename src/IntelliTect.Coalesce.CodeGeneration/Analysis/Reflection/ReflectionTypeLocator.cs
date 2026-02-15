@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
+using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;

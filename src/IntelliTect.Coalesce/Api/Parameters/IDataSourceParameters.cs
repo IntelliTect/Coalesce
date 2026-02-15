@@ -1,4 +1,4 @@
-﻿// Explicitly in IntelliTect.Coalesce to simplify typical using statements 
+// Explicitly in IntelliTect.Coalesce to simplify typical using statements 
 namespace IntelliTect.Coalesce;
 
 public interface IDataSourceParameters

@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Utilities;
+using IntelliTect.Coalesce.Utilities;
 using System.Linq;
 
 namespace IntelliTect.Coalesce.TypeDefinition;

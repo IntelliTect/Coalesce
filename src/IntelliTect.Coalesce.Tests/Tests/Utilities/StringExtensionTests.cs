@@ -1,171 +1,171 @@
-﻿using IntelliTect.Coalesce.Utilities;
+using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce.Tests.Utilities;
 
 public class StringExtensionTests
 {
-    [Fact]
-    public void GetValidCSharpIdentifier_CanGetIdentifierWithSpaces()
+    [Test]
+    public async Task GetValidCSharpIdentifier_CanGetIdentifierWithSpaces()
     {
         string input = "Oh No";
 
         string identifier = input.GetValidCSharpIdentifier();
 
-        Assert.Equal("Oh_No", identifier);
+        await Assert.That(identifier).IsEqualTo("Oh_No");
     }
 
-    [Fact]
-    public void GetValidCSharpIdentifier_CanGetIdentifierWithPrefix()
+    [Test]
+    public async Task GetValidCSharpIdentifier_CanGetIdentifierWithPrefix()
     {
         string input = "MyVariable";
 
         string identifier = input.GetValidCSharpIdentifier("_");
 
-        Assert.Equal("_MyVariable", identifier);
+        await Assert.That(identifier).IsEqualTo("_MyVariable");
     }
 
-    [Fact]
-    public void GetValidCSharpIdentifier_CanGetValidIdentifierWhenItIsAlreadyValid()
+    [Test]
+    public async Task GetValidCSharpIdentifier_CanGetValidIdentifierWhenItIsAlreadyValid()
     {
         string input = "IamValidCSharp";
 
         string identifier = input.GetValidCSharpIdentifier();
 
-        Assert.Equal("IamValidCSharp", identifier);
+        await Assert.That(identifier).IsEqualTo("IamValidCSharp");
     }
 
-    [Fact]
-    public void GetValidCSharpIdentifier_CanGetValidIdentifierWhenSourceContainsUnderscore()
+    [Test]
+    public async Task GetValidCSharpIdentifier_CanGetValidIdentifierWhenSourceContainsUnderscore()
     {
         string input = "_in_put_";
 
         string identifier = input.GetValidCSharpIdentifier();
 
-        Assert.Equal("_in_put_", identifier);
+        await Assert.That(identifier).IsEqualTo("_in_put_");
     }
 
-    [Fact]
-    public void GetValidCSharpIdentifier_CanGetValidIdentifierWhenSourceContainsUnicode()
+    [Test]
+    public async Task GetValidCSharpIdentifier_CanGetValidIdentifierWhenSourceContainsUnicode()
     {
         string input = @"Uni\u15F0code";
 
         string identifier = input.GetValidCSharpIdentifier();
 
-        Assert.Equal("Uni\\u15F0code", identifier);
+        await Assert.That(identifier).IsEqualTo("Uni\\u15F0code");
     }
 
-    [Fact]
-    public void GetValidCSharpIdentifier_GetGetIdentifierForKeyword()
+    [Test]
+    public async Task GetValidCSharpIdentifier_GetGetIdentifierForKeyword()
     {
         string input = "class";
 
         string identifier = input.GetValidCSharpIdentifier();
 
-        Assert.Equal("@class", identifier);
+        await Assert.That(identifier).IsEqualTo("@class");
     }
 
-    [Fact]
-    public void GetValidCSharpIdentifier_CanGetIdentifierForNumericString()
+    [Test]
+    public async Task GetValidCSharpIdentifier_CanGetIdentifierForNumericString()
     {
         string input = "0123";
 
         string identifier = input.GetValidCSharpIdentifier();
 
-        Assert.Equal("_0123", identifier);
+        await Assert.That(identifier).IsEqualTo("_0123");
     }
 
-    [Fact]
-    public void GetValidCSharpIdentifier_CanGetIndetifierFromVerbatimIdentifier()
+    [Test]
+    public async Task GetValidCSharpIdentifier_CanGetIndetifierFromVerbatimIdentifier()
     {
         string input = "@if";
 
         string identifier = input.GetValidCSharpIdentifier();
 
-        Assert.Equal("@if", identifier);
+        await Assert.That(identifier).IsEqualTo("@if");
     }
 
-    [Theory]
-    [InlineData("case")]
-    [InlineData("await")]
-    public void GetValidCSharpIdentifier_EscapesReservedWord(string input)
+    [Test]
+    [Arguments("case")]
+    [Arguments("await")]
+    public async Task GetValidCSharpIdentifier_EscapesReservedWord(string input)
     {
-        Assert.Equal("@" + input, input.GetValidCSharpIdentifier());
+        await Assert.That(input.GetValidCSharpIdentifier()).IsEqualTo("@" + input);
     }
 
-    [Fact]
-    public void ToProperCase_HandlesTwoCapitalsInARow()
+    [Test]
+    public async Task ToProperCase_HandlesTwoCapitalsInARow()
     {
         const string input = "HROnly";
-        Assert.Equal("HR Only", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("HR Only");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesMultipleCapitalsInARow()
+    [Test]
+    public async Task ToProperCase_HandlesMultipleCapitalsInARow()
     {
         const string input = "FBIOnly";
-        Assert.Equal("FBI Only", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("FBI Only");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesOnlyTwoCapitals()
+    [Test]
+    public async Task ToProperCase_HandlesOnlyTwoCapitals()
     {
         const string input = "UI";
-        Assert.Equal("UI", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("UI");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesANormalWord()
+    [Test]
+    public async Task ToProperCase_HandlesANormalWord()
     {
         const string input = "User";
-        Assert.Equal("User", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("User");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesANormalPhrase()
+    [Test]
+    public async Task ToProperCase_HandlesANormalPhrase()
     {
         const string input = "HelloWorld";
-        Assert.Equal("Hello World", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("Hello World");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesCamelCase()
+    [Test]
+    public async Task ToProperCase_HandlesCamelCase()
     {
         const string input = "helloWorld";
-        Assert.Equal("Hello World", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("Hello World");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesCamelCaseWithAcronym()
+    [Test]
+    public async Task ToProperCase_HandlesCamelCaseWithAcronym()
     {
         const string input = "helloWorldUI";
-        Assert.Equal("Hello World UI", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("Hello World UI");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesNumberBeforeLowercase()
+    [Test]
+    public async Task ToProperCase_HandlesNumberBeforeLowercase()
     {
         const string input = "Is1h";
-        Assert.Equal("Is 1h", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("Is 1h");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesNumbersBeforeLowercase()
+    [Test]
+    public async Task ToProperCase_HandlesNumbersBeforeLowercase()
     {
         const string input = "Is24h";
-        Assert.Equal("Is 24h", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("Is 24h");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesNumberBeforeUppercase()
+    [Test]
+    public async Task ToProperCase_HandlesNumberBeforeUppercase()
     {
         const string input = "Is3D";
-        Assert.Equal("Is 3D", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("Is 3D");
     }
 
-    [Fact]
-    public void ToProperCase_HandlesNumbersBeforeUppercase()
+    [Test]
+    public async Task ToProperCase_HandlesNumbersBeforeUppercase()
     {
         const string input = "Is365Days";
-        Assert.Equal("Is 365 Days", input.ToProperCase());
+        await Assert.That(input.ToProperCase()).IsEqualTo("Is 365 Days");
     }
 }

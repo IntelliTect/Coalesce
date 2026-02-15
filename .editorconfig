@@ -21,3 +21,7 @@ dotnet_diagnostic.RS1024.severity = suggestion
 
 # RCS1090: Call 'ConfigureAwait(false)'.
 dotnet_diagnostic.RCS1090.severity = none
+
+# TUnit0001: Test argument types don't match method parameters
+# https://github.com/thomhurst/TUnit/issues/4812
+dotnet_diagnostic.TUnit0001.severity = silent

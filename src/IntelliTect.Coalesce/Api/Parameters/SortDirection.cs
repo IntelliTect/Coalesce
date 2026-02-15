@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce;
+namespace IntelliTect.Coalesce;
 
 public enum SortDirection
 {

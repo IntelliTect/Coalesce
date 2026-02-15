@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;

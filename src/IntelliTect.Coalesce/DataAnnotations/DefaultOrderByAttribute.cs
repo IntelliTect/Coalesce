@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;

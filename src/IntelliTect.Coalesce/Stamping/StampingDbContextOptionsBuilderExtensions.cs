@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Stamping;
+using IntelliTect.Coalesce.Stamping;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;

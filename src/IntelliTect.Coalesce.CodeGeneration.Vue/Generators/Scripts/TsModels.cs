@@ -1,10 +1,7 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators;
 
@@ -126,8 +123,8 @@ public class TsModels : StringBuilderFileGenerator<ReflectionRepository>
 
             b.Line();
             b.Append($"static [Symbol.hasInstance](x: any) {{ return x?.$metadata === metadata.{name}");
-            b.Line(derived.Any() ? 
-                $" || x?.$metadata.baseTypes?.includes(metadata.{name}); }}" : 
+            b.Line(derived.Any() ?
+                $" || x?.$metadata.baseTypes?.includes(metadata.{name}); }}" :
                 $"; }}"
             );
 

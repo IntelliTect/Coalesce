@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Api.DataSources;
+using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.Models;

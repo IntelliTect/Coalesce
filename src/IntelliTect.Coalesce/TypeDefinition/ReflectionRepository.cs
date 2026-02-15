@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeUsage;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;

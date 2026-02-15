@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.AuditLogging.Internal;
+using IntelliTect.Coalesce.AuditLogging.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;

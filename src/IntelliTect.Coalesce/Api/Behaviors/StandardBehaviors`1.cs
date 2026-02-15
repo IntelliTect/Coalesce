@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;

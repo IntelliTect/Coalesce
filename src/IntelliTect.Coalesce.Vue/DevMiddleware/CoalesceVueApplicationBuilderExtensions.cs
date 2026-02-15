@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Vue.DevMiddleware;
+using IntelliTect.Coalesce.Vue.DevMiddleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SpaServices;

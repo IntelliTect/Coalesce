@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using IntelliTect.Coalesce.TypeDefinition;
 
 namespace IntelliTect.Coalesce.Api.Behaviors;

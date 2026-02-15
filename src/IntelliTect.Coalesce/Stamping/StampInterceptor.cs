@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Utilities;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;

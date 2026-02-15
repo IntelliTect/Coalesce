@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using static System.AttributeTargets;
 
 namespace IntelliTect.Coalesce.DataAnnotations;

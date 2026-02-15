@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Models;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce;

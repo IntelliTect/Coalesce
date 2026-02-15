@@ -1,19 +1,17 @@
-using IntelliTect.Coalesce.Analyzer.Analyzers;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0014_NoAutoIncludeOnNonObjectPropertyTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
-    [Theory]
-    [InlineData("string")]
-    [InlineData("int")]
-    [InlineData("int?")]
-    [InlineData("DateTime")]
-    [InlineData("DateOnly")]
-    [InlineData("Guid")]
-    [InlineData("byte[]")]
-    [InlineData("bool")]
-    [InlineData("decimal")]
+    [Test]
+    [Arguments("string")]
+    [Arguments("int")]
+    [Arguments("int?")]
+    [Arguments("DateTime")]
+    [Arguments("DateOnly")]
+    [Arguments("Guid")]
+    [Arguments("byte[]")]
+    [Arguments("bool")]
+    [Arguments("decimal")]
     public async Task NoAutoInclude_OnNonObjectProperty_ReportsWarning(string propertyType)
     {
         await VerifyAnalyzerAsync($$"""
@@ -25,7 +23,7 @@ public class Coalesce0014_NoAutoIncludeOnNonObjectPropertyTests : CSharpAnalyzer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NoAutoInclude_OnEnumProperty_ReportsWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -39,13 +37,13 @@ public class Coalesce0014_NoAutoIncludeOnNonObjectPropertyTests : CSharpAnalyzer
             """);
     }
 
-    [Theory]
-    [InlineData("RelatedClass")]
-    [InlineData("List<RelatedClass>")]
-    [InlineData("ICollection<RelatedClass>")]
-    [InlineData("IEnumerable<RelatedClass>")]
-    [InlineData("RelatedClass[]")]
-    [InlineData("IRelatedClass")]
+    [Test]
+    [Arguments("RelatedClass")]
+    [Arguments("List<RelatedClass>")]
+    [Arguments("ICollection<RelatedClass>")]
+    [Arguments("IEnumerable<RelatedClass>")]
+    [Arguments("RelatedClass[]")]
+    [Arguments("IRelatedClass")]
     public async Task NoAutoInclude_OnObjectOrCollectionProperty_NoWarning(string propertyType)
     {
         await VerifyAnalyzerAsync($$"""
@@ -60,7 +58,7 @@ public class Coalesce0014_NoAutoIncludeOnNonObjectPropertyTests : CSharpAnalyzer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NoAutoInclude_False_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -72,7 +70,7 @@ public class Coalesce0014_NoAutoIncludeOnNonObjectPropertyTests : CSharpAnalyzer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NoAutoInclude_NotSpecified_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -84,7 +82,7 @@ public class Coalesce0014_NoAutoIncludeOnNonObjectPropertyTests : CSharpAnalyzer
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NoAutoInclude_OnClass_NoWarning()
     {
         await VerifyAnalyzerAsync("""

@@ -1,19 +1,12 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp.Testing;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using IntelliTect.Coalesce.Analyzer.Fixers;
-using Xunit;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 
 public class CS0457_AmbiguousItemResultConversionCodeFixProviderTests : CSharpAnalyzerVerifier<EmptyDiagnosticAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task AmbiguousConversion_VariableAssignment_OffersCorrectFixes()
     {
         var source = """
@@ -56,7 +49,7 @@ public class CS0457_AmbiguousItemResultConversionCodeFixProviderTests : CSharpAn
         await VerifyCodeFixAsync<CS0457_AmbiguousItemResultConversionCodeFixProvider>(source, errorResultFixed, 1);
     }
 
-    [Fact]
+    [Test]
     public async Task AmbiguousConversion_ReturnStatement_OffersCorrectFixes()
     {
         var source = """
@@ -105,7 +98,7 @@ public class CS0457_AmbiguousItemResultConversionCodeFixProviderTests : CSharpAn
         await VerifyCodeFixAsync<CS0457_AmbiguousItemResultConversionCodeFixProvider>(source, errorResultFixed, 1, expectedDiagnostic, expectedDiagnostic);
     }
 
-    [Fact]
+    [Test]
     public async Task AmbiguousConversion_VariableDeclaration_OffersCorrectFixes()
     {
         var source = """
@@ -145,7 +138,7 @@ public class CS0457_AmbiguousItemResultConversionCodeFixProviderTests : CSharpAn
         await VerifyCodeFixAsync<CS0457_AmbiguousItemResultConversionCodeFixProvider>(source, errorResultFixed, 1);
     }
 
-    [Fact]
+    [Test]
     public async Task AmbiguousConversion_StringLiteral_OffersCorrectFixes()
     {
         var source = """
@@ -182,7 +175,7 @@ public class CS0457_AmbiguousItemResultConversionCodeFixProviderTests : CSharpAn
         await VerifyCodeFixAsync<CS0457_AmbiguousItemResultConversionCodeFixProvider>(source, errorResultFixed, 1, expectedDiagnostic, expectedDiagnostic);
     }
 
-    [Fact]
+    [Test]
     public async Task NonItemResultAmbiguousConversion_DoesNotOfferFix()
     {
         var source = """

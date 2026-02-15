@@ -1,11 +1,8 @@
-using IntelliTect.Coalesce.Analyzer.Analyzers;
-using Microsoft.CodeAnalysis.Testing;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnCoalesceMethod_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -19,7 +16,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnSemanticKernelMethod_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -33,7 +30,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnServiceInterfaceMethod_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -45,7 +42,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnMethodWithoutCoalesceAttribute_ReportsWarning()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -65,7 +62,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnRegularInterfaceMethod_ReportsWarning()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -81,7 +78,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnServiceClassMethod_ReportsWarning()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -103,7 +100,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnServiceClassMethodWithCoalesce_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -118,7 +115,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnServiceClassImplementation_NoWarning()
     {
         // Must allow the same attributes as the interface
@@ -139,7 +136,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task MultipleParametersWithMixedAttributes_ReportsCorrectWarnings()
     {
         await VerifyAnalyzerAsync("""
@@ -157,7 +154,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NonInjectAttribute_NoWarning()
     {
         await VerifyAnalyzerAsync("""
@@ -172,7 +169,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeOnConstructorParameter_ReportsWarning()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""
@@ -198,7 +195,7 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task InjectAttributeCodeFix_RemovesAttributeFromList()
     {
         await VerifyAnalyzerAndCodeFixAsync<RemoveAttributeCodeFixProvider>("""

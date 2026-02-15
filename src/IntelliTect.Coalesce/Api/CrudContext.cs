@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 using System;

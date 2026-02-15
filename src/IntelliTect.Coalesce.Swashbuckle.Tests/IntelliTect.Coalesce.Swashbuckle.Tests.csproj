@@ -11,18 +11,12 @@
     <ProjectReference
       Include="..\IntelliTect.Coalesce.Swashbuckle\IntelliTect.Coalesce.Swashbuckle.csproj" />
     <ProjectReference
-      Include="..\IntelliTect.Coalesce.CodeGeneration.Tests\IntelliTect.Coalesce.CodeGeneration.Tests.csproj" />
+      Include="..\IntelliTect.Coalesce.Testing\IntelliTect.Coalesce.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.OpenApi.Readers" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="coverlet.collector" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit" />
+    <PackageReference Include="TUnit" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
   </ItemGroup>
 

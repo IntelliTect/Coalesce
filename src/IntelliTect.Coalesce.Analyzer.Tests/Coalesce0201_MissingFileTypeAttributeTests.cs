@@ -1,11 +1,8 @@
-using IntelliTect.Coalesce.Analyzer.Analyzers;
-using Microsoft.CodeAnalysis.Testing;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
-    [Fact]
+    [Test]
     public async Task IFileParameterWithFileTypeAttribute_NoHint()
     {
         await VerifyAnalyzerAsync("""
@@ -22,7 +19,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task IFileParameterWithoutFileTypeAttributeOnCoalesceMethod_ReportsHint()
     {
         await VerifyAnalyzerAsync("""
@@ -38,7 +35,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task IFileParameterWithoutFileTypeAttributeOnSemanticKernelMethod_ReportsHint()
     {
         await VerifyAnalyzerAsync("""
@@ -54,7 +51,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task NonIFileParameter_NoHint()
     {
         await VerifyAnalyzerAsync("""
@@ -68,7 +65,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task MultipleIFileParameters_ReportsHintForEach()
     {
         await VerifyAnalyzerAsync("""
@@ -85,7 +82,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CodeFix_AddsFileTypeAttributeToIFileParameter()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0201_MissingFileTypeAttributeCodeFixProvider>("""
@@ -111,7 +108,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CodeFix_AddsFileTypeAttributeToMultipleParameters()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0201_MissingFileTypeAttributeCodeFixProvider>("""
@@ -137,7 +134,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task CodeFix_PreservesIndentationForParameterOnOwnLine()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce0201_MissingFileTypeAttributeCodeFixProvider>("""
@@ -165,7 +162,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task IFileParameterOnServiceInterfaceMethod_ReportsHint()
     {
         await VerifyAnalyzerAsync("""
@@ -179,7 +176,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task IFileParameterOnServiceClassImplementation_NoHint()
     {
         // Should not suggest FileType on implementation methods when service is exposed via interface
@@ -202,7 +199,7 @@ public class Coalesce0201_MissingFileTypeAttributeTests : CSharpAnalyzerVerifier
             """);
     }
 
-    [Fact]
+    [Test]
     public async Task IFileParameterOnServiceClass_ReportsHint()
     {
         // Should suggest FileType on service class methods when class is directly exposed (no interface) and method has [Coalesce]

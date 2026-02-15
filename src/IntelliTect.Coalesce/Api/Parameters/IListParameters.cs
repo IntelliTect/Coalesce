@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 // Explicitly in IntelliTect.Coalesce to simplify typical using statements 
 namespace IntelliTect.Coalesce;

@@ -1,4 +1,4 @@
-﻿#if NET9_0_OR_GREATER
+#if NET9_0_OR_GREATER
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;

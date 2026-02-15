@@ -1,4 +1,4 @@
-﻿namespace IntelliTect.Coalesce.DataAnnotations;
+namespace IntelliTect.Coalesce.DataAnnotations;
 
 /// <summary>
 /// Allows specifying the type of date to contain. 

@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Utilities;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Models;
+using HttpMethod = IntelliTect.Coalesce.DataAnnotations.HttpMethod;
 
 namespace IntelliTect.Coalesce.TypeDefinition;
 

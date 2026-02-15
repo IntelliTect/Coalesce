@@ -1,5 +1,5 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Tests;
-using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Testing;
+using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -13,12 +13,8 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using System.Net;
 using System.Reflection;
-using Xunit;
 
 namespace IntelliTect.Coalesce.Swashbuckle.Tests;
-
-[CollectionDefinition(OpenApiFixture.Collection)]
-public class OpenApiFixtureCollection : ICollectionFixture<OpenApiFixture> { }
 
 public class OpenApiFixture
 {
@@ -64,22 +60,22 @@ public class OpenApiFixture
         var client = App.GetTestClient();
 
         var openApiDoc = await client.GetAsync("/swagger/v1/swagger.json");
-        Assert.Equal(HttpStatusCode.OK, openApiDoc.StatusCode);
+        await Assert.That(openApiDoc.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
         // OpenApiDocument cannot be parsed directly with a JSON deserializer,
         // as it is a midly non-normalized format that requires special rules to understand.
 #if NET10_0_OR_GREATER
         var result = await OpenApiDocument.LoadAsync(await openApiDoc.Content.ReadAsStreamAsync(), "json");
-        Assert.NotNull(result.Document);
-        Assert.Empty(result.Diagnostic.Errors);
-        Assert.Empty(result.Diagnostic.Warnings);
+        await Assert.That(result.Document).IsNotNull();
+        await Assert.That(result.Diagnostic.Errors).IsEmpty();
+        await Assert.That(result.Diagnostic.Warnings).IsEmpty();
         return result.Document;
 #else
         var openApiDocument = new OpenApiStreamReader()
             .Read(await openApiDoc.Content.ReadAsStreamAsync(), out var diagnostic);
-        Assert.NotNull(openApiDocument);
-        Assert.Empty(diagnostic.Errors);
-        Assert.Empty(diagnostic.Warnings);
+        await Assert.That(openApiDocument).IsNotNull();
+        await Assert.That(diagnostic.Errors).IsEmpty();
+        await Assert.That(diagnostic.Warnings).IsEmpty();
         return openApiDocument;
 #endif
     }

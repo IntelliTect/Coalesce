@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

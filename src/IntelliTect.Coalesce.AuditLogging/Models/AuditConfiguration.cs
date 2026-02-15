@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Utilities;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
@@ -19,6 +19,8 @@ public class AuditConfiguration
     /// If enabled, properties whose value is <see langword="default"/> are excluded from <see cref="AuditEntryState.EntityAdded"/> audit logs.
     /// </summary>
     internal bool KeepAddedDefaultValues { get; set; }
+
+    public int Test = Random.Shared.Next();
 
     public AuditConfiguration Clone()
     {

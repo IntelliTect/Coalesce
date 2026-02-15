@@ -4617,6 +4617,34 @@ export const StringIdentity = domain.types.StringIdentity = {
   dataSources: {
   },
 }
+export const SuppressedDefaultOrdering = domain.types.SuppressedDefaultOrdering = {
+  name: "SuppressedDefaultOrdering" as const,
+  displayName: "Suppressed Default Ordering",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "SuppressedDefaultOrdering",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const Test = domain.types.Test = {
   name: "Test" as const,
   displayName: "Test",
@@ -5599,6 +5627,7 @@ interface AppDomain extends Domain {
     StandaloneReadonly: typeof StandaloneReadonly
     StandaloneReadWrite: typeof StandaloneReadWrite
     StringIdentity: typeof StringIdentity
+    SuppressedDefaultOrdering: typeof SuppressedDefaultOrdering
     Test: typeof Test
     TimeOnlyPk: typeof TimeOnlyPk
     ValidationTarget: typeof ValidationTarget

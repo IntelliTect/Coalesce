@@ -7,47 +7,19 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.Testing\IntelliTect.Coalesce.Testing.csproj" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SemanticKernel" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-    
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+
     <PackageReference Include="Moq" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit" />
+    <PackageReference Include="TUnit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="TargetClasses/**/*.cs" />
-  </ItemGroup>
 
-  <!-- Add current preprocessor directives into an attributes 
-    so we can feed them back into roslyn when we analyze our TargetClasses. -->
-  <Target Name="AddDefinesAsAttribute" BeforeTargets="CoreGenerateAssemblyInfo" DependsOnTargets="AddImplicitDefineConstants">
-    <ItemGroup>
-      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-        <_Parameter1>DefineConstants</_Parameter1>
-        <_Parameter2>$(DefineConstants)</_Parameter2>
-      </AssemblyAttribute>
-    </ItemGroup>
-  </Target>
-
-  <ItemGroup>
-    <None Update="xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 
 </Project>

@@ -1,11 +1,11 @@
-﻿using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Helpers;
 
 namespace IntelliTect.Coalesce.Tests;
 
 public class ClonerTest
 {
-    [Fact]
-    public void CopyTest()
+    [Test]
+    public async Task CopyTest()
     {
         var src = new TestClass
         {
@@ -17,10 +17,10 @@ public class ClonerTest
         src.Field = "my Field";
         var dest = src.Copy();
 
-        Assert.Equal(src.I, dest.I);
-        Assert.Equal(src.S, dest.S);
-        Assert.Equal(src.Field, dest.Field);
-        Assert.Same(src.C, dest.C);
+        await Assert.That(dest.I).IsEqualTo(src.I);
+        await Assert.That(dest.S).IsEqualTo(src.S);
+        await Assert.That(dest.Field).IsEqualTo(src.Field);
+        await Assert.That(dest.C).IsSameReferenceAs(src.C);
     }
 
 

@@ -1,6 +1,3 @@
-using IntelliTect.Coalesce.Analyzer.Analyzers;
-using System.Threading.Tasks;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0014_NoAutoIncludeOnNonObjectPropertyTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>

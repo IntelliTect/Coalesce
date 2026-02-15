@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
@@ -68,7 +67,7 @@ public class AuditTests : IDisposable
     [Test]
     // Volatility of underlying ConcurrentDictionary of underlying MemoryCache causes sporadic failures of this test
     // when run in parallel with the other tests
-    [NotInParallel] 
+    [NotInParallel]
     public async Task ConfigureAudit_IsCached()
     {
         // Arrange

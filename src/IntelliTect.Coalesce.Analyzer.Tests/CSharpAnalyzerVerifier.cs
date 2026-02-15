@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using IntelliTect.Coalesce.TypeDefinition;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;

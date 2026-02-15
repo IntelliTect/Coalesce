@@ -1,7 +1,3 @@
-using IntelliTect.Coalesce.Analyzer.Analyzers;
-using Microsoft.CodeAnalysis.Testing;
-using System.Threading.Tasks;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class GetQueryOrderingAnalyzerTests : CSharpAnalyzerVerifier<GetQueryOrderingAnalyzer>

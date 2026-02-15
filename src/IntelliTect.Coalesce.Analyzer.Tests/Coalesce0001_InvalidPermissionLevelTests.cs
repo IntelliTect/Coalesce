@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0001_InvalidPermissionLevelTests : CSharpAnalyzerVerifier<Coalesce0001_InvalidPermissionLevel>

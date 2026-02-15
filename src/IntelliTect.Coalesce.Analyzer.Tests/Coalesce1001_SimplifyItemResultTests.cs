@@ -1,6 +1,3 @@
-using Microsoft.CodeAnalysis.Testing;
-using System.Threading.Tasks;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coalesce1001_SimplifyItemResult>

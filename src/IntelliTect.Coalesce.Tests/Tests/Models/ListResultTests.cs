@@ -1,9 +1,6 @@
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Testing.Util;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Models;
 

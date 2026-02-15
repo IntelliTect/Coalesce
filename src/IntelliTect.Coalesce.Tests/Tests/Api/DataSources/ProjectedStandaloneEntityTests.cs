@@ -1,9 +1,6 @@
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Testing.Fixtures;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Api.DataSources;
 

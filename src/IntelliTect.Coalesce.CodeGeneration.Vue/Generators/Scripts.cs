@@ -1,6 +1,5 @@
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.TypeDefinition;
-using System.Collections.Generic;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators;
 

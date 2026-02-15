@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class InvalidBehaviorsOverrideWithDenyAllTests : CSharpAnalyzerVerifier<InvalidBehaviorsOverrideWithDenyAllAnalyzer>

@@ -1,6 +1,5 @@
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests;
 

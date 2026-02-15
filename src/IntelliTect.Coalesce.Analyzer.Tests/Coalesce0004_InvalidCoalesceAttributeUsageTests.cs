@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
 public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>

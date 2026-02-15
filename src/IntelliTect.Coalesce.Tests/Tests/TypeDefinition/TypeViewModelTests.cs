@@ -3,10 +3,7 @@ using IntelliTect.Coalesce.Testing.TargetClasses;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Testing.Util;
 using IntelliTect.Coalesce.TypeDefinition;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 

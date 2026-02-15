@@ -1,5 +1,4 @@
 using IntelliTect.Coalesce.TypeDefinition;
-using System;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 

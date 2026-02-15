@@ -6,7 +6,6 @@ using IntelliTect.Coalesce.TypeDefinition.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using static IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 

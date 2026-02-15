@@ -2,10 +2,7 @@ using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Testing.Util;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors;
 

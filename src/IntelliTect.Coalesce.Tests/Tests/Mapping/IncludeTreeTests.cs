@@ -1,11 +1,8 @@
-using System.Collections.Generic;
-using System.Linq;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Testing.Fixtures;
 using IntelliTect.Coalesce.Testing.TargetClasses;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Mapping;
 
@@ -191,7 +188,7 @@ public class IncludeTreeTests
                         // This is the "real" projection.
                         .Select(p => p.Product)
                         // NewExpression in a position that isn't a projection.
-                        .OrderBy(p => new {p.Name}.Name)
+                        .OrderBy(p => new { p.Name }.Name)
                         .ToList()
                 })
             });

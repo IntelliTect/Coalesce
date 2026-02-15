@@ -1,7 +1,6 @@
 using IntelliTect.Coalesce.Testing.Util;
 using IntelliTect.Coalesce.Testing.TargetClasses;
 using IntelliTect.Coalesce.TypeDefinition;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Security;
 

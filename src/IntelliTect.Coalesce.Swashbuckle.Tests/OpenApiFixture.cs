@@ -13,7 +13,6 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using System.Net;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Swashbuckle.Tests;
 

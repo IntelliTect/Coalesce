@@ -1,12 +1,5 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp.Testing;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using IntelliTect.Coalesce.Analyzer.Fixers;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 

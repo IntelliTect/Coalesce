@@ -1,7 +1,5 @@
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Testing.Util;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 

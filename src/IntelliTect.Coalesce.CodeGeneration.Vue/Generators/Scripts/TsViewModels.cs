@@ -3,8 +3,6 @@ using IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Utilities;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators;
 

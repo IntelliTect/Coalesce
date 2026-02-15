@@ -5,7 +5,6 @@ using System.Security.Claims;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Mapping;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Security;
 
@@ -34,13 +33,13 @@ public class PropertySecurityTests
 
         await Assert.That(prop.SecurityInfo.Edit.RoleLists).Count().IsEqualTo(2);
 
-        await Assert.That(prop.SecurityInfo.Edit.IsAllowed(new (new ClaimsIdentity(new[]
+        await Assert.That(prop.SecurityInfo.Edit.IsAllowed(new(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.Role, "ReadRole"),
             new Claim(ClaimTypes.Role, "EditRole"),
         })))).IsTrue();
 
-        await Assert.That(prop.SecurityInfo.Edit.IsAllowed(new (new ClaimsIdentity(new[]
+        await Assert.That(prop.SecurityInfo.Edit.IsAllowed(new(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.Role, "EditRole"),
         })))).IsFalse();

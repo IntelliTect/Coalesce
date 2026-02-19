@@ -31,7 +31,7 @@
   "dependencies": {
     "@tmcp/adapter-zod-v3": "0.2.1",
     "@tmcp/transport-stdio": "^0.4.0",
-    "minimatch": "^10.0.3",
+    "minimatch": "^10.2.1",
     "tmcp": "^1.16.0",
     "zod": "3.25.76"
   }

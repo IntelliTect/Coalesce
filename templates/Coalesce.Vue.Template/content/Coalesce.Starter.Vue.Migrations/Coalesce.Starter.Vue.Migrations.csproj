@@ -16,7 +16,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
     <!--#if(Hangfire) -->
-    <PackageReference Include="Hangfire.SqlServer" Version="1.8.21" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
     <!--#endif -->
   </ItemGroup>
 </Project>

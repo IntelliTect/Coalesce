@@ -20,7 +20,7 @@
     <PackageReference Include="SendGrid" Version="9.29.3" />
     <!--#endif -->
     <!--#if(Hangfire) -->
-    <PackageReference Include="Hangfire.Core" Version="1.8.21" />
+    <PackageReference Include="Hangfire.Core" Version="1.8.23" />
     <!--#endif -->
     <!--#if(AIChat) -->
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" />

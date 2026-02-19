@@ -23,8 +23,8 @@
     <PackageReference Include="Hangfire.Core" Version="1.8.23" />
     <!--#endif -->
     <!--#if(AIChat) -->
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" />
-    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.70.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.72.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.72.0" />
     <!--#endif -->
     <!--#if(KeyVault) -->
     <PackageReference Include="Aspire.Azure.Security.KeyVault" Version="13.1.0" />

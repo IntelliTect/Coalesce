@@ -29,6 +29,7 @@ internal sealed class HangfireSqlServerNoiseFilterProcessor : BaseProcessor<Acti
             // Could be either db.statement or db.query.text, depending on whether using old or new conventions.
             activity.GetTagItem("db.statement") as string ??
             activity.GetTagItem("db.query.text") as string ??
+            activity.GetTagItem("db.stored_procedure.name") as string ??
             activity.GetTagItem("db.stored_procedure.text") as string;
 
         if (commandText is not null &&

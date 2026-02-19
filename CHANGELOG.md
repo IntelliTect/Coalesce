@@ -1,4 +1,5 @@
 # 6.2.1
+- Handle `db.stored_procedure.name` in `AddHangfireSqlServerNoiseFilter`
 
 # 6.2.0
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.

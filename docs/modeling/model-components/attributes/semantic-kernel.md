@@ -117,3 +117,10 @@ var kernel = new Kernel(sp, [.. sp.GetServices<KernelPlugin>()]);
 ```
 
 Then, you can use the Kernel with Semantic Kernel features like `IChatCompletionService` or `ChatCompletionAgent`. Learn more about Semantic Kernel plugins in the [Microsoft documentation](https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/?pivots=programming-language-csharp).
+
+
+## Service Scoping Considerations
+
+Coalesce wraps the invocations of each generated kernel plugin method in a new service scope in order to preserve the typical per-invocation isolation that normally occurs when methods and endpoints are invoked by an HTTP request. This avoids issues with potentially parallel `DbContext` operations, or EF `ChangeTracker` state getting shared between tool calls.
+
+When using Semantic Kernel plugins in a multi-tenant application, you'll need to configure the correct tenant to be used within these nested service scopes. You can do this with the [`CoalesceOptions.OnKernelPluginExecuting`](/topics/startup.md#coalesceoptions-properties) hook, which will invoke with the new service scope is created, but before the execution of the plugin function.

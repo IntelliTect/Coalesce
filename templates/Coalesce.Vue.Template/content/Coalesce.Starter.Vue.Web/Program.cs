@@ -3,8 +3,10 @@ using Coalesce.Starter.Vue.Data.Auth;
 using Coalesce.Starter.Vue.Web;
 using IntelliTect.Coalesce;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 #if OpenAPI
 using Scalar.AspNetCore;
 #endif
@@ -72,7 +74,17 @@ services.AddDbContext<AppDbContext>(options => options
     .ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored))
 );
 
+#if (Tenancy && AIChat)
+services.AddCoalesce<AppDbContext>(
+    b => b.Configure(o => o.OnKernelPluginExecuting = async ctx =>
+    {
+        var crudCtx = ctx.ServiceProvider.GetService<CrudContext<AppDbContext>>();
+        crudCtx.Db.TenantId = crudCtx?.User.GetTenantId();
+    })
+);
+#else
 services.AddCoalesce<AppDbContext>();
+#endif
 services.AddDataProtection().PersistKeysToDbContext<AppDbContext>();
 services.AddMvc();
 

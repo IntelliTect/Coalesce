@@ -83,7 +83,7 @@ public class RoslynTypeLocator : TypeLocator
     public List<INamedTypeSymbol> GetAllTypes()
     {
         if (_allTypes != null) return _allTypes;
-        
+
         var compilation = GetProjectCompilation();
 
         var visitor = new SymbolDiscoveryVisitor();
@@ -175,22 +175,22 @@ public class RoslynTypeLocator : TypeLocator
     {
         var workspace = new RoslynWorkspace(project.MsBuildProjectContext, project.MsBuildProjectContext.Configuration);
 
-        workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
-        {
-            if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
-            {
+        // workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
+        // {
+        //     if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
+        //     {
 
-                // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
-                //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
-                //     Therefore we must ignore an empty error message.
-                Debug.WriteLine(e.Diagnostic.Message);
-                if (!e.Diagnostic.Message.Contains(
-                    "Unable to cast object of type 'Microsoft.CodeAnalysis.BuildTasks.Csc' to type 'Microsoft.Build.Framework.ITask'."))
-                {
-                    throw new InvalidProjectFileException(e.Diagnostic.Message);
-                }
-            }
-        };
+        //         // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
+        //         //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
+        //         //     Therefore we must ignore an empty error message.
+        //         Debug.WriteLine(e.Diagnostic.Message);
+        //         if (!e.Diagnostic.Message.Contains(
+        //             "Unable to cast object of type 'Microsoft.CodeAnalysis.BuildTasks.Csc' to type 'Microsoft.Build.Framework.ITask'."))
+        //         {
+        //             throw new InvalidProjectFileException(e.Diagnostic.Message);
+        //         }
+        //     }
+        // };
 
         return new RoslynTypeLocator(workspace, project);
     }

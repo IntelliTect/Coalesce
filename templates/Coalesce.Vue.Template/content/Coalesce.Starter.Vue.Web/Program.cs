@@ -78,8 +78,8 @@ services.AddDbContext<AppDbContext>(options => options
 services.AddCoalesce<AppDbContext>(
     b => b.Configure(o => o.OnKernelPluginExecuting = async ctx =>
     {
-        var crudCtx = ctx.ServiceProvider.GetService<CrudContext<AppDbContext>>();
-        crudCtx.Db.TenantId = crudCtx?.User.GetTenantId();
+        var crudCtx = ctx.ServiceProvider.GetRequiredService<CrudContext<AppDbContext>>();
+        crudCtx.DbContext.TenantId = crudCtx.User.GetTenantId();
     })
 );
 #else

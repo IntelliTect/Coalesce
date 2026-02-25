@@ -1,3 +1,6 @@
+# 6.2.2
+- Support C# 14
+
 # 6.2.1
 - Handle `db.stored_procedure.name` in `AddHangfireSqlServerNoiseFilter`
 

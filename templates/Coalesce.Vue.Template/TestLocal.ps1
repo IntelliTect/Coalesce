@@ -1,8 +1,3 @@
-param (
-    [Parameter(Position = 0)]
-    [string[]]$testCases
-)
-
 $dir = $PSScriptRoot
 
 # outDir must lie outside of the repository so that NPM and typescript
@@ -23,48 +18,48 @@ dotnet new install $(Get-ChildItem -Path "$dir/IntelliTect.Coalesce.Vue.Template
 
 dotnet new coalescevue --help
 
-foreach ($testCase in $testCases) {
-    Write-Output "-------TEST CASE------"
-    if (-not $testCase) {
-        Write-Output "<no options enabled>"
-    }
-    else {
-        Write-Output $testCase
-    }
-    Write-Output "----------------------"
-    Write-Output ""
+$flags = $args -join ' '
 
-    Remove-Item $outDir/* -Recurse -Force -ErrorAction SilentlyContinue
-    Invoke-Expression "dotnet new coalescevue -o $outDir --force $testcase"
+Write-Output "-------TEST CASE------"
+if (-not $flags) {
+    Write-Output "<no options enabled>"
+}
+else {
+    Write-Output $flags
+}
+Write-Output "----------------------"
+Write-Output ""
 
-    Push-Location $outDir/*.Web
-    try {
-        dotnet restore
-        dotnet coalesce
-        npm i
-        npx tsc -p ./tsconfig.node.json
-        npm run build
-        npm run lint:fix # ensure all lint issues are auto-fixable
-        # CS9113: Parameter '<param>' is unread. (too annoying to fix this for every possible combination of template params)
-        dotnet build .. /nowarn:CS9113
+Remove-Item $outDir/* -Recurse -Force -ErrorAction SilentlyContinue
+Invoke-Expression "dotnet new coalescevue -o $outDir --force $flags"
 
-        if ($testCase -match 'AzureTerraform' -and (Get-Command terraform -ErrorAction SilentlyContinue)) {
-            Push-Location $outDir/terraform
-            try {
-                terraform init -backend=false
-                terraform validate
-            }
-            finally { Pop-Location }
-            
-            Push-Location $outDir/terraform/bootstrap
-            try {
-                terraform init -backend=false
-                terraform validate
-            }
-            finally { Pop-Location }
+Push-Location $outDir/*.Web
+try {
+    dotnet restore
+    dotnet coalesce
+    npm i
+    npx tsc -p ./tsconfig.node.json
+    npm run build
+    npm run lint:fix # ensure all lint issues are auto-fixable
+    # CS9113: Parameter '<param>' is unread. (too annoying to fix this for every possible combination of template params)
+    dotnet build .. /nowarn:CS9113
+
+    if ($flags -match 'AzureTerraform' -and (Get-Command terraform -ErrorAction SilentlyContinue)) {
+        Push-Location $outDir/terraform
+        try {
+            terraform init -backend=false
+            terraform validate
         }
+        finally { Pop-Location }
+        
+        Push-Location $outDir/terraform/bootstrap
+        try {
+            terraform init -backend=false
+            terraform validate
+        }
+        finally { Pop-Location }
     }
-    finally {
-        Pop-Location
-    }
+}
+finally {
+    Pop-Location
 }

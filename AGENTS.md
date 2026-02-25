@@ -43,7 +43,7 @@ cd ../coalesce-mcp && npm test run
 
 ### Template tests
 
-If you make changes to the template in the `templates` directory, validate the changes by running `TestLocal.ps1 -- "--FeatureOne --FeatureTwo"` where the FeatureOne, FeatureTwo parameters are replaced with each flag that might affect the changes you made. Run it multiple times if there are different combinations of feature flags that might interact in different ways. The flags are the variables checked by the `#if` in the template code.
+If you make changes to the template in the `templates` directory, validate the changes by running `TestLocal.ps1 --FeatureOne --FeatureTwo` where the FeatureOne, FeatureTwo parameters are replaced with each flag that might affect the changes you made. Run it multiple times if there are different combinations of feature flags that might interact in different ways. The flags are the variables checked by the `#if` in the template code.
 
 ### Documentation
 

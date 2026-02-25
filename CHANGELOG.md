@@ -1,8 +1,8 @@
+# 6.2.2
+- Support C# 14
+
 # 6.2.1
 - Handle `db.stored_procedure.name` in `AddHangfireSqlServerNoiseFilter`
-
-## Template Changes
-- Updated C# language version to 14
 
 # 6.2.0
 - Add COA0014 analyzer to avoid incorrect usage of `NoAutoInclude`.

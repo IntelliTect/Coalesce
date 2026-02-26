@@ -120,6 +120,11 @@ This can be overridden on individual custom methods using `ExecuteAttribute.Vali
 
 Defaults to `true`.
 
+<Prop def="public Func<KernelPluginExecutingContext, Task>? OnKernelPluginExecuting { get; set; }" lang="c#" />
+
+A hook that will be called before the execution of each Coalesce-generated [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md). This allows for per-scope initialization, such as setting a tenant ID on a DbContext.
+
+
 ## Middleware & Helpers
 
 Coalesce provides several helper extension methods to simplify common application setup tasks:

@@ -2,6 +2,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -90,4 +91,16 @@ public class CoalesceOptions
     /// This can be overridden on individual custom methods using <see cref="ExecuteAttribute.ValidateAttributes"/>.
     /// </summary>
     public bool ValidateAttributesForMethods { get; set; } = true;
+
+    /// <summary>
+    /// A hook that will be called before the execution of each Coalesce-generated Semantic Kernel Plugin.
+    /// </summary>
+    public Func<KernelPluginExecutingContext, Task>? OnKernelPluginExecuting { get; set; }
+}
+
+
+public class KernelPluginExecutingContext
+{
+    public required IServiceProvider ServiceProvider { get; init; }
+    public required object Target { get; init; }
 }

@@ -1,5 +1,6 @@
 # 6.2.2
 - Support C# 14
+- Added `CoalesceOptions.OnKernelPluginExecuting` hook that is called when a new scope is created in `KernelPluginBase.InvokeScoped`. This enables per-scope initialization like setting tenant context on a DbContext.
 
 # 6.2.1
 - Handle `db.stored_procedure.name` in `AddHangfireSqlServerNoiseFilter`

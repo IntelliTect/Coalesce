@@ -33,6 +33,11 @@ public class KernelPluginBase<T>(CrudContext context)
         using var scope = ServiceProvider.CreateScope();
         var scopedInstance = (KernelPluginBase<T>)ActivatorUtilities.GetServiceOrCreateInstance(scope.ServiceProvider, this.GetType());
         scopedInstance._isScoped = true;
+        await (Context.Options.OnKernelPluginExecuting?.Invoke(new()
+        {
+            ServiceProvider = scope.ServiceProvider,
+            Target = scopedInstance
+        }) ?? Task.CompletedTask);
         return await (Task<TResult>)action.Method.Invoke(scopedInstance, args)!;
     }
 
@@ -41,9 +46,15 @@ public class KernelPluginBase<T>(CrudContext context)
     /// </summary>
     protected async Task<string> Json(Func<Task<object>> func)
     {
-        return JsonSerializer.Serialize(await func(), new JsonSerializerOptions { 
-            ReferenceHandler = ReferenceHandler.IgnoreCycles,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        });
+        return JsonSerializer.Serialize(await func(), JsonSerializerOptions);
     }
+
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        ReferenceHandler = ReferenceHandler.IgnoreCycles,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        // String enums to match tool call inputs (https://github.com/microsoft/semantic-kernel/issues/13589),
+        // which should generally work better for a language model.
+        Converters = { new JsonStringEnumConverter() }
+    };
 }

@@ -30,7 +30,7 @@ jobs:
       - run: dotnet pack --no-build --configuration Release -p:PackageOutputPath="$(pwd)/out/packages"
 
       - name: "Upload Artifact: NuGet Packages"
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: packages
           path: out/packages
@@ -100,7 +100,7 @@ jobs:
       - run: npm pack
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coalesce-vue
           path: src/coalesce-vue/coalesce-vue*.tgz
@@ -131,7 +131,7 @@ jobs:
       - run: npm pack
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coalesce-mcp
           path: src/coalesce-mcp/*.tgz
@@ -161,7 +161,7 @@ jobs:
       - run: npm pack
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coalesce-vue-vuetify3
           path: src/coalesce-vue-vuetify3/*.tgz
@@ -186,7 +186,7 @@ jobs:
         run: npm run build
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: docs
           path: docs/.vitepress/dist
@@ -229,7 +229,7 @@ jobs:
             9.0.x
 
       - name: Download Artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: ${{ github.workspace }}/artifacts
 

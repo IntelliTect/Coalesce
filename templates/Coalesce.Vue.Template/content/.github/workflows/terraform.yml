@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
 
       - name: Azure Login
         uses: azure/login@v2
@@ -155,7 +155,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
 
       - name: Azure Login
         uses: azure/login@v2

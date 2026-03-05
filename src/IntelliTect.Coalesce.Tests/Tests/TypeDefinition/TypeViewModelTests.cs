@@ -96,6 +96,7 @@ public class TypeViewModelTests
     [ClassViewModelData(typeof(IEntityFrameworkBehaviors<Exception, AppDbContext>),
         "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.AppDbContext>")]
     [ClassViewModelData(typeof(Case.Statuses), "IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Case.Statuses")]
+    [ClassViewModelData(typeof(ExtensionBlockTestHelpers), "IntelliTect.Coalesce.Testing.TargetClasses.ExtensionBlockTestHelpers")]
     public async Task FullyQualifiedName_HasCorrectValue(
         ClassViewModelData data,
         string expectedTypeName

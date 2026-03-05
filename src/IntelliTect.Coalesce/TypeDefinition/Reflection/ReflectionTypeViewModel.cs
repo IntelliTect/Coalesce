@@ -28,8 +28,8 @@ public class ReflectionTypeViewModel : TypeViewModel
             ? ReflectionTypeViewModel.GetOrCreate(reflectionRepository, Info.GenericTypeArguments[0])
             : null;
 
-        ArrayType = IsArray 
-            ? ReflectionTypeViewModel.GetOrCreate(reflectionRepository, Info.GetElementType()!) 
+        ArrayType = IsArray
+            ? ReflectionTypeViewModel.GetOrCreate(reflectionRepository, Info.GetElementType()!)
             : null;
 
         IEnumerable<Type> GetBaseClassesAndInterfaces(Type t)
@@ -126,7 +126,7 @@ public class ReflectionTypeViewModel : TypeViewModel
                 var member = Info.GetMember(name)[0];
 
                 result.Add(new EnumMember(
-                    name, 
+                    name,
                     Convert.ChangeType(value, integralType),
                     member.GetAttribute<DisplayAttribute>()?.Name ??
                         member.Name.ToProperCase(),
@@ -189,8 +189,8 @@ public class ReflectionTypeViewModel : TypeViewModel
 
         var builder = new System.Text.StringBuilder();
         var name = type.Name;
-        var index = name.IndexOf("`");
-        builder.AppendFormat("{0}.{1}", type.Namespace, name.Substring(0, index));
+        var index = name.IndexOf('`');
+        builder.AppendFormat("{0}.{1}", type.Namespace, index >= 0 ? name.Substring(0, index) : name);
         builder.Append('<');
         var first = true;
         foreach (var arg in type.GetGenericArguments())
@@ -227,8 +227,8 @@ public class ReflectionTypeViewModel : TypeViewModel
 
         var builder = new System.Text.StringBuilder();
         var name = type.Name;
-        var index = name.IndexOf("`");
-        builder.AppendFormat("{0}.{1}", type.Namespace, name.Substring(0, index));
+        var index = name.IndexOf('`');
+        builder.AppendFormat("{0}.{1}", type.Namespace, index >= 0 ? name.Substring(0, index) : name);
         builder.Append('<');
         var first = true;
         foreach (var arg in type.GetGenericArguments())

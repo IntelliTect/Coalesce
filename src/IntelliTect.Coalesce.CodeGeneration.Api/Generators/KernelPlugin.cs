@@ -448,7 +448,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         b.Line();
     }
 
-    private class CompositeDisposable(params IDisposable[] disposables) : IDisposable
+    private class CompositeDisposable(params IEnumerable<IDisposable> disposables) : IDisposable
     {
         public void Dispose()
         {

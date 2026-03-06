@@ -2,8 +2,8 @@ namespace Coalesce.Starter.Vue.Data.Test;
 
 public class UnitTest1 : TestBase
 {
-    [Fact]
-    public void Test1()
+    [Test]
+    public async Task Test1()
     {
 #if ExampleModel
         // Arrange
@@ -17,11 +17,11 @@ public class UnitTest1 : TestBase
         var widget2 = Db.Widgets.Single();
 
         // Assert
-        Assert.Equal(WidgetCategory.Sprecklesprockets, widget2.Category);
+        await Assert.That(widget2.Category).IsEqualTo(WidgetCategory.Sprecklesprockets);
 
         // After calling RefreshServices, we have a different DbContext instance
         // and so we'll get a different entity instance.
-        Assert.NotEqual(widget1, widget2);
+        await Assert.That(widget1).IsNotEqualTo(widget2);
 #endif
     }
 }

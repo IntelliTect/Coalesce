@@ -21,5 +21,5 @@ An `IntelliTect Coalesce`–based project. Projects:
 
 Use the Context7 server to fetch official docs. Flow: `#resolve-library-id` → `#get-library-docs`. The following are existing known library IDs that may be useful:
 
-- Coalesce: `/IntelliTect/Coalesce`
+- Coalesce: `/intellitect/coalesce`
 - `Vuetify`: `/vuetifyjs/vuetify`

@@ -362,6 +362,36 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
     }
 
     [Test]
+    public async Task ItemResultBool_BooleanValue_NoWarning()
+    {
+        // ItemResult<bool> with boolean value is ambiguous, should not report
+        await VerifyAnalyzerAsync("""
+            public class TestClass
+            {
+                public ItemResult<bool> GetResult()
+                {
+                    return new ItemResult<bool> { Object = true };
+                }
+
+                public ItemResult<bool> GetResult2()
+                {
+                    return new ItemResult<bool> { Object = false };
+                }
+
+                public ItemResult<bool> GetResult3()
+                {
+                    return new ItemResult<bool> { WasSuccessful = true };
+                }
+
+                public ItemResult<bool> GetResult4()
+                {
+                    return new ItemResult<bool> { WasSuccessful = false };
+                }
+            }
+            """);
+    }
+
+    [Test]
     public async Task ItemResult_BooleanWithNullMessage_True_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""

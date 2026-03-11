@@ -41,6 +41,17 @@ cd ../coalesce-vue-vuetify3 && npm test run
 cd ../coalesce-mcp && npm test run
 ```
 
+The .NET test projects use TUnit. To filter tests, pass `--treenode-filter` (run in the working directory of the specific test project):
+
+```bash
+# Run all tests in a class:
+dotnet run --disable-logo --framework net10.0 --treenode-filter "/*/*/LoginTests/*"
+
+# Run a specific test:
+dotnet run --disable-logo --framework net10.0 --treenode-filter "/*/*/*/AcceptCookiesTest"
+```
+
+
 ### Template tests
 
 If you make changes to the template in the `templates` directory, validate the changes by running `TestLocal.ps1 --FeatureOne --FeatureTwo` where the FeatureOne, FeatureTwo parameters are replaced with each flag that might affect the changes you made. Run it multiple times if there are different combinations of feature flags that might interact in different ways. The flags are the variables checked by the `#if` in the template code.

@@ -1,4 +1,5 @@
 # 6.2.3
+- Don't suggest COA1001 for ambiguous `ItemResult<bool>` usages.
 
 # 6.2.2
 - Support C# 14

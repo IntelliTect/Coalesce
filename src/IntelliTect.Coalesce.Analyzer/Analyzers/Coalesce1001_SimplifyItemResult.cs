@@ -142,7 +142,8 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         // Case 1: Can simplify to boolean (true or false)
         if ((virtualResult.ObjectExpression == null || IsNullLiteral(virtualResult.ObjectExpression)) &&
             virtualResult.WasSuccessfulExpression is not null &&
-            (virtualResult.MessageExpression == null || IsNullLiteral(virtualResult.MessageExpression)))
+            (virtualResult.MessageExpression == null || IsNullLiteral(virtualResult.MessageExpression)) &&
+            !IsItemResultOfBoolean(type))
         {
             ReportSimplificationDiagnostics(context, objectCreation, virtualResult.WasSuccessfulExpression);
             return;
@@ -174,6 +175,13 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
             // Skip ItemResult<string> with string value as it's ambiguous
             if (typeArgument.SpecialType == SpecialType.System_String &&
                 virtualResult.ObjectType?.SpecialType == SpecialType.System_String)
+            {
+                return;
+            }
+
+            // Skip ItemResult<bool> with bool value as it's ambiguous
+            if (typeArgument.SpecialType == SpecialType.System_Boolean &&
+                virtualResult.ObjectType?.SpecialType == SpecialType.System_Boolean)
             {
                 return;
             }
@@ -259,6 +267,12 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
     {
         return type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType &&
                namedType.TypeArguments[0].SpecialType == SpecialType.System_String;
+    }
+
+    private static bool IsItemResultOfBoolean(ITypeSymbol type)
+    {
+        return type is INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } namedType &&
+               namedType.TypeArguments[0].SpecialType == SpecialType.System_Boolean;
     }
 
     private static bool? GetBooleanValueFromExpression(ExpressionSyntax? expression)

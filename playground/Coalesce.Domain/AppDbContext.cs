@@ -78,6 +78,12 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
             cb.OwnsOne(c => c.CompanyHqAddress);
         });
 
+        modelBuilder.Entity<Person>(e =>
+        {
+            e.ComplexProperty(m => m.CurrentWeather, x => x.ToJson());
+            e.ComplexCollection(m => m.WeatherHistory, x => x.ToJson());
+        });
+
         modelBuilder
             .Entity<Case>()
             .ToTable("Case")

@@ -82,11 +82,44 @@ Coalesce is compatible with TPH, TPT, and TPCT entity hierarchies. Define your m
 - The generated [Model](/stacks/vue/layers/models.md) types **do** mirror your C# inheritance hierarchy using regular TypeScript class inheritance.
 - If you want to expose the discriminator property to the client, map it to a .NET property on the base type [per EF documentation](https://learn.microsoft.com/en-us/ef/core/modeling/inheritance#table-per-hierarchy-and-discriminator-configuration).
 
+## JSON-mapped Properties
+
+Properties whose type is a [Simple Model](/modeling/model-types/simple-models.md) (i.e., a type without a `DbSet<T>` on your `DbContext`) can be mapped in EF to be stored as JSON using `ComplexProperty` and `ComplexCollection` in `OnModelCreating`:
+
+```c#
+public class Order {
+    public int OrderId { get; set; }
+    public Address ShippingAddress { get; set; }
+    public List<LineItem> LineItems { get; set; }
+}
+
+public class Address {
+    public string Street { get; set; }
+    public string City { get; set; }
+}
+
+public class LineItem {
+    public string Sku { get; set; }
+    public int Quantity { get; set; }
+}
+```
+
+```c#
+// In DbContext.OnModelCreating:
+modelBuilder.Entity<Order>(e =>
+{
+    e.ComplexProperty(o => o.ShippingAddress, x => x.ToJson()); // EF Core 8+
+    e.ComplexCollection(o => o.LineItems, x => x.ToJson());     // EF Core 10+
+});
+```
+
+On the TypeScript side, mutations to these properties and their child properties and items participate in [ViewModel](/stacks/vue/layers/viewmodels.md) dirty tracking, triggering [autosave](/stacks/vue/layers/viewmodels.md#autosave) if enabled.
+
 ## Other Model Customization
 
 ### Properties
 
-Read [Properties](/modeling/model-components/properties.md) for an outline of the different types of properties that you may place on your models and the code that Coalesce will generate for each of them. The above section also details the specific needs of properties that have a relational role in your model.
+Read [Properties](/modeling/model-components/properties.md) for an outline of the different types of properties that you may place on your models and the code that Coalesce will generate for each of them.
 
 ### Attributes
 

@@ -81,7 +81,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ComplexModel>(e =>
         {
             e.ComplexProperty(m => m.JsonObject);
+#if NET10_0_OR_GREATER
             e.ComplexCollection(m => m.JsonCollection);
+#endif
         });
     }
 }

@@ -294,7 +294,9 @@ public class PropertyViewModelTests
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.IntCollection), true)]
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.MutablePrimitiveCollection), true)]
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.JsonObject), true)] // json-mapped external type object
+#if NET10_0_OR_GREATER
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.JsonCollection), true)] // json-mapped external type collection
+#endif
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), false)] // collection nav
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.SingleTest), false)] // ref nav
     [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaRead), false)]
@@ -309,7 +311,9 @@ public class PropertyViewModelTests
 
     [Test]
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.JsonObject))]
+#if NET10_0_OR_GREATER
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.JsonCollection))]
+#endif
     public async Task JsonMappedExternalTypeOnEntity_IsValueRole(PropertyViewModelData data)
     {
         PropertyViewModel vm = data;

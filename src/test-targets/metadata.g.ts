@@ -1465,6 +1465,26 @@ export const ComplexModel = domain.types.ComplexModel = {
       },
       role: "value",
     },
+    jsonObject: {
+      name: "jsonObject",
+      displayName: "Json Object",
+      type: "object",
+      get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
+      role: "value",
+    },
+    jsonCollection: {
+      name: "jsonCollection",
+      displayName: "Json Collection",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "object",
+        get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
+      },
+      role: "value",
+    },
     nonNullNonZeroInt: {
       name: "nonNullNonZeroInt",
       displayName: "Non Null Non Zero Int",

@@ -76,6 +76,13 @@ public class AppDbContext : DbContext
             .HasDiscriminator(b => b.Discriminator)
             .HasValue<AbstractImpl1>("impl1")
             .HasValue<AbstractImpl2>("impl2");
+
+        // Configure json-mapped complex type properties on ComplexModel
+        modelBuilder.Entity<ComplexModel>(e =>
+        {
+            e.ComplexProperty(m => m.JsonObject);
+            e.ComplexCollection(m => m.JsonCollection);
+        });
     }
 }
 

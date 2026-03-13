@@ -3106,6 +3106,44 @@ describe("ViewModel", () => {
       vm.$loadCleanData({ intCollection: [42, 99] });
       expect(vm.$isDirty).toBeFalsy();
     });
+
+    test("serializable object props (json-mapped external types) are dirtied when mutated directly", async () => {
+      const vm = new ComplexModelViewModel();
+      vm.$isDirty = false;
+      await delay(1);
+
+      // Setting the object itself marks dirty
+      vm.jsonObject = { tempFahrenheit: 72, humidity: 0.5, location: null };
+      expect(vm.$isDirty).toBeTruthy();
+
+      // Direct mutation of a nested property also marks dirty
+      vm.$isDirty = false;
+      vm.jsonObject!.tempFahrenheit = 80;
+      expect(vm.$isDirty).toBeTruthy();
+
+      // Loading clean data doesn't trigger dirty
+      vm.$isDirty = false;
+      vm.$loadCleanData({ jsonObject: { tempFahrenheit: 80, humidity: 0.5, location: null } });
+      expect(vm.$isDirty).toBeFalsy();
+    });
+
+    test("serializable collections of objects (json-mapped external type collections) are dirtied when mutated directly", async () => {
+      const vm = new ComplexModelViewModel();
+      vm.$isDirty = false;
+      await delay(1);
+
+      vm.jsonCollection = [{ tempFahrenheit: 72, humidity: 0.5, location: null }];
+      expect(vm.$isDirty).toBeTruthy();
+
+      vm.$isDirty = false;
+      vm.jsonCollection.push({ tempFahrenheit: 80, humidity: 0.6, location: null });
+      expect(vm.$isDirty).toBeTruthy();
+
+      // Loading clean data doesn't trigger dirty
+      vm.$isDirty = false;
+      vm.$loadCleanData({ jsonCollection: [{ tempFahrenheit: 80, humidity: 0.6, location: null }] });
+      expect(vm.$isDirty).toBeFalsy();
+    });
   });
 
   describe("$getPropDirty", () => {

@@ -57,9 +57,9 @@ public class PropertySecurityInfo
             prop.HasAttribute<ReadOnlyApiAttribute>() ? "Property annotated with [ReadOnlyApi]" :
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            // Non-scalar properties arent writable unless they're owned by an external type,
-            // or the type of the property is an external type.
-            (prop.PureType.IsPOCO && prop.Parent.IsDbMappedType) ? $"Property is non-scalar and parent type {prop.Parent.Name} is a DB mapped type." :
+            // Properties of a DB-mapped entity type (i.e. a navigation property to another entity)
+            // are not directly writable - use the FK property to establish the relationship instead.
+            // External/simple model types (non-entity POCOs) are allowed as they can be json-mapped columns.
             (prop.PureType.IsPOCO && prop.Object!.IsDbMappedType) ? $"Property is non-scalar and property type {prop.Object.Name} is a DB mapped type." :
 
             !prop.IsClientProperty ? "Other" :

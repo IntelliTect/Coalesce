@@ -1,5 +1,6 @@
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Testing.TargetClasses;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -160,6 +161,11 @@ public class ComplexModel
     // https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-8.0/whatsnew#primitive-collections
     public List<int> IntCollection { get; set; }
     public List<Case.Statuses> EnumCollection { get; set; }
+
+    // https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-8.0/whatsnew#json-columns
+    // External/simple model types stored as JSON columns.
+    public WeatherData JsonObject { get; set; }
+    public List<WeatherData> JsonCollection { get; set; }
 
 
     [Range(1, 100)]

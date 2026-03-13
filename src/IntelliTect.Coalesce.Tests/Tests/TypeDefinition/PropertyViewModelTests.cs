@@ -293,6 +293,8 @@ public class PropertyViewModelTests
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.SingleTestId), true)]
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.IntCollection), true)]
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.MutablePrimitiveCollection), true)]
+    [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.JsonObject), true)] // json-mapped external type object
+    [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.JsonCollection), true)] // json-mapped external type collection
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), false)] // collection nav
     [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.SingleTest), false)] // ref nav
     [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaRead), false)]
@@ -303,6 +305,19 @@ public class PropertyViewModelTests
     {
         PropertyViewModel vm = data;
         await Assert.That(vm.IsClientSerializable).IsEqualTo(expected);
+    }
+
+    [Test]
+    [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.JsonObject))]
+    [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.JsonCollection))]
+    public async Task JsonMappedExternalTypeOnEntity_IsValueRole(PropertyViewModelData data)
+    {
+        PropertyViewModel vm = data;
+        await Assert.That(vm.Role).IsEqualTo(PropertyRole.Value);
+        await Assert.That(vm.IsDbMapped).IsFalse();
+        await Assert.That(vm.IsClientSerializable).IsTrue();
+        await Assert.That(vm.SecurityInfo.Edit.IsAllowed()).IsTrue();
+        await Assert.That(vm.PureType.ClassViewModel!.IsDbMappedType).IsFalse();
     }
 
     [Test]

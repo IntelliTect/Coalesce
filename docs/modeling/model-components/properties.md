@@ -18,6 +18,39 @@ Properties of a type that are not on your `DbContext` will also have correspondi
 
 See [Simple Models](/modeling/model-types/simple-models.md) for more information.
 
+### JSON-mapped Complex Types
+
+EF Core supports mapping complex types (non-entity POCOs) to JSON columns using `ComplexProperty` and `ComplexCollection` in `OnModelCreating`. Coalesce fully supports these properties — they are treated as [Simple Models](/modeling/model-types/simple-models.md) and are serialized to/from the client just like any other POCO property.
+
+```c#
+public class Order {
+    public int OrderId { get; set; }
+    public Address ShippingAddress { get; set; }
+    public List<LineItem> LineItems { get; set; }
+}
+
+public class Address {
+    public string Street { get; set; }
+    public string City { get; set; }
+}
+
+public class LineItem {
+    public string Sku { get; set; }
+    public int Quantity { get; set; }
+}
+```
+
+```c#
+// In DbContext.OnModelCreating:
+modelBuilder.Entity<Order>(e =>
+{
+    e.ComplexProperty(o => o.ShippingAddress);      // EF Core 8+
+    e.ComplexCollection(o => o.LineItems);          // EF Core 10+
+});
+```
+
+On the TypeScript side, mutations to these properties (including pushing items to a collection, or modifying nested properties) will correctly mark the [ViewModel](/stacks/vue/layers/viewmodels.md) as dirty, triggering [autosave](/stacks/vue/layers/viewmodels.md#autosave) if enabled.
+
 ### Getter-only Properties
 
 Any property that only has a getter will also have a corresponding property generated in the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#generated-members) and will receive values of the property from the server, but values won't be sent back to the server.

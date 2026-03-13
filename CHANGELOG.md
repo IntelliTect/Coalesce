@@ -1,3 +1,6 @@
+# 6.3
+- Added support for EF Core JSON-mapped complex type properties (`ComplexProperty`, `ComplexCollection`) on entity models. These properties are now fully serializable to/from the client, and direct mutations on the TypeScript side (including collection pushes and nested property assignments) correctly mark the ViewModel dirty.
+
 # 6.2.3
 - Don't suggest COA1001 for ambiguous `ItemResult<bool>` usages.
 

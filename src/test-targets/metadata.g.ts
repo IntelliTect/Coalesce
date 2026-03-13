@@ -5209,6 +5209,7 @@ export const InputOutputOnlyExternalTypeWithRequiredNonscalarProp = domain.types
 export const Location = domain.types.Location = {
   name: "Location" as const,
   displayName: "Location",
+  get displayProp() { return this.props.city }, 
   type: "object",
   props: {
     city: {
@@ -5496,6 +5497,7 @@ export const ValidationTargetChild = domain.types.ValidationTargetChild = {
 export const WeatherData = domain.types.WeatherData = {
   name: "WeatherData" as const,
   displayName: "Weather Data",
+  get displayProp() { return this.props.tempFahrenheit }, 
   type: "object",
   props: {
     tempFahrenheit: {

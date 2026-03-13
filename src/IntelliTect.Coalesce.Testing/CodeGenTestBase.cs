@@ -39,9 +39,9 @@ public class CodeGenTestBase
 
         using var ms = new MemoryStream();
         EmitResult emitResult = compilation.Emit(ms);
-        
-        if (!emitResult.Success) throw new Exception("Web project compilation failed");
-        
+
+        if (!emitResult.Success) throw new Exception("Web project compilation failed: " + string.Join("\n\n", emitResult.Diagnostics));
+
         var assembly = Assembly.Load(ms.ToArray());
         ReflectionRepository.Global.AddAssembly(assembly);
         return assembly;
@@ -90,7 +90,7 @@ public class CodeGenTestBase
             .WithOutputPath(Path.Combine(project.FullName, "out", tfmAttr.FrameworkName, suiteName));
 
         var validationResult = ValidateContext.Validate(suite.Model);
-        await Assert.That(validationResult.Any(r => r.IsError)).IsFalse();
+        await Assert.That(validationResult.Where(r => r.IsError)).IsEmpty();
 
         return suite;
     }
@@ -188,7 +188,8 @@ public class CodeGenTestBase
 
         await typescriptProcess.WaitForExitAsync();
         var streams = await Task.WhenAll(streamTasks);
-        await Assert.That(0 == typescriptProcess.ExitCode).IsTrue();
+        await Assert.That(typescriptProcess.ExitCode).IsEqualTo(0)
+            .Because($"Typescript {tsVersion}\n:" + string.Join("\n\n", streams));
     }
 
     protected DirectoryInfo GetRepoRoot()

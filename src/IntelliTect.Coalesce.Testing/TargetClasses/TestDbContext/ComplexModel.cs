@@ -165,9 +165,7 @@ public class ComplexModel
     // https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-8.0/whatsnew#json-columns
     // External/simple model types stored as JSON columns.
     public WeatherData JsonObject { get; set; }
-#if NET10_0_OR_GREATER
     public List<WeatherData> JsonCollection { get; set; }
-#endif
 
 
     [Range(1, 100)]

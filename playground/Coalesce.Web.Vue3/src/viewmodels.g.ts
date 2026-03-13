@@ -663,6 +663,8 @@ export interface PersonViewModel extends $models.Person {
   get company(): CompanyViewModel | null;
   set company(value: CompanyViewModel | $models.Company | null);
   arbitraryCollectionOfStrings: string[] | null;
+  currentWeather: $models.WeatherData | null;
+  weatherHistory: $models.WeatherData[] | null;
 }
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
   static DataSources = $models.Person.DataSources;
@@ -681,7 +683,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get rename() {
     const rename = this.$apiClient.$makeCaller(
       this.$metadata.methods.rename,
-      (c, name: string | null) => c.rename(this.$primaryKey, name),
+      (c, name?: string | null) => c.rename(this.$primaryKey, name),
       () => ({name: null as string | null, }),
       (c, args) => c.rename(this.$primaryKey, args.name))
     
@@ -692,7 +694,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get uploadPicture() {
     const uploadPicture = this.$apiClient.$makeCaller(
       this.$metadata.methods.uploadPicture,
-      (c, file: File | null) => c.uploadPicture(this.$primaryKey, file),
+      (c, file?: File | null) => c.uploadPicture(this.$primaryKey, file),
       () => ({file: null as File | null, }),
       (c, args) => c.uploadPicture(this.$primaryKey, args.file))
     
@@ -760,7 +762,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get changeFirstName() {
     const changeFirstName = this.$apiClient.$makeCaller(
       this.$metadata.methods.changeFirstName,
-      (c, firstName: string | null, title?: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title),
+      (c, firstName?: string | null, title?: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title),
       () => ({firstName: null as string | null, title: null as $models.Titles | null, }),
       (c, args) => c.changeFirstName(this.$primaryKey, args.firstName, args.title))
     
@@ -844,7 +846,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get namesStartingWith() {
     const namesStartingWith = this.$apiClient.$makeCaller(
       this.$metadata.methods.namesStartingWith,
-      (c, characters: string | null) => c.namesStartingWith(characters),
+      (c, characters?: string | null) => c.namesStartingWith(characters),
       () => ({characters: null as string | null, }),
       (c, args) => c.namesStartingWith(args.characters))
     
@@ -855,7 +857,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get methodWithStringArrayParameter() {
     const methodWithStringArrayParameter = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithStringArrayParameter,
-      (c, strings: string[] | null) => c.methodWithStringArrayParameter(strings),
+      (c, strings?: string[] | null) => c.methodWithStringArrayParameter(strings),
       () => ({strings: null as string[] | null, }),
       (c, args) => c.methodWithStringArrayParameter(args.strings))
     
@@ -866,7 +868,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get methodWithEntityParameter() {
     const methodWithEntityParameter = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithEntityParameter,
-      (c, person: $models.Person | null, people: $models.Person[] | null) => c.methodWithEntityParameter(person, people),
+      (c, person?: $models.Person | null, people?: $models.Person[] | null) => c.methodWithEntityParameter(person, people),
       () => ({person: null as $models.Person | null, people: null as $models.Person[] | null, }),
       (c, args) => c.methodWithEntityParameter(args.person, args.people))
     
@@ -900,7 +902,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get searchPeople() {
     const searchPeople = this.$apiClient.$makeCaller(
       this.$metadata.methods.searchPeople,
-      (c, criteria: $models.PersonCriteria | null, page?: number | null) => c.searchPeople(criteria, page),
+      (c, criteria?: $models.PersonCriteria | null, page?: number | null) => c.searchPeople(criteria, page),
       () => ({criteria: null as $models.PersonCriteria | null, page: null as number | null, }),
       (c, args) => c.searchPeople(args.criteria, args.page))
     

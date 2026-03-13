@@ -1465,6 +1465,26 @@ export const ComplexModel = domain.types.ComplexModel = {
       },
       role: "value",
     },
+    jsonObject: {
+      name: "jsonObject",
+      displayName: "Json Object",
+      type: "object",
+      get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
+      role: "value",
+    },
+    jsonCollection: {
+      name: "jsonCollection",
+      displayName: "Json Collection",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "object",
+        get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
+      },
+      role: "value",
+    },
     nonNullNonZeroInt: {
       name: "nonNullNonZeroInt",
       displayName: "Non Null Non Zero Int",
@@ -5189,6 +5209,7 @@ export const InputOutputOnlyExternalTypeWithRequiredNonscalarProp = domain.types
 export const Location = domain.types.Location = {
   name: "Location" as const,
   displayName: "Location",
+  get displayProp() { return this.props.city }, 
   type: "object",
   props: {
     city: {
@@ -5476,6 +5497,7 @@ export const ValidationTargetChild = domain.types.ValidationTargetChild = {
 export const WeatherData = domain.types.WeatherData = {
   name: "WeatherData" as const,
   displayName: "Weather Data",
+  get displayProp() { return this.props.tempFahrenheit }, 
   type: "object",
   props: {
     tempFahrenheit: {

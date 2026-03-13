@@ -12,6 +12,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Claims;
 
+#nullable disable
+
 namespace Coalesce.Domain;
 
 [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
@@ -130,6 +132,10 @@ public class Person
     public Company? Company { get; set; }
 
     public List<string>? ArbitraryCollectionOfStrings { get; set; }
+
+    public WeatherData CurrentWeather { get; set; }
+
+    public List<WeatherData> WeatherHistory { get; set; }
 
     /// <summary>
     /// Sets the FirstName to the given text.

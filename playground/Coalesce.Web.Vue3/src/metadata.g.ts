@@ -881,7 +881,6 @@ export const Case = domain.types.Case = {
       type: "object",
       get typeDef() { return (domain.types.DevTeam as ObjectType & { name: "DevTeam" }) },
       role: "value",
-      dontSerialize: true,
     },
     duration: {
       name: "duration",
@@ -1862,6 +1861,26 @@ export const Person = domain.types.Person = {
       },
       role: "value",
     },
+    currentWeather: {
+      name: "currentWeather",
+      displayName: "Current Weather",
+      type: "object",
+      get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
+      role: "value",
+    },
+    weatherHistory: {
+      name: "weatherHistory",
+      displayName: "Weather History",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "object",
+        get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
+      },
+      role: "value",
+    },
   },
   methods: {
     rename: {
@@ -1885,9 +1904,6 @@ export const Person = domain.types.Person = {
           displayName: "Name",
           type: "string",
           role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "Name is required.",
-          }
         },
       },
       return: {
@@ -1919,9 +1935,6 @@ export const Person = domain.types.Person = {
           displayName: "File",
           type: "file",
           role: "value",
-          rules: {
-            required: val => val != null || "File is required.",
-          }
         },
       },
       return: {
@@ -2180,9 +2193,6 @@ export const Person = domain.types.Person = {
           displayName: "First Name",
           type: "string",
           role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "First Name is required.",
-          }
         },
         title: {
           name: "title",
@@ -2227,9 +2237,6 @@ export const Person = domain.types.Person = {
           displayName: "Characters",
           type: "string",
           role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "Characters is required.",
-          }
         },
       },
       return: {
@@ -2263,9 +2270,6 @@ export const Person = domain.types.Person = {
             type: "string",
           },
           role: "value",
-          rules: {
-            required: val => val != null || "Strings is required.",
-          }
         },
       },
       return: {
@@ -2294,9 +2298,6 @@ export const Person = domain.types.Person = {
           type: "model",
           get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
           role: "value",
-          rules: {
-            required: val => val != null || "Person is required.",
-          }
         },
         people: {
           name: "people",
@@ -2310,9 +2311,6 @@ export const Person = domain.types.Person = {
             get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
           },
           role: "value",
-          rules: {
-            required: val => val != null || "People is required.",
-          }
         },
       },
       return: {
@@ -2375,9 +2373,6 @@ export const Person = domain.types.Person = {
           type: "object",
           get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
           role: "value",
-          rules: {
-            required: val => val != null || "Criteria is required.",
-          }
         },
         page: {
           name: "page",
@@ -2578,7 +2573,6 @@ export const Product = domain.types.Product = {
       type: "object",
       get typeDef() { return (domain.types.ProductDetails as ObjectType & { name: "ProductDetails" }) },
       role: "value",
-      dontSerialize: true,
     },
     uniqueId: {
       name: "uniqueId",
@@ -2890,6 +2884,7 @@ export const DevTeam = domain.types.DevTeam = {
 export const Location = domain.types.Location = {
   name: "Location" as const,
   displayName: "Location",
+  get displayProp() { return this.props.city }, 
   type: "object",
   props: {
     city: {
@@ -2995,6 +2990,7 @@ export const StreetAddress = domain.types.StreetAddress = {
 export const WeatherData = domain.types.WeatherData = {
   name: "WeatherData" as const,
   displayName: "Weather Data",
+  get displayProp() { return this.props.tempFahrenheit }, 
   type: "object",
   props: {
     tempFahrenheit: {

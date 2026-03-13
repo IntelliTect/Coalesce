@@ -27,6 +27,7 @@ namespace Coalesce.Web.Vue3.Models
         private System.Collections.Generic.ICollection<Coalesce.Domain.Case.Statuses> _States;
         private int? _DevTeamAssignedId;
         private System.TimeSpan? _Duration;
+        private Coalesce.Web.Vue3.Models.DevTeamParameter _DevTeamAssigned;
 
         public int? CaseKey
         {
@@ -98,6 +99,11 @@ namespace Coalesce.Web.Vue3.Models
             get => _Duration;
             set { _Duration = value; Changed(nameof(Duration)); }
         }
+        public Coalesce.Web.Vue3.Models.DevTeamParameter DevTeamAssigned
+        {
+            get => _DevTeamAssigned;
+            set { _DevTeamAssigned = value; Changed(nameof(DevTeamAssigned)); }
+        }
 
         /// <summary>
         /// Map from the current DTO instance to the domain object.
@@ -120,6 +126,7 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(States))) entity.States = States?.ToList();
             if (ShouldMapTo(nameof(DevTeamAssignedId))) entity.DevTeamAssignedId = DevTeamAssignedId;
             if (ShouldMapTo(nameof(Duration))) entity.Duration = (Duration ?? entity.Duration);
+            if (ShouldMapTo(nameof(DevTeamAssigned))) entity.DevTeamAssigned = DevTeamAssigned?.MapToModelOrNew(entity.DevTeamAssigned, context);
         }
 
         /// <summary>

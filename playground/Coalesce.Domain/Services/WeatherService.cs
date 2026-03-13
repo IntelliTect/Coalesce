@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.DataAnnotations;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,6 +35,7 @@ public class WeatherService : IWeatherService
 
 public class Location
 {
+    [ListText]
     public string? City { get; set; }
     public string? State { get; set; }
     public string? Zip { get; set; }
@@ -41,6 +43,7 @@ public class Location
 
 public class WeatherData
 {
+    [ListText]
     public double TempFahrenheit { get; set; }
 
     public double Humidity { get; set; }

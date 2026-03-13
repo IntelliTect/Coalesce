@@ -1,8 +1,6 @@
 # Properties
 
-Models in a Coalesce application are just EF Core POCOs. The properties defined on your models should fit within the constraints of EF Core.
-
-Coalesce currently has a few more restrictions than what EF Core allows, but hopefully over time some of these restrictions can be relaxed as Coalesce grows in capability.
+The properties on your [CRUD Models](/modeling/model-types/crud.md) and [Simple Models](/modeling/model-types/simple-models.md) determine the shape of the generated TypeScript and API layers in Coalesce.
 
 ## Property Varieties
 
@@ -12,11 +10,19 @@ The following kinds of properties may be declared on your models.
 
 Most common built-in primitive (numerics, strings, booleans) and other scalar data types (enums, [date types](/topics/working-with-dates.md), `Guid`, `Uri`), and their nullable variants, are all supported as model properties. Collections of these types are also supported.
 
-### Non-mapped POCOs
+### Object Properties
 
-Properties of a type that are not on your `DbContext` will also have corresponding properties generated on the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#generated-members) typed as [Plain Models](/stacks/vue/layers/models.md), and the values of such properties will be sent with the object to the client when requested. Properties of this type will also be sent back to the server by the client when they are encountered.
+Properties whose type is another complex object (as opposed to a [primitive or scalar](#primitives-scalars-dates)) fall into two categories based on whether the property type has a `DbSet<T>` on the `DbContext`:
 
-See [Simple Models](/modeling/model-types/simple-models.md) for more information.
+#### Entity Properties
+
+Properties whose type is another [Entity Model](/modeling/model-types/entities.md) (a type with a `DbSet<T>` on your `DbContext`) represent relational navigation properties. These include foreign key / reference navigations (single objects) and collection navigations. See the [Relational Modeling](/modeling/model-types/entities.md#relational-modeling) section of the Entity Models page for details on how to configure these relationships.
+
+#### Simple Model Properties
+
+Properties whose type does not have a `DbSet<T>` on your `DbContext` are [Simple Model](/modeling/model-types/simple-models.md) properties. These will have corresponding properties generated on the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#generated-members), and their values are round-tripped to and from the server in all operations. Collections of simple models are also supported.
+
+When placed on entity models, these properties can optionally be mapped to JSON columns in EF — see [JSON-mapped Properties](/modeling/model-types/entities.md#json-mapped-properties).
 
 ### Getter-only Properties
 

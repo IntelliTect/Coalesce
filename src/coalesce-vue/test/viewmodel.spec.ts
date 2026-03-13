@@ -50,7 +50,13 @@ import {
 import { Student, Advisor, Course, Grade } from "./targets.models";
 import * as metadata from "./targets.metadata";
 import { metaBase } from "./targets.metadata";
-import { ComplexModel, EnumPkId, Statuses, Test, WeatherData } from "@test-targets/models.g";
+import {
+  ComplexModel,
+  EnumPkId,
+  Statuses,
+  Test,
+  WeatherData,
+} from "@test-targets/models.g";
 
 function mockItemResult<T>(success: boolean, object: T) {
   return vitest.fn().mockResolvedValue(<AxiosItemResult<T>>{
@@ -3123,7 +3129,9 @@ describe("ViewModel", () => {
 
       // Loading clean data doesn't trigger dirty
       vm.$isDirty = false;
-      vm.$loadCleanData({ jsonObject: { tempFahrenheit: 80, humidity: 0.5, location: null } });
+      vm.$loadCleanData({
+        jsonObject: { tempFahrenheit: 80, humidity: 0.5, location: null },
+      });
       expect(vm.$isDirty).toBeFalsy();
     });
 
@@ -3132,16 +3140,26 @@ describe("ViewModel", () => {
       vm.$isDirty = false;
       await delay(1);
 
-      vm.jsonCollection = [new WeatherData({ tempFahrenheit: 72, humidity: 0.5 })];
+      vm.jsonCollection = [
+        new WeatherData({ tempFahrenheit: 72, humidity: 0.5 }),
+      ];
       expect(vm.$isDirty).toBeTruthy();
 
       vm.$isDirty = false;
-      vm.jsonCollection!.push(new WeatherData({ tempFahrenheit: 80, humidity: 0.6 }));
+      vm.jsonCollection!.push(
+        new WeatherData({ tempFahrenheit: 80, humidity: 0.6 }),
+      );
+      expect(vm.$isDirty).toBeTruthy();
+
+      vm.$isDirty = false;
+      vm.jsonCollection[0].tempFahrenheit = 70;
       expect(vm.$isDirty).toBeTruthy();
 
       // Loading clean data doesn't trigger dirty
       vm.$isDirty = false;
-      vm.$loadCleanData({ jsonCollection: [{ tempFahrenheit: 80, humidity: 0.6, location: null }] });
+      vm.$loadCleanData({
+        jsonCollection: [{ tempFahrenheit: 80, humidity: 0.6, location: null }],
+      });
       expect(vm.$isDirty).toBeFalsy();
     });
   });

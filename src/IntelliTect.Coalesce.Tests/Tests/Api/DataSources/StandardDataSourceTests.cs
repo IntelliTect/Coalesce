@@ -449,40 +449,40 @@ public class StandardDataSourceTests : TestDbContextFixture
         source.Db.SaveChanges();
 
         // Order should be the same for both the unsorted and the unauthorized sorted order.
-        await Assert.That(source.Query().Count()).IsEqualTo(models.Length);
+        await source.Query().AssertOrder(m => m.ComplexModelId, models);
 
         // Order should do nothing because the prop is unauthorized.
-        await Assert.That(source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.RestrictedString)}"
             }))
-            .Count()).IsEqualTo(models.Length);
-        await Assert.That(source
+            .AssertOrder(m => m.ComplexModelId, models);
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)}"
             }))
-            .Count()).IsEqualTo(models.Length);
+            .AssertOrder(m => m.ComplexModelId, models);
 
         // Order should do nothing because the prop is unauthorized,
         // and subsequent orderings after any un-handlable ordering are ignored.
-        await Assert.That(source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)} ASC, {nameof(ComplexModel.ComplexModelId)} DESC"
             }))
-            .Count()).IsEqualTo(models.Length);
+            .AssertOrder(m => m.ComplexModelId, models);
 
 
         // Order should work because the user is now part of the required role.
         source.User.LogIn();
-        await Assert.That(source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)}"
             }))
-            .Count()).IsEqualTo(4);
+            .AssertOrder(m => m.ComplexModelId, 10, 9, 2, 1);
     }
 
     [Test]
@@ -493,20 +493,20 @@ public class StandardDataSourceTests : TestDbContextFixture
             .AddModel(new ComplexModel { ComplexModelId = 2, String = "abc" });
 
         // Order should do nothing because "FOOBAR" isn't a valid prop.
-        await Assert.That(source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"FOOBAR ASC, {nameof(ComplexModel.String)} ASC"
             }))
-            .Count()).IsEqualTo(2);
+            .AssertOrder(m => m.ComplexModelId, 1, 2);
 
         // Order should do nothing because "ComplexModelId" isn't an object prop.
-        await Assert.That(source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"ComplexModelId.FooBar ASC"
             }))
-            .Count()).IsEqualTo(2);
+            .AssertOrder(m => m.ComplexModelId, 1, 2);
     }
 
     [Test]
@@ -533,12 +533,12 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(defaultOrdering[1].Properties[0].Name).IsEqualTo(nameof(ComplexModel.ComplexModelId));
 
         source.User.LogIn();
-        await Assert.That(source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.ReferenceNavigation)} DESC"
             }))
-            .Count()).IsEqualTo(3);
+            .AssertOrder(m => m.ComplexModelId, 1, 2, 3);
     }
 
     [Test]
@@ -562,9 +562,9 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(defaultOrdering[1].Properties[0].Name).IsEqualTo(nameof(ComplexModel.ComplexModelId));
 
         source.User.LogIn();
-        await Assert.That(source
+        await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters()))
-            .Count()).IsEqualTo(3);
+            .AssertOrder(m => m.ComplexModelId, 2, 1, 3);
     }
 
     [Test]

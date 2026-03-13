@@ -63,24 +63,24 @@ public static class AssortedTestingExtensions
         await Assert.That(query.Count()).IsEqualTo(shouldMatch ? 1 : 0);
     }
 
-    public static async Task AssertOrder<TModel, TProp>(this IEnumerable<TModel> models, Func<TModel, TProp> propSelector, params TProp[] expectedOrder)
+    public static async Task AssertOrder<TModel, TProp>(this IQueryable<TModel> models, Expression<Func<TModel, TProp>> propSelector, params TProp[] expectedOrder)
     {
-        var modelsList = models.ToList();
+        var modelsList = models.Select(propSelector).ToList();
         await Assert.That(modelsList.Count).IsEqualTo(expectedOrder.Length);
 
         foreach (var (model, expected) in modelsList.Zip(expectedOrder))
         {
             // Model not null because we asserted the length matches
-            await Assert.That(propSelector(model!)).IsEqualTo(expected);
+            await Assert.That(model).IsEqualTo(expected);
         }
     }
 
-    public static async Task AssertOrder<TModel>(this IEnumerable<TModel> models, params TModel[] expectedOrder)
+    public static async Task AssertOrder<TModel, TProp>(this IQueryable<TModel> models, Expression<Func<TModel, TProp>> propSelector, params TModel[] expectedOrder)
     {
-        var modelsList = models.ToList();
+        var modelsList = models.Select(propSelector).ToList();
         await Assert.That(modelsList.Count).IsEqualTo(expectedOrder.Length);
 
-        foreach (var (model, expected) in modelsList.Zip(expectedOrder))
+        foreach (var (model, expected) in modelsList.Zip(expectedOrder.AsQueryable().Select(propSelector)))
         {
             await Assert.That(model!.Equals(expected)).IsTrue();
         }

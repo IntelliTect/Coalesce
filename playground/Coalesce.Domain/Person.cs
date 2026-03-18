@@ -12,8 +12,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Claims;
 
-#nullable disable
-
 namespace Coalesce.Domain;
 
 [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]

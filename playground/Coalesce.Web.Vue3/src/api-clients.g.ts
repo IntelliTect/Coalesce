@@ -256,7 +256,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   
   /** Sets the FirstName to the given text. */
-  public rename(id: number | null, name?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+  public rename(id: number | null, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.rename
     const $params =  {
       id,
@@ -266,7 +266,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
   }
   
   
-  public uploadPicture(id: number | null, file?: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+  public uploadPicture(id: number | null, file: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.uploadPicture
     const $params =  {
       id,
@@ -368,7 +368,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
   }
   
   
-  public changeFirstName(id: number | null, firstName?: string | null, title?: $models.Titles | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+  public changeFirstName(id: number | null, firstName: string | null, title?: $models.Titles | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.changeFirstName
     const $params =  {
       id,
@@ -389,7 +389,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
   
   
   /** Gets all the first names starting with the characters. */
-  public namesStartingWith(characters?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
+  public namesStartingWith(characters: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
     const $method = this.$metadata.methods.namesStartingWith
     const $params =  {
       characters,
@@ -398,7 +398,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
   }
   
   
-  public methodWithStringArrayParameter(strings?: string[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
+  public methodWithStringArrayParameter(strings: string[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
     const $method = this.$metadata.methods.methodWithStringArrayParameter
     const $params =  {
       strings,
@@ -407,7 +407,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
   }
   
   
-  public methodWithEntityParameter(person?: $models.Person | null, people?: $models.Person[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+  public methodWithEntityParameter(person: $models.Person | null, people: $models.Person[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.methodWithEntityParameter
     const $params =  {
       person,
@@ -435,7 +435,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
   
   
   /** Gets people matching the criteria, paginated by parameter 'page'. */
-  public searchPeople(criteria?: $models.PersonCriteria | null, page?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ListResult<$models.Person>> {
+  public searchPeople(criteria: $models.PersonCriteria | null, page?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ListResult<$models.Person>> {
     const $method = this.$metadata.methods.searchPeople
     const $params =  {
       criteria,

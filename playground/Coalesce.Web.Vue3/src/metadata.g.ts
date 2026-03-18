@@ -1904,6 +1904,9 @@ export const Person = domain.types.Person = {
           displayName: "Name",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Name is required.",
+          }
         },
       },
       return: {
@@ -1935,6 +1938,9 @@ export const Person = domain.types.Person = {
           displayName: "File",
           type: "file",
           role: "value",
+          rules: {
+            required: val => val != null || "File is required.",
+          }
         },
       },
       return: {
@@ -2193,6 +2199,9 @@ export const Person = domain.types.Person = {
           displayName: "First Name",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "First Name is required.",
+          }
         },
         title: {
           name: "title",
@@ -2237,6 +2246,9 @@ export const Person = domain.types.Person = {
           displayName: "Characters",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Characters is required.",
+          }
         },
       },
       return: {
@@ -2270,6 +2282,9 @@ export const Person = domain.types.Person = {
             type: "string",
           },
           role: "value",
+          rules: {
+            required: val => val != null || "Strings is required.",
+          }
         },
       },
       return: {
@@ -2298,6 +2313,9 @@ export const Person = domain.types.Person = {
           type: "model",
           get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
           role: "value",
+          rules: {
+            required: val => val != null || "Person is required.",
+          }
         },
         people: {
           name: "people",
@@ -2311,6 +2329,9 @@ export const Person = domain.types.Person = {
             get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
           },
           role: "value",
+          rules: {
+            required: val => val != null || "People is required.",
+          }
         },
       },
       return: {
@@ -2373,6 +2394,9 @@ export const Person = domain.types.Person = {
           type: "object",
           get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
           role: "value",
+          rules: {
+            required: val => val != null || "Criteria is required.",
+          }
         },
         page: {
           name: "page",

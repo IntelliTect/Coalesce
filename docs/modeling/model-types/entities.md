@@ -113,7 +113,7 @@ modelBuilder.Entity<Order>(e =>
 });
 ```
 
-On the TypeScript side, mutations to these properties and their child properties and items participate in [ViewModel](/stacks/vue/layers/viewmodels.md) dirty tracking, triggering [autosave](/stacks/vue/layers/viewmodels.md#autosave) if enabled.
+On the TypeScript side, mutations to these properties and their child properties and items participate in [ViewModel](/stacks/vue/layers/viewmodels.md) dirty tracking, triggering [autosave](/stacks/vue/layers/viewmodels.md#auto-save) if enabled.
 
 ## Other Model Customization
 

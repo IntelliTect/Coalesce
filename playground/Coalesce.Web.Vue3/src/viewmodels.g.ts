@@ -663,6 +663,8 @@ export interface PersonViewModel extends $models.Person {
   get company(): CompanyViewModel | null;
   set company(value: CompanyViewModel | $models.Company | null);
   arbitraryCollectionOfStrings: string[] | null;
+  currentWeather: $models.WeatherData | null;
+  weatherHistory: $models.WeatherData[] | null;
 }
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
   static DataSources = $models.Person.DataSources;

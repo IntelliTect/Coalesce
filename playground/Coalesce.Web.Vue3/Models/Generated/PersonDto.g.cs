@@ -26,6 +26,8 @@ namespace Coalesce.Web.Vue3.Models
         private byte[] _ProfilePic;
         private int? _CompanyId;
         private System.Collections.Generic.ICollection<string> _ArbitraryCollectionOfStrings;
+        private Coalesce.Web.Vue3.Models.WeatherDataParameter _CurrentWeather;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.WeatherDataParameter> _WeatherHistory;
 
         public int? PersonId
         {
@@ -92,6 +94,16 @@ namespace Coalesce.Web.Vue3.Models
             get => _ArbitraryCollectionOfStrings;
             set { _ArbitraryCollectionOfStrings = value; Changed(nameof(ArbitraryCollectionOfStrings)); }
         }
+        public Coalesce.Web.Vue3.Models.WeatherDataParameter CurrentWeather
+        {
+            get => _CurrentWeather;
+            set { _CurrentWeather = value; Changed(nameof(CurrentWeather)); }
+        }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.WeatherDataParameter> WeatherHistory
+        {
+            get => _WeatherHistory;
+            set { _WeatherHistory = value; Changed(nameof(WeatherHistory)); }
+        }
 
         /// <summary>
         /// Map from the current DTO instance to the domain object.
@@ -113,6 +125,8 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(ProfilePic))) entity.ProfilePic = ProfilePic;
             if (ShouldMapTo(nameof(CompanyId))) entity.CompanyId = (CompanyId ?? entity.CompanyId);
             if (ShouldMapTo(nameof(ArbitraryCollectionOfStrings))) entity.ArbitraryCollectionOfStrings = ArbitraryCollectionOfStrings?.ToList();
+            if (ShouldMapTo(nameof(CurrentWeather))) entity.CurrentWeather = CurrentWeather?.MapToModelOrNew(entity.CurrentWeather, context);
+            if (ShouldMapTo(nameof(WeatherHistory))) entity.WeatherHistory = WeatherHistory?.Select(f => f.MapToNew(context)).ToList();
         }
 
         /// <summary>
@@ -156,6 +170,8 @@ namespace Coalesce.Web.Vue3.Models
         public Coalesce.Web.Vue3.Models.PersonStatsResponse PersonStats { get; set; }
         public Coalesce.Web.Vue3.Models.PersonLocationResponse PersonLocation { get; set; }
         public Coalesce.Web.Vue3.Models.CompanyResponse Company { get; set; }
+        public Coalesce.Web.Vue3.Models.WeatherDataResponse CurrentWeather { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.WeatherDataResponse> WeatherHistory { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -211,6 +227,16 @@ namespace Coalesce.Web.Vue3.Models
 
             if (tree == null || tree[nameof(this.Company)] != null)
                 this.Company = obj.Company.MapToDto<Coalesce.Domain.Company, CompanyResponse>(context, tree?[nameof(this.Company)]);
+
+
+            this.CurrentWeather = obj.CurrentWeather.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataResponse>(context, tree?[nameof(this.CurrentWeather)]);
+
+            var propValWeatherHistory = obj.WeatherHistory;
+            if (propValWeatherHistory != null)
+            {
+                this.WeatherHistory = propValWeatherHistory
+                    .Select(f => f.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataResponse>(context, tree?[nameof(this.WeatherHistory)])).ToList();
+            }
 
         }
     }

@@ -360,6 +360,8 @@ export interface ComplexModel extends Model<typeof metadata.ComplexModel> {
   uri: string | null
   intCollection: number[] | null
   enumCollection: Statuses[] | null
+  jsonObject: WeatherData | null
+  jsonCollection: WeatherData[] | null
   nonNullNonZeroInt: number | null
   clientValidationInt: number | null
   clientValidationString: string | null

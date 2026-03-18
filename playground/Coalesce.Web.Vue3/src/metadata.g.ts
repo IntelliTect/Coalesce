@@ -881,7 +881,6 @@ export const Case = domain.types.Case = {
       type: "object",
       get typeDef() { return (domain.types.DevTeam as ObjectType & { name: "DevTeam" }) },
       role: "value",
-      dontSerialize: true,
     },
     duration: {
       name: "duration",
@@ -1862,6 +1861,26 @@ export const Person = domain.types.Person = {
       },
       role: "value",
     },
+    currentWeather: {
+      name: "currentWeather",
+      displayName: "Current Weather",
+      type: "object",
+      get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
+      role: "value",
+    },
+    weatherHistory: {
+      name: "weatherHistory",
+      displayName: "Weather History",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "object",
+        get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
+      },
+      role: "value",
+    },
   },
   methods: {
     rename: {
@@ -2578,7 +2597,6 @@ export const Product = domain.types.Product = {
       type: "object",
       get typeDef() { return (domain.types.ProductDetails as ObjectType & { name: "ProductDetails" }) },
       role: "value",
-      dontSerialize: true,
     },
     uniqueId: {
       name: "uniqueId",
@@ -2890,6 +2908,7 @@ export const DevTeam = domain.types.DevTeam = {
 export const Location = domain.types.Location = {
   name: "Location" as const,
   displayName: "Location",
+  get displayProp() { return this.props.city }, 
   type: "object",
   props: {
     city: {
@@ -2995,6 +3014,7 @@ export const StreetAddress = domain.types.StreetAddress = {
 export const WeatherData = domain.types.WeatherData = {
   name: "WeatherData" as const,
   displayName: "Weather Data",
+  get displayProp() { return this.props.tempFahrenheit }, 
   type: "object",
   props: {
     tempFahrenheit: {

@@ -22,6 +22,7 @@
     "mkdir",
     "msword",
     "nameof",
+    "navigations",
     "netcoreapp",
     "netstandard",
     "officedocument",
@@ -52,7 +53,9 @@
     "wordprocessingml",
     "wwwroot"
   ],
-  "ignorePaths": ["node_modules"],
+  "ignorePaths": [
+    "node_modules"
+  ],
   "languageSettings": [
     {
       "languageId": "markdown",

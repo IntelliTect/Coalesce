@@ -78,7 +78,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         // Precondition
         await Assert.That(prop.IsInternalUse).IsTrue();
 
-        await Assert.That(query).HasSingleItem();
+        await Assert.That(query.Count()).IsEqualTo(1);
     }
 
     [Test]
@@ -94,7 +94,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         // Precondition
         await Assert.That(prop.HasNotMapped).IsTrue();
 
-        await Assert.That(query).HasSingleItem();
+        await Assert.That(query.Count()).IsEqualTo(1);
     }
 
 
@@ -109,7 +109,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(CrudContext.User.IsInRole(role)).IsFalse();
         await prop.SecurityInfo.Read.RoleList.AssertCollection(async r => await Assert.That(r).IsEqualTo(role));
 
-        await Assert.That(query).HasSingleItem();
+        await Assert.That(query.Count()).IsEqualTo(1);
     }
 
     [Test]
@@ -122,7 +122,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(CrudContext.User.Identity?.IsAuthenticated).IsNotEqualTo(true);
         await Assert.That(prop.SecurityInfo.Restrictions).IsNotEmpty();
 
-        await Assert.That(query).HasSingleItem();
+        await Assert.That(query.Count()).IsEqualTo(1);
     }
 
     [Test]
@@ -137,7 +137,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         // Precondition
         await prop.SecurityInfo.Read.RoleList.AssertCollection(async r => await Assert.That(r).IsEqualTo(role));
 
-        await Assert.That(query).IsEmpty();
+        await Assert.That(query.Count()).IsEqualTo(0);
     }
 
     [Test]
@@ -151,7 +151,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         await Assert.That(CrudContext.User.Identity?.IsAuthenticated).IsTrue();
         await Assert.That(prop.SecurityInfo.Restrictions).IsNotEmpty();
 
-        await Assert.That(query).IsEmpty();
+        await Assert.That(query.Count()).IsEqualTo(0);
     }
 
 
@@ -449,7 +449,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         source.Db.SaveChanges();
 
         // Order should be the same for both the unsorted and the unauthorized sorted order.
-        await source.Query().AssertOrder(models);
+        await source.Query().AssertOrder(m => m.ComplexModelId, models);
 
         // Order should do nothing because the prop is unauthorized.
         await source
@@ -457,13 +457,13 @@ public class StandardDataSourceTests : TestDbContextFixture
             {
                 OrderBy = $"{nameof(ComplexModel.RestrictedString)}"
             }))
-            .AssertOrder(models);
+            .AssertOrder(m => m.ComplexModelId, models);
         await source
             .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
             {
                 OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)}"
             }))
-            .AssertOrder(models);
+            .AssertOrder(m => m.ComplexModelId, models);
 
         // Order should do nothing because the prop is unauthorized,
         // and subsequent orderings after any un-handlable ordering are ignored.
@@ -472,7 +472,7 @@ public class StandardDataSourceTests : TestDbContextFixture
             {
                 OrderBy = $"{nameof(ComplexModel.AdminReadableReferenceNavigation)}.{nameof(ComplexModel.ComplexModelId)} ASC, {nameof(ComplexModel.ComplexModelId)} DESC"
             }))
-            .AssertOrder(models);
+            .AssertOrder(m => m.ComplexModelId, models);
 
 
         // Order should work because the user is now part of the required role.
@@ -717,8 +717,7 @@ public class StandardDataSourceTests : TestDbContextFixture
 
         // Should match only model1 (contains 2)
         await Assert.That(prop.IsUrlFilterParameter).IsTrue();
-        await Assert.That(query).HasSingleItem();
-        await Assert.That(query.Single().ComplexModelId).IsEqualTo(model1.ComplexModelId);
+        await Assert.That(query.Count()).IsEqualTo(1);
     }
 
     [Test]
@@ -761,7 +760,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
 
         // Should match no models
-        await Assert.That(query).IsEmpty();
+        await Assert.That(query.Count()).IsEqualTo(0);
     }
 
     [Test]
@@ -782,8 +781,7 @@ public class StandardDataSourceTests : TestDbContextFixture
         var query = source.ApplyListFiltering(Db.Set<ComplexModel>(), filterParams);
 
         // Should match only model2 (model1 has empty collection)
-        await Assert.That(query).HasSingleItem();
-        await Assert.That(query.Single().ComplexModelId).IsEqualTo(model2.ComplexModelId);
+        await Assert.That(query.Count()).IsEqualTo(1);
     }
 
     [Test]

@@ -407,6 +407,8 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
   uri: string | null;
   intCollection: number[] | null;
   enumCollection: $models.Statuses[] | null;
+  jsonObject: $models.WeatherData | null;
+  jsonCollection: $models.WeatherData[] | null;
   nonNullNonZeroInt: number | null;
   clientValidationInt: number | null;
   clientValidationString: string | null;

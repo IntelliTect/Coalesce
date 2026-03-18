@@ -63,10 +63,8 @@
     "vue-router": "^4.4.1"
   },
   "devDependencies": {
-    "@types/node": "^20.14.11",
     "@vitejs/plugin-vue-jsx": "^5.1.5",
     "coalesce-vue": "../coalesce-vue",
-    "sass": "^1.69.7",
     "vue-router": "^4.4.1",
     "vuetify": "3.10.3"
   }

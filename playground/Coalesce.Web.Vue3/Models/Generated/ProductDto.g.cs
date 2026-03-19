@@ -18,6 +18,7 @@ namespace Coalesce.Web.Vue3.Models
         private System.Guid? _UniqueId;
         private System.DateOnly? _MilestoneId;
         private object _Unknown;
+        private Coalesce.Web.Vue3.Models.ProductDetailsParameter _Details;
 
         public int? ProductId
         {
@@ -44,6 +45,11 @@ namespace Coalesce.Web.Vue3.Models
             get => _Unknown;
             set { _Unknown = value; Changed(nameof(Unknown)); }
         }
+        public Coalesce.Web.Vue3.Models.ProductDetailsParameter Details
+        {
+            get => _Details;
+            set { _Details = value; Changed(nameof(Details)); }
+        }
 
         /// <summary>
         /// Map from the current DTO instance to the domain object.
@@ -57,6 +63,7 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(UniqueId)) && (context.IsInRoleCached("Admin"))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
             if (ShouldMapTo(nameof(MilestoneId))) entity.MilestoneId = MilestoneId;
             if (ShouldMapTo(nameof(Unknown))) entity.Unknown = Unknown;
+            if (ShouldMapTo(nameof(Details))) entity.Details = Details?.MapToModelOrNew(entity.Details, context);
         }
 
         /// <summary>

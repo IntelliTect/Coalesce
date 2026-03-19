@@ -131,6 +131,10 @@ public class Person
 
     public List<string>? ArbitraryCollectionOfStrings { get; set; }
 
+    public WeatherData? CurrentWeather { get; set; }
+
+    public List<WeatherData> WeatherHistory { get; set; } = [];
+
     /// <summary>
     /// Sets the FirstName to the given text.
     /// </summary>

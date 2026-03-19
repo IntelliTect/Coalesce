@@ -2459,14 +2459,14 @@ export function defineProps<T extends new () => ViewModel>(
 
                   this.$setPropDirty(propName);
 
-                  // For collections of primitives,
-                  // we need to setup a watcher on the prop so that direct collection
-                  // mutations will also trigger the dirty flag.
+                  // For serializable collection and object props, set up a deep watcher
+                  // so that direct mutations (e.g. collection.push(), obj.prop = value)
+                  // also trigger the dirty flag.
                   // Its OK that we only set this up in the setter
-                  // since there's no point in watching an empty collection.
+                  // since there's no point in watching an empty/null value.
                   if (
                     prop.role == "value" &&
-                    prop.type == "collection" &&
+                    (prop.type == "collection" || prop.type == "object") &&
                     !prop.dontSerialize &&
                     !(this as any)[hasWatcherFlag]
                   ) {
@@ -2477,7 +2477,7 @@ export function defineProps<T extends new () => ViewModel>(
                         //@ts-expect-error yep, undeclared
                         window.__coalesce_warned_collection_watcher = true;
                         console.warn(
-                          "Unable to setup dirty watcher for collection prop mutations because FinalizationRegistry is not available.",
+                          "Unable to setup dirty watcher for prop mutations because FinalizationRegistry is not available.",
                         );
                       }
                     } else {

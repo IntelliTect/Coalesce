@@ -27,7 +27,9 @@ export default defineConfig({
             {
               name(moduleId) {
                 // Suggest that top level node_modules folders should have their own chunk.
-                return /node_modules[/\\]([^\/]+)/i.exec(moduleId)?.[1] ?? null;
+                return (
+                  /node_modules[/\\]([^/\\]+)/i.exec(moduleId)?.[1] ?? null
+                );
               },
             },
           ],

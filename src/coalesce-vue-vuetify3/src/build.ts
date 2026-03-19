@@ -14,7 +14,7 @@ export function CoalesceVuetifyResolver() {
   const componentMap = new Map<string, string>();
   const exportRegex =
     /export\s*\{\s*default\s+as\s+(C[A-Z][A-Za-z]+)\s*\}\s*from\s*"\.\/(.+?)\.vue"/g;
-  let match;
+  let match: RegExpExecArray | null;
   while ((match = exportRegex.exec(componentIndex)) !== null) {
     const [, name, relPath] = match;
     componentMap.set(name, `coalesce-vue-vuetify3/components/${relPath}.js`);

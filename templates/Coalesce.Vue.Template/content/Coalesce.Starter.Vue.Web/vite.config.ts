@@ -13,22 +13,26 @@ import createVuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 export default defineConfig({
   build: {
     outDir: "wwwroot",
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks(id) {
-          // Chunk all styles together so that there aren't problems
-          // with selectors getting reordered, which alters specificity.
-          if (/\.s?css|type=style/.test(id)) return "styles";
-
-          // Workers can't be chunked with other things
-          if (id.includes("worker")) return undefined;
-
-          //#if AppInsights
-          if (id.match(/applicationinsights/i)) return "applicationinsights";
-          //#endif
-          if (id.match(/vuetify/)) return "vuetify";
-          if (id.match(/node_modules/)) return "vendor";
-          return "index";
+        codeSplitting: {
+          groups: [
+            {
+              name: "styles",
+              // Chunk all styles together so that there aren't problems
+              // with selectors getting reordered, which alters specificity.
+              test: /\.s?css|type=style/,
+              priority: 30,
+            },
+            {
+              name(moduleId) {
+                // Suggest that top level node_modules folders should have their own chunk.
+                return (
+                  /node_modules[/\\]([^/\\]+)/i.exec(moduleId)?.[1] ?? null
+                );
+              },
+            },
+          ],
         },
       },
     },
@@ -42,7 +46,7 @@ export default defineConfig({
     // Integrations with UseViteDevelopmentServer from IntelliTect.Coalesce.Vue:
     createAspNetCoreHmrPlugin(),
 
-    // Transforms usages of Vuetify and Coalesce components into treeshakable imports.
+    // Dynamically adds imports for usages of Vuetify and Coalesce components.
     // Vuetify3Resolver could be removed and replaced by vite-plugin-vuetify if desired.
     createVueComponentImporterPlugin({
       resolvers: [CoalesceVuetifyResolver()],

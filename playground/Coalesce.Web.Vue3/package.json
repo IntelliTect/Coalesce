@@ -11,7 +11,7 @@
     "dev": "vite",
     "lint:fix": "eslint src --fix",
     "test": "vitest",
-    "coalesce": "dotnet run --project ../../src/IntelliTect.Coalesce.DotnetTool --framework net8.0 -- ../../coalesce-vue3.json"
+    "coalesce": "dotnet run --project ../../src/IntelliTect.Coalesce.DotnetTool --framework net10.0 -- ../../coalesce-vue3.json"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
@@ -26,7 +26,6 @@
     "vue": "^3.5.4"
   },
   "devDependencies": {
-    "vite-plugin-inspect": "^11.3.3",
-    "vite-plugin-vuetify": "^2.1.2"
+    "vite-plugin-vuetify": "^2.1.3"
   }
 }

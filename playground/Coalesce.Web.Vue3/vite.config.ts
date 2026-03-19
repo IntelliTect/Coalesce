@@ -15,7 +15,7 @@ const libRoot = path.resolve(__dirname, "../../src/") + "/";
 export default defineConfig({
   build: {
     outDir: "wwwroot",
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         manualChunks(id) {
           // Chunk all styles together so that there aren't problems
@@ -34,7 +34,9 @@ export default defineConfig({
   },
 
   plugins: [
-    (await import("vite-plugin-inspect")).default(),
+    // vite-plugin-inspect is not compatible with Vite 8 yet
+    // See: https://github.com/antfu-collective/vite-plugin-inspect/issues/167
+    // (await import("vite-plugin-inspect")).default(),
 
     createVuePlugin({
       template: { transformAssetUrls },
@@ -86,22 +88,6 @@ export default defineConfig({
       // repo root, where some NPM packages may be restored to
       allow: [path.resolve(__dirname, "../../")],
     },
-  },
-
-  css: {
-    preprocessorOptions: {
-      scss: {
-        api: "modern",
-      },
-      sass: {
-        api: "modern",
-      },
-    },
-  },
-
-  esbuild: {
-    // vue-class-component uses the original names of classes as the component name.
-    keepNames: true,
   },
 
   optimizeDeps: {

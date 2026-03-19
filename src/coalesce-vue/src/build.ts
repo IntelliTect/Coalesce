@@ -3,6 +3,7 @@ import MagicString from "magic-string";
 
 import * as path from "node:path";
 import * as fs from "node:fs";
+import * as process from "node:process";
 import { readFile, writeFile } from "node:fs/promises";
 import { spawn, exec } from "node:child_process";
 import { TLSSocket } from "node:tls";

@@ -6,8 +6,8 @@
   "author": "IntelliTect",
   "license": "Apache-2.0",
   "private": false,
-  "main": "./dist/coalesce-vue-vuetify.js",
-  "module": "./dist/coalesce-vue-vuetify.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "styles": "./dist/coalesce-vue-vuetify.css",
   "types": "./dist/index.d.ts",
   "type": "module",
@@ -18,7 +18,7 @@
     ".": {
       "style": "./dist/coalesce-vue-vuetify.css",
       "types": "./dist/index.d.ts",
-      "default": "./dist/coalesce-vue-vuetify3.js"
+      "default": "./dist/index.js"
     },
     "./build": {
       "types": "./dist/build.d.ts",
@@ -63,10 +63,8 @@
     "vue-router": "^4.4.1"
   },
   "devDependencies": {
-    "@types/node": "^20.14.11",
-    "@vitejs/plugin-vue-jsx": "^5.1.1",
+    "@vitejs/plugin-vue-jsx": "^5.1.5",
     "coalesce-vue": "../coalesce-vue",
-    "sass": "^1.69.7",
     "vue-router": "^4.4.1",
     "vuetify": "3.10.3"
   }

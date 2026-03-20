@@ -110,6 +110,21 @@ interface ListItem<T = any> {
   children?: ListItem<T>[];
 }
 
+// Detect Vuetify 4 by checking if VSelect's item slot has `internalItem` in its props.
+// In V4, `item` is the raw value and `internalItem` is the ListItem wrapper.
+// In V3, `item` is the ListItem wrapper.
+type _IsVuetify4 = VSelect["$slots"] extends {
+  item?: (props: infer P) => any;
+}
+  ? P extends { internalItem: any }
+    ? true
+    : false
+  : false;
+
+type _SelectionSlotProps<T> = _IsVuetify4 extends true
+  ? { item: T; internalItem: ListItem<T>; index: number }
+  : { item: ListItem<T>; index: number };
+
 type _InheritedSlots<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>,
@@ -117,21 +132,21 @@ type _InheritedSlots<
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   SelectSlotItemType<TModel, TFor> extends {}
     ? // These slots for v-select/v-autocomplete are duplicated from Vuetify because Vuetify doesn't export their types correctly for generic components.
+      // The slot shapes adapt based on the installed Vuetify version (3 vs 4).
       Omit<VInput["$slots"] & VField["$slots"], "default"> & {
-        item?(props: {
-          item: ListItem<SelectSlotItemType<TModel, TFor>>;
-          index: number;
-          props: Record<string, unknown>;
-        }): any;
-        chip?(props: {
-          item: ListItem<SelectSlotItemType<TModel, TFor>>;
-          index: number;
-          props: Record<string, unknown>;
-        }): any;
-        selection?(props: {
-          item: ListItem<SelectSlotItemType<TModel, TFor>>;
-          index: number;
-        }): any;
+        item?(
+          props: _SelectionSlotProps<SelectSlotItemType<TModel, TFor>> & {
+            props: Record<string, unknown>;
+          },
+        ): any;
+        chip?(
+          props: _SelectionSlotProps<SelectSlotItemType<TModel, TFor>> & {
+            props: Record<string, unknown>;
+          },
+        ): any;
+        selection?(
+          props: _SelectionSlotProps<SelectSlotItemType<TModel, TFor>>,
+        ): any;
       }
     : Omit<VInput["$slots"] & VField["$slots"], "default">;
 

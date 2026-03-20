@@ -72,7 +72,7 @@
           style="min-height: 55px"
         >
           <template v-if="methodMeta.return.type !== 'void'">
-            <h3>
+            <h3 class="my-0">
               Result:
               <v-btn
                 v-if="caller.result && methodMeta.return.type == 'file'"

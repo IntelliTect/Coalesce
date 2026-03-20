@@ -505,10 +505,10 @@ defineExpose({
     line-height: 1.25rem;
   }
   th {
-    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+    border-bottom: 1px solid color-mix(in srgb, rgb(var(--v-theme-on-surface)) 15%, transparent);
   }
   tr:not(:last-child) td {
-    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+    border-bottom: 1px solid color-mix(in srgb, rgb(var(--v-theme-on-surface)) 5%, transparent);
   }
   tr:hover td {
     background: rgba(0, 0, 0, 0.1);

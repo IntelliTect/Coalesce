@@ -1,5 +1,5 @@
 <template>
-  <div class="c-method">
+  <div class="c-method d-flex flex-column ga-3">
     <v-row
       v-if="filteredParams.length"
       class="my-0 c-method--section c-method--params"

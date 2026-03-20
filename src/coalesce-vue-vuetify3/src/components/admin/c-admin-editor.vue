@@ -84,7 +84,7 @@
               ></i>
               {{ prop.displayName }}
             </v-col>
-            <v-col class="py-0" align-self="start" style="flex-basis: 1px">
+            <v-col class="py-0 align-self-start" style="flex-basis: 1px">
               <div class="c-admin-editor--input-row">
                 <div class="c-admin-editor--input-col">
                   <c-input

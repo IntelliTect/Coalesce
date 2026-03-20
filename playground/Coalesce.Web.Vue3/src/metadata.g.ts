@@ -1795,6 +1795,7 @@ export const Person = domain.types.Person = {
     personStats: {
       name: "personStats",
       displayName: "Person Stats",
+      description: "Example of a shared-key one-to-one",
       type: "model",
       get typeDef() { return (domain.types.PersonStats as ModelType & { name: "PersonStats" }) },
       role: "referenceNavigation",
@@ -1806,6 +1807,7 @@ export const Person = domain.types.Person = {
     personLocation: {
       name: "personLocation",
       displayName: "Person Location",
+      description: "Example of a separate-key one-to-one",
       type: "model",
       get typeDef() { return (domain.types.PersonLocation as ModelType & { name: "PersonLocation" }) },
       role: "value",
@@ -1852,6 +1854,7 @@ export const Person = domain.types.Person = {
     arbitraryCollectionOfStrings: {
       name: "arbitraryCollectionOfStrings",
       displayName: "Arbitrary Collection Of Strings",
+      description: "Example of a JSON-persisted simple collection on an entity",
       type: "collection",
       itemType: {
         name: "$collectionItem",
@@ -1864,6 +1867,7 @@ export const Person = domain.types.Person = {
     currentWeather: {
       name: "currentWeather",
       displayName: "Current Weather",
+      description: "Example of a JSON-persisted complex object on an entity",
       type: "object",
       get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
       role: "value",
@@ -1871,6 +1875,7 @@ export const Person = domain.types.Person = {
     weatherHistory: {
       name: "weatherHistory",
       displayName: "Weather History",
+      description: "Example of a JSON-persisted complex collection on an entity",
       type: "collection",
       itemType: {
         name: "$collectionItem",

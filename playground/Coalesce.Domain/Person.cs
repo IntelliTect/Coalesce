@@ -105,7 +105,10 @@ public class Person
     [Hidden]
     public DateTimeOffset? NextUpgrade { get; set; }
 
+    [Description("Example of a shared-key one-to-one")]
     public PersonStats? PersonStats { get; set; }
+
+    [Description("Example of a separate-key one-to-one")]
     public PersonLocation? PersonLocation { get; set; }
 
     // [InternalUse]
@@ -129,10 +132,13 @@ public class Person
     /// </summary>
     public Company? Company { get; set; }
 
+    [Description("Example of a JSON-persisted simple collection on an entity")]
     public List<string>? ArbitraryCollectionOfStrings { get; set; }
 
+    [Description("Example of a JSON-persisted complex object on an entity")]
     public WeatherData? CurrentWeather { get; set; }
 
+    [Description("Example of a JSON-persisted complex collection on an entity")]
     public List<WeatherData> WeatherHistory { get; set; } = [];
 
     /// <summary>

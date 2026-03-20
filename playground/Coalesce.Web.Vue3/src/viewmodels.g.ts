@@ -647,8 +647,12 @@ export interface PersonViewModel extends $models.Person {
   birthDate: Date | null;
   lastBath: Date | null;
   nextUpgrade: Date | null;
+  
+  /** Example of a shared-key one-to-one */
   get personStats(): PersonStatsViewModel | null;
   set personStats(value: PersonStatsViewModel | $models.PersonStats | null);
+  
+  /** Example of a separate-key one-to-one */
   get personLocation(): PersonLocationViewModel | null;
   set personLocation(value: PersonLocationViewModel | $models.PersonLocation | null);
   profilePic: string | null;
@@ -662,8 +666,14 @@ export interface PersonViewModel extends $models.Person {
   /** Company loaded from the Company ID */
   get company(): CompanyViewModel | null;
   set company(value: CompanyViewModel | $models.Company | null);
+  
+  /** Example of a JSON-persisted simple collection on an entity */
   arbitraryCollectionOfStrings: string[] | null;
+  
+  /** Example of a JSON-persisted complex object on an entity */
   currentWeather: $models.WeatherData | null;
+  
+  /** Example of a JSON-persisted complex collection on an entity */
   weatherHistory: $models.WeatherData[] | null;
 }
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {

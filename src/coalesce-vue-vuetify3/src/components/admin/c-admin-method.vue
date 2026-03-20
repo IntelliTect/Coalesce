@@ -1,5 +1,5 @@
 <template>
-  <div class="c-method d-flex flex-column ga-3">
+  <div class="c-method">
     <v-row
       v-if="filteredParams.length"
       class="my-0 c-method--section c-method--params"
@@ -260,6 +260,13 @@ function downloadFileResult() {
 </script>
 
 <style lang="scss">
+// In Vuetify 4, v-row uses CSS gap instead of col padding,
+// so there's no implicit spacing between adjacent rows.
+// Use padding (not margin) so it collapses with v-col's
+// existing padding in Vuetify 3.
+.c-method--params + .c-method--results > .v-col {
+  padding-top: 12px;
+}
 .c-method--section {
   > .v-col:first-child {
     font-size: 18px;

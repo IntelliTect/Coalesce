@@ -416,6 +416,11 @@ function lerp(a: number, b: number, alpha: number) {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 8px;
   user-select: none;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 
   &:disabled {
     opacity: 0.2;

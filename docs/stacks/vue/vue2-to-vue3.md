@@ -13,7 +13,7 @@ If you're new to Vue entirely, check out the rest of Vue docs and [pick your lea
 
 ## Coalesce Upgrade Steps
 
-The changes specific to Coalesce when migrating from Vue2 to Vue3 are pretty minimal. Most of your work will be in following the [Vue 3 Migration Guide](https://v3-migration.vuejs.org/) and the [Vuetify 3 Migration Guide](https://vuetifyjs.com/en/getting-started/upgrade-guide/).
+The changes specific to Coalesce when migrating from Vue2 to Vue3 are pretty minimal. Most of your work will be in following the [Vue 3 Migration Guide](https://v3-migration.vuejs.org/) and the [Vuetify 3 Migration Guide](https://v3.vuetifyjs.com/en/getting-started/upgrade-guide/).
 
 The table below contains the Coalesce-specific changes when migrating to Vue 3. However, the easiest migration path may be to disregard the table below and instead, [instantiate the Coalesce Vue template](/stacks/vue/getting-started.md#creating-a-project) or [look at it on GitHub](https://github.com/IntelliTect/Coalesce.Vue.Template/tree/master/content/Coalesce.Starter.Vue.Web) and compare individual files between your project and the template side by side and ingest the changes that you observe.
 

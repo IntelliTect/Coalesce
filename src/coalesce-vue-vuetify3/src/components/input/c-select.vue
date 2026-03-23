@@ -937,8 +937,8 @@ const effectiveMultiple = computed((): boolean => {
   return multiple;
 });
 
-/** 
-  Converts the provided single item into a ViewModel instance 
+/**
+  Converts the provided single item into a ViewModel instance
   if we're going to be assigning the item into a ViewModel or ViewModelCollection.
 
   We do this preemptively so that the object instance
@@ -1294,7 +1294,7 @@ async function createItem(): Promise<void> {
 }
 
 function onIntersect(isIntersecting: boolean) {
-  if (!props.autofocus || !isIntersecting) return;
+  if (!props.autofocus || !isIntersecting || menuOpen.value) return;
   // Doesn't work reliably without a small delay
   setTimeout(() => {
     mainInputRef.value?.focus();

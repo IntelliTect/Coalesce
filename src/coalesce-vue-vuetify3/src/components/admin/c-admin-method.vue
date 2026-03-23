@@ -72,7 +72,7 @@
           style="min-height: 55px"
         >
           <template v-if="methodMeta.return.type !== 'void'">
-            <h3>
+            <h3 class="my-0">
               Result:
               <v-btn
                 v-if="caller.result && methodMeta.return.type == 'file'"
@@ -260,6 +260,13 @@ function downloadFileResult() {
 </script>
 
 <style lang="scss">
+// In Vuetify 4, v-row uses CSS gap instead of col padding,
+// so there's no implicit spacing between adjacent rows.
+// Use padding (not margin) so it collapses with v-col's
+// existing padding in Vuetify 3.
+.c-method--params + .c-method--results > .v-col {
+  padding-top: 12px;
+}
 .c-method--section {
   > .v-col:first-child {
     font-size: 18px;

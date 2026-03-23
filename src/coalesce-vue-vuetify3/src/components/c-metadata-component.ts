@@ -29,6 +29,7 @@ import { ApiState, ViewModel } from "coalesce-vue";
 import {
   computed,
   inject,
+  unref,
   useAttrs,
   type AllowedComponentProps,
   type VNodeProps,
@@ -428,11 +429,11 @@ export function useCustomInput(props: {
   const form: any = inject(Symbol.for("vuetify:form"), null);
 
   const isDisabled = computed(
-    (): boolean => props.disabled || form?.isDisabled.value,
+    (): boolean => props.disabled || unref(form?.isDisabled),
   );
 
   const isReadonly = computed(
-    (): boolean => props.readonly || form?.isReadonly.value,
+    (): boolean => props.readonly || unref(form?.isReadonly),
   );
 
   const isInteractive = computed((): boolean => {

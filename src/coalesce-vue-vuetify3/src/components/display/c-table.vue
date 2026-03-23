@@ -261,10 +261,10 @@ function onRowClick(event: MouseEvent, item: ViewModelType) {
   .fixed-column-right {
     position: sticky;
     right: 0;
-    background: rgba(var(--v-theme-surface), 0.7);
+    background: color-mix(in srgb, rgb(var(--v-theme-surface)) 70%, transparent);
     backdrop-filter: blur(12px);
     .v-theme--dark & {
-      background: rgba(var(--v-theme-surface), 0.85);
+      background: color-mix(in srgb, rgb(var(--v-theme-surface)) 85%, transparent);
       backdrop-filter: blur(12px) brightness(3);
     }
     box-shadow: -2px 2px 4px 0px rgba(0, 0, 0, 0.4);

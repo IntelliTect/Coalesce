@@ -389,7 +389,11 @@ function lerp(a: number, b: number, alpha: number) {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 9px;
-  background-color: rgba(var(--v-theme-surface), 0.3);
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--v-theme-surface)) 30%,
+    transparent
+  );
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -397,13 +401,19 @@ function lerp(a: number, b: number, alpha: number) {
 
   &::-webkit-scrollbar-track {
     border-radius: 8px;
-    border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
-    box-shadow: inset 0 0 6px rgba(var(--v-theme-on-surface), 0.2);
+    border: 1px solid
+      color-mix(in srgb, rgb(var(--v-theme-on-surface)) 15%, transparent);
+    box-shadow: inset 0 0 6px
+      color-mix(in srgb, rgb(var(--v-theme-on-surface)) 20%, transparent);
   }
 
   &::-webkit-scrollbar-thumb {
     border-radius: 8px;
-    background-color: rgba(var(--v-theme-on-surface), 0.3);
+    background-color: color-mix(
+      in srgb,
+      rgb(var(--v-theme-on-surface)) 30%,
+      transparent
+    );
   }
 }
 .c-time-picker__item {
@@ -416,13 +426,22 @@ function lerp(a: number, b: number, alpha: number) {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 8px;
   user-select: none;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
 
   &:disabled {
     opacity: 0.2;
   }
   &:not(:disabled):not(.c-time-picker__item-active) {
     &:hover {
-      background: rgba(var(--v-theme-on-surface), 0.1);
+      background: color-mix(
+        in srgb,
+        rgb(var(--v-theme-on-surface)) 10%,
+        transparent
+      );
     }
   }
 

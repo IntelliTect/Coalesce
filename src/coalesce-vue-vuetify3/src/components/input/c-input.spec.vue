@@ -4,13 +4,13 @@
     <template #prepend-inner="{ isActive }">
       <span>foo: {{ isActive.value }}</span>
     </template>
-    <template #item="item">
+    <template #item="slotProps">
       <span>{{
         (() => {
           //@ts-expect-error item.raw is enum metadata, cast to string should be invalid
-          item.item.raw as string;
+          slotProps.item.raw as string;
 
-          return item.item.raw.displayName as string;
+          return slotProps.item.raw.displayName as string;
         })()
       }}</span>
     </template>

@@ -1,7 +1,7 @@
 {
   "name": "coalesce-vue-vuetify3",
   "version": "0.1.0-local",
-  "description": "Vuetify 3 components for IntelliTect's Coalesce framework.",
+  "description": "Vuetify 3/Vuetify 4 components for IntelliTect's Coalesce framework.",
   "repository": "https://github.com/IntelliTect/Coalesce",
   "author": "IntelliTect",
   "license": "Apache-2.0",
@@ -57,7 +57,7 @@
   },
   "peerDependencies": {
     "coalesce-vue": "0.1.0-local",
-    "vuetify": "^3.7.1"
+    "vuetify": "^3.7.1 || ^4.0.0"
   },
   "optionalDependencies": {
     "vue-router": "^4.4.1"

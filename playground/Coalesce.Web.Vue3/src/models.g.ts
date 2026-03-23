@@ -523,7 +523,11 @@ export interface Person extends Model<typeof metadata.Person> {
   birthDate: Date | null
   lastBath: Date | null
   nextUpgrade: Date | null
+  
+  /** Example of a shared-key one-to-one */
   personStats: PersonStats | null
+  
+  /** Example of a separate-key one-to-one */
   personLocation: PersonLocation | null
   profilePic: string | null
   
@@ -535,8 +539,14 @@ export interface Person extends Model<typeof metadata.Person> {
   
   /** Company loaded from the Company ID */
   company: Company | null
+  
+  /** Example of a JSON-persisted simple collection on an entity */
   arbitraryCollectionOfStrings: string[] | null
+  
+  /** Example of a JSON-persisted complex object on an entity */
   currentWeather: WeatherData | null
+  
+  /** Example of a JSON-persisted complex collection on an entity */
   weatherHistory: WeatherData[] | null
 }
 export class Person {

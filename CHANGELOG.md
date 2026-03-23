@@ -1,3 +1,5 @@
+# 6.3.1
+
 # 6.3.0
 - Added Vuetify 4 compatibility to coalesce-vue-vuetify3.
 - Added support for EF Core 10 JSON-mapped complex type properties (`ComplexProperty`, `ComplexCollection`) on entity models. These properties are now fully serializable to/from the client, and direct mutations on the TypeScript side (including collection pushes and nested property assignments) correctly mark the ViewModel dirty.

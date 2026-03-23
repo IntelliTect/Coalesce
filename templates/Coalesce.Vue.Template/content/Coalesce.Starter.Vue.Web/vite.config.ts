@@ -91,7 +91,7 @@ export default defineConfig({
 
   server: {
     warmup: {
-      clientFiles: ["./src/views/*.vue"],
+      clientFiles: ["./src/views/**/*.vue"],
     },
   },
 

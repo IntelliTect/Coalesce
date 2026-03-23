@@ -90,7 +90,7 @@ jobs:
       #if (AzureTerraform)
       - name: Azure Login
         if: github.event_name != 'pull_request'
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}

@@ -21,7 +21,7 @@
     "typeface-roboto": "1.1.13",
     "vue": "^3.5.22",
     "vue-router": "^4.5.1",
-    "vuetify": "^3.10.3"
+    "vuetify": "^4.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",
@@ -41,7 +41,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-vue-components": "^31.0.0",
     "vite": "^8.0.0",
-    "vite-plugin-vuetify": "^2.1.2",
+    "vite-plugin-vuetify": "^2.1.3",
     "vitest": "^4.1.0",
     "vue-tsc": "^3.1.0"
   }

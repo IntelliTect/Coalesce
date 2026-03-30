@@ -20,8 +20,6 @@ public class AuditConfiguration
     /// </summary>
     internal bool KeepAddedDefaultValues { get; set; }
 
-    public int Test = Random.Shared.Next();
-
     public AuditConfiguration Clone()
     {
         return new()
@@ -148,10 +146,10 @@ public class AuditConfiguration
     {
         var wrappedFormatter = (object v) => formatter((T)v);
 
-        Formatters.Add((e) => 
-            e.Metadata.ClrType.IsAssignableTo(typeof(T)) || 
-            Nullable.GetUnderlyingType(e.Metadata.ClrType)?.IsAssignableTo(typeof(T)) == true 
-                ? wrappedFormatter 
+        Formatters.Add((e) =>
+            e.Metadata.ClrType.IsAssignableTo(typeof(T)) ||
+            Nullable.GetUnderlyingType(e.Metadata.ClrType)?.IsAssignableTo(typeof(T)) == true
+                ? wrappedFormatter
                 : null);
 
         return this;
@@ -170,7 +168,7 @@ public class AuditConfiguration
                 return formatter(currentValue);
             }
         }
-        
+
         if (currentValue is System.Collections.ICollection collection)
         {
             return $"[{string.Join(", ", collection.OfType<object>())}]";

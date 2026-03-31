@@ -99,6 +99,7 @@ jobs:
       - name: update version
         run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 
+      - run: npm run build
       - run: npm pack
 
       - name: Upload Artifact
@@ -125,11 +126,10 @@ jobs:
       - name: npm run test
         run: npm run test
 
-      - run: npm run build
-
       - name: update version
         run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 
+      - run: npm run build
       - run: npm pack
 
       - name: Upload Artifact

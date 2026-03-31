@@ -17,8 +17,8 @@ describe("CListPageSize", () => {
     expect(selectWrapper.exists()).toBe(true);
 
     // The aria-label should be present on the select or its input element
-    const ariaLabel = 
-      selectWrapper.attributes("aria-label") || 
+    const ariaLabel =
+      selectWrapper.attributes("aria-label") ||
       wrapper.find("input").attributes("aria-label");
     expect(ariaLabel).toBe("Page Size");
   });
@@ -34,8 +34,8 @@ describe("CListPageSize", () => {
 
     // The aria-label should be present on the select wrapper or input
     const selectWrapper = wrapper.find(".c-list-page-size--dropdown");
-    const ariaLabel = 
-      selectWrapper.attributes("aria-label") || 
+    const ariaLabel =
+      selectWrapper.attributes("aria-label") ||
       wrapper.find("input").attributes("aria-label");
     expect(ariaLabel).toBe("Page Size");
   });

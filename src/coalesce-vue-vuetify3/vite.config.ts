@@ -36,7 +36,7 @@ export default defineConfig({
     },
     outDir: "dist",
     rolldownOptions: {
-      preserveEntrySignatures: 'allow-extension',
+      preserveEntrySignatures: "allow-extension",
       external: [
         ...Object.keys(pkg.dependencies),
         ...Object.keys(pkg.peerDependencies),

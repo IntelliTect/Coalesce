@@ -82,6 +82,8 @@ jobs:
       - run: npm ci
         working-directory: ${{ github.workspace }}
 
+      - run: npm run lint
+
       - name: npm run test
         run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue.results.xml
 
@@ -157,6 +159,7 @@ jobs:
 
       - run: npm run build-local-deps # build coalesce-vue
       - run: npm run build
+      - run: npm run lint
       - run: npm run test
 
       - name: update version

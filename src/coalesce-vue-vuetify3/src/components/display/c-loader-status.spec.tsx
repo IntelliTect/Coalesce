@@ -307,7 +307,7 @@ describe("CLoaderStatus", () => {
 
     // Manually set the loader to a loading state to trigger the progress bar
     vm.$load.isLoading = true;
-    
+
     // Wait for next tick so the loading state is reflected in the DOM
     await wrapper.vm.$nextTick();
 

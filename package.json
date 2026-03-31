@@ -7,6 +7,11 @@
     "playground/*",
     "docs"
   ],
+  "overrides": {
+    "js-beautify": {
+      "glob": "13.0.6"
+    }
+  },
   "devDependencies": {
     "@types/node": "^22.15.3",
     "@vitejs/plugin-vue": "^6.0.5",

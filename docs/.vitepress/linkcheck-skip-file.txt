@@ -1,3 +1,5 @@
 github.com/intellitect/coalesce/edit
 github.com/IntelliTect/Coalesce/blob/main
 github.com/IntelliTect/Coalesce/blob/1fb00c7de5e363aaf3c1a78f45af3b949b11dff4/src/coalesce-vue/test/utils.spec.ts#L5
+www.npmjs.com/package/vue-facing-decorator
+www.kalzumeus.com

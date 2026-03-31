@@ -175,7 +175,7 @@ export default defineComponent({
         // - `(` (nongeneric method)
         // - ` {` (prop definition)
         // - `<eol>` (field definition, or prop where {get;set;} were omitted from the def)
-        const result = / (\w+)(?:<|\(| \{|$)/.exec(this.def);
+        const result = / ([\w.]+)(?:<|\(| \{|$)/.exec(this.def);
         this.idAttr = result ? this.idPrefix + "-" + result[1] : null;
       }
 

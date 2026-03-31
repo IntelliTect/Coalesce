@@ -61,7 +61,7 @@ Azure OpenAI can be configured in two ways: through .NET Aspire (recommended) or
 
 #### Using .NET Aspire (Recommended)
 
-When launching with the Aspire AppHost, Azure OpenAI will configure and provision cloud resources automatically with [Aspire's local provisioning](https://learn.microsoft.com/en-us/dotnet/aspire/azure/local-provisioning#configuration). Configure the required Azure settings in your AppHost project's `appsettings.json`, `appsettings.localhost.json`, or `dotnet user-secrets`:
+When launching with the Aspire AppHost, Azure OpenAI will configure and provision cloud resources automatically with [Aspire's local provisioning](https://aspire.dev/integrations/cloud/azure/local-provisioning/#configuration). Configure the required Azure settings in your AppHost project's `appsettings.json`, `appsettings.localhost.json`, or `dotnet user-secrets`:
 
 ```json
 {
@@ -74,9 +74,9 @@ When launching with the Aspire AppHost, Azure OpenAI will configure and provisio
 }
 ```
 
-If there's an existing resource you'd rather use instead of provisioning a new resource, see the documentation for [Connecting to an existing Azure OpenAI service](https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration?tabs=package-reference#connect-to-an-existing-azure-openai-service).
+If there's an existing resource you'd rather use instead of provisioning a new resource, see the documentation for [Connecting to an existing Azure OpenAI service](https://aspire.dev/integrations/cloud/azure/azure-openai/azure-openai-get-started/).
 
-For more details on Aspire's Azure OpenAI integration, see the [official documentation](https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration).
+For more details on Aspire's Azure OpenAI integration, see the [official documentation](https://aspire.dev/integrations/cloud/azure/azure-openai/azure-openai-get-started/).
 
 #### Manual Configuration (Without Aspire)
 

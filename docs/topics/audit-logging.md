@@ -84,7 +84,7 @@ public class OperationContext : DefaultAuditOperationContext<AuditLog>
 
 When you're inheriting from `DefaultAuditLog` for your `IAuditLog` implementation, you'll want to similarly inherit from `DefaultAuditOperationContext<>` for your operation context. It will take care of populating the HTTP request tracking fields on the `AuditLog` record. If you want a totally custom implementation, you only need to implement the `IAuditOperationContext<TAuditLog>` interface.
 
-The operation context class passed to `WithAugmentation` will be injected from the application service provider if available; otherwise, a new instance will be constructed using dependencies from the application service provider. To make an injected dependency optional, make the constructor parameter nullable with a default value of `null`, or create [alternate constructors](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#multiple-constructor-discovery-rules).
+The operation context class passed to `WithAugmentation` will be injected from the application service provider if available; otherwise, a new instance will be constructed using dependencies from the application service provider. To make an injected dependency optional, make the constructor parameter nullable with a default value of `null`, or create [alternate constructors](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection/overview#constructor-selection-rules).
 
 ### 4. Add the UI
 

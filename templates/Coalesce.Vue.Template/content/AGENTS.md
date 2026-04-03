@@ -16,6 +16,9 @@ An `IntelliTect Coalesce`–based project. Projects:
 - Coalesce generates DTOs, controllers, and TypeScript from your models. After making changes to your models, invoke code generation with the `coalesce_generate` tool. The `coalesce.json` file is in the workspace root.
 - If you run tests with `npm test`, pass `--run` to avoid running in interactive mode. E.g. `npm test -- --run`.
 - In Vue files, you don't need to add import statements for components nor composables from `vue`, `vue-router`, or those defined by the project's source code - they will be auto-imported by Vite.
+- Do not run `npm run build` to validate changes unless the user asks because this ruins HMR if the app is running. Instead, validate frontend changes by checking for problems with `read/problems`.
+- Use SCSS for all styles - `lang="scss"` in .vue files.
+- Use `date-fns` for date manipulation and formatting, or `.$display(propName)` on Coalesce ViewModel instances, or `c-display` in Vue templates.
 
 ## Docs
 

@@ -1,4 +1,6 @@
 # 6.3.1
+- Added `app.UseAppVersionHeader()` middleware and `<CAppUpdateAlert>` component for detecting and notifying users when a new version of the application has been deployed.
+- Assorted template improvements
 
 # 6.3.0
 - Added Vuetify 4 compatibility to coalesce-vue-vuetify3.

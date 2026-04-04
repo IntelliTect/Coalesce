@@ -179,6 +179,21 @@ This is useful for preventing browsers from unexpectedly caching API responses. 
 app.UseNoCacheResponseHeader();
 ```
 
+<Prop def="public static IApplicationBuilder UseAppVersionHeader(this IApplicationBuilder app, string? version = null)" />
+
+Adds an `X-App-Build` response header to all responses that reach this point in the pipeline, using the entry assembly's `AssemblyInformationalVersion` by default. This middleware acts as a pre-hook, so the header can be overridden by later middleware or individual endpoints.
+
+On the client, this header is used by the [`<CAppUpdateAlert>`](/stacks/vue/coalesce-vue-vuetify/components/c-app-update-alert.md) component (or the `useAppUpdateCheck` composable from `coalesce-vue`) to detect when a new version of the application has been deployed and notify the user to refresh.
+
+``` c#
+app.UseAppVersionHeader();
+```
+
+``` c#
+// With a custom version string:
+app.UseAppVersionHeader("2.1.0-rc1");
+```
+
 <Prop def="public static IEndpointConventionBuilder MapCoalesceSecurityOverview(this IEndpointRouteBuilder builder, string pattern)" />
 
 Maps a route that presents an HTML page with a comprehensive overview of all types exposed by Coalesce and their effective security rules. This page displays:

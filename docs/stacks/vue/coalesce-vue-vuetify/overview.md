@@ -37,6 +37,14 @@ If for whatever reason you find yourself adding Coalesce to an existing project,
 </td></tr>
 <tr><td>
 
+[c-app-update-alert](./components/c-app-update-alert.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-app-update-alert.md) 
+</td></tr>
+<tr><td>
+
 [c-list-range-display](./components/c-list-range-display.md)
 </td>
 <td> 

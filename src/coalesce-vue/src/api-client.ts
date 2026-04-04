@@ -624,6 +624,48 @@ AxiosClient.interceptors.request.use((config) => {
   }
 });
 
+const APP_BUILD_HEADER = "x-app-build";
+
+/**
+ * Sets up detection of application version changes by monitoring the `X-App-Build`
+ * response header on API responses. When the header value changes from the initially
+ * observed value, `isUpdateAvailable` becomes true.
+ *
+ * On the server, call `app.UseAppVersionHeader()` to emit this header.
+ *
+ * @param axiosInstance The Axios instance to monitor. Defaults to the Coalesce `AxiosClient`.
+ * @returns An object with an `isUpdateAvailable` ref that becomes true when a new version is detected.
+ */
+export function useAppUpdateCheck(axiosInstance = AxiosClient): {
+  isUpdateAvailable: Ref<boolean>;
+} {
+  const isUpdateAvailable = ref(false);
+  let initialBuild: string | null = null;
+
+  axiosInstance.interceptors.response.use(
+    (response) => {
+      checkBuild(response.headers?.[APP_BUILD_HEADER]);
+      return response;
+    },
+    (error) => {
+      checkBuild(error?.response?.headers?.[APP_BUILD_HEADER]);
+      return Promise.reject(error);
+    },
+  );
+
+  function checkBuild(build: string | undefined) {
+    if (!build) return;
+
+    if (initialBuild === null) {
+      initialBuild = build;
+    } else if (build !== initialBuild) {
+      isUpdateAvailable.value = true;
+    }
+  }
+
+  return { isUpdateAvailable };
+}
+
 export type ApiCallerConcurrency = "cancel" | "disallow" | "allow" | "debounce";
 
 type ItemTransportTypeSpecifier<T extends ApiRoutedType = any> =

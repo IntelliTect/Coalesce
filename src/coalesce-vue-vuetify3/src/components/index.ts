@@ -1,6 +1,5 @@
 // In alphabetical order:
 export { default as CAdminAuditLogPage } from "./admin/c-admin-audit-log-page.vue";
-export { default as CAppUpdateAlert } from "./display/c-app-update-alert.vue";
 export { default as CAdminDisplay } from "./admin/c-admin-display.vue";
 export { default as CAdminEditor } from "./admin/c-admin-editor.vue";
 export { default as CAdminEditorPage } from "./admin/c-admin-editor-page.vue";
@@ -9,6 +8,7 @@ export { default as CAdminMethods } from "./admin/c-admin-methods.vue";
 export { default as CAdminTable } from "./admin/c-admin-table.vue";
 export { default as CAdminTablePage } from "./admin/c-admin-table-page.vue";
 export { default as CAdminTableToolbar } from "./admin/c-admin-table-toolbar.vue";
+export { default as CAppUpdateAlert } from "./display/c-app-update-alert.vue";
 export { default as CDatetimePicker } from "./input/c-datetime-picker.vue";
 export { default as CDisplay } from "./display/c-display.vue";
 export { default as CInput } from "./input/c-input.vue";
@@ -28,7 +28,6 @@ export { default as CTable } from "./display/c-table.vue";
 declare module "vue" {
   interface GlobalComponents {
     CAdminAuditLogPage: (typeof import("."))["CAdminAuditLogPage"];
-    CAppUpdateAlert: (typeof import("."))["CAppUpdateAlert"];
     CAdminDisplay: (typeof import("."))["CAdminDisplay"];
     CAdminEditor: (typeof import("."))["CAdminEditor"];
     CAdminEditorPage: (typeof import("."))["CAdminEditorPage"];
@@ -37,6 +36,7 @@ declare module "vue" {
     CAdminTable: (typeof import("."))["CAdminTable"];
     CAdminTablePage: (typeof import("."))["CAdminTablePage"];
     CAdminTableToolbar: (typeof import("."))["CAdminTableToolbar"];
+    CAppUpdateAlert: (typeof import("."))["CAppUpdateAlert"];
     CDatetimePicker: (typeof import("."))["CDatetimePicker"];
     CDisplay: (typeof import("."))["CDisplay"];
     CInput: (typeof import("."))["CInput"];

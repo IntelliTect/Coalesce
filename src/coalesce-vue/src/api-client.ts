@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
 import {
   onBeforeUnmount,
+  onScopeDispose,
   ref,
   markRaw,
   getCurrentInstance,
@@ -642,7 +643,7 @@ export function useAppUpdateCheck(axiosInstance = AxiosClient): {
   const isUpdateAvailable = ref(false);
   let initialBuild: string | null = null;
 
-  axiosInstance.interceptors.response.use(
+  const interceptorId = axiosInstance.interceptors.response.use(
     (response) => {
       checkBuild(response.headers?.[APP_BUILD_HEADER]);
       return response;
@@ -651,6 +652,11 @@ export function useAppUpdateCheck(axiosInstance = AxiosClient): {
       checkBuild(error?.response?.headers?.[APP_BUILD_HEADER]);
       return Promise.reject(error);
     },
+  );
+
+  onScopeDispose(
+    () => axiosInstance.interceptors.response.eject(interceptorId),
+    true,
   );
 
   function checkBuild(build: string | undefined) {

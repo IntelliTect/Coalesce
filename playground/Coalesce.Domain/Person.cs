@@ -70,6 +70,7 @@ public class Person
     /// <summary>
     /// Email address of the person
     /// </summary>
+    [FeatureFlag("new-email-validation")]
     [ClientValidation(IsEmail = true)]
     [DataType(DataType.EmailAddress)]
     [EmailAddress]

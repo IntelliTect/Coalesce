@@ -23,6 +23,13 @@ public abstract class ClassViewModel : IAttributeProvider
 
     public ReflectionRepository? ReflectionRepository => Type.ReflectionRepository;
 
+    /// <summary>
+    /// Gets the custom attribute metadata for this class,
+    /// based on assembly-level <see cref="DataAnnotations.CoalesceMetadataAttribute"/> declarations.
+    /// </summary>
+    public IEnumerable<CustomMetadataItem> GetCustomMetadata()
+        => ReflectionRepository?.CustomMetadata.GetCustomMetadata(this, Type) ?? [];
+
     protected ClassViewModel(TypeViewModel type)
     {
         Type = type;

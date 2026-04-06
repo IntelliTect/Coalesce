@@ -60,6 +60,8 @@ public class ReflectionTypeViewModel : TypeViewModel
     public override IAttributeProvider Assembly
         => new ReflectionAttributeProvider(Info.Assembly);
 
+    internal override object AssemblyIdentity => Info.Assembly;
+
     // TODO: why is an arity of 1 removed from the name? Seems to be an oversight
     // - If we're removing arity, we should remove any arity.
     public override string Name => Info.Name.Replace("`1", "");

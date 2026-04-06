@@ -18,6 +18,30 @@ public class ReflectionAttributeViewModel<TAttribute> : AttributeViewModel<TAttr
 
     public override TypeViewModel Type => ReflectionRepository.GetOrAddType(Instance.GetType());
 
+    public override IReadOnlyList<KeyValuePair<string, object?>> GetAllValues()
+    {
+        var result = new List<KeyValuePair<string, object?>>();
+        foreach (var property in Instance.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (property.DeclaringType == typeof(Attribute)) continue;
+            try
+            {
+                var value = property.GetValue(Instance, null);
+                if (value is Type reflectionValue)
+                    value = ReflectionRepository.Global.GetOrAddType(reflectionValue);
+                if (value != null)
+                    result.Add(new(property.Name, value));
+            }
+#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
+            catch (Exception)
+            {
+                // Ignore property getters that throw
+            }
+#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception
+        }
+        return result;
+    }
+
     public override object? GetValue(string valueName)
     {
         var property = Instance.GetType().GetProperty(valueName);
@@ -47,6 +71,9 @@ internal class ReflectionAttributeProvider(ICustomAttributeProvider symbol) : IA
 
 public static class ReflectionExtensions
 {
+    public static IAttributeProvider GetAttributeProvider(this ICustomAttributeProvider member)
+        => new ReflectionAttributeProvider(member);
+
     public static IEnumerable<ReflectionAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(
         this ICustomAttributeProvider member,
         ReflectionRepository? rr = null

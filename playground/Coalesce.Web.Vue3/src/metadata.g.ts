@@ -1716,6 +1716,11 @@ export const Person = domain.types.Person = {
       type: "string",
       subtype: "email",
       role: "value",
+      meta: {
+        featureFlag: {
+          flag: "new-email-validation",
+        },
+      },
       rules: {
         email: val => !val || /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<> ()\[\]\\.,;:\s@"]+)*)|(".+ "))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val.trim()) || "Email must be a valid email address.",
       }

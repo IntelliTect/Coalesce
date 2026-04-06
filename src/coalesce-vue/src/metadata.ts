@@ -88,6 +88,14 @@ export interface Metadata {
   // TODO: i18n? How does it fit into this property? Do we take a dependency on an i18n framework and compute it in a getter?
   /** The human-readable name of the value or type */
   readonly displayName: string;
+
+  /**
+   * Custom metadata extracted from C# attributes specified
+   * via `[assembly: CoalesceMetadata<T>]` declarations.
+   */
+  readonly attributes?: {
+    readonly [key: string]: { readonly [key: string]: unknown };
+  };
 }
 
 /** Common properties for custom object types. */

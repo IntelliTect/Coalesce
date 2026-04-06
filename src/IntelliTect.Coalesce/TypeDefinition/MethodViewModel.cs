@@ -34,6 +34,13 @@ public abstract partial class MethodViewModel : IAttributeProvider
     public ClassViewModel Parent { get; protected set; }
 
     /// <summary>
+    /// Gets the custom attribute metadata for this method,
+    /// based on assembly-level <see cref="DataAnnotations.CoalesceMetadataAttribute"/> declarations.
+    /// </summary>
+    public IEnumerable<CustomMetadataItem> GetCustomMetadata()
+        => Parent?.ReflectionRepository?.CustomMetadata.GetCustomMetadata(this, Parent.Type) ?? [];
+
+    /// <summary>
     /// The class that is the context in which the method was requested.
     /// Not nessecarily the class that the method is declared on. For that, use <see cref="Parent"/>
     /// </summary>

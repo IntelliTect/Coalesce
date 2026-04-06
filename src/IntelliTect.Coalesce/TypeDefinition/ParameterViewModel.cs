@@ -18,6 +18,13 @@ public abstract class ParameterViewModel : ValueViewModel
     public MethodViewModel Parent { get; }
 
     /// <summary>
+    /// Gets the custom attribute metadata for this parameter,
+    /// based on assembly-level <see cref="DataAnnotations.CoalesceMetadataAttribute"/> declarations.
+    /// </summary>
+    public IEnumerable<CustomMetadataItem> GetCustomMetadata()
+        => Parent?.Parent?.ReflectionRepository?.CustomMetadata.GetCustomMetadata(this, Parent.Parent.Type) ?? [];
+
+    /// <summary>
     /// If set, this parameter's value is automatically populated from the referenced 
     /// property on the parent model's ViewModel instance.
     /// </summary>
@@ -33,7 +40,7 @@ public abstract class ParameterViewModel : ValueViewModel
     /// <summary>
     /// True if this is an injected method parameter that should be represented by a controller action argument.
     /// </summary>
-    public bool ShouldInjectFromServices => 
+    public bool ShouldInjectFromServices =>
         HasInjectAttribute ||
         // Only DbContexts that are not the `IsAutoInjectedContext` are injected from services.
         // The auto-injected context is sourced from the controller, not the action parameters.

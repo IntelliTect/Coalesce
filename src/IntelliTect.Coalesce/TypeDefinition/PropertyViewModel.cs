@@ -85,6 +85,13 @@ public abstract class PropertyViewModel : ValueViewModel
     public ClassViewModel Parent { get; protected set; }
 
     /// <summary>
+    /// Gets the custom attribute metadata for this property,
+    /// based on assembly-level <see cref="DataAnnotations.CoalesceMetadataAttribute"/> declarations.
+    /// </summary>
+    public IEnumerable<CustomMetadataItem> GetCustomMetadata()
+        => Parent?.ReflectionRepository?.CustomMetadata.GetCustomMetadata(this, Parent.Type) ?? [];
+
+    /// <summary>
     /// The class that is the context in which the property was requested.
     /// Not nessecarily the class that the property is declared on. For that, use <see cref="Parent"/>
     /// </summary>

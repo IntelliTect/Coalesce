@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 
 [SemanticKernel("ComplexModel", DeleteEnabled = true, SaveEnabled = true)]
+[CustomMetadataTarget("ClassLevel", Value = 42)]
 public class ComplexModel
 {
     [Coalesce]
@@ -54,6 +55,8 @@ public class ComplexModel
     public EnumPk EnumPk { get; set; }
 
     [Search]
+    [CustomMetadataTarget("PropLevel")]
+    [CustomMetadataMarker]
     public DateTimeOffset DateTimeOffset { get; set; }
 
     public DateTimeOffset? DateTimeOffsetNullable { get; set; }
@@ -190,11 +193,12 @@ public class ComplexModel
     // Add other kinds of properties, relationships, etc... as needed.
 
     [Coalesce, Execute]
+    [CustomMetadataTarget("MethodLevel", Value = 99)]
     public ExternalParent MethodWithManyParams(
         ExternalParent singleExternal,
         ICollection<ExternalParent> collectionExternal,
         IFile file,
-        string strParam,
+        [CustomMetadataTarget("ParamLevel")] string strParam,
         string[] stringsParam,
         DateTime dateTime,
         int integer,

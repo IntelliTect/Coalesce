@@ -16,6 +16,12 @@ public abstract class AttributeViewModel<TAttribute>
         ReflectionRepository = reflectionRepository ?? ReflectionRepository.Global;
     }
 
+    /// <summary>
+    /// Returns all explicitly set values of the attribute as key-value pairs.
+    /// Keys are the property/parameter names; values are the resolved values.
+    /// </summary>
+    public abstract IReadOnlyList<KeyValuePair<string, object?>> GetAllValues();
+
     public T? GetValue<T>(string valueName)
         where T : struct
     {

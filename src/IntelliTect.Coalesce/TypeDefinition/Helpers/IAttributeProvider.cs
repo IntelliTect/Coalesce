@@ -11,6 +11,12 @@ namespace IntelliTect.Coalesce.TypeDefinition;
 public interface IAttributeProvider
 {
     IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() where TAttribute : Attribute;
+
+    /// <summary>
+    /// Gets the custom attribute metadata for this element,
+    /// based on assembly-level <see cref="DataAnnotations.CoalesceMetadataAttribute"/> declarations.
+    /// </summary>
+    IEnumerable<CustomMetadataItem> GetCustomMetadata() => [];
 }
 
 public static class AttributeExtensions

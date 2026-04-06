@@ -1,11 +1,13 @@
 ﻿using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.AuditLogging;
+using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Security.Cryptography;
 
 // [assembly: CoalesceConfiguration(NoAutoInclude = true)]
+[assembly: CoalesceMetadata<Coalesce.Domain.FeatureFlagAttribute>]
 
 namespace Coalesce.Domain;
 

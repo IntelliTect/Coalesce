@@ -1043,6 +1043,12 @@ export const ComplexModel = domain.types.ComplexModel = {
   name: "ComplexModel" as const,
   displayName: "Complex Model",
   get displayProp() { return this.props.name }, 
+  attributes: {
+    customMetadataTarget: {
+      value: 42,
+      name: "ClassLevel",
+    },
+  },
   type: "model",
   controllerRoute: "ComplexModel",
   get keyProp() { return this.props.complexModelId }, 
@@ -1566,6 +1572,12 @@ export const ComplexModel = domain.types.ComplexModel = {
       displayName: "Method With Many Params",
       transportType: "item",
       httpMethod: "POST",
+      attributes: {
+        customMetadataTarget: {
+          value: 99,
+          name: "MethodLevel",
+        },
+      },
       params: {
         id: {
           name: "id",

@@ -24,6 +24,19 @@ public abstract class TypeViewModel : IAttributeProvider
 
     public abstract IAttributeProvider Assembly { get; }
 
+    /// <summary>
+    /// An object that uniquely identifies the assembly containing this type,
+    /// suitable for use as a dictionary key (uses reference equality).
+    /// </summary>
+    internal abstract object AssemblyIdentity { get; }
+
+    /// <summary>
+    /// Gets the custom attribute metadata for this type,
+    /// based on assembly-level <see cref="CoalesceMetadataAttribute"/> declarations.
+    /// </summary>
+    public IEnumerable<CustomMetadataItem> GetCustomMetadata()
+        => ReflectionRepository?.CustomMetadata.GetCustomMetadata(this, this) ?? [];
+
     public abstract string Name { get; }
 
     /// <summary>

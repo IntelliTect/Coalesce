@@ -67,6 +67,8 @@ public class SymbolTypeViewModel : TypeViewModel
     public override IAttributeProvider Assembly
         => Symbol.ContainingAssembly.GetAttributeProvider();
 
+    internal override object AssemblyIdentity => Symbol.ContainingAssembly;
+
     protected override bool ShouldCreateClassViewModel
         => base.ShouldCreateClassViewModel && Symbol is INamedTypeSymbol;
 

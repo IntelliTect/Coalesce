@@ -137,6 +137,7 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
             }
             b.Line("]},");
         }
+        WriteCustomMetadata(b, model);
     }
 
     private void WriteExternalTypeMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
@@ -198,6 +199,8 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
                 }
             }
             b.Line("]),");
+
+            WriteCustomMetadata(b, model);
         }
     }
 
@@ -548,6 +551,8 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
             b.StringProp("transportType", method.TransportType.ToString().Replace("Result", "").ToLower());
             b.StringProp("httpMethod", method.ApiActionHttpMethod.ToString().ToUpperInvariant());
 
+            WriteCustomMetadata(b, method);
+
 
             int hiddenAreaFlags = (int)method.HiddenAreas;
             if (hiddenAreaFlags != 0)
@@ -666,6 +671,7 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
         }
 
         WriteTypeCommonMetadata(b, value.Type, value);
+        WriteCustomMetadata(b, value);
     }
 
     /// <summary>
@@ -788,4 +794,39 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
                 break;
         }
     }
+
+    private void WriteCustomMetadata(TypeScriptCodeBuilder b, IAttributeProvider provider)
+    {
+        var entries = provider.GetCustomMetadata();
+        if (!entries.Any()) return;
+
+        using (b.Block("attributes:", ','))
+        {
+            foreach (var entry in entries)
+            {
+                using (b.Block($"{entry.Key}:", ','))
+                {
+                    foreach (var (propName, propValue) in entry.Properties)
+                    {
+                        b.Prop(propName.ToCamelCase(), ValueToJsLiteral(propValue));
+                    }
+                }
+            }
+        }
+    }
+
+    private static string ValueToJsLiteral(object value) => value switch
+    {
+        null => "null",
+        true => "true",
+        false => "false",
+        string s => $"\"{s.EscapeStringLiteralForTypeScript()}\"",
+        int or long or short or byte or sbyte or uint or ulong or ushort => value.ToString(),
+        float f => f.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        double d => d.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        decimal m => m.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        TypeViewModel tv => $"\"{tv.FullyQualifiedName.EscapeStringLiteralForTypeScript()}\"",
+        object[] arr => $"[{string.Join(", ", arr.Select(ValueToJsLiteral))}]",
+        _ => $"\"{value.ToString().EscapeStringLiteralForTypeScript()}\""
+    };
 }

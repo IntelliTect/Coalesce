@@ -33,6 +33,33 @@ public class ReflectionRepository
     private readonly ConcurrentDictionary<object, TypeViewModel> _allTypeViewModels
         = new();
 
+    private CustomMetadataProvider? _customMetadataProvider;
+
+    /// <summary>
+    /// Provider for extracting custom attribute metadata from symbols,
+    /// based on assembly-level <see cref="DataAnnotations.CoalesceMetadataAttribute"/> declarations.
+    /// Lazily initialized from all unique assemblies of discovered types.
+    /// </summary>
+    internal CustomMetadataProvider CustomMetadata
+    {
+        get => _customMetadataProvider ??= BuildCustomMetadataProvider();
+    }
+
+    private CustomMetadataProvider BuildCustomMetadataProvider()
+    {
+        var provider = new CustomMetadataProvider();
+        var seen = new HashSet<object>();
+        foreach (var cvm in DiscoveredClassViewModels)
+        {
+            var id = cvm.Type.AssemblyIdentity;
+            if (seen.Add(id))
+            {
+                provider.AddAssembly(id, cvm.Type.Assembly);
+            }
+        }
+        return provider;
+    }
+
     private readonly object _discoverLock = new();
 
     public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new(_contexts);
@@ -176,6 +203,7 @@ public class ReflectionRepository
         // Null this out so it gets recomputed on next access.
         _clientTypes = null;
         _clientMethods = null;
+        _customMetadataProvider = null;
 
         if (type.IsA<DbContext>())
         {

@@ -19,39 +19,41 @@ public class SymbolAttributeViewModel<TAttribute> : AttributeViewModel<TAttribut
 
     public override TypeViewModel Type => ReflectionRepository.GetOrAddType(AttributeData.AttributeClass!);
 
-    public override object? GetValue(string propertyName)
+    private object? MapValue(TypedConstant arg) => arg.Kind == TypedConstantKind.Array
+        ? arg.Values.Select(v => MapScalar(v.Value)).ToArray()
+        : MapScalar(arg.Value);
+
+    private object? MapScalar(object? ret) => ret switch
     {
-        var namedArgument = AttributeData.NamedArguments.SingleOrDefault(na => na.Key == propertyName);
+        ITypeSymbol symbolValue => ReflectionRepository.Global.GetOrAddType(symbolValue),
+        _ => ret
+    };
 
-        if (namedArgument.Key != null)
+    private IEnumerable<KeyValuePair<string, object?>> EnumerateValues()
+    {
+        foreach (var named in AttributeData.NamedArguments)
         {
-            return MapReturn(namedArgument.Value.Value);
+            yield return new(named.Key, MapValue(named.Value));
         }
 
-        TypedConstant? constructorArgument = AttributeData
-            .AttributeConstructor?.Parameters
-            .Zip(AttributeData.ConstructorArguments, Tuple.Create)
-        // Look for ctor params with a matching name (case insensitive)
-            .FirstOrDefault(t => string.Equals(t.Item1.Name, propertyName, StringComparison.OrdinalIgnoreCase))
-            ?.Item2
-            // If we didn't find one, see if there is just a single ctor param. If so, this is almost certainly what we were looking for.
-            ;//?? (attributeData.ConstructorArguments.Length == 1 ? attributeData.ConstructorArguments.SingleOrDefault() : default);
-
-        if (constructorArgument == null || constructorArgument.Value.IsNull) return null;
-        var arg = constructorArgument.Value;
-
-        if (arg.Kind == TypedConstantKind.Array)
+        if (AttributeData.AttributeConstructor is { } ctor)
         {
-            return arg.Values.Select(v => MapReturn(v.Value)).ToArray();
+            var args = AttributeData.ConstructorArguments;
+            for (int i = 0; i < ctor.Parameters.Length && i < args.Length; i++)
+            {
+                if (!args[i].IsNull)
+                    yield return new(ctor.Parameters[i].Name, MapValue(args[i]));
+            }
         }
-        return MapReturn(arg.Value);
-
-        object? MapReturn(object? ret) => ret switch
-        {
-            ITypeSymbol symbolValue => ReflectionRepository.Global.GetOrAddType(symbolValue),
-            _ => ret
-        };
     }
+
+    public override IReadOnlyList<KeyValuePair<string, object?>> GetAllValues()
+        => [.. EnumerateValues()];
+
+    public override object? GetValue(string propertyName)
+        => EnumerateValues()
+            .FirstOrDefault(kv => string.Equals(kv.Key, propertyName, StringComparison.OrdinalIgnoreCase))
+            .Value;
 }
 
 internal class SymbolAttributeProvider(ISymbol symbol) : IAttributeProvider
@@ -125,7 +127,7 @@ public static class SymbolExtensions
         => new SymbolAttributeProvider(symbol);
 
     public static IEnumerable<SymbolAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(
-        this ISymbol symbol, 
+        this ISymbol symbol,
         ReflectionRepository? rr = null)
         where TAttribute : Attribute
     {

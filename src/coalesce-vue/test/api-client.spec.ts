@@ -1,5 +1,9 @@
 import { type ComponentPublicInstance, effectScope } from "vue";
-import axios, { AxiosError, type AxiosAdapter, type AxiosResponse } from "axios";
+import axios, {
+  AxiosError,
+  type AxiosAdapter,
+  type AxiosResponse,
+} from "axios";
 import { mount } from "@vue/test-utils";
 
 import { type ItemMethod } from "../src/metadata";
@@ -1702,9 +1706,7 @@ describe("ModelApiClient", () => {
 describe("useAppUpdateCheck", () => {
   const APP_BUILD_HEADER = "x-app-build";
 
-  function makeAxiosWithMockAdapter(
-    headers: Record<string, string> = {},
-  ) {
+  function makeAxiosWithMockAdapter(headers: Record<string, string> = {}) {
     const instance = axios.create();
     instance.defaults.adapter = vitest.fn().mockResolvedValue(<AxiosResponse>{
       data: { wasSuccessful: true },
@@ -1818,19 +1820,20 @@ describe("useAppUpdateCheck", () => {
     });
 
     const scope = effectScope();
-    let result!: ReturnType<typeof useAppUpdateCheck>;
 
     scope.run(() => {
-      result = useAppUpdateCheck(instance);
+      useAppUpdateCheck(instance);
     });
 
-    const interceptorCountBefore = (instance.interceptors.response as any)
-      .handlers.filter(Boolean).length;
+    const interceptorCountBefore = (
+      instance.interceptors.response as any
+    ).handlers.filter(Boolean).length;
 
     scope.stop();
 
-    const interceptorCountAfter = (instance.interceptors.response as any)
-      .handlers.filter(Boolean).length;
+    const interceptorCountAfter = (
+      instance.interceptors.response as any
+    ).handlers.filter(Boolean).length;
 
     expect(interceptorCountAfter).toBe(interceptorCountBefore - 1);
   });

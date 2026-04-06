@@ -39,6 +39,7 @@ function getComponentCategory(item: (typeof vuetifyComponents)[0]) {
   return item.text.startsWith("c-admin")
     ? "admin"
     : [
+          "c-app-update-alert",
           "c-display",
           "c-loader-status",
           "c-list-range-display",

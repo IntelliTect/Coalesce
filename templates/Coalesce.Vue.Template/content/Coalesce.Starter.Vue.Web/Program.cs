@@ -202,6 +202,7 @@ app.UseAuthorization();
 
 app.UseViteStaticFiles();
 app.UseNoCacheResponseHeader();
+app.UseAppVersionHeader();
 
 #if OpenAPI
 app.MapSwagger();

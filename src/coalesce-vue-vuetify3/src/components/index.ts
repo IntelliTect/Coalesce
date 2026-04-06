@@ -8,6 +8,7 @@ export { default as CAdminMethods } from "./admin/c-admin-methods.vue";
 export { default as CAdminTable } from "./admin/c-admin-table.vue";
 export { default as CAdminTablePage } from "./admin/c-admin-table-page.vue";
 export { default as CAdminTableToolbar } from "./admin/c-admin-table-toolbar.vue";
+export { default as CAppUpdateAlert } from "./display/c-app-update-alert.vue";
 export { default as CDatetimePicker } from "./input/c-datetime-picker.vue";
 export { default as CDisplay } from "./display/c-display.vue";
 export { default as CInput } from "./input/c-input.vue";
@@ -35,6 +36,7 @@ declare module "vue" {
     CAdminTable: (typeof import("."))["CAdminTable"];
     CAdminTablePage: (typeof import("."))["CAdminTablePage"];
     CAdminTableToolbar: (typeof import("."))["CAdminTableToolbar"];
+    CAppUpdateAlert: (typeof import("."))["CAppUpdateAlert"];
     CDatetimePicker: (typeof import("."))["CDatetimePicker"];
     CDisplay: (typeof import("."))["CDisplay"];
     CInput: (typeof import("."))["CInput"];

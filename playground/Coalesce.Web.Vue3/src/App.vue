@@ -50,6 +50,8 @@
 
       <AIChat title="OmniTool" endpoint="chatAgent" class="right-0" />
     </v-main>
+
+    <CAppUpdateAlert />
   </v-app>
 </template>
 

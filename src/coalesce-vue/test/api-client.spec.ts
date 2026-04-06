@@ -1,5 +1,9 @@
-import { type ComponentPublicInstance } from "vue";
-import { AxiosError, type AxiosAdapter, type AxiosResponse } from "axios";
+import { type ComponentPublicInstance, effectScope } from "vue";
+import axios, {
+  AxiosError,
+  type AxiosAdapter,
+  type AxiosResponse,
+} from "axios";
 import { mount } from "@vue/test-utils";
 
 import { type ItemMethod } from "../src/metadata";
@@ -14,6 +18,7 @@ import {
   mapParamsToDto,
   mapQueryToParams,
   getMessageForError,
+  useAppUpdateCheck,
 } from "../src/api-client";
 import { getInternalInstance } from "../src/util";
 import { delay, mountData, mockEndpoint } from "./test-utils";
@@ -1695,5 +1700,141 @@ describe("ModelApiClient", () => {
         }),
       );
     });
+  });
+});
+
+describe("useAppUpdateCheck", () => {
+  const APP_BUILD_HEADER = "x-app-build";
+
+  function makeAxiosWithMockAdapter(headers: Record<string, string> = {}) {
+    const instance = axios.create();
+    instance.defaults.adapter = vitest.fn().mockResolvedValue(<AxiosResponse>{
+      data: { wasSuccessful: true },
+      status: 200,
+      statusText: "OK",
+      headers,
+      config: {} as any,
+    });
+    return instance;
+  }
+
+  test("records initial build value and isUpdateAvailable starts false", async () => {
+    const axiosInstance = makeAxiosWithMockAdapter({
+      [APP_BUILD_HEADER]: "build-1",
+    });
+    const scope = effectScope();
+    let result!: ReturnType<typeof useAppUpdateCheck>;
+
+    scope.run(() => {
+      result = useAppUpdateCheck(axiosInstance);
+    });
+
+    expect(result.isUpdateAvailable.value).toBe(false);
+    await axiosInstance.get("/test");
+    expect(result.isUpdateAvailable.value).toBe(false);
+
+    scope.stop();
+  });
+
+  test("isUpdateAvailable becomes true when build header changes", async () => {
+    let buildHeader = "build-1";
+    const instance = axios.create();
+    instance.defaults.adapter = vitest.fn().mockImplementation(() =>
+      Promise.resolve(<AxiosResponse>{
+        data: { wasSuccessful: true },
+        status: 200,
+        statusText: "OK",
+        headers: { [APP_BUILD_HEADER]: buildHeader },
+        config: {} as any,
+      }),
+    );
+
+    const scope = effectScope();
+    let result!: ReturnType<typeof useAppUpdateCheck>;
+
+    scope.run(() => {
+      result = useAppUpdateCheck(instance);
+    });
+
+    await instance.get("/test");
+    expect(result.isUpdateAvailable.value).toBe(false);
+
+    buildHeader = "build-2";
+    await instance.get("/test");
+    expect(result.isUpdateAvailable.value).toBe(true);
+
+    scope.stop();
+  });
+
+  test("isUpdateAvailable becomes true when error response has different build header", async () => {
+    let buildHeader = "build-1";
+    let shouldError = false;
+    const instance = axios.create();
+    instance.defaults.adapter = vitest.fn().mockImplementation(() => {
+      if (shouldError) {
+        const err = new AxiosError("Server Error");
+        err.response = {
+          data: {},
+          status: 500,
+          statusText: "Internal Server Error",
+          headers: { [APP_BUILD_HEADER]: buildHeader },
+          config: {} as any,
+        };
+        return Promise.reject(err);
+      }
+      return Promise.resolve(<AxiosResponse>{
+        data: { wasSuccessful: true },
+        status: 200,
+        statusText: "OK",
+        headers: { [APP_BUILD_HEADER]: buildHeader },
+        config: {} as any,
+      });
+    });
+
+    const scope = effectScope();
+    let result!: ReturnType<typeof useAppUpdateCheck>;
+
+    scope.run(() => {
+      result = useAppUpdateCheck(instance);
+    });
+
+    await instance.get("/test");
+    expect(result.isUpdateAvailable.value).toBe(false);
+
+    buildHeader = "build-2";
+    shouldError = true;
+    await instance.get("/test").catch(() => {});
+    expect(result.isUpdateAvailable.value).toBe(true);
+
+    scope.stop();
+  });
+
+  test("interceptor is ejected when scope is stopped", async () => {
+    const instance = axios.create();
+    instance.defaults.adapter = vitest.fn().mockResolvedValue(<AxiosResponse>{
+      data: { wasSuccessful: true },
+      status: 200,
+      statusText: "OK",
+      headers: { [APP_BUILD_HEADER]: "build-1" },
+      config: {} as any,
+    });
+
+    const scope = effectScope();
+
+    scope.run(() => {
+      useAppUpdateCheck(instance);
+    });
+
+    const interceptorCountBefore = (
+      instance.interceptors.response as any
+    ).handlers.filter(Boolean).length;
+
+    scope.stop();
+
+    const interceptorCountAfter = (
+      instance.interceptors.response as any
+    ).handlers.filter(Boolean).length;
+
+    expect(interceptorCountAfter).toBe(interceptorCountBefore - 1);
   });
 });

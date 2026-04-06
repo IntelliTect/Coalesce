@@ -143,6 +143,8 @@
       <AIChat title="AI Assistant" endpoint="chatAgent" class="right-0" />
       <!--#endif -->
     </v-main>
+
+    <c-app-update-alert />
   </v-app>
 </template>
 

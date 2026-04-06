@@ -101,6 +101,7 @@ app.UseMiddleware<DemoMiddleware>();
 
 app.UseViteStaticFiles();
 app.UseNoCacheResponseHeader();
+app.UseAppVersionHeader();
 
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
 app.MapRazorPages();

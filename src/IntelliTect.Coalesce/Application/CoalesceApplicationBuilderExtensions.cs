@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -68,6 +69,31 @@ public static partial class CoalesceApplicationBuilderExtensions
         return app.Use((context, next) =>
         {
             context.Response.Headers.CacheControl = "no-cache, no-store";
+            return next(context);
+        });
+    }
+
+    /// <summary>
+    /// Add an <c>X-App-Build</c> response header to all responses that reach this point in the pipeline.
+    /// This middleware is a pre-hook and so the header can be overridden by later middleware or individual endpoints.
+    /// <para>
+    /// On the client, this header is used by the <c>useAppUpdateCheck</c> composable from <c>coalesce-vue</c>
+    /// to detect when a new version of the application has been deployed and notify the user to refresh.
+    /// </para>
+    /// </summary>
+    /// <param name="app">The application builder</param>
+    /// <param name="version">A custom version string. If null, the entry assembly's <see cref="AssemblyInformationalVersionAttribute"/> is used.</param>
+    public static IApplicationBuilder UseAppVersionHeader(this IApplicationBuilder app, string? version = null)
+    {
+        version ??= Assembly.GetEntryAssembly()
+            ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
+
+        if (version is null) return app;
+
+        return app.Use((context, next) =>
+        {
+            context.Response.Headers["X-App-Build"] = version;
             return next(context);
         });
     }

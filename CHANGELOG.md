@@ -2,6 +2,7 @@
 - Added `app.UseAppVersionHeader()` middleware and `<CAppUpdateAlert>` component for detecting and notifying users when a new version of the application has been deployed.
 - Assorted template improvements
 - Added `[assembly: CoalesceMetadata<TAttribute>]`, an assembly-level attribute that causes any occurrences of the target attribute and its value to be generated into the TypeScript metadata.
+- Added `eslint-plugin-coalesce` package with rules to detect common mistakes: `no-load-before-auto-load`, `no-sort-in-computed`, and `no-static-router-import`.
 
 # 6.3.0
 - Added Vuetify 4 compatibility to coalesce-vue-vuetify3.

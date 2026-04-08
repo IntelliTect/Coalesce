@@ -2,6 +2,7 @@ import pluginVue from "eslint-plugin-vue";
 import vueTsEslintConfig from "@vue/eslint-config-typescript";
 import pluginVitest from "@vitest/eslint-plugin";
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
+import coalesce from "eslint-plugin-coalesce";
 export default [
   {
     name: "app/files-to-lint",
@@ -15,6 +16,7 @@ export default [
 
   ...pluginVue.configs["flat/recommended"],
   ...vueTsEslintConfig(),
+  coalesce.configs.recommended,
   {
     ...pluginVitest.configs.recommended,
     files: ["src/**/__tests__/*", "src/**/*.spec.*"],

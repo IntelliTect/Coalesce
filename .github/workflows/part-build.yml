@@ -108,6 +108,36 @@ jobs:
           name: coalesce-vue
           path: src/coalesce-vue/coalesce-vue*.tgz
 
+  build-eslint-plugin-coalesce:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/eslint-plugin-coalesce
+
+    env:
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - run: npm ci
+        working-directory: ${{ github.workspace }}
+
+      - name: npm run test
+        run: npm run test
+
+      - name: update version
+        run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
+
+      - run: npm run build
+      - run: npm pack
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: eslint-plugin-coalesce
+          path: src/eslint-plugin-coalesce/*.tgz
+
   build-coalesce-mcp:
     runs-on: ubuntu-latest
     defaults:
@@ -201,7 +231,13 @@ jobs:
   validate-template:
     runs-on: ubuntu-latest
     name: "test template: ${{matrix.testCase}}"
-    needs: [build-dotnet, build-coalesce-vue, build-coalesce-vue-vuetify3]
+    needs:
+      [
+        build-dotnet,
+        build-coalesce-vue,
+        build-coalesce-vue-vuetify3,
+        build-eslint-plugin-coalesce,
+      ]
     strategy:
       matrix:
         testCase:
@@ -264,10 +300,12 @@ jobs:
           # Update package.json to use the newly built packages
           $coalescevuePath = "file:$((Get-ChildItem -Path '${{ github.workspace }}/artifacts/coalesce-vue/*.tgz').FullName)"
           $coalescevuetifyPath = "file:$((Get-ChildItem -Path '${{ github.workspace }}/artifacts/coalesce-vue-vuetify3/*.tgz').FullName)"
+          $eslintPluginPath = "file:$((Get-ChildItem -Path '${{ github.workspace }}/artifacts/eslint-plugin-coalesce/*.tgz').FullName)"
 
           $packageJson = Get-Content package.json | ConvertFrom-Json
           $packageJson.dependencies.'coalesce-vue' = $coalescevuePath
           $packageJson.dependencies.'coalesce-vue-vuetify3' = $coalescevuetifyPath
+          $packageJson.devDependencies.'eslint-plugin-coalesce' = $eslintPluginPath
           $packageJson | ConvertTo-Json -Depth 10 | Set-Content package.json
 
           cat package.json

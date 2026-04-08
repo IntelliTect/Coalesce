@@ -1,7 +1,7 @@
 # 6.4.0
 - Added `app.UseAppVersionHeader()` middleware and `<CAppUpdateAlert>` component for detecting and notifying users when a new version of the application has been deployed.
 - Assorted template improvements
-- Added `[attribute: CoalesceMetadata<TAttribute>]`, an assembly-level attribute that causes any occurrences of the target attribute and its value to be generated into the TypeScript metadata.
+- Added `[assembly: CoalesceMetadata<TAttribute>]`, an assembly-level attribute that causes any occurrences of the target attribute and its value to be generated into the TypeScript metadata.
 
 # 6.3.0
 - Added Vuetify 4 compatibility to coalesce-vue-vuetify3.

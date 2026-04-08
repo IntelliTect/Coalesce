@@ -37,10 +37,10 @@ cd ../eslint-plugin-coalesce && npm run build
 
 ```bash
 dotnet test
-cd src/coalesce-vue && npm test run
-cd ../coalesce-vue-vuetify3 && npm test run
-cd ../coalesce-mcp && npm test run
-cd ../eslint-plugin-coalesce && npm test run
+cd src/coalesce-vue && npm run test
+cd ../coalesce-vue-vuetify3 && npm run test
+cd ../coalesce-mcp && npm run test
+cd ../eslint-plugin-coalesce && npm run test
 ```
 
 The .NET test projects use TUnit. To filter tests, pass `--treenode-filter` (run in the working directory of the specific test project):

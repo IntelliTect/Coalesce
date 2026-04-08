@@ -45,6 +45,10 @@ jobs:
         if: ${{ !inputs.skipNpm }}
         run: for f in ./coalesce-vue-vuetify*/*.tgz; do npm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public; done
 
+      - name: npm publish eslint-plugin-coalesce
+        if: ${{ !inputs.skipNpm }}
+        run: npm publish ./eslint-plugin-coalesce/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
+
   nuget:
     runs-on: ubuntu-latest
     permissions:

@@ -1,0 +1,37 @@
+{
+  "name": "eslint-plugin-coalesce",
+  "version": "0.1.0-local",
+  "description": "ESLint plugin to detect common mistakes in Coalesce applications.",
+  "repository": "https://github.com/IntelliTect/Coalesce",
+  "author": "IntelliTect",
+  "license": "Apache-2.0",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "coalesce",
+    "vue"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint .",
+    "coverage": "vitest --coverage"
+  },
+  "peerDependencies": {
+    "eslint": ">=9.0.0"
+  }
+}

@@ -253,6 +253,7 @@ export default defineConfig({
 
           autoTitle("/topics/analyzers"),
           autoTitle("/topics/coalesce-json"),
+          autoTitle("/topics/eslint-plugin"),
           autoTitle("/topics/immutability"),
           autoTitle("/topics/startup"),
           autoTitle("/topics/audit-logging"),

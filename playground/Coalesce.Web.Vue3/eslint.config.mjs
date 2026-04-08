@@ -1,5 +1,6 @@
 import pluginVue from "eslint-plugin-vue";
 import vueTsEslintConfig from "@vue/eslint-config-typescript";
+import coalesce from "eslint-plugin-coalesce";
 
 export default [
   {
@@ -14,6 +15,7 @@ export default [
 
   ...pluginVue.configs["flat/essential"],
   ...vueTsEslintConfig(),
+  coalesce.configs.recommended,
 
   {
     rules: {

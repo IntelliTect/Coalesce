@@ -26,6 +26,7 @@
     "vue": "^3.5.4"
   },
   "devDependencies": {
+    "eslint-plugin-coalesce": "0.1.0-local",
     "vite-plugin-vuetify": "^2.1.3"
   }
 }

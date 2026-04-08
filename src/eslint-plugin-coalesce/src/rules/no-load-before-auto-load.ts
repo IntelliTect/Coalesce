@@ -16,7 +16,9 @@ const rule: Rule.RuleModule = {
     },
     messages: {
       useImmediate:
-        "Don't call `$load()` separately when using `{{autoMethod}}()`. Use `{{autoMethod}}({ immediate: true })` instead.",
+        "Don't call `$load()` separately when using `$useAutoLoad()`. Use `$useAutoLoad({ immediate: true })` instead.",
+      useImmediateStartAutoLoad:
+        "Don't call `$load()` separately when using `$startAutoLoad()`. Pass `{ immediate: true }` as the second argument: `$startAutoLoad(vue, { immediate: true })`.",
     },
     schema: [],
   },
@@ -64,13 +66,14 @@ const rule: Rule.RuleModule = {
         );
 
         if (loadCalls.length > 0 && autoLoadCalls.length > 0) {
+          const autoMethod = autoLoadCalls[0].methodName;
           for (const loadCall of loadCalls) {
             context.report({
               node: loadCall.node,
-              messageId: "useImmediate",
-              data: {
-                autoMethod: autoLoadCalls[0].methodName,
-              },
+              messageId:
+                autoMethod === "$startAutoLoad"
+                  ? "useImmediateStartAutoLoad"
+                  : "useImmediate",
             });
           }
         }

@@ -91,7 +91,7 @@ ruleTester.run("no-load-before-auto-load", rule, {
           list.$startAutoLoad(this);
         }
       `,
-      errors: [{ messageId: "useImmediate" }],
+      errors: [{ messageId: "useImmediateStartAutoLoad" }],
     },
     // Works with `this` as the object
     {

@@ -87,15 +87,6 @@ jobs:
       - name: npm run test
         run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue.results.xml
 
-      # Currently broken with vitest: https://github.com/dorny/test-reporter/issues/187
-      # - name: Publish Test Results
-      #   uses: dorny/test-reporter@v1
-      #   if: always() && github.event_name != 'pull_request'
-      #   with:
-      #     name: coalesce-vue tests
-      #     path: '**/*.results.xml'
-      #     reporter: jest-junit
-
       - name: update version
         run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 

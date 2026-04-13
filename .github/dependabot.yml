@@ -1,21 +1,39 @@
 version: 2
 updates:
-    # Main Workflows
-  - package-ecosystem: "github-actions" 
+  # Main Workflows
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly" 
+      interval: "weekly"
     groups:
-       dev-dependencies:
-          patterns:
-            - "*-artifact"
-            
+      dev-dependencies:
+        patterns:
+          - "*-artifact"
+
     # Vue Template Project
-  - package-ecosystem: "github-actions" 
+  - package-ecosystem: "github-actions"
     directory: "/templates/Coalesce.Vue.Template/content/.github/workflows"
     schedule:
-      interval: "weekly" 
+      interval: "weekly"
     groups:
-       dev-dependencies:
-          patterns:
-            - "*-artifact"
+      dev-dependencies:
+        patterns:
+          - "*-artifact"
+
+    # Template npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/templates/Coalesce.Vue.Template/content/Coalesce.Starter.Vue.Web"
+    schedule:
+      interval: "monthly"
+    groups:
+      all-npm:
+        patterns: ["*"]
+
+    # Template nuget dependencies
+  - package-ecosystem: "nuget"
+    directory: "/templates/Coalesce.Vue.Template/content"
+    schedule:
+      interval: "monthly"
+    groups:
+      all-nuget:
+        patterns: ["*"]

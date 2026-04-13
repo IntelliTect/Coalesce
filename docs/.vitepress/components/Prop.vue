@@ -158,6 +158,9 @@ export default defineComponent({
 
       if (this.id) {
         this.idAttr = this.id;
+      } else if (this.def.startsWith("#")) {
+        // Vue slot name (e.g. #default, #actions)
+        this.idAttr = this.idPrefix + "-" + this.def;
       } else if (this.lang == "ts") {
         // Typescript is pretty nice in that the member name is always first in its declaration.
         // No types on the left hand side.

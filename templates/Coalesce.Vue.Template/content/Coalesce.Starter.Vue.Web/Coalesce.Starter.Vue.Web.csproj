@@ -33,7 +33,7 @@
 
     <!--#if(OpenAPI) -->
     <PackageReference Include="IntelliTect.Coalesce.Swashbuckle" Version="$(CoalesceVersion)" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.13.20" />
     <!--#endif -->
     <!--#if(MicrosoftAuth) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.3" />

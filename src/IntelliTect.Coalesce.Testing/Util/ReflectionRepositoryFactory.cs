@@ -30,7 +30,7 @@ public static class ReflectionRepositoryFactory
     public static readonly ReflectionRepository Reflection = MakeFromReflection();
 
     public const string SymbolDiscoveryAssemblyName = "SymbolAsm";
-    
+
     public static ReflectionRepository MakeFromSymbols()
     {
         var rr = new ReflectionRepository();
@@ -45,8 +45,8 @@ public static class ReflectionRepositoryFactory
                 (
                     (
                         !fqn.Contains("IntelliTect.Coalesce.Testing.TargetClasses") //&&
-                       // !fqn.StartsWith("System.")
-                    ) || 
+                                                                                    // !fqn.StartsWith("System.")
+                    ) ||
                     (s is IArrayTypeSymbol ats ? ats.ElementType : s).ContainingAssembly?.MetadataName == SymbolDiscoveryAssemblyName
                 )
             )
@@ -133,8 +133,8 @@ public static class ReflectionRepositoryFactory
         // gather their locations so we can feed those locations to Roslyn.
         var assemblies = AppDomain.CurrentDomain
             .GetAssemblies()
-            // Exclude dynamic assemblies (they can't possibly be relevant here)
-            .Where(a => !a.IsDynamic)
+            // Exclude dynamic assemblies and assemblies without a file path.
+            .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
             .Select(a => MetadataReference.CreateFromFile(a.Location))
             .ToArray();
 

@@ -61,7 +61,7 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.12.7" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.8.10" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.13.20" />
     <PackageVersion Include="System.Net.Http.Json" Version="8.0.1" />
     <PackageVersion Include="TUnit" Version="1.14.0" />
     <PackageVersion Include="TUnit.Core" Version="1.14.0" />

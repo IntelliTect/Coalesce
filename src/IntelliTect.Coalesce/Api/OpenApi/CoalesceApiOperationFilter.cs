@@ -117,7 +117,7 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
             {
                 foreach (var otherContent in result.Content)
                 {
-                    operation.RequestBody.Content.Add(otherContent);
+                    operation.RequestBody.Content.TryAdd(otherContent.Key, otherContent.Value);
                 }
             }
         }

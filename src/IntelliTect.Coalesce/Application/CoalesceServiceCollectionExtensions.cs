@@ -108,6 +108,18 @@ public static class CoalesceServiceCollectionExtensions
         services.ConfigureAll<OpenApiOptions>(x =>
         {
             x.AddOperationTransformer<CoalesceApiOperationFilter>();
+#if NET10_0_OR_GREATER
+            // Workaround https://github.com/dotnet/aspnetcore/issues/61038
+            x.AddDocumentTransformer<CoalesceNumericSchemaTransformer>();
+
+            // Workaround https://github.com/dotnet/aspnetcore/issues/66299
+            var defaultCreateId = x.CreateSchemaReferenceId;
+            x.CreateSchemaReferenceId = (typeInfo) =>
+            {
+                var id = defaultCreateId(typeInfo);
+                return id?.Replace("[]", "Array");
+            };
+#endif
         });
 #endif
 

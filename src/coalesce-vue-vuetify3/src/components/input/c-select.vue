@@ -2,7 +2,6 @@
   <v-text-field
     ref="rootRef"
     v-model="mainValue"
-    v-intersect="onIntersect"
     class="c-select"
     role="combobox"
     :class="{
@@ -19,7 +18,6 @@
     :dirty="!!selectedKeysSet.size || menuOpen"
     :disabled="isDisabled"
     :readonly="isReadonly"
-    :autofocus="autofocus"
     :clearable="isInteractive && isClearable"
     :placeholder="selectedKeysSet.size ? undefined : placeholder"
     append-inner-icon="$dropdown"
@@ -333,6 +331,7 @@ import {
   onBeforeUnmount,
   useTemplateRef,
   useId,
+  readonly,
 } from "vue";
 import {
   useMetadataProps,
@@ -468,7 +467,6 @@ const props = withDefaults(
 
       readonly?: boolean | null;
       disabled?: boolean | null;
-      autofocus?: boolean | null;
       clearable?: boolean | null;
       placeholder?: string | null;
       preselectFirst?: boolean | null;
@@ -1293,16 +1291,10 @@ async function createItem(): Promise<void> {
   }
 }
 
-function onIntersect(isIntersecting: boolean) {
-  if (!props.autofocus || !isIntersecting || menuOpen.value) return;
-  // Doesn't work reliably without a small delay
-  setTimeout(() => {
-    mainInputRef.value?.focus();
-  }, 50);
-}
-
 async function onSearchIntersect(isIntersecting: boolean) {
-  if (!isIntersecting) return;
+  // This can fire while the menu is closing, so guard against focusing the search input
+  // after the menu is no longer open (which would steal focus from the main input).
+  if (!isIntersecting || !menuOpen.value) return;
 
   const input = searchRef.value?.$el.querySelector("input") as HTMLInputElement;
   if (!input) return;
@@ -1310,6 +1302,7 @@ async function onSearchIntersect(isIntersecting: boolean) {
   await nextTick();
   await new Promise((resolve) => setTimeout(resolve, 25));
 
+  if (!menuOpen.value) return;
   input.focus();
 
   if (pendingSearchSelect.value) {
@@ -1502,8 +1495,10 @@ listCaller().then(() => {
 });
 
 defineExpose({
-  menuOpen: menuOpen,
+  menuOpen: readonly(menuOpen),
   search: search,
+  openMenu,
+  closeMenu,
 });
 </script>
 

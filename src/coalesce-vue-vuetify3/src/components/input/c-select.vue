@@ -331,7 +331,7 @@ import {
   onBeforeUnmount,
   useTemplateRef,
   useId,
-  readonly,
+  readonly as readonlyRef,
 } from "vue";
 import {
   useMetadataProps,
@@ -1495,7 +1495,7 @@ listCaller().then(() => {
 });
 
 defineExpose({
-  menuOpen: readonly(menuOpen),
+  menuOpen: readonlyRef(menuOpen),
   search: search,
   openMenu,
   closeMenu,

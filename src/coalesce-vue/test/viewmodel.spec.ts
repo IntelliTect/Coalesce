@@ -53,7 +53,6 @@ import {
   Grade,
   Statuses,
   Student,
-  StudentWrapper,
   Test,
   WeatherData,
 } from "@test-targets/models.g";

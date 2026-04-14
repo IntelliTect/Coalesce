@@ -54,6 +54,10 @@ public class AppDbContext : DbContext
 
     public DbSet<SuppressedDefaultOrdering> SuppressedDefaultOrderings { get; set; }
 
+    public DbSet<Student> Students { get; set; }
+    public DbSet<Advisor> Advisors { get; set; }
+    public DbSet<Course> Courses { get; set; }
+
 
     public AppDbContext() : this(Guid.NewGuid().ToString()) { }
 

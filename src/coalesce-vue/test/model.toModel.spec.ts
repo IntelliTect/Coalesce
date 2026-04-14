@@ -1,5 +1,6 @@
 import * as model from "../src/model";
-import * as $metadata from "./targets.metadata";
+import * as $metadata from "@test-targets/metadata.g";
+import * as $models from "@test-targets/models.g";
 import type {
   ObjectValue,
   Value,
@@ -11,14 +12,12 @@ import { type Indexable } from "../src/util";
 import {
   twoWayConversions,
   type MappingData,
-  displaysStudentValue,
+  displaysModelValue,
+  DisplaysModel,
 } from "./model.shared";
-import { Course } from "./targets.models";
 import { convertToModel } from "../src/model";
-import * as $metadata2 from "@test-targets/metadata.g";
-import * as $models from "@test-targets/models.g";
 
-const studentProps = $metadata.Student.props;
+const cmProps = $metadata.ComplexModel.props;
 
 function unparsable(meta: Value, ...values: any[]) {
   return values.map((value) => {
@@ -42,74 +41,74 @@ const dtoToModelMappings = <MappingData[]>[
   ...twoWayConversions,
 
   // String
-  { meta: studentProps.name, dto: 123, model: "123" },
-  { meta: studentProps.name, dto: true, model: "true" },
-  { meta: studentProps.name, dto: undefined, model: null },
-  ...unparsable(studentProps.name, {}, []),
+  { meta: cmProps.name, dto: 123, model: "123" },
+  { meta: cmProps.name, dto: true, model: "true" },
+  { meta: cmProps.name, dto: undefined, model: null },
+  ...unparsable(cmProps.name, {}, []),
 
   // Number
-  { meta: studentProps.studentId, dto: "1", model: 1 },
-  { meta: studentProps.studentId, dto: "", model: null },
-  { meta: studentProps.studentId, dto: " ", model: null },
-  ...unparsable(studentProps.studentId, true, "abc", {}, []),
+  { meta: cmProps.complexModelId, dto: "1", model: 1 },
+  { meta: cmProps.complexModelId, dto: "", model: null },
+  { meta: cmProps.complexModelId, dto: " ", model: null },
+  ...unparsable(cmProps.complexModelId, true, "abc", {}, []),
 
   // Boolean
-  { meta: studentProps.isEnrolled, dto: "true", model: true },
-  { meta: studentProps.isEnrolled, dto: "false", model: false },
-  ...unparsable(studentProps.isEnrolled, 123, "abc", {}, []),
+  { meta: cmProps.isActive, dto: "true", model: true },
+  { meta: cmProps.isActive, dto: "false", model: false },
+  ...unparsable(cmProps.isActive, 123, "abc", {}, []),
 
   // Enum
-  { meta: studentProps.grade, dto: "11", model: 11 },
+  { meta: cmProps.enumWithDefault, dto: "10", model: 10 },
   // Enums should parse any number - not just valid enum values. This allows for flags enums.
-  { meta: studentProps.grade, dto: 123, model: 123 },
-  ...unparsable(studentProps.grade, "abc", {}, [], true),
+  { meta: cmProps.enumWithDefault, dto: 123, model: 123 },
+  ...unparsable(cmProps.enumWithDefault, "abc", {}, [], true),
 
   // Date
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     dto: new Date("1990-01-02T03:04:05.000-08:00"),
     model: new Date("1990-01-02T03:04:05.000-08:00"),
   },
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     dto: "2020-06-10T21:00:00+00:00",
     model: new Date(1591822800000),
   },
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     dto: "2020-06-10T21:00:00-00:30",
     model: new Date(1591824600000),
   },
   {
     // Dates without timezone should be assumed to be local time.
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     dto: "2020-06-10T14:00:00",
     model: new Date(2020, 5, 10, 14, 0, 0, 0),
   },
   {
-    meta: { ...studentProps.birthDate, dateKind: "date" },
+    meta: { ...cmProps.dateTimeOffset, dateKind: "date" },
     dto: "2020-06-10",
     model: new Date(2020, 5, 10, 0, 0, 0, 0),
   },
   {
-    meta: { ...studentProps.birthDate, dateKind: "date" },
+    meta: { ...cmProps.dateTimeOffset, dateKind: "date" },
     dto: "2020-06-10T14:00:00Z",
     model: new Date(1591797600000),
   },
   {
-    meta: { ...studentProps.birthDate, dateKind: "time" },
+    meta: { ...cmProps.dateTimeOffset, dateKind: "time" },
     dto: "12:34:56",
     // Time-only parses as Jan 1 of current year to avoid un-representable times on DST changeover days.
     model: new Date(new Date().getFullYear(), 0, 1, 12, 34, 56, 0),
   },
   {
     // Time-only, represented in a datetime format.
-    meta: { ...studentProps.birthDate, dateKind: "time" },
+    meta: { ...cmProps.dateTimeOffset, dateKind: "time" },
     dto: "2020-06-10T12:34:56",
     model: new Date(2020, 5, 10, 12, 34, 56, 0),
   },
   ...unparsable(
-    studentProps.birthDate,
+    cmProps.dateTimeOffset,
     "abc",
     123,
     {},
@@ -121,46 +120,46 @@ const dtoToModelMappings = <MappingData[]>[
   // Collection
   {
     // Collection with holes in it, likely caused by https://github.com/dotnet/runtime/issues/66187
-    meta: studentProps.courses,
+    meta: cmProps.tests,
     dto: [null],
     model: [],
   },
   {
     // Collection with holes in it, likely caused by https://github.com/dotnet/runtime/issues/66187
-    meta: studentProps.courses,
+    meta: cmProps.tests,
     dto: [{}, null, {}],
     model: [
-      convertToModel({}, $metadata.Course),
-      convertToModel({}, $metadata.Course),
+      convertToModel({}, $metadata.Test),
+      convertToModel({}, $metadata.Test),
     ],
   },
   {
-    meta: $metadata2.ComplexModel.props.intCollection,
+    meta: $metadata.ComplexModel.props.intCollection,
     dto: "1,2,3",
     model: [1, 2, 3],
   },
   {
-    meta: $metadata2.ComplexModel.props.intCollection,
+    meta: $metadata.ComplexModel.props.intCollection,
     dto: "0",
     model: [0],
   },
-  ...unparsable(studentProps.courses, "abc", 123, {}, true),
+  ...unparsable(cmProps.tests, "abc", 123, {}, true),
 
   // Model
-  ...unparsable(studentProps.advisor, "abc", 123, [], true),
+  ...unparsable(cmProps.singleTest, "abc", 123, [], true),
   {
-    meta: studentProps.advisor,
-    dto: { advisorId: 1, extraneousProp: true },
-    model: { advisorId: 1, $metadata: $metadata.Advisor },
+    meta: cmProps.singleTest,
+    dto: { testId: 1, extraneousProp: true },
+    model: { testId: 1, $metadata: $metadata.Test },
   },
 
   // Object
   {
-    meta: displaysStudentValue,
+    meta: displaysModelValue,
     dto: { name: "bob", extraneousProp: true },
-    model: { name: "bob", $metadata: $metadata.DisplaysStudent },
+    model: { name: "bob", $metadata: DisplaysModel },
   },
-  ...unparsable(displaysStudentValue, "abc", 123, [], true),
+  ...unparsable(displaysModelValue, "abc", 123, [], true),
 ];
 
 // Test for both `map` and `convert` using the cases above.
@@ -285,7 +284,7 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
         id: 1,
         impl1OnlyField: "foo",
       }),
-      $metadata2.AbstractModel, // request base type
+      $metadata.AbstractModel, // request base type
     );
 
     expect(mapped).toBeInstanceOf($models.AbstractImpl1);
@@ -297,7 +296,7 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
         $id: 1,
         tests: [{ $id: 2, testName: "foo" }, { $ref: 2 }],
       },
-      $metadata2.ComplexModel,
+      $metadata.ComplexModel,
     ) as $models.ComplexModel;
 
     expect(mapped.tests![0]).toStrictEqual(mapped.tests![1]);
@@ -306,18 +305,24 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
 
 describe("mapToModel", () => {
   test("can be typed with concrete model class", () => {
-    const _mapped: Course = model.mapToModel<Course>({}, $metadata.Course);
-    //@ts-expect-error wrong metadata
-    const _mapped2: Course = model.mapToModel<Course>({}, $metadata.Student);
+    const _mapped: $models.Test = model.mapToModel<$models.Test>(
+      {},
+      $metadata.Test,
+    );
+    const _mapped2: $models.Test = model.mapToModel<$models.Test>(
+      {},
+      //@ts-expect-error wrong metadata
+      $metadata.ComplexModel,
+    );
   });
 
   test("ignores mismatched existing metadata", () => {
     const mapped = model.mapToModel(
       {
-        studentId: 1,
-        $metadata: $metadata.Advisor, // intentionally mismatched.
+        complexModelId: 1,
+        $metadata: $metadata.Test, // intentionally mismatched.
       },
-      $metadata.Student,
+      $metadata.ComplexModel,
     );
 
     // Because we're mapping to a new object, we don't care
@@ -326,10 +331,10 @@ describe("mapToModel", () => {
     // setting metadata on some existing object,
     // the code should always set the correct medata on the resulting object.
     expect(mapped).toMatchObject({
-      studentId: 1,
+      complexModelId: 1,
       $metadata: expect.objectContaining({
-        name: $metadata.Student.name,
-        type: $metadata.Student.type,
+        name: $metadata.ComplexModel.name,
+        type: $metadata.ComplexModel.type,
       }),
     });
   });
@@ -337,11 +342,14 @@ describe("mapToModel", () => {
 
 describe("convertToModel", () => {
   test("can be typed with concrete model class", () => {
-    const _mapped: Course = model.convertToModel<Course>({}, $metadata.Course);
-    const _mapped2: Course = model.convertToModel<Course>(
+    const _mapped: $models.Test = model.convertToModel<$models.Test>(
+      {},
+      $metadata.Test,
+    );
+    const _mapped2: $models.Test = model.convertToModel<$models.Test>(
       {},
       //@ts-expect-error wrong metadata
-      $metadata.Student,
+      $metadata.ComplexModel,
     );
   });
 
@@ -353,26 +361,26 @@ describe("convertToModel", () => {
     expect(() => {
       model.convertToModel(
         {
-          studentId: 1,
-          $metadata: $metadata.Advisor, // intentionally mismatched.
+          complexModelId: 1,
+          $metadata: $metadata.Test, // intentionally mismatched.
         },
-        $metadata.Student,
+        $metadata.ComplexModel,
       );
     }).toThrowError(
-      /found metadata for advisor where metadata for student was expected/i,
+      /found metadata for test where metadata for complexmodel was expected/i,
     );
   });
 
   test("converts object, preserving references", () => {
     const dto = {
-      studentId: 1,
-      birthDate: new Date(),
+      complexModelId: 1,
+      dateTimeOffset: new Date(),
     };
-    const converted = model.convertToModel(dto, $metadata.Student) as any;
+    const converted = model.convertToModel(dto, $metadata.ComplexModel) as any;
 
     // Expect reference equality for both
     expect(converted).toBe(dto);
-    expect(converted.birthDate).toBe(dto.birthDate);
-    expect(converted.$metadata).toBe($metadata.Student);
+    expect(converted.dateTimeOffset).toBe(dto.dateTimeOffset);
+    expect(converted.$metadata).toBe($metadata.ComplexModel);
   });
 });

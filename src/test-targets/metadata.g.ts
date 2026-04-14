@@ -51,6 +51,33 @@ export const Genders = domain.enums.Genders = {
   },
   ]),
 }
+export const Grade = domain.enums.Grade = {
+  name: "Grade" as const,
+  displayName: "Grade",
+  type: "enum",
+  ...getEnumMeta<"Freshman"|"Sophomore"|"Junior"|"Senior">([
+  {
+    value: 9,
+    strValue: "Freshman",
+    displayName: "Freshman",
+  },
+  {
+    value: 10,
+    strValue: "Sophomore",
+    displayName: "Sophomore",
+  },
+  {
+    value: 11,
+    strValue: "Junior",
+    displayName: "Junior",
+  },
+  {
+    value: 12,
+    strValue: "Senior",
+    displayName: "Senior",
+  },
+  ]),
+}
 export const SkyConditions = domain.enums.SkyConditions = {
   name: "SkyConditions" as const,
   displayName: "Sky Conditions",
@@ -584,6 +611,74 @@ export const AbstractModelPerson = domain.types.AbstractModelPerson = {
       get principalKey() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id as PrimaryKeyProperty },
       get inverseNavigation() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.abstractModelPeople as ModelCollectionNavigationProperty },
       dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const Advisor = domain.types.Advisor = {
+  name: "Advisor" as const,
+  displayName: "Advisor",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "Advisor",
+  get keyProp() { return this.props.advisorId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    advisorId: {
+      name: "advisorId",
+      displayName: "Advisor Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
+    },
+    students: {
+      name: "students",
+      displayName: "Students",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.Student as ModelType & { name: "Student" }) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.Student as ModelType & { name: "Student" }).props.studentAdvisorId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.Student as ModelType & { name: "Student" }).props.advisor as ModelReferenceNavigationProperty },
+      dontSerialize: true,
+    },
+    studentsNonNavigation: {
+      name: "studentsNonNavigation",
+      displayName: "Students Non Navigation",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.Student as ModelType & { name: "Student" }) },
+      },
+      role: "value",
+      dontSerialize: true,
+    },
+    studentWrapperObject: {
+      name: "studentWrapperObject",
+      displayName: "Student Wrapper Object",
+      type: "object",
+      get typeDef() { return (domain.types.StudentWrapper as ObjectType & { name: "StudentWrapper" }) },
+      role: "value",
     },
   },
   methods: {
@@ -3051,6 +3146,55 @@ export const ComplexModelDependent = domain.types.ComplexModelDependent = {
   dataSources: {
   },
 }
+export const Course = domain.types.Course = {
+  name: "Course" as const,
+  displayName: "Course",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "Course",
+  get keyProp() { return this.props.courseId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    courseId: {
+      name: "courseId",
+      displayName: "Course Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    studentId: {
+      name: "studentId",
+      displayName: "Student Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Student as ModelType & { name: "Student" }).props.studentId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Student as ModelType & { name: "Student" }) },
+      get navigationProp() { return (domain.types.Course as ModelType & { name: "Course" }).props.student as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+    },
+    student: {
+      name: "student",
+      displayName: "Student",
+      type: "model",
+      get typeDef() { return (domain.types.Student as ModelType & { name: "Student" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.Course as ModelType & { name: "Course" }).props.studentId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Student as ModelType & { name: "Student" }).props.studentId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Student as ModelType & { name: "Student" }).props.courses as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const DateOnlyPk = domain.types.DateOnlyPk = {
   name: "DateOnlyPk" as const,
   displayName: "Date Only Pk",
@@ -3753,6 +3897,36 @@ export const Person = domain.types.Person = {
         displayName: "Result",
         type: "model",
         get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        role: "value",
+      },
+    },
+    fullNameAndAge: {
+      name: "fullNameAndAge",
+      displayName: "Full Name And Age",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        age: {
+          name: "age",
+          displayName: "Age",
+          type: "number",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "string",
         role: "value",
       },
     },
@@ -4649,6 +4823,113 @@ export const StringIdentity = domain.types.StringIdentity = {
   dataSources: {
   },
 }
+export const Student = domain.types.Student = {
+  name: "Student" as const,
+  displayName: "Student",
+  description: "A student entity used to test edge cases with FK/nav relationships.",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "Student",
+  get keyProp() { return this.props.studentId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    studentId: {
+      name: "studentId",
+      displayName: "Student Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    isEnrolled: {
+      name: "isEnrolled",
+      displayName: "Is Enrolled",
+      type: "boolean",
+      role: "value",
+    },
+    birthDate: {
+      name: "birthDate",
+      displayName: "Birth Date",
+      type: "date",
+      dateKind: "datetime",
+      noOffset: true,
+      role: "value",
+    },
+    courses: {
+      name: "courses",
+      displayName: "Courses",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.Course as ModelType & { name: "Course" }) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.Course as ModelType & { name: "Course" }).props.studentId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.Course as ModelType & { name: "Course" }).props.student as ModelReferenceNavigationProperty },
+      dontSerialize: true,
+    },
+    currentCourse: {
+      name: "currentCourse",
+      displayName: "Current Course",
+      type: "model",
+      get typeDef() { return (domain.types.Course as ModelType & { name: "Course" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.Student as ModelType & { name: "Student" }).props.currentCourseId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Course as ModelType & { name: "Course" }).props.courseId as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    currentCourseId: {
+      name: "currentCourseId",
+      displayName: "Current Course Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Course as ModelType & { name: "Course" }).props.courseId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Course as ModelType & { name: "Course" }) },
+      get navigationProp() { return (domain.types.Student as ModelType & { name: "Student" }).props.currentCourse as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+    },
+    grade: {
+      name: "grade",
+      displayName: "Grade",
+      type: "enum",
+      get typeDef() { return Grade },
+      role: "value",
+    },
+    advisor: {
+      name: "advisor",
+      displayName: "Advisor",
+      type: "model",
+      get typeDef() { return (domain.types.Advisor as ModelType & { name: "Advisor" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.Student as ModelType & { name: "Student" }).props.studentAdvisorId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Advisor as ModelType & { name: "Advisor" }).props.advisorId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Advisor as ModelType & { name: "Advisor" }).props.students as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    studentAdvisorId: {
+      name: "studentAdvisorId",
+      displayName: "Student Advisor Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Advisor as ModelType & { name: "Advisor" }).props.advisorId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Advisor as ModelType & { name: "Advisor" }) },
+      get navigationProp() { return (domain.types.Student as ModelType & { name: "Student" }).props.advisor as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const SuppressedDefaultOrdering = domain.types.SuppressedDefaultOrdering = {
   name: "SuppressedDefaultOrdering" as const,
   displayName: "Suppressed Default Ordering",
@@ -5416,6 +5697,28 @@ export const SimpleModelTarget = domain.types.SimpleModelTarget = {
     },
   },
 }
+export const StudentWrapper = domain.types.StudentWrapper = {
+  name: "StudentWrapper" as const,
+  displayName: "Student Wrapper",
+  get displayProp() { return this.props.name }, 
+  type: "object",
+  props: {
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    student: {
+      name: "student",
+      displayName: "Student",
+      type: "model",
+      get typeDef() { return (domain.types.Student as ModelType & { name: "Student" }) },
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+}
 export const ValidationTarget = domain.types.ValidationTarget = {
   name: "ValidationTarget" as const,
   displayName: "Validation Target",
@@ -5608,6 +5911,7 @@ interface AppDomain extends Domain {
   enums: {
     EnumPkId: typeof EnumPkId
     Genders: typeof Genders
+    Grade: typeof Grade
     SkyConditions: typeof SkyConditions
     Statuses: typeof Statuses
     Titles: typeof Titles
@@ -5617,12 +5921,14 @@ interface AppDomain extends Domain {
     AbstractImpl2: typeof AbstractImpl2
     AbstractModel: typeof AbstractModel
     AbstractModelPerson: typeof AbstractModelPerson
+    Advisor: typeof Advisor
     Case: typeof Case
     CaseDtoStandalone: typeof CaseDtoStandalone
     CaseProduct: typeof CaseProduct
     Company: typeof Company
     ComplexModel: typeof ComplexModel
     ComplexModelDependent: typeof ComplexModelDependent
+    Course: typeof Course
     DateOnlyPk: typeof DateOnlyPk
     DateTimeOffsetPk: typeof DateTimeOffsetPk
     DateTimePk: typeof DateTimePk
@@ -5661,6 +5967,8 @@ interface AppDomain extends Domain {
     StandaloneReadonly: typeof StandaloneReadonly
     StandaloneReadWrite: typeof StandaloneReadWrite
     StringIdentity: typeof StringIdentity
+    Student: typeof Student
+    StudentWrapper: typeof StudentWrapper
     SuppressedDefaultOrdering: typeof SuppressedDefaultOrdering
     Test: typeof Test
     TimeOnlyPk: typeof TimeOnlyPk

@@ -1,58 +1,61 @@
 import { mockEndpoint } from "../src/test-utils";
-import { StudentApiClient } from "./targets.apiclients";
-import { Student } from "./targets.metadata";
-import { StudentListViewModel, StudentViewModel } from "./targets.viewmodels";
+import { PersonApiClient } from "@test-targets/api-clients.g";
+import { Person } from "@test-targets/metadata.g";
+import {
+  PersonViewModel,
+  PersonListViewModel,
+} from "@test-targets/viewmodels.g";
 
 describe("mockEndpoint", () => {
   test("mocks standard method via string spec", async () => {
     const mock = mockEndpoint(
-      "/Students/get",
+      "/Person/get",
       vitest.fn((config) => ({
         wasSuccessful: true,
         object: {
-          studentId: 1,
-          name: "bob",
+          personId: 1,
+          firstName: "bob",
         },
       })),
     );
 
-    const vm = new StudentViewModel();
+    const vm = new PersonViewModel();
     await vm.$load(1);
 
-    expect(vm.name).toBe("bob");
+    expect(vm.firstName).toBe("bob");
     expect(mock).toHaveBeenCalledOnce();
   });
 
   test("mocks custom method via string spec", async () => {
     const mock = mockEndpoint(
-      "/Students/fullNameAndAge",
+      "/Person/getUser",
       vitest.fn((config) => ({
         wasSuccessful: true,
-        object: "bob, 42",
+        object: "bob",
       })),
     );
 
-    const result = await new StudentApiClient().fullNameAndAge(1);
+    const result = await new PersonApiClient().getUser();
     expect(mock).toHaveBeenCalledOnce();
-    expect(result.data.object).toBe("bob, 42");
+    expect(result.data.object).toBe("bob");
   });
 
   test("mocks custom method via metadata", async () => {
     const mock = mockEndpoint(
-      Student.methods.fullNameAndAge,
+      Person.methods.getUser,
       vitest.fn((config) => ({
         wasSuccessful: true,
-        object: "bob, 23",
+        object: "bob",
       })),
     );
 
-    const result = await new StudentApiClient().fullNameAndAge(1);
+    const result = await new PersonApiClient().getUser();
     expect(mock).toHaveBeenCalledOnce();
-    expect(result.data.object).toBe("bob, 23");
+    expect(result.data.object).toBe("bob");
   });
 
   test("typechecks metadata object", async () => {
-    const mock = mockEndpoint(Student.methods.fullNameAndAge, (config) => ({
+    const mock = mockEndpoint(Person.methods.getUser, (config) => ({
       wasSuccessful: true,
       //@ts-expect-error: `object` is expected to be a string.
       object: 3,
@@ -61,7 +64,7 @@ describe("mockEndpoint", () => {
 
   test("typechecks list", async () => {
     mockEndpoint(
-      "/Students/list",
+      "/Person/list",
       //@ts-expect-error: `list` is expected to be an array.
       vitest.fn((config) => ({
         wasSuccessful: true,
@@ -72,7 +75,7 @@ describe("mockEndpoint", () => {
 
   test("types for un-typeable metadata return type are usable", async () => {
     mockEndpoint(
-      Student.methods.getWithObjParam,
+      Person.methods.rename,
       vitest.fn((config) => ({
         wasSuccessful: true,
         // The metadata layer can't pull types down from the model layer,
@@ -87,14 +90,14 @@ describe("mockEndpoint", () => {
 
   test("mocks failure", async () => {
     const mock = mockEndpoint(
-      "/Students/list",
+      "/Person/list",
       vitest.fn(async (config) => ({
         wasSuccessful: false,
         message: "something went wrong",
       })),
     );
 
-    const vm = new StudentListViewModel();
+    const vm = new PersonListViewModel();
     try {
       await vm.$load();
     } catch (e: any) {
@@ -108,17 +111,17 @@ describe("mockEndpoint", () => {
 
   test("fills in list properties", async () => {
     const mock = mockEndpoint(
-      "/Students/list",
+      "/Person/list",
       vitest.fn(async (config) => ({
         wasSuccessful: true,
         list: [
-          { studentId: 1, name: "bob" },
-          { studentId: 2, name: "sue" },
+          { personId: 1, firstName: "bob" },
+          { personId: 2, firstName: "sue" },
         ],
       })),
     );
 
-    const vm = new StudentListViewModel();
+    const vm = new PersonListViewModel();
     await vm.$load();
 
     expect(vm.$load.page).toBe(1);
@@ -128,9 +131,9 @@ describe("mockEndpoint", () => {
   });
 
   test("destroyable", async () => {
-    const client = new StudentApiClient();
+    const client = new PersonApiClient();
     const mock1 = mockEndpoint(
-      Student.methods.fullNameAndAge,
+      Person.methods.getUser,
       vitest.fn((config) => ({
         wasSuccessful: true,
         object: "bob",
@@ -138,18 +141,18 @@ describe("mockEndpoint", () => {
     );
 
     const mock2 = mockEndpoint(
-      Student.methods.fullNameAndAge,
+      Person.methods.getUser,
       vitest.fn((config) => ({
         wasSuccessful: true,
         object: "steve",
       })),
     );
 
-    let result = await client.fullNameAndAge(1);
+    let result = await client.getUser();
     expect(result.data.object).toBe("steve");
     mock2.destroy();
 
-    result = await client.fullNameAndAge(1);
+    result = await client.getUser();
     expect(result.data.object).toBe("bob");
     mock1.destroy();
 

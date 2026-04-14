@@ -1093,6 +1093,29 @@ export interface BindToQueryStringOptions<TValue> {
   mode?: "push" | "replace";
 }
 
+/**
+ * Binds a value on an object, or the value of a ref, to the query string.
+ * `parse`/`stringify` are auto-configured for Models, Data Sources, and caller args.
+ *
+ * For Composition API, use {@link useBindToQueryString} instead.
+ *
+ * @example
+ * // Component data property:
+ * bindToQueryString(this, this, 'activeTab');
+ * // List parameters:
+ * bindToQueryString(this, list, '$page');
+ * bindToQueryString(this, list, '$search');
+ * bindToQueryString(this, list.$params, 'pageSize');
+ * // Data source parameters:
+ * bindToQueryString(this, dataSource, 'myParameter');
+ * // Caller args:
+ * bindToQueryString(this, vm.myCaller.args, 'startDate');
+ * bindToQueryString(this, vm.myCaller.args, 'searchCriteria');
+ * // Plain ref:
+ * bindToQueryString(this, activeTab, 'tab');
+ * // Ref with custom options:
+ * bindToQueryString(this, enumTab, { queryKey: 'tab', parse: ..., stringify: ... });
+ */
 export function bindToQueryString<
   T = any,
   TKey extends keyof T & string = keyof T & string,
@@ -1291,6 +1314,24 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
   updateObject(vuePublic.$route?.query[queryKey]);
 }
 
+/**
+ * Composition API wrapper for {@link bindToQueryString}. Must be called inside `setup()`.
+ *
+ * @example
+ * // List parameters:
+ * useBindToQueryString(list, '$page');
+ * useBindToQueryString(list, '$search');
+ * useBindToQueryString(list.$params, 'pageSize');
+ * // Data source parameters:
+ * useBindToQueryString(dataSource, 'myParameter');
+ * // Caller args:
+ * useBindToQueryString(vm.myCaller.args, 'startDate');
+ * useBindToQueryString(vm.myCaller.args, 'searchCriteria');
+ * // Plain ref:
+ * useBindToQueryString(activeTab, 'tab');
+ * // Ref with custom options:
+ * useBindToQueryString(enumTab, { queryKey: 'tab', parse: ..., stringify: ... });
+ */
 export function useBindToQueryString<T, TKey extends keyof T & string>(
   obj: T,
   key: TKey,

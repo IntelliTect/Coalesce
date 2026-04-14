@@ -102,6 +102,7 @@ Binds a value on an object, or the value of a ref, to the query string.
   - **ListParameters**: When binding to a `ListParameters` object (or any object with `page` and `pageSize` properties), numeric fields are automatically parsed using `parseInt` without needing to specify a `parse` function.
   - **ListViewModel $ properties**: When binding to the ListViewModel shorthand parameter properties (e.g., `$page`, `$pageSize`, `$search`), the query key automatically drops the `$` prefix (e.g., `$page` becomes `page` in the URL). Numeric properties are automatically parsed using `parseInt`.
   - **Models and DataSources**: When binding to a property on a [Model](#model-interfaces), [ViewModel](./viewmodels.md#viewmodels), or [Data Source](#data-sources), `parse` and `stringify` are auto-configured.
+  - **Caller args**: When binding to a property on a caller's `args` object (e.g., `caller.args`), parameter metadata is used to automatically serialize and deserialize complex types like dates, objects, collections, and enums.
 
 - **Example**
 
@@ -139,6 +140,11 @@ Binds a value on an object, or the value of a ref, to the query string.
   
   const dataSource = new PersonListViewModel.DataSources.MySource();
   useBindToQueryString(dataSource, 'myParameter');
+
+  // Bind caller args (complex types auto-serialize via metadata):
+  const vm = new PersonViewModel();
+  useBindToQueryString(vm.myCaller.args, 'startDate');
+  useBindToQueryString(vm.myCaller.args, 'searchCriteria');
 
   // Bind to a `ref` ('tab' is the querystring key)
   const activeTab = ref("1")

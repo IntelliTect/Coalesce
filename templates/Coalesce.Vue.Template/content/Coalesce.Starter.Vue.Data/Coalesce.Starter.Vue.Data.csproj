@@ -22,6 +22,9 @@
     <!--#if(Hangfire) -->
     <PackageReference Include="Hangfire.Core" Version="1.8.23" />
     <!--#endif -->
+    <!--#if(Hangfire || EmailSendGrid) -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!--#endif -->
     <!--#if(AIChat) -->
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.72.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.72.0" />

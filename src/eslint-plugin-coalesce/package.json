@@ -2,7 +2,10 @@
   "name": "eslint-plugin-coalesce",
   "version": "0.1.0-local",
   "description": "ESLint plugin to detect common mistakes in Coalesce applications.",
-  "repository": "https://github.com/IntelliTect/Coalesce",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IntelliTect/Coalesce.git"
+  },
   "author": "IntelliTect",
   "license": "Apache-2.0",
   "keywords": [

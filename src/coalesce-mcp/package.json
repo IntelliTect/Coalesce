@@ -2,7 +2,10 @@
   "name": "coalesce-mcp",
   "version": "0.1.0-local",
   "description": "MCP server for IntelliTect's Coalesce framework.",
-  "repository": "https://github.com/IntelliTect/Coalesce",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IntelliTect/Coalesce.git"
+  },
   "author": "IntelliTect",
   "license": "Apache-2.0",
   "keywords": [

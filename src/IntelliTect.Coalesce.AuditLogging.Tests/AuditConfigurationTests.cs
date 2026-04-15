@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
+// All tests share the same TestDbContext type, so EF Core's internal model
+// initialization can race when multiple tests run concurrently.
+[NotInParallel]
 public class AuditConfigurationTests : IDisposable
 {
     public SqliteConnection SqliteConn { get; }

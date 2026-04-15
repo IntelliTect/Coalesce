@@ -128,6 +128,15 @@ public class Person
     }
 
     /// <summary>
+    /// Returns the user name in format "Last, First"
+    /// </summary>
+    [Coalesce, Execute(HttpMethod = HttpMethod.Get)]
+    public string FullNameAndAge(int age)
+    {
+        return $"{FirstName} {age}";
+    }
+
+    /// <summary>
     /// Removes spaces from the name and puts in dashes
     /// </summary>
     [Coalesce]

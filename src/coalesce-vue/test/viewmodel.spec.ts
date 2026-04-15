@@ -12,7 +12,7 @@ import {
 import { mount } from "@vue/test-utils";
 import { delay, destroy, mountData, mockEndpoint } from "./test-utils";
 
-import { type ModelType } from "../src/metadata";
+import { type ModelType, type BehaviorFlags } from "../src/metadata";
 import {
   type AxiosItemResult,
   type AxiosListResult,
@@ -29,34 +29,34 @@ import {
 } from "../src/viewmodel";
 
 import {
+  AdvisorViewModel,
   CaseListViewModel,
   CaseViewModel,
   CompanyViewModel,
   ComplexModelListViewModel,
   ComplexModelViewModel,
+  CourseViewModel,
   PersonViewModel,
   ProductViewModel,
+  StudentListViewModel,
+  StudentViewModel,
   TestViewModel,
   ZipCodeViewModel,
   Parent1ViewModel,
   Parent2ViewModel,
-} from "../../test-targets/viewmodels.g";
+} from "@test-targets/viewmodels.g";
 import {
-  StudentViewModel,
-  CourseViewModel,
-  AdvisorViewModel,
-  StudentListViewModel,
-} from "./targets.viewmodels";
-import { Student, Advisor, Course, Grade } from "./targets.models";
-import * as metadata from "./targets.metadata";
-import { metaBase } from "./targets.metadata";
-import {
+  Advisor,
   ComplexModel,
+  Course,
   EnumPkId,
+  Grade,
   Statuses,
+  Student,
   Test,
   WeatherData,
 } from "@test-targets/models.g";
+import * as metadata from "@test-targets/metadata.g";
 
 function mockItemResult<T>(success: boolean, object: T) {
   return vitest.fn().mockResolvedValue(<AxiosItemResult<T>>{
@@ -126,7 +126,7 @@ describe("ViewModel", () => {
     (callerName) => {
       describe("model props are set when watchers observe end of loading", () => {
         beforeEach(() => {
-          return mockEndpoint("/students/", (req) => {
+          return mockEndpoint("/Student/", (req) => {
             return {
               wasSuccessful: true,
               object: <Student>{ studentId: 1, name: "Bob" },
@@ -681,7 +681,7 @@ describe("ViewModel", () => {
 
     test("creation with parent that was explicitly late loaded by key", async () => {
       const saveEndpoint = mockEndpoint(
-        "/students/save",
+        "/Student/save",
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: {
@@ -784,7 +784,7 @@ describe("ViewModel", () => {
       };
 
       const endpoint = mockEndpoint(
-        "/students/bulkSave",
+        "/Student/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
           ...JSON.parse(JSON.stringify(response)), // deep clone
@@ -894,7 +894,7 @@ describe("ViewModel", () => {
       };
 
       const endpoint = mockEndpoint(
-        "/students/bulkSave",
+        "/Student/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
           ...JSON.parse(JSON.stringify(response)), // deep clone
@@ -946,7 +946,7 @@ describe("ViewModel", () => {
     });
 
     test("deletion", async () => {
-      const loadEndpoint = mockEndpoint("/students/get", (req) => ({
+      const loadEndpoint = mockEndpoint("/Student/get", (req) => ({
         wasSuccessful: true,
         object: {
           studentId: 1,
@@ -958,7 +958,7 @@ describe("ViewModel", () => {
       }));
 
       const bulkSaveEndpoint = mockEndpoint(
-        "/students/bulkSave",
+        "/Student/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: {
@@ -1018,7 +1018,7 @@ describe("ViewModel", () => {
 
     test("creation of principal entity", async () => {
       const bulkSaveEndpoint = mockEndpoint(
-        "/students/bulkSave",
+        "/Student/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: {
@@ -1068,7 +1068,7 @@ describe("ViewModel", () => {
     });
 
     test("removing an item and then reloading purges local $removedItems", async () => {
-      const loadEndpoint = mockEndpoint("/students/get", (req) => ({
+      const loadEndpoint = mockEndpoint("/Student/get", (req) => ({
         wasSuccessful: true,
         object: {
           studentId: 1,
@@ -1099,7 +1099,7 @@ describe("ViewModel", () => {
 
     test("creation of root entity with no dirty props", async () => {
       const bulkSaveEndpoint = mockEndpoint(
-        "/students/bulkSave",
+        "/Student/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: {
@@ -1141,7 +1141,7 @@ describe("ViewModel", () => {
       };
 
       const endpoint = mockEndpoint(
-        "/students/bulkSave",
+        "/Student/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
           ...JSON.parse(JSON.stringify(response)), // deep clone
@@ -1338,7 +1338,7 @@ describe("ViewModel", () => {
 
     test("creation with parent that was explicitly late loaded by key - does not include ref to existing parent", async () => {
       const bulkSaveEndpoint = mockEndpoint(
-        "/students/bulkSave",
+        "/Student/bulkSave",
         vitest.fn((req) => ({
           wasSuccessful: true,
           object: {
@@ -2356,7 +2356,7 @@ describe("ViewModel", () => {
         });
 
         expect(advisor.studentWrapperObject!.$metadata).toBe(
-          metadata.DisplaysStudent,
+          metadata.StudentWrapper,
         );
         expect(advisor.studentWrapperObject!.student?.$metadata).toBe(
           metadata.Student,
@@ -3198,7 +3198,13 @@ describe("ViewModel", () => {
 
     describe("default values", () => {
       const meta = {
-        ...metaBase(),
+        type: "model" as const,
+        name: "model",
+        displayName: "Model",
+        dataSources: {},
+        methods: {},
+        controllerRoute: "Model",
+        behaviorFlags: 7 as BehaviorFlags,
         get keyProp() {
           return this.props.id;
         },

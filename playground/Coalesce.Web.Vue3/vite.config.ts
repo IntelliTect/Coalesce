@@ -88,6 +88,9 @@ export default defineConfig({
       // repo root, where some NPM packages may be restored to
       allow: [path.resolve(__dirname, "../../")],
     },
+    warmup: {
+      clientFiles: ["./src/**/*.vue"],
+    },
   },
 
   optimizeDeps: {

@@ -4,21 +4,19 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
-      dev-dependencies:
-        patterns:
-          - "*-artifact"
+      all-actions:
+        patterns: ["*"]
 
     # Vue Template Project
   - package-ecosystem: "github-actions"
     directory: "/templates/Coalesce.Vue.Template/content/.github/workflows"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
-      dev-dependencies:
-        patterns:
-          - "*-artifact"
+      all-actions:
+        patterns: ["*"]
 
     # Template npm dependencies
   - package-ecosystem: "npm"

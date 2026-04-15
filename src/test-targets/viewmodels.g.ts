@@ -194,6 +194,40 @@ export class AbstractModelPersonListViewModel extends ListViewModel<$models.Abst
 }
 
 
+export interface AdvisorViewModel extends $models.Advisor {
+  advisorId: number | null;
+  name: string | null;
+  get students(): ViewModelCollection<StudentViewModel, $models.Student>;
+  set students(value: (StudentViewModel | $models.Student)[] | null);
+  
+  /** A collection of models that doesn't function as a navigation property. */
+  get studentsNonNavigation(): ViewModelCollection<StudentViewModel, $models.Student>;
+  set studentsNonNavigation(value: (StudentViewModel | $models.Student)[] | null);
+  
+  /** An object type property containing a model reference. */
+  studentWrapperObject: $models.StudentWrapper | null;
+}
+export class AdvisorViewModel extends ViewModel<$models.Advisor, $apiClients.AdvisorApiClient, number> implements $models.Advisor  {
+  
+  
+  public addToStudents(initialData?: DeepPartial<$models.Student> | null) {
+    return this.$addChild('students', initialData) as StudentViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.Advisor> | null) {
+    super($metadata.Advisor, new $apiClients.AdvisorApiClient(), initialData)
+  }
+}
+defineProps(AdvisorViewModel, $metadata.Advisor)
+
+export class AdvisorListViewModel extends ListViewModel<$models.Advisor, $apiClients.AdvisorApiClient, AdvisorViewModel> {
+  
+  constructor() {
+    super($metadata.Advisor, new $apiClients.AdvisorApiClient())
+  }
+}
+
+
 export interface CaseViewModel extends $models.Case {
   caseKey: number | null;
   title: string | null;
@@ -912,6 +946,29 @@ export class ComplexModelDependentListViewModel extends ListViewModel<$models.Co
 }
 
 
+export interface CourseViewModel extends $models.Course {
+  courseId: number | null;
+  name: string | null;
+  studentId: number | null;
+  get student(): StudentViewModel | null;
+  set student(value: StudentViewModel | $models.Student | null);
+}
+export class CourseViewModel extends ViewModel<$models.Course, $apiClients.CourseApiClient, number> implements $models.Course  {
+  
+  constructor(initialData?: DeepPartial<$models.Course> | null) {
+    super($metadata.Course, new $apiClients.CourseApiClient(), initialData)
+  }
+}
+defineProps(CourseViewModel, $metadata.Course)
+
+export class CourseListViewModel extends ListViewModel<$models.Course, $apiClients.CourseApiClient, CourseViewModel> {
+  
+  constructor() {
+    super($metadata.Course, new $apiClients.CourseApiClient())
+  }
+}
+
+
 export interface DateOnlyPkViewModel extends $models.DateOnlyPk {
   dateOnlyPkId: Date | null;
   name: string | null;
@@ -1268,6 +1325,18 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     return rename
   }
   
+  /** Returns the user name in format "Last, First" */
+  public get fullNameAndAge() {
+    const fullNameAndAge = this.$apiClient.$makeCaller(
+      this.$metadata.methods.fullNameAndAge,
+      (c, age?: number | null) => c.fullNameAndAge(this.$primaryKey, age),
+      () => ({age: null as number | null, }),
+      (c, args) => c.fullNameAndAge(this.$primaryKey, args.age))
+    
+    Object.defineProperty(this, 'fullNameAndAge', {value: fullNameAndAge});
+    return fullNameAndAge
+  }
+  
   /** Removes spaces from the name and puts in dashes */
   public get changeSpacesToDashesInName() {
     const changeSpacesToDashesInName = this.$apiClient.$makeCaller(
@@ -1611,6 +1680,42 @@ export class StringIdentityListViewModel extends ListViewModel<$models.StringIde
 }
 
 
+export interface StudentViewModel extends $models.Student {
+  studentId: number | null;
+  name: string | null;
+  isEnrolled: boolean | null;
+  birthDate: Date | null;
+  get courses(): ViewModelCollection<CourseViewModel, $models.Course>;
+  set courses(value: (CourseViewModel | $models.Course)[] | null);
+  get currentCourse(): CourseViewModel | null;
+  set currentCourse(value: CourseViewModel | $models.Course | null);
+  currentCourseId: number | null;
+  grade: $models.Grade | null;
+  get advisor(): AdvisorViewModel | null;
+  set advisor(value: AdvisorViewModel | $models.Advisor | null);
+  studentAdvisorId: number | null;
+}
+export class StudentViewModel extends ViewModel<$models.Student, $apiClients.StudentApiClient, number> implements $models.Student  {
+  
+  
+  public addToCourses(initialData?: DeepPartial<$models.Course> | null) {
+    return this.$addChild('courses', initialData) as CourseViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.Student> | null) {
+    super($metadata.Student, new $apiClients.StudentApiClient(), initialData)
+  }
+}
+defineProps(StudentViewModel, $metadata.Student)
+
+export class StudentListViewModel extends ListViewModel<$models.Student, $apiClients.StudentApiClient, StudentViewModel> {
+  
+  constructor() {
+    super($metadata.Student, new $apiClients.StudentApiClient())
+  }
+}
+
+
 export interface SuppressedDefaultOrderingViewModel extends $models.SuppressedDefaultOrdering {
   id: number | null;
   name: string | null;
@@ -1730,12 +1835,14 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   AbstractImpl1: AbstractImpl1ViewModel,
   AbstractImpl2: AbstractImpl2ViewModel,
   AbstractModelPerson: AbstractModelPersonViewModel,
+  Advisor: AdvisorViewModel,
   Case: CaseViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
   CaseProduct: CaseProductViewModel,
   Company: CompanyViewModel,
   ComplexModel: ComplexModelViewModel,
   ComplexModelDependent: ComplexModelDependentViewModel,
+  Course: CourseViewModel,
   DateOnlyPk: DateOnlyPkViewModel,
   DateTimeOffsetPk: DateTimeOffsetPkViewModel,
   DateTimePk: DateTimePkViewModel,
@@ -1758,6 +1865,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   StandaloneReadonly: StandaloneReadonlyViewModel,
   StandaloneReadWrite: StandaloneReadWriteViewModel,
   StringIdentity: StringIdentityViewModel,
+  Student: StudentViewModel,
   SuppressedDefaultOrdering: SuppressedDefaultOrderingViewModel,
   Test: TestViewModel,
   TimeOnlyPk: TimeOnlyPkViewModel,
@@ -1768,12 +1876,14 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   AbstractImpl2: AbstractImpl2ListViewModel,
   AbstractModel: AbstractModelListViewModel,
   AbstractModelPerson: AbstractModelPersonListViewModel,
+  Advisor: AdvisorListViewModel,
   Case: CaseListViewModel,
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,
   CaseProduct: CaseProductListViewModel,
   Company: CompanyListViewModel,
   ComplexModel: ComplexModelListViewModel,
   ComplexModelDependent: ComplexModelDependentListViewModel,
+  Course: CourseListViewModel,
   DateOnlyPk: DateOnlyPkListViewModel,
   DateTimeOffsetPk: DateTimeOffsetPkListViewModel,
   DateTimePk: DateTimePkListViewModel,
@@ -1796,6 +1906,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   StandaloneReadonly: StandaloneReadonlyListViewModel,
   StandaloneReadWrite: StandaloneReadWriteListViewModel,
   StringIdentity: StringIdentityListViewModel,
+  Student: StudentListViewModel,
   SuppressedDefaultOrdering: SuppressedDefaultOrderingListViewModel,
   Test: TestListViewModel,
   TimeOnlyPk: TimeOnlyPkListViewModel,

@@ -101,6 +101,11 @@ export class AbstractModelPersonApiClient extends ModelApiClient<$models.Abstrac
 }
 
 
+export class AdvisorApiClient extends ModelApiClient<$models.Advisor> {
+  constructor() { super($metadata.Advisor) }
+}
+
+
 export class CaseApiClient extends ModelApiClient<$models.Case> {
   constructor() { super($metadata.Case) }
   
@@ -562,6 +567,11 @@ export class ComplexModelDependentApiClient extends ModelApiClient<$models.Compl
 }
 
 
+export class CourseApiClient extends ModelApiClient<$models.Course> {
+  constructor() { super($metadata.Course) }
+}
+
+
 export class DateOnlyPkApiClient extends ModelApiClient<$models.DateOnlyPk> {
   constructor() { super($metadata.DateOnlyPk) }
 }
@@ -631,6 +641,17 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     const $params =  {
       id,
       name,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  /** Returns the user name in format "Last, First" */
+  public fullNameAndAge(id: number | null, age?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
+    const $method = this.$metadata.methods.fullNameAndAge
+    const $params =  {
+      id,
+      age,
     }
     return this.$invoke($method, $params, $config)
   }
@@ -767,6 +788,11 @@ export class StandaloneReadWriteApiClient extends ModelApiClient<$models.Standal
 
 export class StringIdentityApiClient extends ModelApiClient<$models.StringIdentity> {
   constructor() { super($metadata.StringIdentity) }
+}
+
+
+export class StudentApiClient extends ModelApiClient<$models.Student> {
+  constructor() { super($metadata.Student) }
 }
 
 

@@ -102,8 +102,9 @@ jobs:
 
       - name: Create GitHub Release
         if: ${{ !inputs.prereleaseSlug }}
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.meta.outputs.COALESCE_VERSION }}
-          name: ${{ needs.meta.outputs.COALESCE_VERSION }}
-          body_path: release_notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ needs.meta.outputs.COALESCE_VERSION }}" \
+            --title "${{ needs.meta.outputs.COALESCE_VERSION }}" \
+            --notes-file release_notes.md

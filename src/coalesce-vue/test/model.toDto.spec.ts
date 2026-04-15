@@ -1,14 +1,15 @@
 import * as model from "../src/model";
-import * as $metadata from "./targets.metadata";
+import * as $metadata from "@test-targets/metadata.g";
 import type { Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import {
   twoWayConversions,
-  studentValue,
+  complexModelValue,
+  DisplaysModelSerializesChild,
   type MappingData,
 } from "./model.shared";
 
-const studentProps = $metadata.Student.props;
+const cmProps = $metadata.ComplexModel.props;
 
 function unmappable(meta: Value, ...values: any[]) {
   return values.map((value) => {
@@ -28,79 +29,79 @@ describe.each(<MappingData[]>[
   // Also test that foreign keys are auto-populated
   // from their reference prop if the FK itself is null.
   {
-    meta: studentValue,
+    meta: complexModelValue,
     model: {
-      $metadata: $metadata.Student,
-      studentId: 1,
+      $metadata: $metadata.ComplexModel,
+      complexModelId: 1,
       name: "Steve",
-      courses: [{ $metadata: $metadata.Course, courseId: 1, name: "CS 101" }],
-      studentAdvisorId: null,
-      advisor: {
-        $metadata: $metadata.Advisor,
-        advisorId: 1,
-        name: "Joe",
+      tests: [{ $metadata: $metadata.Test, testId: 1, testName: "CS 101" }],
+      singleTestId: null,
+      singleTest: {
+        $metadata: $metadata.Test,
+        testId: 1,
+        testName: "Joe",
       },
     },
-    dto: { name: "Steve", studentId: 1, studentAdvisorId: 1 },
+    dto: { name: "Steve", complexModelId: 1, singleTestId: 1 },
   },
 
   // Serialized child object with a non-null value
   {
     meta: {
       role: "value",
-      typeDef: $metadata.DisplaysStudentSerializesChild,
+      typeDef: DisplaysModelSerializesChild,
       type: "object",
     },
     model: {
-      $metadata: $metadata.DisplaysStudentSerializesChild,
+      $metadata: DisplaysModelSerializesChild,
       name: "Steve",
-      student: {
-        $metadata: $metadata.Student,
+      model: {
+        $metadata: $metadata.ComplexModel,
         name: "Steve",
       },
     },
-    dto: { name: "Steve", student: { name: "Steve" } },
+    dto: { name: "Steve", model: { name: "Steve" } },
   },
   // Serialized child object with a null value
   {
     meta: {
       role: "value",
-      typeDef: $metadata.DisplaysStudentSerializesChild,
+      typeDef: DisplaysModelSerializesChild,
       type: "object",
     },
     model: {
-      $metadata: $metadata.DisplaysStudentSerializesChild,
+      $metadata: DisplaysModelSerializesChild,
       name: "Steve",
-      student: null,
+      model: null,
     },
-    dto: { name: "Steve", student: null },
+    dto: { name: "Steve", model: null },
   },
   // Null object
-  { meta: studentValue, model: null, dto: null },
+  { meta: complexModelValue, model: null, dto: null },
 
   // String
-  { meta: studentProps.name, model: 123, dto: "123" },
-  { meta: studentProps.name, model: true, dto: "true" },
-  ...unmappable(studentProps.name, new Date(), [], {}),
+  { meta: cmProps.name, model: 123, dto: "123" },
+  { meta: cmProps.name, model: true, dto: "true" },
+  ...unmappable(cmProps.name, new Date(), [], {}),
 
   // Number
-  { meta: studentProps.studentId, model: "123", dto: 123 },
-  { meta: studentProps.studentId, model: "", dto: null },
-  { meta: studentProps.studentId, model: " ", dto: null },
-  ...unmappable(studentProps.studentId, new Date(), [], {}, "abc"),
+  { meta: cmProps.complexModelId, model: "123", dto: 123 },
+  { meta: cmProps.complexModelId, model: "", dto: null },
+  { meta: cmProps.complexModelId, model: " ", dto: null },
+  ...unmappable(cmProps.complexModelId, new Date(), [], {}, "abc"),
 
   // Enum
-  { meta: studentProps.grade, model: "123", dto: 123 },
-  ...unmappable(studentProps.grade, new Date(), [], {}, "abc"),
+  { meta: cmProps.enumWithDefault, model: "123", dto: 123 },
+  ...unmappable(cmProps.enumWithDefault, new Date(), [], {}, "abc"),
 
   // Boolean
-  { meta: studentProps.isEnrolled, model: "true", dto: true },
-  { meta: studentProps.isEnrolled, model: "false", dto: false },
-  ...unmappable(studentProps.isEnrolled, new Date(), [], {}, "abc", 123),
+  { meta: cmProps.isActive, model: "true", dto: true },
+  { meta: cmProps.isActive, model: "false", dto: false },
+  ...unmappable(cmProps.isActive, new Date(), [], {}, "abc", 123),
 
   // Date
   ...unmappable(
-    studentProps.birthDate,
+    cmProps.dateTimeOffset,
     new Date("!!Invalid"),
     123,
     "abc",
@@ -149,39 +150,39 @@ describe("mapToDto", () => {
 
   test("for object, maps object", () => {
     const mapped = model.mapToDto({
-      $metadata: $metadata.Student,
-      studentId: 1,
+      $metadata: $metadata.ComplexModel,
+      complexModelId: 1,
       name: "Steve",
-      courses: [{ $metadata: $metadata.Course, courseId: 1, name: "CS 101" }],
-      studentAdvisorId: null,
-      advisor: {
-        $metadata: $metadata.Advisor,
-        advisorId: 1,
-        name: "Joe",
+      tests: [{ $metadata: $metadata.Test, testId: 1, testName: "CS 101" }],
+      singleTestId: null,
+      singleTest: {
+        $metadata: $metadata.Test,
+        testId: 1,
+        testName: "Joe",
       },
     });
 
     expect(mapped).toMatchObject({
       name: "Steve",
-      studentId: 1,
-      studentAdvisorId: 1,
+      complexModelId: 1,
+      singleTestId: 1,
     });
   });
 
   test("for object with specific props, drops extra props", () => {
     const mapped = model.mapToDtoFiltered(
       {
-        $metadata: $metadata.Student,
-        studentId: 1,
+        $metadata: $metadata.ComplexModel,
+        complexModelId: 1,
         name: "Steve",
-        studentAdvisorId: 3,
+        singleTestId: 3,
       },
-      ["name", "studentId"],
+      ["name", "complexModelId"],
     );
 
     expect(mapped).toMatchObject({
       name: "Steve",
-      studentId: 1,
+      complexModelId: 1,
     });
   });
 
@@ -189,11 +190,11 @@ describe("mapToDto", () => {
     model.setDefaultTimeZone("America/Adak");
 
     const mapped = model.mapToDto({
-      $metadata: $metadata.Student,
-      birthDate: new Date("2014-10-25T13:46:20+02:00"),
+      $metadata: $metadata.ComplexModel,
+      dateTimeOffset: new Date("2014-10-25T13:46:20+02:00"),
     }) as any;
 
     // Output is shifted from UTC+2 to UTC-9, a total of 11 hours (1300 hours to 0200 hours).
-    expect(mapped.birthDate).toBe("2014-10-25T02:46:20.000-09:00");
+    expect(mapped.dateTimeOffset).toBe("2014-10-25T02:46:20.000-09:00");
   });
 });

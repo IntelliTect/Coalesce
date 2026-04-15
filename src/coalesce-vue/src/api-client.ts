@@ -946,6 +946,13 @@ export class ApiClient<T extends ApiRoutedType> {
     // Set this on the instance if we have it.
     instance.$metadata = meta;
 
+    // Set $metadata on the initial args object so that bindToQueryString
+    // can resolve parameter metadata. resetArgs() also does this,
+    // but the constructor's resetArgs() runs before $metadata is set above.
+    if (meta && "args" in instance) {
+      (instance.args as any).$metadata = meta;
+    }
+
     return instance as any;
   }
 
@@ -2139,7 +2146,9 @@ export class ItemApiStateWithArgs<
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
   public resetArgs() {
-    this.args = this.argsFactory();
+    const args = this.argsFactory();
+    if (this.$metadata) (args as any).$metadata = this.$metadata;
+    this.args = args;
   }
 
   /** Invoke a call to the API endpoint after an affirmative confirmation from the user.
@@ -2321,7 +2330,9 @@ export class ListApiStateWithArgs<
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
   public resetArgs() {
-    this.args = this.argsFactory();
+    const args = this.argsFactory();
+    if (this.$metadata) (args as any).$metadata = this.$metadata;
+    this.args = args;
   }
 
   /** Invoke a call to the API endpoint after an affirmative confirmation from the user.

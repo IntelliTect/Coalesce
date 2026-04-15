@@ -23,10 +23,6 @@ import {
 import { getInternalInstance } from "../src/util";
 import { delay, mountData, mockEndpoint } from "./test-utils";
 
-import { StudentApiClient } from "./targets.apiclients";
-import { Student as StudentMeta } from "./targets.metadata";
-import { Student, Advisor } from "./targets.models";
-
 import {
   ComplexModelApiClient,
   PersonApiClient,
@@ -34,10 +30,15 @@ import {
   StringIdentityApiClient,
 } from "@test-targets/api-clients.g";
 import {
+  ComplexModel as ComplexModelMeta,
+  Person as PersonMeta,
+} from "@test-targets/metadata.g";
+import {
   ComplexModelViewModel,
   PersonListViewModel,
 } from "@test-targets/viewmodels.g";
 import {
+  ComplexModel,
   ExternalParent,
   Genders,
   Person,
@@ -73,7 +74,7 @@ describe("error handling", () => {
       headers: { "Content-Type": "text/html" },
     });
 
-    await expect(new StudentApiClient().get(1)).rejects.toThrow(
+    await expect(new PersonApiClient().get(1)).rejects.toThrow(
       "Unexpected text/html string response from server.",
     );
   });
@@ -205,10 +206,10 @@ describe("$useSimultaneousRequestCaching", () => {
       .mockImplementation(async () => {
         // Delay so the calls don't complete instantly (which would subvert request caching).
         await delay(30);
-        return <AxiosListResult<Student>>{
+        return <AxiosListResult<Person>>{
           data: {
             wasSuccessful: true,
-            list: [] as Student[],
+            list: [] as Person[],
             page: 1,
             pageCount: 0,
             pageSize: 10,
@@ -217,31 +218,36 @@ describe("$useSimultaneousRequestCaching", () => {
         };
       }));
 
-    const client = new StudentApiClient().$useSimultaneousRequestCaching();
+    const client = new PersonApiClient().$useSimultaneousRequestCaching();
 
-    const invoker = (nameStart: string) => {
+    const invoker = (status: Statuses) => {
       const params = new ListParameters();
-      const ds = (params.dataSource = new Student.DataSources.Search());
-      ds.nameStart = nameStart;
-      params.fields = ["name", "birthDate"];
+      const ds = (params.dataSource =
+        new Person.DataSources.NamesStartingWithAWithCases());
+      ds.allowedStatuses = [status];
+      params.fields = ["firstName", "birthDate"];
       return client.list(params);
     };
 
     // Act
     await Promise.all([
-      invoker("bob"),
-      invoker("bob"),
-      invoker("steve"),
-      invoker("steve"),
-      invoker("bob"),
+      invoker(Statuses.Open),
+      invoker(Statuses.Open),
+      invoker(Statuses.InProgress),
+      invoker(Statuses.InProgress),
+      invoker(Statuses.Open),
     ]);
 
     // Assert
     expect(mock).toBeCalledTimes(2); // 2 distinct sets of parameters => 2 calls
     const actualParams = mock.mock.calls[0] as Parameters<AxiosAdapter>;
-    expect(actualParams[0].params["dataSource"]).toBe("Search");
-    expect(actualParams[0].params["dataSource.nameStart"]).toBe("bob");
-    expect(actualParams[0].params["fields"]).toBe("name,birthDate");
+    expect(actualParams[0].params["dataSource"]).toBe(
+      "NamesStartingWithAWithCases",
+    );
+    expect(actualParams[0].params["dataSource.allowedStatuses"]).toStrictEqual([
+      0,
+    ]);
+    expect(actualParams[0].params["fields"]).toBe("firstName,birthDate");
     expect(actualParams[0].params["page"]).toBe("1");
     expect(actualParams[0].params["pageSize"]).toBe("10");
   });
@@ -258,11 +264,12 @@ describe("$useSimultaneousRequestCaching", () => {
         };
       }));
 
-    const client = new StudentApiClient().$useSimultaneousRequestCaching();
+    const client = new ComplexModelApiClient().$useSimultaneousRequestCaching();
 
-    const invoker = (advisorId: number) =>
-      client.$invoke(StudentMeta.methods.getWithObjParam, {
-        advisor: new Advisor({ name: "Ad Visor", advisorId }),
+    const invoker = (id: number) =>
+      client.$invoke(ComplexModelMeta.methods.instanceGetMethodWithObjParam, {
+        id,
+        obj: new ExternalParent({ stringList: ["hello"] }),
       });
 
     // Act
@@ -272,10 +279,9 @@ describe("$useSimultaneousRequestCaching", () => {
     expect(mock).toBeCalledTimes(2); // 2 distinct sets of parameters => 2 calls
     const actualParams = mock.mock.calls[0] as Parameters<AxiosAdapter>;
     expect(actualParams[0].params).toMatchObject({
-      advisor: {
-        advisorId: 3,
-        name: "Ad Visor",
-        studentWrapperObject: null,
+      id: 3,
+      obj: {
+        stringList: ["hello"],
       },
     });
   });
@@ -318,10 +324,7 @@ describe("$invoke", () => {
     // but the client code doesn't make that distinction - the server does,
     // and we're mocking the server.
     await expect(
-      new StudentApiClient().$invoke(
-        StudentMeta.methods.fullNameAndAge,
-        {} as any,
-      ),
+      new PersonApiClient().$invoke(PersonMeta.methods.rename, {} as any),
     ).resolves.toBeTruthy();
 
     expect(mock.mock.calls[0][0]).toMatchObject({ params: {} });
@@ -375,8 +378,8 @@ describe("$invoke", () => {
       status: 200,
     }));
 
-    const res = await new StudentApiClient().$invoke(
-      StudentMeta.methods.fullNameAndAge,
+    const res = await new PersonApiClient().$invoke(
+      PersonMeta.methods.fullNameAndAge,
       // Our types are actually so good that they will catch this as an error, so we cast to any.
       { id: 1, extraParam: "" } as any,
     );
@@ -413,7 +416,7 @@ describe("$invoke", () => {
       type: "application/pdf",
     });
 
-    await new StudentApiClient().$invoke(methodMeta, {
+    await new PersonApiClient().$invoke(methodMeta, {
       id: 42,
       file,
     });
@@ -456,7 +459,7 @@ describe("$invoke", () => {
           role: "value",
           displayName: "",
           name: "student",
-          typeDef: StudentMeta,
+          typeDef: ComplexModelMeta,
         },
       },
     };
@@ -464,15 +467,15 @@ describe("$invoke", () => {
       type: "application/pdf",
     });
 
-    await new StudentApiClient().$invoke(methodMeta, {
+    await new PersonApiClient().$invoke(methodMeta, {
       id: 42,
       file,
-      student: <Student>{ name: "bob&bob=bob", studentAdvisorId: null },
+      student: <ComplexModel>{ name: "bob&bob=bob", singleTestId: null },
     });
 
     expect(mock).toBeCalledTimes(1);
     expect(mock.mock.calls[0][0].data).toBe(
-      '{"id":42,"file":{"content":"AA==","contentType":"application/pdf","name":"fileName"},"student":{"name":"bob&bob=bob","studentAdvisorId":null}}',
+      '{"id":42,"file":{"content":"AA==","contentType":"application/pdf","name":"fileName"},"student":{"singleTestId":null,"name":"bob&bob=bob"}}',
     );
   });
 
@@ -514,7 +517,7 @@ describe("$invoke", () => {
       type: "application/pdf",
     });
 
-    await new StudentApiClient().$invoke(methodMeta, {
+    await new PersonApiClient().$invoke(methodMeta, {
       id: 42,
       files: [file1, file2],
     });
@@ -550,7 +553,7 @@ describe("$invoke", () => {
     };
 
     const bin = new Uint8Array([0x11, 0x22, 0x33]);
-    await new StudentApiClient().$invoke(methodMeta, {
+    await new PersonApiClient().$invoke(methodMeta, {
       id: 42,
       bin,
     });
@@ -568,16 +571,16 @@ describe("$invoke", () => {
       status: 200,
     }));
 
-    await new StudentApiClient().save(
-      new Student({
-        studentAdvisorId: null,
-        name: "bob",
+    await new PersonApiClient().save(
+      new Person({
+        companyId: null,
+        firstName: "bob",
       }),
-      { fields: ["studentAdvisorId", "name"] },
+      { fields: ["companyId", "firstName"] },
     );
 
     expect(mock.mock.calls[0][0].data).toBe(
-      '{"name":"bob","studentAdvisorId":null}',
+      '{"firstName":"bob","companyId":null}',
     );
   });
 
@@ -672,7 +675,7 @@ describe("$invoke", () => {
 describe("$makeCaller", () => {
   test("passes parameters to invoker func", async () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient().$makeCaller(
+    const caller = new PersonApiClient().$makeCaller(
       "item",
       (c, num: number) => {
         return endpointMock(num);
@@ -695,7 +698,7 @@ describe("$makeCaller", () => {
   });
 
   test("failed requests re-throw errors", async () => {
-    const caller = new StudentApiClient().$makeCaller(
+    const caller = new PersonApiClient().$makeCaller(
       "item",
       (c, num: number) => {
         throw {
@@ -710,7 +713,7 @@ describe("$makeCaller", () => {
 
   test("allows return undefined from invoker func", async () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient().$makeCaller(
+    const caller = new PersonApiClient().$makeCaller(
       "item",
       (c, num: number) => {
         if (num == 42) {
@@ -741,7 +744,7 @@ describe("$makeCaller", () => {
 
   test("types: allows return undefined from async invoker func", async () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient().$makeCaller(
+    const caller = new PersonApiClient().$makeCaller(
       "item",
       async (c, num: number) => {
         if (num == 42) {
@@ -775,7 +778,7 @@ describe("$makeCaller", () => {
     const endpointMock = makeEndpointMock();
     let awaited = false;
     const model = {
-      caller: new StudentApiClient()
+      caller: new PersonApiClient()
         .$makeCaller("item", function (this: any, c) {
           return endpointMock(42);
         })
@@ -802,7 +805,7 @@ describe("$makeCaller", () => {
   test("onRejected callbacks are awaited when promises returned", async () => {
     let awaited = false;
     const model = {
-      caller: new StudentApiClient()
+      caller: new PersonApiClient()
         .$makeCaller("item", function (this: any, c) {
           throw Error();
         })
@@ -823,7 +826,7 @@ describe("$makeCaller", () => {
     const fulfilledMock = vitest.fn();
     const model = <Model>{
       value: 42,
-      caller: new StudentApiClient()
+      caller: new PersonApiClient()
         .$makeCaller("item", function (this: Model, c) {
           return endpointMock(this.value);
         })
@@ -838,9 +841,8 @@ describe("$makeCaller", () => {
 
   test("preserves getter/setter behavior on ApiState after _makeReactive()", () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient().$makeCaller(
-      "item",
-      (c, num: number) => endpointMock(num),
+    const caller = new PersonApiClient().$makeCaller("item", (c, num: number) =>
+      endpointMock(num),
     );
 
     // Precondition: Ensures that our test doesn't accidentally set the property with the same value
@@ -877,7 +879,7 @@ describe("$makeCaller", () => {
 
   test("concurrencyMode 'debounce' ignores redundant requests when resolving", async () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient()
+    const caller = new PersonApiClient()
       .$makeCaller("item", async (c, param: number) => {
         await delay(20);
         return await endpointMock(param);
@@ -906,7 +908,7 @@ describe("$makeCaller", () => {
 
   test("concurrencyMode 'debounce' ignores redundant requests when throwing", async () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient()
+    const caller = new PersonApiClient()
       .$makeCaller("item", async (c, param: number) => {
         await delay(20);
         // endpointMock in this case is just being used to record our parameter's value.
@@ -957,7 +959,7 @@ describe("$makeCaller", () => {
       };
     });
 
-    const caller = new StudentApiClient()
+    const caller = new PersonApiClient()
       .$makeCaller("item", (c, param: number) => c.get(1))
       .setConcurrency("cancel");
 
@@ -1000,8 +1002,8 @@ describe("$makeCaller", () => {
       return resp;
     });
 
-    const caller = new StudentApiClient().$makeCaller("item", (c) =>
-      c.getFile(42, "bob"),
+    const caller = new ComplexModelApiClient().$makeCaller("item", (c) =>
+      c.downloadAttachment_VaryString(42, "bob"),
     );
 
     await caller();
@@ -1027,8 +1029,8 @@ describe("$makeCaller", () => {
       };
     });
 
-    const caller = new StudentApiClient().$makeCaller("item", (c) =>
-      c.getFile(42, "bob"),
+    const caller = new ComplexModelApiClient().$makeCaller("item", (c) =>
+      c.downloadAttachment_VaryString(42, "bob"),
     );
 
     await expect(caller()).rejects.toBeTruthy();
@@ -1057,8 +1059,8 @@ describe("$makeCaller", () => {
       ));
     const revokeUrlMock = (URL.revokeObjectURL = vitest.fn());
 
-    const caller = new StudentApiClient().$makeCaller("item", (c) =>
-      c.getFile(42, "bob"),
+    const caller = new ComplexModelApiClient().$makeCaller("item", (c) =>
+      c.downloadAttachment_VaryString(42, "bob"),
     );
 
     const wrapper = mount({ template: "<div></div>" });
@@ -1182,7 +1184,7 @@ describe("$makeCaller", () => {
       AxiosClient.defaults.adapter = () => makeEndpointMock("asdf")();
 
       const runTest = () => {
-        const caller = new StudentApiClient().$makeCaller("item", (c) =>
+        const caller = new PersonApiClient().$makeCaller("item", (c) =>
           c.fullNameAndAge(42),
         );
         caller.useResponseCaching({ maxAgeSeconds: 0.4 });
@@ -1213,7 +1215,7 @@ describe("$makeCaller", () => {
       AxiosClient.defaults.adapter = () => makeEndpointMock("asdf")();
 
       const runTest = () => {
-        const caller = new StudentApiClient().$makeCaller("item", (c) =>
+        const caller = new PersonApiClient().$makeCaller("item", (c) =>
           c.fullNameAndAge(42),
         );
         caller.useResponseCaching({ maxAgeSeconds: 20 });
@@ -1244,7 +1246,7 @@ describe("$makeCaller", () => {
       AxiosClient.defaults.adapter = () => makeEndpointMock("response1")();
 
       const runTest = () => {
-        const caller = new StudentApiClient().$makeCaller("item", async (c) => {
+        const caller = new PersonApiClient().$makeCaller("item", async (c) => {
           const res = c.fullNameAndAge(42);
           await delay(10);
           return await res;
@@ -1283,7 +1285,7 @@ describe("$makeCaller", () => {
 describe("$makeCaller with args object", () => {
   test("is typed properly", async () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient().$makeCaller(
+    const caller = new PersonApiClient().$makeCaller(
       "item",
       (c, num: number) => endpointMock(num),
       () => ({ num: null as number | null }),
@@ -1299,7 +1301,7 @@ describe("$makeCaller with args object", () => {
 
   test("confirm is typed properly", async () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient().$makeCaller(
+    const caller = new PersonApiClient().$makeCaller(
       "item",
       (c, num: number) => endpointMock(num),
       () => ({ num: null as number | null }),
@@ -1318,8 +1320,8 @@ describe("$makeCaller with args object", () => {
 
   test("allows return undefined from args invoker func", async () => {
     const endpointMock = makeEndpointMock();
-    const caller = new StudentApiClient().$makeCaller(
-      StudentMeta.methods.fullNameAndAge,
+    const caller = new PersonApiClient().$makeCaller(
+      PersonMeta.methods.rename,
       (c, num: number) => endpointMock(num),
       () => ({ num: null as null | number }),
       (c, args) => {
@@ -1355,14 +1357,16 @@ describe("$makeCaller with args object", () => {
       .fn()
       .mockResolvedValue("foo"));
 
-    const caller = new StudentApiClient().$makeCaller(
+    const caller = new ComplexModelApiClient().$makeCaller(
       "item",
-      (c) => c.getFile(42, null),
+      (c) => c.downloadAttachment_VaryString(42, null),
       () => ({}),
-      (c, args) => c.getFile(42, "bob+/"),
+      (c, args) => c.downloadAttachment_VaryString(42, "bob+/"),
     );
 
-    expect(caller.url).toBe("/api/Students/getFile?id=42&etag=bob%2B%2F");
+    expect(caller.url).toBe(
+      "/api/ComplexModel/downloadAttachment_VaryString?id=42&etag=bob%2B%2F",
+    );
     expect(adapter).toBeCalledTimes(0);
   });
 
@@ -1381,7 +1385,7 @@ describe("$makeCaller with args object", () => {
       }) as ListResultPromise<number>;
     });
 
-    const caller = new StudentApiClient().$makeCaller(
+    const caller = new PersonApiClient().$makeCaller(
       "list",
       (c, num: number) => endpointMock(num),
       () => ({ num: null as number | null }),
@@ -1415,7 +1419,7 @@ describe("$makeCaller with args object", () => {
         typeof makeEndpointMock<number | null | undefined>
       >,
     ) =>
-      new StudentApiClient().$makeCaller(
+      new PersonApiClient().$makeCaller(
         type,
         (c, num: number) => endpointMock(num),
         () => ({ num: null as number | null }),
@@ -1476,7 +1480,7 @@ describe("$makeCaller with args object", () => {
 
     test("debounce ignores redundant requests when resolving", async () => {
       const endpointMock = makeEndpointMock();
-      const caller = new StudentApiClient()
+      const caller = new PersonApiClient()
         .$makeCaller(
           type,
           (c, num: number) => endpointMock(num),

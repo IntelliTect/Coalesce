@@ -19,7 +19,10 @@ import { mount } from "@vue/test-utils";
 import { delay } from "./test-utils";
 import { reactive } from "vue";
 import { Person, PersonCriteria } from "@test-targets/models.g";
-import { ComplexModelListViewModel } from "@test-targets/viewmodels.g";
+import {
+  ComplexModelListViewModel,
+  ComplexModelViewModel,
+} from "@test-targets/viewmodels.g";
 
 describe("bindToQueryString", () => {
   let router: Router;
@@ -431,6 +434,41 @@ describe("bindToQueryString", () => {
     expect(router.currentRoute.value.query.page).toBe("5");
     expect(router.currentRoute.value.query.pageSize).toBe("100");
     expect(router.currentRoute.value.query.search).toBe("programmatic");
+  });
+
+  test("caller args have $metadata for automatic serialization", async () => {
+    const vm = new ComplexModelViewModel();
+    const caller = vm.methodWithManyParams;
+
+    await runTest(async (v) => {
+      bindToQueryString(v, caller.args, "strParam");
+      bindToQueryString(v, caller.args, "dateTime");
+      bindToQueryString(v, caller.args, "integer");
+    });
+
+    // Test setting values programmatically
+    caller.args.strParam = "hello";
+    caller.args.dateTime = new Date("2025-01-15T00:00:00");
+    caller.args.integer = 42;
+    await delay(1);
+
+    expect(router.currentRoute.value.query.strParam).toBe("hello");
+    expect(router.currentRoute.value.query.dateTime).toBe(
+      "2025-01-15T00:00:00.000",
+    );
+    expect(router.currentRoute.value.query.integer).toBe("42");
+
+    // Test reading from query string
+    router.push("/?strParam=world&dateTime=2025-06-01T12:00:00&integer=99");
+    await delay(1);
+
+    expect(caller.args.strParam).toBe("world");
+    expect(caller.args.dateTime).toBeInstanceOf(Date);
+    expect(caller.args.integer).toBe(99);
+
+    // Test resetArgs preserves $metadata
+    caller.resetArgs();
+    expect((caller.args as any).$metadata).toBe(caller.$metadata);
   });
 });
 

@@ -1,18 +1,23 @@
 import * as model from "../src/model";
-import * as $metadata from "./targets.metadata";
 import type { Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import { format, subYears } from "date-fns";
 import { toDate } from "date-fns-tz";
 
-import { Case as CaseMeta } from "@test-targets/metadata.g";
+import {
+  ComplexModel as ComplexModelMeta,
+  Person as PersonMeta,
+  Test as TestMeta,
+  Case as CaseMeta,
+} from "@test-targets/metadata.g";
 import { Case } from "@test-targets/models.g";
+import { DisplaysModel } from "./model.shared";
 
-const studentProps = $metadata.Student.props;
+const cmProps = ComplexModelMeta.props;
 
-const basicStudent = {
-  $metadata: $metadata.Student,
-  studentId: 1,
+const basicModel = {
+  $metadata: ComplexModelMeta,
+  complexModelId: 1,
   name: "Bob",
 };
 
@@ -24,38 +29,36 @@ describe("modelDisplay", () => {
   });
 
   test("returns value for value prop", () => {
-    const meta = basicStudent.$metadata;
+    const meta = basicModel.$metadata;
     expect(meta.displayProp).toBe(meta.props.name);
 
-    expect(model.modelDisplay(basicStudent)).toBe(basicStudent.name);
+    expect(model.modelDisplay(basicModel)).toBe(basicModel.name);
   });
 
   test("returns value for object prop", () => {
     expect(
       model.modelDisplay({
-        $metadata: $metadata.DisplaysStudent,
-        student: basicStudent,
+        $metadata: DisplaysModel,
+        model: basicModel,
       }),
-    ).toBe(basicStudent.name);
+    ).toBe(basicModel.name);
   });
 });
 
 describe("propDisplay - resolves property", () => {
   test("by name", () => {
-    expect(model.propDisplay(basicStudent, "name")).toBe(basicStudent.name);
+    expect(model.propDisplay(basicModel, "name")).toBe(basicModel.name);
   });
 
   test("by object", () => {
-    expect(model.propDisplay(basicStudent, studentProps.name)).toBe(
-      basicStudent.name,
-    );
+    expect(model.propDisplay(basicModel, cmProps.name)).toBe(basicModel.name);
   });
 });
 
 describe("display", () => {
   test("returns json for object without displayProp", () => {
     const typeMeta = {
-      ...$metadata.DisplaysStudent,
+      ...DisplaysModel,
       displayProp: undefined,
     };
     const instance = {
@@ -85,44 +88,44 @@ function undisplayable(meta: Value, ...values: any[]) {
 }
 
 describe.each(<DisplayData[]>[
-  { meta: studentProps.studentId, model: null, display: null },
-  { meta: studentProps.studentId, model: undefined, display: null },
-  { meta: studentProps.studentId, model: 1, display: "1" },
-  { meta: studentProps.studentId, model: "1", display: "1" },
-  ...undisplayable(studentProps.studentId, "abc", {}, [], true, new Date()),
+  { meta: cmProps.complexModelId, model: null, display: null },
+  { meta: cmProps.complexModelId, model: undefined, display: null },
+  { meta: cmProps.complexModelId, model: 1, display: "1" },
+  { meta: cmProps.complexModelId, model: "1", display: "1" },
+  ...undisplayable(cmProps.complexModelId, "abc", {}, [], true, new Date()),
 
-  { meta: studentProps.name, model: null, display: null },
-  { meta: studentProps.name, model: undefined, display: null },
-  { meta: studentProps.name, model: "Bob", display: "Bob" },
-  { meta: studentProps.name, model: 123, display: "123" },
-  { meta: studentProps.name, model: true, display: "true" },
-  ...undisplayable(studentProps.name, {}, [], new Date()),
+  { meta: cmProps.name, model: null, display: null },
+  { meta: cmProps.name, model: undefined, display: null },
+  { meta: cmProps.name, model: "Bob", display: "Bob" },
+  { meta: cmProps.name, model: 123, display: "123" },
+  { meta: cmProps.name, model: true, display: "true" },
+  ...undisplayable(cmProps.name, {}, [], new Date()),
 
-  { meta: studentProps.birthDate, model: null, display: null },
-  { meta: studentProps.birthDate, model: undefined, display: null },
+  { meta: cmProps.dateTimeOffset, model: null, display: null },
+  { meta: cmProps.dateTimeOffset, model: undefined, display: null },
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     model: new Date(1990, 0, 2, 3, 4, 5),
     display: "1/2/1990 3:04:05 AM",
   },
   {
-    meta: { ...studentProps.birthDate, dateKind: "time" },
+    meta: { ...cmProps.dateTimeOffset, dateKind: "time" },
     model: new Date(1990, 0, 2, 3, 4, 5),
     display: "3:04:05 AM",
   },
   {
-    meta: { ...studentProps.birthDate, dateKind: "date" },
+    meta: { ...cmProps.dateTimeOffset, dateKind: "date" },
     model: new Date(1990, 0, 2, 3, 4, 5),
     display: "1/2/1990",
   },
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     model: new Date(1990, 0, 2, 3, 4, 5),
     display: "1990",
     options: { format: "yyyy" },
   },
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     model: toDate("2014-10-25T13:46:20+02:00"),
     display: "2014-10-25 07:46:20 EDT",
     options: {
@@ -133,19 +136,19 @@ describe.each(<DisplayData[]>[
     },
   },
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     model: subYears(new Date(), 2),
     display: "about 2 years ago",
     options: { format: { distance: true } },
   },
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     model: subYears(new Date(), 2),
     display: "about 2 years",
     options: { format: { distance: true, addSuffix: false } },
   },
   {
-    meta: studentProps.birthDate,
+    meta: cmProps.dateTimeOffset,
     model: "1990-01-02T03:04:05.000-08:00",
     // We define the expected using date-fns's format to make this test timezone-independent.
     display: format(
@@ -154,7 +157,7 @@ describe.each(<DisplayData[]>[
     ),
   },
   ...undisplayable(
-    studentProps.birthDate,
+    cmProps.dateTimeOffset,
     true,
     123,
     "abc",
@@ -163,48 +166,48 @@ describe.each(<DisplayData[]>[
     new Date("!!Invalid"),
   ),
 
-  { meta: studentProps.grade, model: undefined, display: null },
-  { meta: studentProps.grade, model: null, display: null },
-  { meta: studentProps.grade, model: 11, display: "Junior" },
-  { meta: studentProps.grade, model: "11", display: "Junior" },
+  { meta: PersonMeta.props.gender, model: undefined, display: null },
+  { meta: PersonMeta.props.gender, model: null, display: null },
+  { meta: PersonMeta.props.gender, model: 1, display: "Male" },
+  { meta: PersonMeta.props.gender, model: "1", display: "Male" },
   // Non-explicitly-defined enums should display the number value
   // since there's nothing better to show:
-  { meta: studentProps.grade, model: 111, display: "111" },
-  ...undisplayable(studentProps.grade, true, "abc", {}, [], new Date()),
+  { meta: PersonMeta.props.gender, model: 111, display: "111" },
+  ...undisplayable(PersonMeta.props.gender, true, "abc", {}, [], new Date()),
 
-  { meta: studentProps.isEnrolled, model: undefined, display: null },
-  { meta: studentProps.isEnrolled, model: null, display: null },
-  { meta: studentProps.isEnrolled, model: true, display: "true" },
-  { meta: studentProps.isEnrolled, model: "true", display: "true" },
-  ...undisplayable(studentProps.isEnrolled, 123, "abc", {}, [], new Date()),
+  { meta: cmProps.isActive, model: undefined, display: null },
+  { meta: cmProps.isActive, model: null, display: null },
+  { meta: cmProps.isActive, model: true, display: "true" },
+  { meta: cmProps.isActive, model: "true", display: "true" },
+  ...undisplayable(cmProps.isActive, 123, "abc", {}, [], new Date()),
 
   // Collection
-  { meta: studentProps.courses, model: undefined, display: null },
-  { meta: studentProps.courses, model: null, display: null },
-  { meta: studentProps.courses, model: [], display: "" },
+  { meta: cmProps.tests, model: undefined, display: null },
+  { meta: cmProps.tests, model: null, display: null },
+  { meta: cmProps.tests, model: [], display: "" },
   {
-    meta: studentProps.courses,
-    model: ["CSCD 210", "CSCD 211", "MATH 301"].map((name, i) => {
+    meta: cmProps.tests,
+    model: ["CSCD 210", "CSCD 211", "MATH 301"].map((testName, i) => {
       return {
-        $metadata: $metadata.Course,
-        name: name,
-        courseId: i,
+        $metadata: TestMeta,
+        testName: testName,
+        testId: i,
       };
     }),
     display: "CSCD 210, CSCD 211, MATH 301",
   },
   {
-    meta: studentProps.courses,
-    model: Array(10).map((name, i) => {
+    meta: cmProps.tests,
+    model: Array(10).map((testName, i) => {
       return {
-        $metadata: $metadata.Course,
-        name: "CS10" + i,
-        courseId: i,
+        $metadata: TestMeta,
+        testName: "CS10" + i,
+        testId: i,
       };
     }),
     display: "10 items",
   },
-  ...undisplayable(studentProps.courses, "abc", 123, {}, true, new Date()),
+  ...undisplayable(cmProps.tests, "abc", 123, {}, true, new Date()),
 
   // Many-to-many collection
   {
@@ -222,10 +225,10 @@ describe.each(<DisplayData[]>[
   },
 
   // Model/Object
-  { meta: studentProps.advisor, model: null, display: null },
+  { meta: cmProps.singleTest, model: null, display: null },
   {
-    meta: studentProps.advisor,
-    model: { advisorId: 1, name: "Steve" },
+    meta: cmProps.singleTest,
+    model: { testId: 1, testName: "Steve" },
     display: "Steve",
   },
 ])("valueDisplay", (x) => {
@@ -260,7 +263,7 @@ describe("valueDisplay", () => {
       model.setDefaultTimeZone("America/Adak");
       const result = model.valueDisplay(
         toDate("2014-10-25T13:46:20"),
-        studentProps.dateNoOffset,
+        cmProps.dateTime,
         {
           format: "yyyy-MM-dd HH:mm:ss",
         },
@@ -276,7 +279,7 @@ describe("valueDisplay", () => {
       model.setDefaultTimeZone("America/Adak");
       const result = model.valueDisplay(
         toDate("2014-10-25T13:46:20+02:00"),
-        studentProps.birthDate,
+        cmProps.dateTimeOffset,
         {
           format: "yyyy-MM-dd HH:mm:ss zzzz",
         },

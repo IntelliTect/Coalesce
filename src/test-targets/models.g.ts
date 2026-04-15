@@ -17,6 +17,14 @@ export enum Genders {
 }
 
 
+export enum Grade {
+  Freshman = 9,
+  Sophomore = 10,
+  Junior = 11,
+  Senior = 12,
+}
+
+
 export enum SkyConditions {
   Cloudy = 0,
   PartyCloudy = 1,
@@ -153,6 +161,38 @@ export class AbstractModelPerson {
   /** Instantiate a new AbstractModelPerson, optionally basing it on the given data. */
   constructor(data?: Partial<AbstractModelPerson> | {[k: string]: any}) {
     Object.assign(this, AbstractModelPerson.map(data || {}));
+  }
+}
+
+
+export interface Advisor extends Model<typeof metadata.Advisor> {
+  advisorId: number | null
+  name: string | null
+  students: Student[] | null
+  
+  /** A collection of models that doesn't function as a navigation property. */
+  studentsNonNavigation: Student[] | null
+  
+  /** An object type property containing a model reference. */
+  studentWrapperObject: StudentWrapper | null
+}
+export class Advisor {
+  
+  /** Mutates the input object and its descendants into a valid Advisor implementation. */
+  static convert(data?: Partial<Advisor>): Advisor {
+    return convertToModel<Advisor>(data || {}, metadata.Advisor) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid Advisor implementation. */
+  static map(data?: Partial<Advisor>): Advisor {
+    return mapToModel<Advisor>(data || {}, metadata.Advisor) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Advisor; }
+  
+  /** Instantiate a new Advisor, optionally basing it on the given data. */
+  constructor(data?: Partial<Advisor> | {[k: string]: any}) {
+    Object.assign(this, Advisor.map(data || {}));
   }
 }
 
@@ -417,6 +457,33 @@ export class ComplexModelDependent {
   /** Instantiate a new ComplexModelDependent, optionally basing it on the given data. */
   constructor(data?: Partial<ComplexModelDependent> | {[k: string]: any}) {
     Object.assign(this, ComplexModelDependent.map(data || {}));
+  }
+}
+
+
+export interface Course extends Model<typeof metadata.Course> {
+  courseId: number | null
+  name: string | null
+  studentId: number | null
+  student: Student | null
+}
+export class Course {
+  
+  /** Mutates the input object and its descendants into a valid Course implementation. */
+  static convert(data?: Partial<Course>): Course {
+    return convertToModel<Course>(data || {}, metadata.Course) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid Course implementation. */
+  static map(data?: Partial<Course>): Course {
+    return mapToModel<Course>(data || {}, metadata.Course) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Course; }
+  
+  /** Instantiate a new Course, optionally basing it on the given data. */
+  constructor(data?: Partial<Course> | {[k: string]: any}) {
+    Object.assign(this, Course.map(data || {}));
   }
 }
 
@@ -1044,6 +1111,39 @@ export class StringIdentity {
 }
 
 
+export interface Student extends Model<typeof metadata.Student> {
+  studentId: number | null
+  name: string | null
+  isEnrolled: boolean | null
+  birthDate: Date | null
+  courses: Course[] | null
+  currentCourse: Course | null
+  currentCourseId: number | null
+  grade: Grade | null
+  advisor: Advisor | null
+  studentAdvisorId: number | null
+}
+export class Student {
+  
+  /** Mutates the input object and its descendants into a valid Student implementation. */
+  static convert(data?: Partial<Student>): Student {
+    return convertToModel<Student>(data || {}, metadata.Student) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid Student implementation. */
+  static map(data?: Partial<Student>): Student {
+    return mapToModel<Student>(data || {}, metadata.Student) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Student; }
+  
+  /** Instantiate a new Student, optionally basing it on the given data. */
+  constructor(data?: Partial<Student> | {[k: string]: any}) {
+    Object.assign(this, Student.map(data || {}));
+  }
+}
+
+
 export interface SuppressedDefaultOrdering extends Model<typeof metadata.SuppressedDefaultOrdering> {
   id: number | null
   name: string | null
@@ -1636,6 +1736,31 @@ export namespace StandaloneReadWrite {
 }
 
 
+export interface StudentWrapper extends Model<typeof metadata.StudentWrapper> {
+  name: string | null
+  student: Student | null
+}
+export class StudentWrapper {
+  
+  /** Mutates the input object and its descendants into a valid StudentWrapper implementation. */
+  static convert(data?: Partial<StudentWrapper>): StudentWrapper {
+    return convertToModel<StudentWrapper>(data || {}, metadata.StudentWrapper) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid StudentWrapper implementation. */
+  static map(data?: Partial<StudentWrapper>): StudentWrapper {
+    return mapToModel<StudentWrapper>(data || {}, metadata.StudentWrapper) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.StudentWrapper; }
+  
+  /** Instantiate a new StudentWrapper, optionally basing it on the given data. */
+  constructor(data?: Partial<StudentWrapper> | {[k: string]: any}) {
+    Object.assign(this, StudentWrapper.map(data || {}));
+  }
+}
+
+
 export interface ValidationTarget extends Model<typeof metadata.ValidationTarget> {
   id: number | null
   productId: string | null
@@ -1721,6 +1846,7 @@ declare module "coalesce-vue/lib/model" {
   interface EnumTypeLookup {
     EnumPkId: EnumPkId
     Genders: Genders
+    Grade: Grade
     SkyConditions: SkyConditions
     Statuses: Statuses
     Titles: Titles
@@ -1730,12 +1856,14 @@ declare module "coalesce-vue/lib/model" {
     AbstractImpl2: AbstractImpl2
     AbstractModel: AbstractModel
     AbstractModelPerson: AbstractModelPerson
+    Advisor: Advisor
     Case: Case
     CaseDtoStandalone: CaseDtoStandalone
     CaseProduct: CaseProduct
     Company: Company
     ComplexModel: ComplexModel
     ComplexModelDependent: ComplexModelDependent
+    Course: Course
     DateOnlyPk: DateOnlyPk
     DateTimeOffsetPk: DateTimeOffsetPk
     DateTimePk: DateTimePk
@@ -1774,6 +1902,8 @@ declare module "coalesce-vue/lib/model" {
     StandaloneReadonly: StandaloneReadonly
     StandaloneReadWrite: StandaloneReadWrite
     StringIdentity: StringIdentity
+    Student: Student
+    StudentWrapper: StudentWrapper
     SuppressedDefaultOrdering: SuppressedDefaultOrdering
     Test: Test
     TimeOnlyPk: TimeOnlyPk

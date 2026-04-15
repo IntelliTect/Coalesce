@@ -4,15 +4,15 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
-    <DotNetPackageVersionSpec>8.0.18</DotNetPackageVersionSpec>
+    <DotNetPackageVersionSpec>8.0.26</DotNetPackageVersionSpec>
   </PropertyGroup>
   <!-- TargetFramework is empty for projects that aren't multi-targeting (i.e. the playground
   projects) -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0'">
-    <DotNetPackageVersionSpec>9.0.7</DotNetPackageVersionSpec>
+    <DotNetPackageVersionSpec>9.0.15</DotNetPackageVersionSpec>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == '' ">
-    <DotNetPackageVersionSpec>10.0.0</DotNetPackageVersionSpec>
+    <DotNetPackageVersionSpec>10.0.6</DotNetPackageVersionSpec>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0'">

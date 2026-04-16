@@ -10,14 +10,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.6" />
     <!--#if(Hangfire) -->
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
     <!--#endif -->
-  <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.2" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.2" />
   </ItemGroup>
 </Project>

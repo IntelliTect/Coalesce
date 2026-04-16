@@ -36,10 +36,10 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.13.22" />
     <!--#endif -->
     <!--#if(MicrosoftAuth) -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.6" />
     <!--#endif -->
     <!--#if(GoogleAuth) -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.6" />
     <!--#endif -->
     <!--#if(Hangfire) -->
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />

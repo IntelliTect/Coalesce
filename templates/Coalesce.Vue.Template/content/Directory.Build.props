@@ -7,7 +7,7 @@
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 
-    <CoalesceVersion>6.3.0</CoalesceVersion>
+    <CoalesceVersion>6.4.0</CoalesceVersion>
     <!-- Disable Source Link attribute in Debug to avoid hot reload issues.
          In Release, the source revision is included for app update detection. -->
     <IncludeSourceRevisionInInformationalVersion Condition="'$(Configuration)' == 'Debug'">false</IncludeSourceRevisionInInformationalVersion>

@@ -1,7 +1,6 @@
 # 6.4.0
 - Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize their members correctly without custom `parse`/`stringify`.
 - Added `app.UseAppVersionHeader()` middleware and `<CAppUpdateAlert>` component for detecting and notifying users when a new version of the application has been deployed.
-- Assorted template improvements
 - Added `[assembly: CoalesceMetadata<TAttribute>]`, an assembly-level attribute that causes any occurrences of the target attribute and its value to be generated into the TypeScript metadata.
 - Added `eslint-plugin-coalesce` package with rules to detect common mistakes: `no-load-before-auto-load`, `no-sort-in-computed`, and `no-static-router-import`.
 - Added `upgrade` prompt, `read_template_file` tool, and `read_changelog` tool to `coalesce-mcp` for AI-assisted project upgrades.
@@ -10,6 +9,7 @@
 - Fix: c-select `autofocus` aggressively stealing focus from other elements.
 
 ## Template Changes
+- Assorted template improvements
 - Template test projects now use TUnit instead of xUnit.
 
 # 6.3.0

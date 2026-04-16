@@ -8,7 +8,7 @@ An `IntelliTect Coalesce`–based project. Projects:
 
 - AppHost: Aspire host project. Always launch this, never launch `Web` directly.
 - Data: EF Core entity models, services, business logic, etc
-- Data.Test: xUnit automated tests for the Data project.
+- Data.Test: TUnit automated tests for the Data project.
 - Migrations: EF Core Migrations assembly. Create and manage migrations here, e.g. `dotnet ef migrations add MigrationName`. Run `dotnet ef` in this project's working directory, don't pass extra args like startup-project to `dotnet ef` calls.
 - Web: ASP.NET Core server. Serves both API endpoints and frontend Vue assets. Automatically launches Vite dev server - don't do `npm run dev` manually.
 - Web/src: Vite, Vue 3, Vuetify 4, and Coalesce for data binding and API access.

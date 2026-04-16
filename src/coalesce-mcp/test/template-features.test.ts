@@ -150,7 +150,7 @@ describe("registerTemplateFeatureResource", () => {
     expect(mockServer.tool).toHaveBeenCalledOnce();
     expect(mockServer.tool).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: "coalesce_get_template_features",
+        name: "get_template_features",
         description: expect.stringContaining(
           "Get the files for a specific Coalesce template feature",
         ),

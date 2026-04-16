@@ -4,6 +4,7 @@
 - Assorted template improvements
 - Added `[assembly: CoalesceMetadata<TAttribute>]`, an assembly-level attribute that causes any occurrences of the target attribute and its value to be generated into the TypeScript metadata.
 - Added `eslint-plugin-coalesce` package with rules to detect common mistakes: `no-load-before-auto-load`, `no-sort-in-computed`, and `no-static-router-import`.
+- Added `upgrade` prompt, `read_template_file` tool, and `read_changelog` tool to `coalesce-mcp` for AI-assisted project upgrades.
 
 - Fix: Assorted issues with Microsoft.AspNetCore.OpenAPI generation. This is unfortunately still not likely high enough quality to use as a Swashbuckle replacement.
 - Fix: c-select `autofocus` aggressively stealing focus from other elements.

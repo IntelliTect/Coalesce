@@ -65,7 +65,7 @@ A step-by-step guide that walks an AI agent through upgrading a Coalesce project
 4. Compare third-party dependencies against the template
 5. Compare configuration files (vite config, eslint, tsconfig, etc.)
 6. Address any breaking changes
-7. Run post-upgrade validation (build, codegen, tests)
+7. Run post-upgrade validation (build, code generation, tests)
 
 **Usage**: In VS Code, use the prompt from chat by typing `/mcp` and selecting the "Upgrade Coalesce" prompt. The agent will then interactively walk through the upgrade process using the `read_template_file` and `read_changelog` tools.
 

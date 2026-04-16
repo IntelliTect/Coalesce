@@ -201,13 +201,21 @@ export function registerUpgradeTools(server: McpServerType) {
       }
 
       if (sinceVersion) {
+        // Strip prerelease suffix (e.g. "6.4.0-beta.20260415.3" -> "6.4.0")
+        // so we match the release heading in the changelog.
+        const baseVersion = sinceVersion.replace(/-.*$/, "");
         const versionHeadingRegex = new RegExp(
-          `^# ${sinceVersion.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+          `^# ${baseVersion.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
           "m",
         );
         const match = versionHeadingRegex.exec(changelog);
         if (match) {
-          changelog = changelog.slice(0, match.index).trim();
+          // Include the current version's entries (find the next heading after it)
+          const nextHeading = changelog.indexOf("\n# ", match.index + 1);
+          changelog =
+            nextHeading >= 0
+              ? changelog.slice(0, nextHeading).trim()
+              : changelog.trim();
         }
         if (!changelog) {
           return {

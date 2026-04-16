@@ -1,5 +1,7 @@
 
-global using Xunit;
+global using TUnit.Core;
+global using TUnit.Assertions;
+global using TUnit.Assertions.Extensions;
 global using Moq;
 global using IntelliTect.Coalesce;
 global using IntelliTect.Coalesce.Api;

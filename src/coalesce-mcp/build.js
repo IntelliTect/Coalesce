@@ -41,6 +41,10 @@ async function main() {
     console.log("Copying template configuration...");
     await copyTemplateConfig();
 
+    // Copy changelog
+    console.log("Copying changelog...");
+    await copyChangelog();
+
     console.log("Build completed successfully!");
   } catch (error) {
     console.error("Build failed:", error);
@@ -131,6 +135,14 @@ async function copyTemplateConfig() {
   await fs.copyFile(configSource, configDest);
 
   console.log(`   Copied template.json to ${configDest}`);
+}
+
+async function copyChangelog() {
+  const changelogSource = path.resolve(projectRoot, "..", "..", "CHANGELOG.md");
+  const changelogDest = path.resolve(distPath, "CHANGELOG.md");
+
+  await fs.copyFile(changelogSource, changelogDest);
+  console.log(`   Copied CHANGELOG.md to ${changelogDest}`);
 }
 
 async function copyDirectory(src, dest, options = {}) {

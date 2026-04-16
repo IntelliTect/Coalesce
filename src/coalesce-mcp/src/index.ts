@@ -5,6 +5,7 @@ import { ZodV3JsonSchemaAdapter } from "@tmcp/adapter-zod-v3";
 import { StdioTransport } from "@tmcp/transport-stdio";
 import { registerCoalesceCodeGenTool } from "./tools/coalesce-generate.js";
 import { registerTemplateFeatureResource } from "./tools/template-features.js";
+import { registerUpgradeTools } from "./tools/upgrade-prompt.js";
 import packageJson from "../package.json" with { type: "json" };
 
 // Create the adapter for Zod schema validation
@@ -22,13 +23,15 @@ const server = new McpServer(
     capabilities: {
       tools: { listChanged: true },
       resources: { listChanged: true },
+      prompts: { listChanged: true },
     },
   },
 );
 
-// Register tools and resources
+// Register tools, resources, and prompts
 registerCoalesceCodeGenTool(server);
 registerTemplateFeatureResource(server);
+registerUpgradeTools(server);
 
 // Start the server
 const transport = new StdioTransport(server);

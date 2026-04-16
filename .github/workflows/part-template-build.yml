@@ -34,22 +34,7 @@ jobs:
 
       - name: "Set dependency versions"
         if: success() && env.COALESCE_VERSION
-        run: |
-          $ErrorActionPreference = "Stop"
-          $PSNativeCommandUseErrorActionPreference = $true
-
-          $filePath = "./content/Directory.Build.props"
-          $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
-          (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
-
-          cat $filePath
-
-          cd ./content/*.Web
-          echo $env:COALESCE_VERSION
-          npm i coalesce-vue@$env:COALESCE_VERSION coalesce-vue-vuetify3@$env:COALESCE_VERSION --save --force
-          npm i eslint-plugin-coalesce@$env:COALESCE_VERSION --save-dev --force
-
-          cat package.json
+        run: ./Update-CoalesceVersions.ps1 -Version $env:COALESCE_VERSION
 
       - name: dotnet pack
         run: |

@@ -150,6 +150,11 @@ jobs:
       - name: update version
         run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 
+      - name: update template dependency versions
+        shell: pwsh
+        working-directory: ./templates/Coalesce.Vue.Template
+        run: ./Update-CoalesceVersions.ps1 -Version $env:COALESCE_VERSION
+
       - run: npm run build
       - run: npm pack
 

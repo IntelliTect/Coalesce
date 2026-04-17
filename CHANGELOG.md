@@ -1,3 +1,5 @@
+# 6.4.1
+
 # 6.4.0
 - Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize their members correctly without custom `parse`/`stringify`.
 - Added `app.UseAppVersionHeader()` middleware and `<CAppUpdateAlert>` component for detecting and notifying users when a new version of the application has been deployed.

@@ -29,6 +29,11 @@ variable "github_repository" {
   type        = string
 }
 
+variable "developers_group_id" {
+  description = "The Object ID of the AAD developers group created by bootstrap."
+  type        = string
+}
+
 variable "tags" {
   description = "Additional tags applied to all resources. `project` and `managedBy` are always included."
   type        = map(string)

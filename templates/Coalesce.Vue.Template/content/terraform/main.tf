@@ -48,13 +48,6 @@ resource "azurerm_role_assignment" "ci_acr_push" {
 }
 
 # ============================================================
-# Developers AAD Group - created by bootstrap
-# ============================================================
-data "azuread_group" "developers" {
-  display_name = "${var.project_name}-developers"
-}
-
-# ============================================================
 # Dev Environment
 # ============================================================
 module "dev" {
@@ -67,7 +60,7 @@ module "dev" {
 
   # Admin principals for dev resources
   admin_principals = {
-    developers = data.azuread_group.developers.object_id
+    developers = var.developers_group_id
   }
 
   # Networking

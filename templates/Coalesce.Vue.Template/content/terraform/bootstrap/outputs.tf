@@ -28,5 +28,6 @@ output "github_vars_summary" {
       AZURE_CLIENT_ID:       ${azurerm_user_assigned_identity.ci.client_id}
       PROJECT_NAME:          ${var.project_name}
       ACR_NAME:              ${replace("${var.project_name}acr", "-", "")}
+      DEVELOPERS_GROUP_ID:   ${azuread_group.developers.object_id}
   EOT
 }

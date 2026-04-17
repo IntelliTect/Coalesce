@@ -109,4 +109,5 @@ resource "azurerm_role_assignment" "ci_tfstate_blob_owner" {
 resource "azuread_group" "developers" {
   display_name     = "${var.project_name}-developers"
   security_enabled = true
+  owners           = [azurerm_user_assigned_identity.ci.principal_id]
 }

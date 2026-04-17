@@ -1,4 +1,5 @@
 # 6.4.1
+- `CrudContext.User` now has a public setter, allowing the user principal to be overridden from the value provided by `IHttpContextAccessor` (e.g. for testing or non-http scenarios).
 - Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 
 ## Template Changes

@@ -11,6 +11,7 @@ namespace IntelliTect.Coalesce;
 public class CrudContext
 {
     private readonly Lazy<ClaimsPrincipal> lazyUser;
+    private ClaimsPrincipal? _userOverride;
 
     public CrudContext(Func<ClaimsPrincipal> userAccessor)
     {
@@ -24,7 +25,7 @@ public class CrudContext
     }
 
     public CrudContext(
-        Func<ClaimsPrincipal> userAccessor, 
+        Func<ClaimsPrincipal> userAccessor,
         TimeZoneInfo timeZone,
         CancellationToken cancellationToken = default,
         CoalesceOptions? coalesceOptions = null,
@@ -46,6 +47,7 @@ public class CrudContext
         }
 
         lazyUser = baseContext.lazyUser;
+        _userOverride = baseContext._userOverride;
         TimeZone = baseContext.TimeZone;
         CancellationToken = baseContext.CancellationToken;
         Options = baseContext.Options;
@@ -65,7 +67,11 @@ public class CrudContext
     /// <summary>
     /// The user making the request for a CRUD action.
     /// </summary>
-    public ClaimsPrincipal User => lazyUser.Value ?? new ClaimsPrincipal();
+    public ClaimsPrincipal User
+    {
+        get => _userOverride ?? lazyUser.Value ?? new ClaimsPrincipal();
+        set => _userOverride = value;
+    }
 
     /// <summary>
     /// The timezone to be used when performing any actions on date inputs that lack time zone information.
@@ -105,8 +111,8 @@ public class CrudContext<TContext> : CrudContext
     }
 
     public CrudContext(
-        TContext dbContext, 
-        Func<ClaimsPrincipal> userAccessor, 
+        TContext dbContext,
+        Func<ClaimsPrincipal> userAccessor,
         TimeZoneInfo timeZone,
         CancellationToken cancellationToken = default
     )

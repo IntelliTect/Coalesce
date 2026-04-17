@@ -54,32 +54,29 @@ resource "azurerm_user_assigned_identity" "ci" {
 
 # Federated credential for pushes to main (build)
 resource "azurerm_federated_identity_credential" "ci_branch_main" {
-  name                = "github-branch-main"
-  resource_group_name = azurerm_resource_group.shared.name
-  parent_id           = azurerm_user_assigned_identity.ci.id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://token.actions.githubusercontent.com"
-  subject             = "repo:${var.github_repository}:ref:refs/heads/main"
+  name                      = "github-branch-main"
+  user_assigned_identity_id = azurerm_user_assigned_identity.ci.id
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = "https://token.actions.githubusercontent.com"
+  subject                   = "repo:${var.github_repository}:ref:refs/heads/main"
 }
 
 # Federated credential for pull requests (terraform plan)
 resource "azurerm_federated_identity_credential" "ci_pull_request" {
-  name                = "github-pull-request"
-  resource_group_name = azurerm_resource_group.shared.name
-  parent_id           = azurerm_user_assigned_identity.ci.id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://token.actions.githubusercontent.com"
-  subject             = "repo:${var.github_repository}:pull_request"
+  name                      = "github-pull-request"
+  user_assigned_identity_id = azurerm_user_assigned_identity.ci.id
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = "https://token.actions.githubusercontent.com"
+  subject                   = "repo:${var.github_repository}:pull_request"
 }
 
 # Federated credential for terraform apply (via 'terraform' GitHub Environment)
 resource "azurerm_federated_identity_credential" "ci_terraform_env" {
-  name                = "github-environment-terraform"
-  resource_group_name = azurerm_resource_group.shared.name
-  parent_id           = azurerm_user_assigned_identity.ci.id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://token.actions.githubusercontent.com"
-  subject             = "repo:${var.github_repository}:environment:terraform"
+  name                      = "github-environment-terraform"
+  user_assigned_identity_id = azurerm_user_assigned_identity.ci.id
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = "https://token.actions.githubusercontent.com"
+  subject                   = "repo:${var.github_repository}:environment:terraform"
 }
 
 # Contributor on the subscription so Terraform can manage all resources

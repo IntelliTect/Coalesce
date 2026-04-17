@@ -265,6 +265,8 @@ If the user is already on the latest version, tell them and stop. Let them know 
 
 If upgrading would cross a major version boundary (e.g. 5.x → 6.x), warn the user that major upgrades may require significant changes and suggest upgrading one major version at a time.
 
+If the upgrade includes a Vuetify major version change (e.g. Vuetify 3 to 4), warn the user that the Vuetify upgrade is non-trivial for most apps. Suggest they follow the official Vuetify upgrade guide at https://vuetifyjs.com/en/getting-started/upgrade-guide/ alongside the Coalesce upgrade.
+
 ## Step 2: Review the Changelog
 
 Use the \`read_changelog\` tool with the user's current version as \`sinceVersion\` to get all changes since their version. Pay special attention to:

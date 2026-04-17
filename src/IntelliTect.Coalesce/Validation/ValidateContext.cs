@@ -17,6 +17,16 @@ internal static class ValidateContext
         assert.IsTrue(repository.DiscoveredClassViewModels.Any(), "No types were discovered. Make sure all models have a DbSet on the context.");
 
         assert.NoDuplicates(repository.ClientClasses, d => d.ClientTypeName, StringComparer.OrdinalIgnoreCase);
+        assert.NoDuplicates(repository.ClientEnums, d => d.ClientTypeName, StringComparer.OrdinalIgnoreCase);
+
+        var classNames = new HashSet<string>(
+            repository.ClientClasses.Select(c => c.ClientTypeName),
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var e in repository.ClientEnums)
+        {
+            assert.IsFalse(classNames.Contains(e.ClientTypeName),
+                $"Enum '{e.ClientTypeName}' has the same name as a class, which would produce duplicate TypeScript exports.");
+        }
 
         foreach (var model in repository.ClientClasses)
         {

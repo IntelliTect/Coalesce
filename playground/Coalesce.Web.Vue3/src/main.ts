@@ -1,7 +1,8 @@
 import "./css/site.scss";
 
-import "typeface-roboto";
-import "typeface-roboto-mono";
+import "@fontsource/roboto/latin.css";
+import "@fontsource/roboto/latin-italic.css";
+import "@fontsource/roboto-mono/latin.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";

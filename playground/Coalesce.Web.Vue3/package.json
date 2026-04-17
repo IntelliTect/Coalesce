@@ -18,11 +18,11 @@
     "@mdi/font": "7.1.96",
     "coalesce-vue": "0.1.0-local",
     "coalesce-vue-vuetify3": "0.1.0-local",
-    "typeface-roboto": "1.1.13",
-    "typeface-roboto-mono": "0.0.75",
+    "@fontsource/roboto": "^5.2.6",
+    "@fontsource/roboto-mono": "^5.2.6",
     "vue-facing-decorator": "^2.0.4",
     "vue-router": "^4.4.4",
-    "vuetify": "4.0.3",
+    "vuetify": "4.0.5",
     "vue": "^3.5.4"
   },
   "devDependencies": {

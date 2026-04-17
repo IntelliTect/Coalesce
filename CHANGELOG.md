@@ -3,6 +3,7 @@
 
 ## Template Changes
 - Added Vuetify 4 CSS layer ordering to `index.html` to work around Vite 8/Rolldown CSS ordering bugs.
+- Replaced deprecated `typeface-roboto` with `@fontsource/roboto/latin.css` and `@fontsource/roboto/latin-italic.css`.
 
 # 6.4.0
 - Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize their members correctly without custom `parse`/`stringify`.

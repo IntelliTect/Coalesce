@@ -16,7 +16,8 @@ import useAppInsights from "./composables/useAppInsights";
 //#endif
 
 // Import global CSS and Fonts:
-import "typeface-roboto";
+import "@fontsource/roboto/latin.css";
+import "@fontsource/roboto/latin-italic.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import "coalesce-vue-vuetify3/styles.css";
 import "vuetify/styles";

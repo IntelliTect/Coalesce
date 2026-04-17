@@ -42,8 +42,7 @@ jobs:
       - name: Use .NET SDK
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 9.x
-          dotnet-quality: preview
+          global-json-file: global.json
 
       - name: Use Node.js
         uses: actions/setup-node@v6

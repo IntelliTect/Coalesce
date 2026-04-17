@@ -27,6 +27,10 @@ const rule: Rule.RuleModule = {
     // Track whether we're inside a computed() callback
     let computedDepth = 0;
 
+    // Track variables initialized with new arrays inside computed callbacks.
+    // Stack of sets, one per computed depth.
+    const localArrayVars: Set<string>[] = [];
+
     const newArrayMethods = new Set([
       "map",
       "filter",
@@ -55,6 +59,13 @@ const rule: Rule.RuleModule = {
         return true;
       }
 
+      // Local variable initialized with an array literal
+      if (node.type === "Identifier") {
+        for (let i = localArrayVars.length - 1; i >= 0; i--) {
+          if (localArrayVars[i].has(node.name)) return true;
+        }
+      }
+
       return false;
     }
 
@@ -66,6 +77,7 @@ const rule: Rule.RuleModule = {
           node.callee.name === "computed"
         ) {
           computedDepth++;
+          localArrayVars.push(new Set());
           return;
         }
 
@@ -93,6 +105,17 @@ const rule: Rule.RuleModule = {
           node.callee.name === "computed"
         ) {
           computedDepth--;
+          localArrayVars.pop();
+        }
+      },
+
+      VariableDeclarator(node: Rule.Node & { type: "VariableDeclarator" }) {
+        if (
+          computedDepth > 0 &&
+          node.id.type === "Identifier" &&
+          node.init?.type === "ArrayExpression"
+        ) {
+          localArrayVars[localArrayVars.length - 1].add(node.id.name);
         }
       },
     };

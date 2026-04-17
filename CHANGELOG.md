@@ -1,4 +1,5 @@
 # 6.4.1
+- Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 
 # 6.4.0
 - Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize their members correctly without custom `parse`/`stringify`.

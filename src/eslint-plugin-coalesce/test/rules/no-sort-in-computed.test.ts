@@ -43,6 +43,14 @@ ruleTester.run("no-sort-in-computed", rule, {
     {
       code: `const sorted = computed(() => [3, 1, 2].sort());`,
     },
+    // .sort() on local array variable initialized with [] - fine
+    {
+      code: `const sorted = computed(() => { const arr = []; arr.push(1); arr.sort(); return arr; });`,
+    },
+    // .sort() on local array variable with spread init - fine
+    {
+      code: `const sorted = computed(() => { const arr = [...items.value]; arr.sort(); return arr; });`,
+    },
   ],
   invalid: [
     // .sort() on reactive array inside computed

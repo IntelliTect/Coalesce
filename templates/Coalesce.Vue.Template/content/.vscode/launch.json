@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C#: Aspire Host",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/Coalesce.Starter.Vue.AppHost/Coalesce.Starter.Vue.AppHost.csproj"
+    }
+  ]
+}

@@ -1,4 +1,7 @@
 using Coalesce.Starter.Vue.Data.Models;
+#if (Passwords || Passkeys)
+using Coalesce.Starter.Vue.Data.Auth;
+#endif
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,59 +11,153 @@ using System.ComponentModel.DataAnnotations;
 namespace Coalesce.Starter.Vue.Web.Pages;
 
 [AllowAnonymous]
-public class SignInModel(SignInManager<User> signInManager) : PageModel
+public class SignInModel(
+    SignInManager<User> signInManager
+#if (Passwords || Passkeys)
+    , UserManager<User> userManager,
+    UserManagementService userManagementService
+#endif
+) : PageModel
 {
     [BindProperty(SupportsGet = true)]
     public string? ReturnUrl { get; set; }
 
-#if LocalAuth
-    [Required]
-    [BindProperty]
-    public required string Username { get; set; }
+#if (Passwords || Passkeys)
+    /// <summary>What step of the sign-in flow are we on.</summary>
+    public int Step { get; set; } = 1;
 
-    [Required]
+    /// <summary>Whether a one-time code was just sent to the user's email.</summary>
+    public bool CodeSent { get; set; }
+
+    [BindProperty]
+    public string? Username { get; set; }
+
+    [BindProperty]
+    public string? Code { get; set; }
+
+    [BindProperty]
+    public string? Action { get; set; }
+#endif
+
+#if Passwords
     [BindProperty]
     [DataType(DataType.Password)]
-    public required string Password { get; set; }
+    public string? Password { get; set; }
+#endif
 
 #if Passkeys
     [BindProperty]
     public string? CredentialJson { get; set; }
 #endif
 
-#endif
     public void OnGet()
     {
     }
 
-#if LocalAuth
+#if (Passwords || Passkeys)
     public async Task<IActionResult> OnPostAsync()
     {
-
 #if Passkeys
-        Microsoft.AspNetCore.Identity.SignInResult result;
+        // Passkey sign-in can happen from any step (including conditional mediation from step 1)
         if (!string.IsNullOrEmpty(CredentialJson))
         {
-            result = await signInManager.PasskeySignInAsync(CredentialJson);
-        }
-        else
-        {
-            if (!ModelState.IsValid) return Page();
-            result = await signInManager.PasswordSignInAsync(Username, Password, true, true);
-        }
-#else
-        if (!ModelState.IsValid) return Page();
+            var result = await signInManager.PasskeySignInAsync(CredentialJson);
+            if (result.Succeeded)
+            {
+                return LocalRedirect(ReturnUrl ?? "/");
+            }
 
-        var result = await signInManager.PasswordSignInAsync(Username, Password, true, true);
+            ModelState.AddModelError(string.Empty, "Invalid passkey.");
+            return Page();
+        }
 #endif
 
-        if (result.Succeeded)
+        if (string.IsNullOrWhiteSpace(Username))
         {
-            return LocalRedirect(ReturnUrl ?? "/");
+            ModelState.AddModelError(nameof(Username), "Username is required.");
+            return Page();
         }
 
-        ModelState.AddModelError(string.Empty, result.IsLockedOut ? "Account locked out" : "Invalid login attempt.");
+        var user = await userManager.FindByNameAsync(Username);
+        if (user == null)
+        {
+            ModelState.AddModelError(string.Empty, "User not found.");
+            Step = 1;
+            return Page();
+        }
 
+        // Step 1 -> Step 2: Username entered, show authentication methods.
+        if (Action == "continue")
+        {
+            Step = 2;
+            return Page();
+        }
+
+        // Send a one-time sign-in code to the user's email.
+        if (Action == "sendCode")
+        {
+            if (user.Email != null)
+            {
+                await userManagementService.SendSignInCode(user);
+            }
+            Step = 2;
+            CodeSent = true;
+            return Page();
+        }
+
+        // Verify one-time code.
+        if (!string.IsNullOrWhiteSpace(Code))
+        {
+            if (await userManager.IsLockedOutAsync(user))
+            {
+                ModelState.AddModelError(string.Empty, "Account locked out.");
+                Step = 2;
+                CodeSent = true;
+                return Page();
+            }
+
+            var isValid = await userManager.VerifyUserTokenAsync(
+                user, TokenOptions.DefaultEmailProvider, "SignIn", Code!);
+            if (isValid)
+            {
+                await userManager.ResetAccessFailedCountAsync(user);
+                await signInManager.SignInAsync(user, true);
+#if Passkeys
+                return LocalRedirect(Url.Page("/CreatePasskey", values: new { ReturnUrl })!);
+#else
+                return LocalRedirect(ReturnUrl ?? "/");
+#endif
+            }
+
+            await userManager.AccessFailedAsync(user);
+            ModelState.AddModelError(string.Empty, "Invalid or expired code.");
+            Step = 2;
+            CodeSent = true;
+            return Page();
+        }
+
+#if Passwords
+        // Password sign-in.
+        if (!string.IsNullOrWhiteSpace(Password))
+        {
+            var result = await signInManager.PasswordSignInAsync(Username, Password, true, true);
+            if (result.Succeeded)
+            {
+#if Passkeys
+                return LocalRedirect(Url.Page("/CreatePasskey", values: new { ReturnUrl })!);
+#else
+                return LocalRedirect(ReturnUrl ?? "/");
+#endif
+            }
+
+            ModelState.AddModelError(string.Empty, result.IsLockedOut ? "Account locked out" : "Invalid login attempt.");
+            Step = 2;
+            return Page();
+        }
+#endif
+
+        // Fallback: show step 2.
+        Step = 2;
         return Page();
     }
 #endif

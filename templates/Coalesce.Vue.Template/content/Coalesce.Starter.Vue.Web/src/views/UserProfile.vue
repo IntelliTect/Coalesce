@@ -44,7 +44,7 @@
               </template>
             </c-input>
 
-            <!--#if LocalAuth -->
+            <!--#if Passwords -->
             <div v-if="!user.emailConfirmed">
               <v-btn
                 color="success"
@@ -122,7 +122,7 @@
           </div>
         </v-card-text>
 
-        <!--#if LocalAuth -->
+        <!--#if Passwords -->
         <template v-if="isMe">
           <v-card-title>
             Password
@@ -403,6 +403,8 @@ async function addPasskey() {
     await passkeyService.getPasskeys();
   } catch (error) {
     if (attempt == addAttempt && error instanceof Error) {
+      if (error.name === "InvalidStateError") return;
+
       const errorMessage =
         error.name === "NotAllowedError"
           ? "No passkey was provided by the authenticator."

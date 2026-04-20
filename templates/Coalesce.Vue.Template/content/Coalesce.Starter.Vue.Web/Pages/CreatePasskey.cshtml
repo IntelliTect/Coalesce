@@ -1,0 +1,58 @@
+@page
+@model Coalesce.Starter.Vue.Web.Pages.CreatePasskeyModel
+@{
+    ViewData["Title"] = "Create a Passkey";
+}
+
+<div id="prompt">
+    <p>
+        Would you like to create a passkey for faster, passwordless sign-in next time?
+    </p>
+    <p class="text-muted" style="font-size: 0.85em">
+        Only do this on a personal device you trust.
+    </p>
+
+    <div class="d-grid gap-2 mt-3">
+        <button id="createBtn" class="btn btn-primary rounded-pill" onclick="doCreatePasskey()">
+            Create a passkey
+        </button>
+        <a href="@Model.ReturnUrl" class="btn btn-link">Skip for now</a>
+    </div>
+
+    <div id="error" class="text-danger limit-width mt-2"></div>
+</div>
+
+<div id="success" style="display:none">
+    <p class="text-success">
+        <strong>Passkey created!</strong> You can use it to sign in next time.
+    </p>
+
+    <div class="d-grid mt-3">
+        <a href="@Model.ReturnUrl" class="btn btn-primary rounded-pill">Continue</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/passkey.js"></script>
+    <script>
+        async function doCreatePasskey() {
+            const errorEl = document.getElementById("error");
+            const createBtn = document.getElementById("createBtn");
+            errorEl.textContent = "";
+            createBtn.disabled = true;
+            try {
+                await createPasskey();
+                document.getElementById("prompt").style.display = "none";
+                document.getElementById("success").style.display = "";
+            } catch (e) {
+                if (e.name === "AbortError" || e.name === "NotAllowedError" || e.name === "InvalidStateError") {
+                // User cancelled
+                } else {
+                    errorEl.textContent = e.message || "Failed to create passkey.";
+                }
+            } finally {
+                createBtn.disabled = false;
+            }
+        }
+    </script>
+}

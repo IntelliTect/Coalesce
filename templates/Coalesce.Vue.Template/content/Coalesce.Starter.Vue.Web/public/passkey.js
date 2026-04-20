@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const browserSupportsPasskeys =
   typeof navigator.credentials !== "undefined" &&
   typeof window.PublicKeyCredential !== "undefined" &&
@@ -50,6 +51,25 @@ async function requestCredential(email, mediation, signal) {
   });
 }
 
+async function createPasskey() {
+  const optionsJson = await fetchWithErrorHandling(
+    `/api/PasskeyService/GetCreationOptions`,
+    { method: "POST" },
+  );
+  const options = PublicKeyCredential.parseCreationOptionsFromJSON(optionsJson);
+  const credential = await navigator.credentials.create({
+    publicKey: options,
+  });
+  const credentialJson = JSON.stringify(credential);
+  await fetchWithErrorHandling(`/api/PasskeyService/AddPasskey`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({ credentialJson }),
+  });
+}
+
 customElements.define(
   "passkey-submit",
   class extends HTMLElement {
@@ -61,6 +81,7 @@ customElements.define(
         operation: this.getAttribute("operation"),
         name: this.getAttribute("name"),
         emailName: this.getAttribute("email-name"),
+        autoPrompt: this.hasAttribute("auto-prompt"),
       };
 
       this.internals.form.addEventListener("submit", (event) => {
@@ -70,7 +91,16 @@ customElements.define(
         }
       });
 
-      this.tryAutofillPasskey();
+      if (this.attrs.autoPrompt) {
+        // Immediately prompt for a passkey (browser popup).
+        // Errors are suppressed since this is automatic, not user-initiated.
+        this.obtainAndSubmitCredential(
+          /* useConditionalMediation */ false,
+          /* silent */ true,
+        );
+      } else {
+        this.tryAutofillPasskey();
+      }
     }
 
     disconnectedCallback() {
@@ -84,12 +114,17 @@ customElements.define(
         );
       }
 
-      const email = new FormData(this.internals.form).get(this.attrs.emailName);
+      const email = useConditionalMediation
+        ? null
+        : new FormData(this.internals.form).get(this.attrs.emailName);
       const mediation = useConditionalMediation ? "conditional" : undefined;
       return await requestCredential(email, mediation, signal);
     }
 
-    async obtainAndSubmitCredential(useConditionalMediation = false) {
+    async obtainAndSubmitCredential(
+      useConditionalMediation = false,
+      silent = false,
+    ) {
       this.abortController?.abort();
       this.abortController = new AbortController();
       const signal = this.abortController.signal;
@@ -113,7 +148,7 @@ customElements.define(
           return;
         }
         console.error(error);
-        if (useConditionalMediation) {
+        if (useConditionalMediation || silent) {
           // An error occurred during conditional mediation, which is not user-initiated.
           // We log the error in the console but do not relay it to the user.
           return;
@@ -131,7 +166,7 @@ customElements.define(
       let errorDiv = this.internals.form.querySelector(".passkey-error");
       if (!errorDiv) {
         errorDiv = document.createElement("div");
-        errorDiv.className = "passkey-error text-danger";
+        errorDiv.className = "passkey-error text-danger limit-width";
         errorDiv.style.marginTop = "0.5rem";
         // Insert after the passkey-submit element
         this.parentElement.insertBefore(errorDiv, this.nextSibling);

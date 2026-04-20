@@ -204,7 +204,7 @@ const selections = ref([
   "DarkMode",
   "AuditLogs",
   "UserPictures",
-  "LocalAuth", // https://github.com/IntelliTect/Coalesce/issues/522
+  "Passwords", // https://github.com/IntelliTect/Coalesce/issues/522
   "Passkeys",
 
   // Azure

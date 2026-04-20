@@ -23,7 +23,7 @@ using Microsoft.AspNetCore.Mvc;
 using Azure.Core;
 using Azure.Identity;
 #endif
-#if (LocalAuth || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)
+#if (Passwords || Passkeys || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)
 using Coalesce.Starter.Vue.Data.Communication;
 #endif
 #if Hangfire
@@ -105,7 +105,7 @@ services.AddSingleton<TokenCredential, DefaultAzureCredential>();
 services.Configure<AzureEmailOptions>(builder.Configuration.GetSection("Communication:Azure"));
 services.AddTransient<IEmailService, AzureEmailService>();
 
-#elif (LocalAuth || TenantMemberInvites || TenantCreateAdmin)
+#elif (Passwords || Passkeys || TenantMemberInvites || TenantCreateAdmin)
 services.AddTransient<IEmailService, NoOpEmailService>();
 
 #endif
@@ -125,7 +125,7 @@ services.AddSwaggerGen(c =>
 
 services.AddScoped<SecurityService>();
 
-#if (LocalAuth || TenantMemberInvites || TenantCreateAdmin)
+#if (Passwords || TenantMemberInvites || TenantCreateAdmin)
 services.AddUrlHelper();
 #endif
 #if (TenantMemberInvites || TenantCreateAdmin)

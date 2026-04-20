@@ -1,4 +1,4 @@
-﻿@page
+@page
 @using Microsoft.AspNetCore.Authentication
 @model Coalesce.Starter.Vue.Web.Pages.SignInModel
 @inject IAuthenticationSchemeProvider schemeProvider
@@ -17,38 +17,104 @@
     </div>
 }
 @*#endif *@
-@*#if LocalAuth *@
-<form method="post" class="d-grid gap-2 mt-3">
-    <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+@*#if (Passwords || Passkeys) *@
 
-    <div>
-        <label asp-for="Username" class="form-label"></label>
-        <input asp-for="Username" class="form-control" autocomplete="username webauthn" autofocus />
-    </div>
-    <div>
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" class="form-control" autocomplete="current-password" />
-    </div>
+@if (Model.Step == 1)
+{
+    <form method="post" class="d-grid gap-2 mt-3">
+        <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+        <input type="hidden" name="Action" value="continue" />
 
-    <div asp-validation-summary="All" class="text-danger" style="margin-bottom: -0.5rem"></div>
+        <div>
+            <label asp-for="Username" class="form-label"></label>
+            <input asp-for="Username" class="form-control" autocomplete="username webauthn" autofocus />
+        </div>
 
-    <button type="submit" class="btn btn-primary rounded-pill">Sign in</button>
+        <div asp-validation-summary="All" class="text-danger" style="margin-bottom: -0.5rem"></div>
 
-    @*#if Passkeys *@
-    <div class="d-flex flex-column">
-        <button type="submit" formnovalidate name="__passkeySubmit" class="btn btn-link mx-auto">Sign in with a
-            passkey</button>
+        <button type="submit" class="btn btn-primary rounded-pill">Continue</button>
+
+        <div class="d-flex gap-2 mt-2 justify-content-center">
+            <a asp-page="Register" asp-route-ReturnUrl="@Model.ReturnUrl">Sign up</a>
+        </div>
+
+        @*#if Passkeys *@
         <passkey-submit name="Passkey" email-name="Username">
         </passkey-submit>
-    </div>
-    @*#endif *@
+        @*#endif *@
+    </form>
+}
+else
+{
+    <form method="post" class="d-grid gap-2 mt-3">
+        <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+        <input type="hidden" asp-for="Username" />
 
-    <div class="d-flex gap-2 mt-2 justify-content-center">
-        <a asp-page="Register" asp-route-ReturnUrl="@Model.ReturnUrl">Sign up</a>
-        •
-        <a asp-page="ForgotPassword">Forgot Password</a>
-    </div>
-</form>
+        <div class="mb-1" style="font-size: 0.9em">
+            Signing in as <strong>@Model.Username</strong>
+            <a href="@Url.Page("SignIn", new { ReturnUrl = Model.ReturnUrl })" class="ms-2 small">Change</a>
+        </div>
+
+        <div asp-validation-summary="All" class="text-danger" style="margin-bottom: -0.5rem"></div>
+
+        @if (Model.CodeSent)
+        {
+            <div class="alert alert-info py-2 limit-width" role="alert">
+                If an account was found, a sign-in code was sent to the email address on file.
+            </div>
+
+            <div>
+                <label asp-for="Code" class="form-label">Sign-in code</label>
+                <input asp-for="Code" class="form-control" autocomplete="one-time-code" inputmode="numeric" maxlength="10" autofocus />
+            </div>
+
+            <button type="submit" class="btn btn-primary rounded-pill">Verify code</button>
+        }
+        else
+        {
+            @*#if Passwords *@
+            <div>
+                <a asp-page="ForgotPassword" style="float: right">Forgot Password</a>
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" autocomplete="current-password" autofocus />
+            </div>
+
+            <button type="submit" class="btn btn-primary rounded-pill mt-3">Sign in</button>
+            @*#if Passkeys *@
+            <button type="submit" formnovalidate name="__passkeySubmit" class="btn btn-outline-dark rounded-pill mt-3">Sign in with a passkey</button>
+            @*#endif *@
+            @*#endif *@
+
+            @*#elseif (Passkeys)
+            <button type="submit" formnovalidate name="__passkeySubmit" class="btn btn-primary rounded-pill mt-3">Sign in with a passkey</button>
+            #endif *@
+        }
+        @*#endif *@
+
+        <div class="d-flex flex-column align-items-center gap-1 mt-1">
+            @if (Model.CodeSent)
+            {
+                <button type="submit" name="Action" value="sendCode" class="btn btn-link p-0">Resend code</button>
+                @*#if Passwords *@
+                <button type="submit" name="Action" value="continue" class="btn btn-link p-0">Sign in with password</button>
+                @*#endif *@
+                @*#if Passkeys *@
+                <button type="submit" formnovalidate name="__passkeySubmit" class="btn btn-link p-0">Sign in with a passkey</button>
+                @*#endif *@
+            }
+            else
+            {
+                <button type="submit" name="Action" value="sendCode" class="btn btn-link p-0">Email me a sign-in code</button>
+            }
+        </div>
+
+        @*#if Passkeys *@
+        <passkey-submit name="Passkey" email-name="Username" auto-prompt=@(!Model.CodeSent)>
+        </passkey-submit>
+        @*#endif *@
+    </form>
+}
+
 @if (externalLogins.Any())
 {
     <hr class="my-4" />
@@ -63,7 +129,7 @@
             @foreach (var provider in externalLogins)
             {
                 <button type="submit" name="provider" value="@provider.Name" title="Sign in with @provider.DisplayName"
-                    class="btn btn-outline-dark rounded-pill">
+                        class="btn btn-outline-dark rounded-pill">
                     <img src="/@provider.Name.ToLower()-logo.svg" />
                     Sign in with @provider.DisplayName
                 </button>
@@ -71,14 +137,14 @@
         </div>
     </form>
 }
-@*#if (!LocalAuth) *@
+@*#if (!Passwords && !Passkeys) *@
 @if (!externalLogins.Any())
 {
     <div class="alert alert-primary text-center" role="alert">
         No external login providers have been configured, and local accounts were not added from the project template.
         <br>
         You will need to <a href="https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social">setup some
-            other login provider</a>.
+        other login provider</a>.
     </div>
 }
 @*#endif *@

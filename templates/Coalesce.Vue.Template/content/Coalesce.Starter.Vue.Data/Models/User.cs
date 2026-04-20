@@ -155,7 +155,7 @@ public class User : IdentityUser
 #endif
 #endif
 
-#if (LocalAuth)
+#if (Passwords)
     [Coalesce]
     public async Task<ItemResult> SetEmail(
         [Inject] UserManagementService userService,

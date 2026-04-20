@@ -83,13 +83,11 @@ else
             @*#if Passkeys *@
             <button type="submit" formnovalidate name="__passkeySubmit" class="btn btn-outline-dark rounded-pill mt-3">Sign in with a passkey</button>
             @*#endif *@
-            @*#endif *@
 
             @*#elseif (Passkeys)
             <button type="submit" formnovalidate name="__passkeySubmit" class="btn btn-primary rounded-pill mt-3">Sign in with a passkey</button>
             #endif *@
         }
-        @*#endif *@
 
         <div class="d-flex flex-column align-items-center gap-1 mt-1">
             @if (Model.CodeSent)

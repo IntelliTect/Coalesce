@@ -5,7 +5,7 @@
 ## Template Changes
 - Added Vuetify 4 CSS layer ordering to `index.html` to work around Vite 8/Rolldown CSS ordering bugs.
 - Replaced deprecated `typeface-roboto` with `@fontsource/roboto/latin.css` and `@fontsource/roboto/latin-italic.css`.
-- The first-party login flow is now two-stage: enter username first, then choose between password, passkey, or a one-time email code. After signing in with password or email code, users are prompted to create a passkey.
+- The first-party login flow is now two-stage: enter username first, then choose between password, passkey, or a one-time email code. When `Passkeys` is enabled, users who sign in with password or email code are then prompted to create a passkey.
 
 # 6.4.0
 - Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize their members correctly without custom `parse`/`stringify`.

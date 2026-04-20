@@ -403,7 +403,13 @@ async function addPasskey() {
     await passkeyService.getPasskeys();
   } catch (error) {
     if (attempt == addAttempt && error instanceof Error) {
-      if (error.name === "InvalidStateError") return;
+      if (error.name === "InvalidStateError") {
+        passkeyService.addPasskey.wasSuccessful = false;
+        passkeyService.addPasskey.message =
+          "A passkey may already exist for this account on this device. Refreshing your passkey list.";
+        await passkeyService.getPasskeys();
+        return;
+      }
 
       const errorMessage =
         error.name === "NotAllowedError"

@@ -125,7 +125,7 @@ services.AddSwaggerGen(c =>
 
 services.AddScoped<SecurityService>();
 
-#if (Passwords || TenantMemberInvites || TenantCreateAdmin)
+#if (Passwords || Passkeys || TenantMemberInvites || TenantCreateAdmin)
 services.AddUrlHelper();
 #endif
 #if (TenantMemberInvites || TenantCreateAdmin)

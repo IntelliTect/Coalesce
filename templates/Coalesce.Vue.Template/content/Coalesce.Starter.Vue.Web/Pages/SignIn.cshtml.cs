@@ -96,11 +96,20 @@ public class SignInModel(
         // Send a one-time sign-in code to the user's email.
         if (Action == "sendCode")
         {
-            if (user.Email != null)
-            {
-                await userManagementService.SendSignInCode(user);
-            }
             Step = 2;
+
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                ModelState.AddModelError(string.Empty, "User does not have a valid email address.");
+                return Page();
+            }
+
+            var sendCodeResult = await userManagementService.SendSignInCode(user);
+            if (!sendCodeResult.WasSuccessful)
+            {
+                ModelState.AddModelError(string.Empty, sendCodeResult.Message ?? "Failed to send sign-in code.");
+                return Page();
+            }
             CodeSent = true;
             return Page();
         }

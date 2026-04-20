@@ -109,8 +109,16 @@ else
         </div>
 
         @*#if Passkeys *@
-        <passkey-submit name="Passkey" email-name="Username" auto-prompt=@(!Model.CodeSent)>
-        </passkey-submit>
+        @if (Model.CodeSent)
+        {
+            <passkey-submit name="Passkey" email-name="Username">
+            </passkey-submit>
+        }
+        else
+        {
+            <passkey-submit name="Passkey" email-name="Username" auto-prompt>
+            </passkey-submit>
+        }
         @*#endif *@
     </form>
 }

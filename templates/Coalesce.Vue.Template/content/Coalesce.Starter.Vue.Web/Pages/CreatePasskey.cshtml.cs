@@ -12,6 +12,9 @@ public class CreatePasskeyModel : PageModel
 
     public void OnGet()
     {
-        ReturnUrl ??= "/";
+        if (!Url.IsLocalUrl(ReturnUrl))
+        {
+            ReturnUrl = "/";
+        }
     }
 }

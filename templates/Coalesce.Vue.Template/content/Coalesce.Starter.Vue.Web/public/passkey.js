@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 const browserSupportsPasskeys =
   typeof navigator.credentials !== "undefined" &&
   typeof window.PublicKeyCredential !== "undefined" &&
@@ -51,6 +50,7 @@ async function requestCredential(email, mediation, signal) {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- called from inline scripts in Razor pages
 async function createPasskey() {
   const optionsJson = await fetchWithErrorHandling(
     `/api/PasskeyService/GetCreationOptions`,

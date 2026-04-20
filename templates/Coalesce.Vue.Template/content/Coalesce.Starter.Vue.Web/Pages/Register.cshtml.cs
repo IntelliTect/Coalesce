@@ -26,6 +26,7 @@ public class RegisterModel(
     [Display(Name = "Email")]
     public string Email { get; set; } = null!;
 
+#if Passwords
     [BindProperty]
     [Required]
     [DataType(DataType.Password)]
@@ -38,6 +39,7 @@ public class RegisterModel(
     [Display(Name = "Confirm password")]
     [Compare(nameof(Password), ErrorMessage = "The password and confirmation password do not match.")]
     public string ConfirmPassword { get; set; } = null!;
+#endif
 
     public string? SuccessMessage { get; set; }
 
@@ -53,7 +55,11 @@ public class RegisterModel(
 
         new DatabaseSeeder(db).InitializeFirstUser(user);
 
+#if Passwords
         var result = await userManager.CreateAsync(user, Password);
+#else
+        var result = await userManager.CreateAsync(user);
+#endif
 
         if (!result.Succeeded)
         {
@@ -73,7 +79,11 @@ public class RegisterModel(
         else
         {
             await signInManager.SignInAsync(user, isPersistent: false);
+#if Passkeys
+            return LocalRedirect(Url.Page("/CreatePasskey", values: new { ReturnUrl })!);
+#else
             return LocalRedirect(ReturnUrl ?? "/");
+#endif
         }
     }
 }

@@ -280,8 +280,8 @@ export const Role = domain.types.Role = {
         required: val => (val != null && val !== '') || "Name is required.",
       }
     },
-    permissions: {
-      name: "permissions",
+    permissionEnums: {
+      name: "permissionEnums",
       displayName: "Permissions",
       type: "collection",
       itemType: {

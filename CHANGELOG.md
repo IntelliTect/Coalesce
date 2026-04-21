@@ -1,4 +1,4 @@
-# 6.4.1
+# 6.5.0
 - `CrudContext.User` now has a public setter, allowing the user principal to be overridden from the value provided by `IHttpContextAccessor` (e.g. for testing or non-http scenarios).
 - Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 
@@ -6,6 +6,7 @@
 - Added Vuetify 4 CSS layer ordering to `index.html` to work around Vite 8/Rolldown CSS ordering bugs.
 - Replaced deprecated `typeface-roboto` with `@fontsource/roboto/latin.css` and `@fontsource/roboto/latin-italic.css`.
 - The first-party login flow is now two-stage: enter username first, then choose between password, passkey, or a one-time email code. When `Passkeys` is enabled, users who sign in with password or email code are then prompted to create a passkey.
+- `Role.Permissions` are no longer EF-mapped as enums. The EF property is now `List<string>`, with a `[NotMapped]` `PermissionEnums` wrapper that silently drops unrecognized values. This prevents `InvalidOperationException` when a `Permission` enum member is removed but old values remain in the database.
 
 # 6.4.0
 - Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize their members correctly without custom `parse`/`stringify`.

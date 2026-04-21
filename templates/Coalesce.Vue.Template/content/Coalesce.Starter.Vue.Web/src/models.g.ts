@@ -103,7 +103,7 @@ export class AuditLogProperty {
 
 export interface Role extends Model<typeof metadata.Role> {
   name: string | null
-  permissions: Permission[] | null
+  permissionEnums: Permission[] | null
   id: string | null
 }
 export class Role {

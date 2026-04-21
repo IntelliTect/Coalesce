@@ -126,7 +126,7 @@ public class User : IdentityUser
     {
         if (
             Id == callingUser.GetUserId() &&
-            db.Users.Count(u => u.UserRoles!.Any(r => r.Role!.Permissions!.Contains(Permission.UserAdmin))) == 1
+            db.Users.Count(u => u.UserRoles!.Any(r => r.Role!.Permissions!.Contains(nameof(Permission.UserAdmin)))) == 1
         )
         {
             return "You cannot remove the last remaining user admin.";

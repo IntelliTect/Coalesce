@@ -60,7 +60,7 @@ public class UserRole : IdentityUserRole<string>
         public override ItemResult BeforeDelete(UserRole item)
         {
             // Prevent removing the last user admin
-            if (item.Role?.Permissions?.Contains(Permission.UserAdmin) == true)
+            if (item.Role?.PermissionEnums?.Contains(Permission.UserAdmin) == true)
             {
                 var result = CheckWouldLeaveNoUserAdmins(item.UserId, item.RoleId);
                 if (!result.WasSuccessful) return result;
@@ -87,7 +87,7 @@ public class UserRole : IdentityUserRole<string>
             var adminUserCount = Db.Users
                 .Where(u => u.UserRoles!.Any(ur => 
                     !(ur.UserId == userIdToExclude && ur.RoleId == roleIdToExclude) &&
-                    ur.Role!.Permissions!.Contains(Permission.UserAdmin)))
+                    ur.Role!.Permissions!.Contains(nameof(Permission.UserAdmin))))
                 .Count();
 
             if (adminUserCount == 0)

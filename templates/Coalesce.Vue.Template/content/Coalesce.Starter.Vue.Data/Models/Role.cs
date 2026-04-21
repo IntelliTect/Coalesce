@@ -33,7 +33,24 @@ public class Role
     [InternalUse]
     public override string? NormalizedName { get; set; }
 
-    public List<Permission>? Permissions { get; set; }
+    /// <summary>
+    /// The permissions granted by this role, persisted as strings
+    /// with EF to avoid exceptions when Permission names are changed.
+    /// </summary>
+    [InternalUse]
+    public List<string> Permissions { get; set; } = [];
+
+    [NotMapped]
+    [Display(Name = "Permissions")]
+    public List<Permission> PermissionEnums
+    {
+        get => Permissions
+            .Select(s => Enum.TryParse<Permission>(s, out var p) ? p : (Permission?)null)
+            .Where(p => p.HasValue)
+            .Select(p => p!.Value)
+            .ToList();
+        set => Permissions = value?.Select(p => p.ToString()).ToList() ?? [];
+    }
 
     public class Behaviors(RoleManager<Role> roleManager, CrudContext<AppDbContext> context) : AppBehaviors<Role>(context)
     {
@@ -49,9 +66,9 @@ public class Role
             // Prevent removing UserAdmin permission if it would leave no user admins
             if (kind == SaveKind.Update && oldItem != null)
             {
-                var oldHadUserAdmin = oldItem.Permissions?.Contains(Permission.UserAdmin) == true;
-                var newHasUserAdmin = item.Permissions?.Contains(Permission.UserAdmin) == true;
-                
+                var oldHadUserAdmin = oldItem.PermissionEnums?.Contains(Permission.UserAdmin) == true;
+                var newHasUserAdmin = item.PermissionEnums?.Contains(Permission.UserAdmin) == true;
+
                 if (oldHadUserAdmin && !newHasUserAdmin)
                 {
                     var result = CheckWouldLeaveNoUserAdmins(item.Id);
@@ -67,7 +84,7 @@ public class Role
         public override ItemResult BeforeDelete(Role item)
         {
             // Prevent deleting role with UserAdmin permission if it would leave no user admins
-            if (item.Permissions?.Contains(Permission.UserAdmin) == true)
+            if (item.PermissionEnums?.Contains(Permission.UserAdmin) == true)
             {
                 var result = CheckWouldLeaveNoUserAdmins(item.Id);
                 if (!result.WasSuccessful) return result;
@@ -80,9 +97,9 @@ public class Role
         {
             // Count users who have UserAdmin permission through roles other than the one being modified/deleted
             var adminUserCount = Db.Users
-                .Where(u => u.UserRoles!.Any(ur => 
-                    ur.RoleId != roleIdToExclude && 
-                    ur.Role!.Permissions!.Contains(Permission.UserAdmin)))
+                .Where(u => u.UserRoles!.Any(ur =>
+                    ur.RoleId != roleIdToExclude &&
+                    ur.Role!.Permissions!.Contains(nameof(Permission.UserAdmin))))
                 .Count();
 
             if (adminUserCount == 0)

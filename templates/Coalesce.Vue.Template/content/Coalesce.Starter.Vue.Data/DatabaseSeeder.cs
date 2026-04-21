@@ -48,7 +48,7 @@ public class DatabaseSeeder(AppDbContext db)
         {
             db.Roles.Add(new()
             {
-                Permissions = Enum.GetValues<Permission>().ToList(),
+                PermissionEnums = Enum.GetValues<Permission>().ToList(),
                 Name = "Admin",
                 NormalizedName = "ADMIN",
             });

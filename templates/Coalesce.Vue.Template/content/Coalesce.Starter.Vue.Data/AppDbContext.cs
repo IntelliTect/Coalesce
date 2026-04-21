@@ -184,7 +184,7 @@ public class AppDbContext
         builder.Entity<Role>(e =>
         {
             e.Property(e => e.Id).HasMaxLength(36);
-            e.PrimitiveCollection(e => e.Permissions).ElementType().HasConversion<string>();
+            e.PrimitiveCollection(e => e.Permissions);
 
 #if Tenancy
             // Fix index that doesn't account for tenanted roles

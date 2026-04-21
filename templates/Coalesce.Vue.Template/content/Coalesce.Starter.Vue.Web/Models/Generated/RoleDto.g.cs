@@ -15,7 +15,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
         private string _Id;
         private string _Name;
-        private System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> _Permissions;
+        private System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> _PermissionEnums;
 
         public string Id
         {
@@ -27,10 +27,10 @@ namespace Coalesce.Starter.Vue.Web.Models
             get => _Name;
             set { _Name = value; Changed(nameof(Name)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> Permissions
+        public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> PermissionEnums
         {
-            get => _Permissions;
-            set { _Permissions = value; Changed(nameof(Permissions)); }
+            get => _PermissionEnums;
+            set { _PermissionEnums = value; Changed(nameof(PermissionEnums)); }
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
-            if (ShouldMapTo(nameof(Permissions))) entity.Permissions = Permissions?.ToList();
+            if (ShouldMapTo(nameof(PermissionEnums))) entity.PermissionEnums = PermissionEnums?.ToList();
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
         public string Id { get; set; }
         public string Name { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> Permissions { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> PermissionEnums { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -81,7 +81,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             this.Id = obj.Id;
             this.Name = obj.Name;
-            this.Permissions = obj.Permissions;
+            this.PermissionEnums = obj.PermissionEnums;
         }
     }
 }

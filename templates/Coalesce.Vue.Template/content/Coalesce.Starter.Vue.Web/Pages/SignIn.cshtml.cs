@@ -67,7 +67,15 @@ public class SignInModel(
                 return LocalRedirect(ReturnUrl ?? "/");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid passkey.");
+            Step = string.IsNullOrWhiteSpace(Username) ? 1 : 2;
+
+            ModelState.AddModelError(
+                string.Empty,
+                result.IsLockedOut
+                    ? "Account locked out"
+                    : result.IsNotAllowed
+                        ? "This account is not allowed to sign in."
+                        : "Invalid passkey.");
             return Page();
         }
 #endif

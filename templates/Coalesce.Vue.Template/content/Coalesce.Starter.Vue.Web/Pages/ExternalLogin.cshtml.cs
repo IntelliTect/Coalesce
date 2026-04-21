@@ -214,7 +214,7 @@ public class ExternalLoginModel(
             if (user?.EmailConfirmed == false)
             {
                 // Don't match existing users by email if the email isn't confirmed.
-#if (!Passwords)
+#if (!(Passwords || Passkeys))
                 // Note: this error message assumes that the only way an unverified account can exist
                 // is if the application has local user accounts. Customize this message if needed.
 #endif

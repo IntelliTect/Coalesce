@@ -323,7 +323,7 @@ Based on the changelog review from Step 2, make any code changes needed to addre
 
 Run these commands in order, fixing any errors before proceeding to the next:
 
-1. \`npm install\` in the web project. If it fails due to a recently-published package being blocked by npm's minimum release age policy, suggest to the user a re-run with \`npm install --min-release-age=0\` after explaining the risk.
+1. \`npm install\` in the web project. If it fails due to a recently-published package being blocked by npm's minimum release age policy, offer to re-run with \`npm install --min-release-age=0\` after explaining the risk. Always check for warnings in the npm install output.
 2. \`dotnet restore\` in the solution root
 3. Run Coalesce code generation (use the \`coalesce_generate\` tool, or run \`dotnet coalesce\` in the web project)
 4. \`dotnet build\` to verify .NET compilation

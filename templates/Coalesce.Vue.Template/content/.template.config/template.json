@@ -88,7 +88,7 @@
       "$coalesceParent": "Identity",
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/other-logins"
     },
-    "LocalAuth": {
+    "Passwords": {
       "type": "parameter",
       "datatype": "bool",
       "displayName": "Sign-in with Username/Password",
@@ -102,8 +102,8 @@
       "datatype": "bool",
       "displayName": "Sign-in with Passkeys",
       "description": "Adds infrastructure for supporting passwordless authentication using passkeys (WebAuthn).",
-      "$coalesceRequires": ["and", "LocalAuth"],
-      "$coalesceParent": "LocalAuth",
+      "$coalesceRequires": ["and", "Identity"],
+      "$coalesceParent": "Identity",
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/passkeys"
     },
     "UserPictures": {
@@ -333,21 +333,27 @@
           "exclude": ["**/ExternalLogin.*"]
         },
         {
-          "condition": "!LocalAuth",
+          "condition": "!Passwords",
+          "exclude": ["**/ResetPassword.*", "**/ForgotPassword.*"]
+        },
+        {
+          "condition": "!(Passwords || Passkeys)",
           "exclude": [
-            "**/ResetPassword.*",
             "**/Register.*",
-            "**/ForgotPassword.*",
             "**/ConfirmEmail.*",
             "**/UserManagementService.cs"
           ]
         },
         {
           "condition": "!Passkeys",
-          "exclude": ["**/PasskeyService.cs", "**/passkey.js"]
+          "exclude": [
+            "**/PasskeyService.cs",
+            "**/passkey.js",
+            "**/CreatePasskey.*"
+          ]
         },
         {
-          "condition": "!(LocalAuth || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)",
+          "condition": "!(Passwords || Passkeys || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)",
           "exclude": ["**/NoOpEmailService.*", "**/IEmailService.*"]
         },
         {

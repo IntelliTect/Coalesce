@@ -3,11 +3,15 @@
 @using Microsoft.Extensions.Options
 
 @model Coalesce.Starter.Vue.Web.Pages.RegisterModel
+@*#if Passwords *@
 @inject IOptions<IdentityOptions> identityOptions
+@*#endif *@
 
 @{
     ViewData["Title"] = "Register";
+    @*#if Passwords *@
     int passwordMinlength = identityOptions.Value.Password.RequiredLength;
+    @*#endif *@
 }
 
 @if (Model.SuccessMessage is not null)
@@ -34,21 +38,26 @@
         <label asp-for="Email" class="form-label"></label>
         <input asp-for="Email" class="form-control" autocomplete="username" required autofocus />
     </div>
+    @*#if Passwords *@
     <div>
         <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" id="password" class="form-control" autocomplete="new-password" required minlength="@passwordMinlength" oninput="validatePassword()" />
+        <input asp-for="Password" id="password" class="form-control" autocomplete="new-password" required
+               minlength="@passwordMinlength" oninput="validatePassword()" />
         <div id="emailHelp" class="form-text">Passwords must be at least @passwordMinlength characters.</div>
     </div>
     <div>
         <label asp-for="ConfirmPassword" class="form-label"></label>
-        <input asp-for="ConfirmPassword" id="confirm_password" class="form-control" autocomplete="new-password" required oninput="validatePassword()" />
+        <input asp-for="ConfirmPassword" id="confirm_password" class="form-control" autocomplete="new-password" required
+               oninput="validatePassword()" />
     </div>
+    @*#endif *@
 
     <div asp-validation-summary="All" class="text-danger"></div>
 
     <button type="submit" class="btn btn-primary rounded-pill">Register</button>
 </form>
 
+@*#if Passwords *@
 <script>
     const password = document.getElementById("password");
     const confirm_password = document.getElementById("confirm_password");
@@ -58,3 +67,4 @@
             password.value != confirm_password.value ? "Passwords Don't Match" : '');
     }
 </script>
+@*#endif *@

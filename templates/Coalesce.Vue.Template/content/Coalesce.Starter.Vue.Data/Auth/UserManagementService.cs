@@ -99,4 +99,22 @@ public class UserManagementService(
             "If the user account exists, the email address on the account " +
             "will receive an email shortly with password reset instructions.");
     }
+
+    public async Task<ItemResult> SendSignInCode(User user)
+    {
+        if (string.IsNullOrWhiteSpace(user.Email)) return "User has no email.";
+
+        var code = await userManager.GenerateUserTokenAsync(
+            user, TokenOptions.DefaultEmailProvider, "SignIn");
+
+        return await emailSender.SendEmailAsync(
+            user.Email,
+            "Your sign-in code",
+            $"""
+            Your sign-in code is: <strong>{HtmlEncoder.Default.Encode(code)}</strong>
+            <br><br>
+            This code will expire in a few minutes. If you didn't request this, you can safely ignore this email.
+            """
+        );
+    }
 }

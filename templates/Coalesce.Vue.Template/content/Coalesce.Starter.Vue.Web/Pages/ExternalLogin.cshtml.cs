@@ -214,7 +214,7 @@ public class ExternalLoginModel(
             if (user?.EmailConfirmed == false)
             {
                 // Don't match existing users by email if the email isn't confirmed.
-#if (!LocalAuth)
+#if (!(Passwords || Passkeys))
                 // Note: this error message assumes that the only way an unverified account can exist
                 // is if the application has local user accounts. Customize this message if needed.
 #endif
@@ -225,7 +225,7 @@ public class ExternalLoginModel(
                 // The person who owns the current verified external login needs to sign into that account with its password,
                 // including performing a "forgot password" request if the password isn't actually known.
                 return $"An existing unverified user account with email address {remoteUserEmail} already exists. " +
-                    $"You must log into this account with its username and password and verify the account's email address " +
+                    $"You must log into this account and verify the account's email address " +
                     $"before you can link the account to your {info.ProviderDisplayName} login.";
             }
         }

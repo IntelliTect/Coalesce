@@ -25,7 +25,7 @@ public static class ProgramAuthConfiguration
                 c.ClaimsIdentity.UserNameClaimType = AppClaimTypes.UserName;
 
                 c.User.RequireUniqueEmail = true;
-#if LocalAuth
+#if Passwords
                 // https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver
                 c.Password.RequireNonAlphanumeric = false;
                 c.Password.RequireDigit = false;
@@ -39,7 +39,7 @@ public static class ProgramAuthConfiguration
             .AddDefaultTokenProviders()
             .AddClaimsPrincipalFactory<ClaimsPrincipalFactory>();
 
-#if LocalAuth
+#if (Passwords || Passkeys)
         builder.Services.AddScoped<UserManagementService>();
 #endif
 #if Passkeys

@@ -10,11 +10,13 @@ public class BehaviorsFactory : IBehaviorsFactory
 {
     private readonly IServiceProvider serviceProvider;
     private readonly ReflectionRepository reflectionRepository;
+    private readonly DefaultCrudStrategyOverrides overrides;
 
-    public BehaviorsFactory(IServiceProvider serviceProvider, ReflectionRepository reflectionRepository)
+    public BehaviorsFactory(IServiceProvider serviceProvider, ReflectionRepository reflectionRepository, DefaultCrudStrategyOverrides overrides)
     {
         this.serviceProvider = serviceProvider;
         this.reflectionRepository = reflectionRepository;
+        this.overrides = overrides;
     }
 
     /// <summary>
@@ -31,10 +33,18 @@ public class BehaviorsFactory : IBehaviorsFactory
         // If other kinds of default are handled here in the future, add them to the collection above.
 
         var tContext = reflectionRepository.EntityUsages[servedType].First().Context;
-        return typeof(IEntityFrameworkBehaviors<,>).MakeGenericType(
-            servedType.Type.TypeInfo,
-            tContext.ClassViewModel.Type.TypeInfo
-        );
+        var entityType = servedType.Type.TypeInfo;
+        var contextType = tContext.ClassViewModel.Type.TypeInfo;
+
+        // Check for partially constructed generic overrides
+        var serviceType = typeof(IEntityFrameworkBehaviors<,>);
+        if (overrides.TryGet(serviceType, out var implType))
+        {
+            return DefaultCrudStrategyOverrides.CloseImplementationType(
+                implType, serviceType, [entityType, contextType]);
+        }
+
+        return serviceType.MakeGenericType(entityType, contextType);
     }
 
     public object GetDefaultBehaviors(ClassViewModel servedType)

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace IntelliTect.Coalesce;
 
@@ -72,7 +73,18 @@ public class CoalesceServiceBuilder
         {
             if (new ReflectionTypeViewModel(implementationType).IsA(serviceType))
             {
-                Services.AddScoped(serviceType, implementationType);
+                if (implementationType.IsGenericTypeDefinition && serviceType.IsGenericTypeDefinition
+                    && implementationType.GetGenericArguments().Length != serviceType.GetGenericArguments().Length)
+                {
+                    // Partially constructed generic: the implementation type has fewer
+                    // generic parameters than the service type (e.g. MyDataSource<T> : StandardDataSource<T, AppDbContext>).
+                    // .NET DI cannot handle this directly, so store the mapping for factory-based resolution.
+                    GetOrCreateOverrides().Set(serviceType, implementationType);
+                }
+                else
+                {
+                    Services.AddScoped(serviceType, implementationType);
+                }
                 foundMatch = true;
             }
         }
@@ -85,6 +97,21 @@ public class CoalesceServiceBuilder
         }
 
         return this;
+    }
+
+    private DefaultCrudStrategyOverrides GetOrCreateOverrides()
+    {
+        var existing = Services
+            .Where(sd => sd.ServiceType == typeof(DefaultCrudStrategyOverrides))
+            .Select(sd => sd.ImplementationInstance as DefaultCrudStrategyOverrides)
+            .FirstOrDefault(x => x != null);
+
+        if (existing != null)
+            return existing;
+
+        var overrides = new DefaultCrudStrategyOverrides();
+        Services.AddSingleton(overrides);
+        return overrides;
     }
 
     /// <summary>

@@ -80,6 +80,8 @@ public static class CoalesceServiceCollectionExtensions
             foreach (var type in types) services.TryAddScoped(type.Key, type.Value);
         }
 
+        services.TryAddSingleton<DefaultCrudStrategyOverrides>();
+
         services.TryAddScoped<IDataSourceFactory, DataSourceFactory>();
         AddFactoryDefaultTypes(DataSourceFactory.DefaultTypes);
 

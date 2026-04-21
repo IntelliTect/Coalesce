@@ -13,11 +13,13 @@ public class DataSourceFactory : IDataSourceFactory
 
     private readonly IServiceProvider serviceProvider;
     private readonly ReflectionRepository reflectionRepository;
+    private readonly DefaultCrudStrategyOverrides overrides;
 
-    public DataSourceFactory(IServiceProvider serviceProvider, ReflectionRepository reflectionRepository)
+    public DataSourceFactory(IServiceProvider serviceProvider, ReflectionRepository reflectionRepository, DefaultCrudStrategyOverrides overrides)
     {
         this.serviceProvider = serviceProvider;
         this.reflectionRepository = reflectionRepository;
+        this.overrides = overrides;
     }
     
     /// <summary>
@@ -90,11 +92,19 @@ public class DataSourceFactory : IDataSourceFactory
             throw new ArgumentException("Requested type is not served by a DbContext and has no explicitly declared data source.");
         }
 
+        var entityType = servedType.Type.TypeInfo;
+        var contextType = servedType.DbContext.Type.TypeInfo;
+
+        // Check for partially constructed generic overrides
+        var serviceType = typeof(IEntityFrameworkDataSource<,>);
+        if (overrides.TryGet(serviceType, out var implType))
+        {
+            return DefaultCrudStrategyOverrides.CloseImplementationType(
+                implType, serviceType, [entityType, contextType]);
+        }
+
         // FUTURE: If other kinds of default data sources are created, add them to the DefaultTypes dictionary above.
-        return typeof(IEntityFrameworkDataSource<,>).MakeGenericType(
-            servedType.Type.TypeInfo,
-            servedType.DbContext.Type.TypeInfo
-        );
+        return serviceType.MakeGenericType(entityType, contextType);
     }
 
     public IDataSource<TServed> GetDefaultDataSource<TServed, TDeclaredFor>()

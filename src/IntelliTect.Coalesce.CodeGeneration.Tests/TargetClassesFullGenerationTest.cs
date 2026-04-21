@@ -127,8 +127,8 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
 
         var reflectionData = CoalesceApplicationBuilderExtensions.GetSecurityOverviewData(
             ReflectionRepositoryFactory.Reflection,
-            new DataSourceFactory(services, ReflectionRepositoryFactory.Reflection),
-            new BehaviorsFactory(services, ReflectionRepositoryFactory.Reflection)
+            new DataSourceFactory(services, ReflectionRepositoryFactory.Reflection, new DefaultCrudStrategyOverrides()),
+            new BehaviorsFactory(services, ReflectionRepositoryFactory.Reflection, new DefaultCrudStrategyOverrides())
         );
 
         // We serialize here to force evaluation of all the lazy IEnumerables in the data.

@@ -61,7 +61,18 @@ public class SignInModel(
         // Passkey sign-in can happen from any step (including conditional mediation from step 1)
         if (!string.IsNullOrEmpty(CredentialJson))
         {
-            var result = await signInManager.PasskeySignInAsync(CredentialJson);
+            Microsoft.AspNetCore.Identity.SignInResult result;
+            try
+            {
+                result = await signInManager.PasskeySignInAsync(CredentialJson);
+            }
+            catch (InvalidOperationException)
+            {
+                // The passkey assertion options are no longer in the session
+                // (e.g. the app restarted). Redirect to start fresh.
+                return RedirectToPage(new { ReturnUrl });
+            }
+
             if (result.Succeeded)
             {
                 return LocalRedirect(ReturnUrl ?? "/");

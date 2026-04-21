@@ -78,6 +78,28 @@ export const Grade = domain.enums.Grade = {
   },
   ]),
 }
+export const RegularEnum = domain.enums.RegularEnum = {
+  name: "RegularEnum" as const,
+  displayName: "Regular Enum",
+  type: "enum",
+  ...getEnumMeta<"FirstValue"|"SecondValue"|"ThirdValue">([
+  {
+    value: 1,
+    strValue: "FirstValue",
+    displayName: "First Value",
+  },
+  {
+    value: 2,
+    strValue: "SecondValue",
+    displayName: "Second Value",
+  },
+  {
+    value: 3,
+    strValue: "ThirdValue",
+    displayName: "Third Value",
+  },
+  ]),
+}
 export const SkyConditions = domain.enums.SkyConditions = {
   name: "SkyConditions" as const,
   displayName: "Sky Conditions",
@@ -131,6 +153,29 @@ export const Statuses = domain.enums.Statuses = {
     value: 99,
     strValue: "Cancelled",
     displayName: "Cancelled",
+  },
+  ]),
+}
+export const StringSerializedEnum = domain.enums.StringSerializedEnum = {
+  name: "StringSerializedEnum" as const,
+  displayName: "String Serialized Enum",
+  type: "enum",
+  serializeAsString: true,
+  ...getEnumMeta<"FirstValue"|"SecondValue"|"ThirdValue">([
+  {
+    value: 1,
+    strValue: "FirstValue",
+    displayName: "First Value",
+  },
+  {
+    value: 2,
+    strValue: "SecondValue",
+    displayName: "Second Value",
+  },
+  {
+    value: 3,
+    strValue: "ThirdValue",
+    displayName: "Third Value",
   },
   ]),
 }
@@ -4741,6 +4786,49 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
     },
   },
 }
+export const StringEnumModel = domain.types.StringEnumModel = {
+  name: "StringEnumModel" as const,
+  displayName: "String Enum Model",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "StringEnumModel",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    stringEnum: {
+      name: "stringEnum",
+      displayName: "String Enum",
+      type: "enum",
+      get typeDef() { return StringSerializedEnum },
+      role: "value",
+    },
+    regularEnum: {
+      name: "regularEnum",
+      displayName: "Regular Enum",
+      type: "enum",
+      get typeDef() { return RegularEnum },
+      role: "value",
+    },
+    nullableStringEnum: {
+      name: "nullableStringEnum",
+      displayName: "Nullable String Enum",
+      type: "enum",
+      get typeDef() { return StringSerializedEnum },
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const StringIdentity = domain.types.StringIdentity = {
   name: "StringIdentity" as const,
   displayName: "String Identity",
@@ -5912,8 +6000,10 @@ interface AppDomain extends Domain {
     EnumPkId: typeof EnumPkId
     Genders: typeof Genders
     Grade: typeof Grade
+    RegularEnum: typeof RegularEnum
     SkyConditions: typeof SkyConditions
     Statuses: typeof Statuses
+    StringSerializedEnum: typeof StringSerializedEnum
     Titles: typeof Titles
   }
   types: {
@@ -5966,6 +6056,7 @@ interface AppDomain extends Domain {
     SimpleModelTarget: typeof SimpleModelTarget
     StandaloneReadonly: typeof StandaloneReadonly
     StandaloneReadWrite: typeof StandaloneReadWrite
+    StringEnumModel: typeof StringEnumModel
     StringIdentity: typeof StringIdentity
     Student: typeof Student
     StudentWrapper: typeof StudentWrapper

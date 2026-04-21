@@ -25,6 +25,13 @@ export enum Grade {
 }
 
 
+export enum RegularEnum {
+  FirstValue = 1,
+  SecondValue = 2,
+  ThirdValue = 3,
+}
+
+
 export enum SkyConditions {
   Cloudy = 0,
   PartyCloudy = 1,
@@ -44,6 +51,13 @@ export enum Statuses {
   
   /** doc comment on enum member */
   Cancelled = 99,
+}
+
+
+export enum StringSerializedEnum {
+  FirstValue = "FirstValue",
+  SecondValue = "SecondValue",
+  ThirdValue = "ThirdValue",
 }
 
 
@@ -1082,6 +1096,33 @@ export class Sibling {
 }
 
 
+export interface StringEnumModel extends Model<typeof metadata.StringEnumModel> {
+  id: number | null
+  stringEnum: StringSerializedEnum | null
+  regularEnum: RegularEnum | null
+  nullableStringEnum: StringSerializedEnum | null
+}
+export class StringEnumModel {
+  
+  /** Mutates the input object and its descendants into a valid StringEnumModel implementation. */
+  static convert(data?: Partial<StringEnumModel>): StringEnumModel {
+    return convertToModel<StringEnumModel>(data || {}, metadata.StringEnumModel) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid StringEnumModel implementation. */
+  static map(data?: Partial<StringEnumModel>): StringEnumModel {
+    return mapToModel<StringEnumModel>(data || {}, metadata.StringEnumModel) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.StringEnumModel; }
+  
+  /** Instantiate a new StringEnumModel, optionally basing it on the given data. */
+  constructor(data?: Partial<StringEnumModel> | {[k: string]: any}) {
+    Object.assign(this, StringEnumModel.map(data || {}));
+  }
+}
+
+
 export interface StringIdentity extends Model<typeof metadata.StringIdentity> {
   stringIdentityId: string | null
   parentId: string | null
@@ -1847,8 +1888,10 @@ declare module "coalesce-vue/lib/model" {
     EnumPkId: EnumPkId
     Genders: Genders
     Grade: Grade
+    RegularEnum: RegularEnum
     SkyConditions: SkyConditions
     Statuses: Statuses
+    StringSerializedEnum: StringSerializedEnum
     Titles: Titles
   }
   interface ModelTypeLookup {
@@ -1901,6 +1944,7 @@ declare module "coalesce-vue/lib/model" {
     SimpleModelTarget: SimpleModelTarget
     StandaloneReadonly: StandaloneReadonly
     StandaloneReadWrite: StandaloneReadWrite
+    StringEnumModel: StringEnumModel
     StringIdentity: StringIdentity
     Student: Student
     StudentWrapper: StudentWrapper

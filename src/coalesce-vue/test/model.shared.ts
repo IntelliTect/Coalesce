@@ -9,6 +9,7 @@ import * as $metadata from "@test-targets/metadata.g";
 import * as $models from "@test-targets/models.g";
 
 const cmProps = $metadata.ComplexModel.props;
+const semProps = $metadata.StringEnumModel.props;
 
 export const complexModelValue = <ModelValue>{
   name: "complexModel",
@@ -107,6 +108,10 @@ export const twoWayConversions = <MappingData[]>[
   { meta: cmProps.complexModelId, model: 1, dto: 1 },
   { meta: cmProps.enumWithDefault, model: null, dto: null },
   { meta: cmProps.enumWithDefault, model: 10, dto: 10 },
+  // String-serialized enum: values are strings both ways
+  { meta: semProps.stringEnum, model: null, dto: null },
+  { meta: semProps.stringEnum, model: "FirstValue", dto: "FirstValue" },
+  { meta: semProps.stringEnum, model: "SecondValue", dto: "SecondValue" },
   { meta: cmProps.isActive, model: null, dto: null },
   { meta: cmProps.isActive, model: true, dto: true },
   { meta: cmProps.isActive, model: false, dto: false },

@@ -10,6 +10,7 @@ import {
 } from "./model.shared";
 
 const cmProps = $metadata.ComplexModel.props;
+const semProps = $metadata.StringEnumModel.props;
 
 function unmappable(meta: Value, ...values: any[]) {
   return values.map((value) => {
@@ -93,6 +94,12 @@ describe.each(<MappingData[]>[
   // Enum
   { meta: cmProps.enumWithDefault, model: "123", dto: 123 },
   ...unmappable(cmProps.enumWithDefault, new Date(), [], {}, "abc"),
+
+  // String-serialized enum: string values pass through as strings
+  { meta: semProps.stringEnum, model: "FirstValue", dto: "FirstValue" },
+  // Numeric values are converted to string enum member names
+  { meta: semProps.stringEnum, model: 1, dto: "FirstValue" },
+  ...unmappable(semProps.stringEnum, new Date(), [], {}, "InvalidValue"),
 
   // Boolean
   { meta: cmProps.isActive, model: "true", dto: true },

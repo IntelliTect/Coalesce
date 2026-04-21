@@ -7,34 +7,34 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 public class EnumStringSerializationTests
 {
     [Test]
-    public void IsEnumStringSerializable_WithJsonStringEnumConverter_ReturnsTrue()
+    public async Task IsEnumStringSerializable_WithJsonStringEnumConverter_ReturnsTrue()
     {
         var enumType = ReflectionRepository.Global.GetOrAddType(typeof(StringSerializedEnum));
 
-        Assert.That(enumType.IsEnum, Is.True);
-        Assert.That(enumType.IsEnumStringSerializable, Is.True);
+        await Assert.That(enumType.IsEnum).IsTrue();
+        await Assert.That(enumType.IsEnumStringSerializable).IsTrue();
     }
 
     [Test]
-    public void IsEnumStringSerializable_WithoutJsonStringEnumConverter_ReturnsFalse()
+    public async Task IsEnumStringSerializable_WithoutJsonStringEnumConverter_ReturnsFalse()
     {
         var enumType = ReflectionRepository.Global.GetOrAddType(typeof(RegularEnum));
 
-        Assert.That(enumType.IsEnum, Is.True);
-        Assert.That(enumType.IsEnumStringSerializable, Is.False);
+        await Assert.That(enumType.IsEnum).IsTrue();
+        await Assert.That(enumType.IsEnumStringSerializable).IsFalse();
     }
 
     [Test]
-    public void StringEnumModel_Properties_DetectCorrectSerializationType()
+    public async Task StringEnumModel_Properties_DetectCorrectSerializationType()
     {
-        var classViewModel = ReflectionRepository.Global.GetClassViewModel<StringEnumModel>();
+        var classViewModel = ReflectionRepository.Global.GetClassViewModel<StringEnumModel>()!;
 
-        var stringEnumProperty = classViewModel!.PropertyByName(nameof(StringEnumModel.StringEnum))!;
+        var stringEnumProperty = classViewModel.PropertyByName(nameof(StringEnumModel.StringEnum))!;
         var regularEnumProperty = classViewModel.PropertyByName(nameof(StringEnumModel.RegularEnum))!;
         var nullableStringEnumProperty = classViewModel.PropertyByName(nameof(StringEnumModel.NullableStringEnum))!;
 
-        Assert.That(stringEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable, Is.True);
-        Assert.That(regularEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable, Is.False);
-        Assert.That(nullableStringEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable, Is.True);
+        await Assert.That(stringEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable).IsTrue();
+        await Assert.That(regularEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable).IsFalse();
+        await Assert.That(nullableStringEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable).IsTrue();
     }
 }

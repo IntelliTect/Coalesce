@@ -258,7 +258,7 @@
                     v-for="permission in PermissionMeta.values.map((p) => ({
                       meta: p,
                       roles: user.roles.filter((r) =>
-                        r.permissions?.includes(p.value),
+                        r.permissionEnums?.includes(p.value),
                       ),
                     }))"
                     :key="permission.meta.strValue"

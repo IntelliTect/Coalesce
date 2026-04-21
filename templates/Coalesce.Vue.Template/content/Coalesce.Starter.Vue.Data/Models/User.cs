@@ -103,8 +103,8 @@ public class User : IdentityUser
     [Description("Global admins can perform some administrative actions against ALL tenants.")]
     public bool IsGlobalAdmin { get; set; }
 #endif
-
 #if UserPictures
+
     [Coalesce, Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(PhotoHash))]
     public ItemResult<IFile> GetPhoto(ClaimsPrincipal user, AppDbContext db)
     {
@@ -119,8 +119,8 @@ public class User : IdentityUser
         };
     }
 #endif
-
 #if Tenancy
+
     [Coalesce, Execute(Roles = nameof(Permission.UserAdmin))]
     public ItemResult Evict(ClaimsPrincipal callingUser, AppDbContext db)
     {
@@ -139,8 +139,8 @@ public class User : IdentityUser
 
         return true;
     }
-
 #if TenantMemberInvites
+
     [Coalesce, Execute(Roles = nameof(Permission.UserAdmin))]
     public static async Task<ItemResult> InviteUser(
         AppDbContext db,
@@ -154,8 +154,8 @@ public class User : IdentityUser
     }
 #endif
 #endif
+#if (Passwords || Passkeys)
 
-#if (Passwords)
     [Coalesce]
     public async Task<ItemResult> SetEmail(
         [Inject] UserManagementService userService,
@@ -176,6 +176,8 @@ public class User : IdentityUser
         if (currentUser.GetUserId() != this.Id && !currentUser.Can(Permission.UserAdmin)) return "Unauthorized.";
         return await userService.SendEmailConfirmationRequest(this);
     }
+#endif
+#if (Passwords)
 
     [Coalesce]
     public async Task<ItemResult> SetPassword(

@@ -44,7 +44,7 @@
               </template>
             </c-input>
 
-            <!--#if Passwords -->
+            <!--#if (Passwords || Passkeys) -->
             <div v-if="!user.emailConfirmed">
               <v-btn
                 color="success"

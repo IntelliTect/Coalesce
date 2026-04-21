@@ -183,6 +183,10 @@ public class ComplexModel
 
     public Case.Statuses? EnumNullable { get; set; }
 
+    public StringSerializedEnum StringEnum { get; set; }
+
+    public StringSerializedEnum? StringEnumNullable { get; set; }
+
     [NotMapped]
     public IReadOnlyCollection<string> ReadOnlyPrimitiveCollection { get; set; }
     [NotMapped]

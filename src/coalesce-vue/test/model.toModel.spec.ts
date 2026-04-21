@@ -18,7 +18,6 @@ import {
 import { convertToModel } from "../src/model";
 
 const cmProps = $metadata.ComplexModel.props;
-const semProps = $metadata.StringEnumModel.props;
 
 function unparsable(meta: Value, ...values: any[]) {
   return values.map((value) => {
@@ -65,10 +64,10 @@ const dtoToModelMappings = <MappingData[]>[
   ...unparsable(cmProps.enumWithDefault, "abc", {}, [], true),
 
   // String-serialized enum
-  { meta: semProps.stringEnum, dto: "FirstValue", model: "FirstValue" },
+  { meta: cmProps.stringEnum, dto: "FirstValue", model: "FirstValue" },
   // Numeric value should be converted to string enum member name
-  { meta: semProps.stringEnum, dto: 1, model: "FirstValue" },
-  ...unparsable(semProps.stringEnum, "InvalidValue", {}, [], true),
+  { meta: cmProps.stringEnum, dto: 1, model: "FirstValue" },
+  ...unparsable(cmProps.stringEnum, "InvalidValue", {}, [], true),
 
   // Date
   {

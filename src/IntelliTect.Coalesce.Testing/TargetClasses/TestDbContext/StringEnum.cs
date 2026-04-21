@@ -14,21 +14,3 @@ public enum StringSerializedEnum
 
     ThirdValue = 3
 }
-
-public enum RegularEnum
-{
-    FirstValue = 1,
-    SecondValue = 2,
-    ThirdValue = 3
-}
-
-public class StringEnumModel
-{
-    public int Id { get; set; }
-
-    public StringSerializedEnum StringEnum { get; set; }
-
-    public RegularEnum RegularEnum { get; set; }
-
-    public StringSerializedEnum? NullableStringEnum { get; set; }
-}

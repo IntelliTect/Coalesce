@@ -92,7 +92,19 @@ describe.each(<MappingData[]>[
 
   // Enum
   { meta: cmProps.enumWithDefault, model: "123", dto: 123 },
+  // String enum member names should resolve to their numeric value
+  { meta: cmProps.enumWithDefault, model: "Value10", dto: 10 },
   ...unmappable(cmProps.enumWithDefault, new Date(), [], {}, "abc"),
+
+  // String-serialized enum: string values pass through as strings
+  { meta: cmProps.stringEnum, model: "FirstValue", dto: "FirstValue" },
+  // Numeric values are converted to string enum member names
+  { meta: cmProps.stringEnum, model: 1, dto: "FirstValue" },
+  // Numeric strings should also resolve to string enum member names
+  { meta: cmProps.stringEnum, model: "1", dto: "FirstValue" },
+  // Unknown string values pass through (server may have newer enum members)
+  { meta: cmProps.stringEnum, model: "UnknownValue", dto: "UnknownValue" },
+  ...unmappable(cmProps.stringEnum, new Date(), [], {}),
 
   // Boolean
   { meta: cmProps.isActive, model: "true", dto: true },

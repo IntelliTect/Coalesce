@@ -179,7 +179,7 @@ export function parseValue(value: null | undefined, meta: Value): null;
 export function parseValue(value: any, meta: StringValue): null | string;
 export function parseValue(value: any, meta: NumberValue): null | number;
 export function parseValue(value: any, meta: BooleanValue): null | boolean;
-export function parseValue(value: any, meta: EnumValue): null | number;
+export function parseValue(value: any, meta: EnumValue): null | number | string;
 export function parseValue(value: any, meta: DateValue): null | Date;
 export function parseValue(value: any, meta: FileValue): null | Blob | File;
 export function parseValue(
@@ -208,7 +208,6 @@ export function parseValue(
 
   switch (meta.type) {
     case "number":
-    case "enum":
       if (type === "number") return value;
 
       if (type !== "string") {
@@ -229,6 +228,30 @@ export function parseValue(
         throw parseError(value, meta);
       }
       return parsed;
+
+    case "enum":
+      if (type === "string" && isNullOrWhitespace(value)) {
+        return null;
+      }
+
+      {
+        const enumMember = meta.typeDef.valueLookup[value];
+        if (enumMember) {
+          return meta.typeDef.format === "string"
+            ? enumMember.strValue
+            : enumMember.value;
+        }
+        if (meta.typeDef.format !== "string") {
+          if (type === "number") return value;
+          if (type === "string") {
+            const parsed = Number(value);
+            if (!isNaN(parsed)) return parsed;
+          }
+        } else {
+          if (type === "string") return value;
+        }
+      }
+      throw parseError(value, meta);
 
     case "string":
       if (type === "string") return value;

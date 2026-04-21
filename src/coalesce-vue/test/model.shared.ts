@@ -107,6 +107,10 @@ export const twoWayConversions = <MappingData[]>[
   { meta: cmProps.complexModelId, model: 1, dto: 1 },
   { meta: cmProps.enumWithDefault, model: null, dto: null },
   { meta: cmProps.enumWithDefault, model: 10, dto: 10 },
+  // String-serialized enum: values are strings both ways
+  { meta: cmProps.stringEnum, model: null, dto: null },
+  { meta: cmProps.stringEnum, model: "FirstValue", dto: "FirstValue" },
+  { meta: cmProps.stringEnum, model: "SecondValue", dto: "SecondValue" },
   { meta: cmProps.isActive, model: null, dto: null },
   { meta: cmProps.isActive, model: true, dto: true },
   { meta: cmProps.isActive, model: false, dto: false },

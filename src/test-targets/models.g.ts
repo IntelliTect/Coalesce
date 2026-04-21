@@ -47,6 +47,13 @@ export enum Statuses {
 }
 
 
+export enum StringSerializedEnum {
+  FirstValue = "FirstValue",
+  SecondValue = "SecondValue",
+  ThirdValue = "ThirdValue",
+}
+
+
 export enum Titles {
   Mr = 0,
   Ms = 1,
@@ -406,6 +413,8 @@ export interface ComplexModel extends Model<typeof metadata.ComplexModel> {
   clientValidationInt: number | null
   clientValidationString: string | null
   enumNullable: Statuses | null
+  stringEnum: StringSerializedEnum | null
+  stringEnumNullable: StringSerializedEnum | null
   readOnlyPrimitiveCollection: string[] | null
   mutablePrimitiveCollection: string[] | null
   primitiveEnumerable: string[] | null
@@ -1849,6 +1858,7 @@ declare module "coalesce-vue/lib/model" {
     Grade: Grade
     SkyConditions: SkyConditions
     Statuses: Statuses
+    StringSerializedEnum: StringSerializedEnum
     Titles: Titles
   }
   interface ModelTypeLookup {

@@ -335,4 +335,27 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-Your custom data source must have the same generic type parameters - `<T, TContext>`. Otherwise, the Microsoft.Extensions.DependencyInjection service provider won't know how to inject it.
+If your application only uses a single `DbContext`, you can also use a partially constructed generic that fixes the context type parameter:
+
+```c#
+public class MyDataSource<T> : StandardDataSource<T, AppDbContext>
+    where T : class
+{
+    public MyDataSource(CrudContext<AppDbContext> context) : base(context)
+    {
+    }
+
+    ...
+}
+```
+
+```c#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddCoalesce(b =>
+    {
+        b.AddContext<AppDbContext>();
+        b.UseDefaultDataSource(typeof(MyDataSource<>));
+    });
+}
+```

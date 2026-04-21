@@ -73,9 +73,7 @@ public class PartiallyConstructedGenericTests
         services.AddCoalesce(b =>
         {
             b.AddContext<AppDbContext>();
-            b.UseDefaultDataSource(typeof(TestBehaviors<,>).DeclaringType is not null
-                ? typeof(StandardDataSource<,>)
-                : typeof(StandardDataSource<,>));
+            b.UseDefaultDataSource(typeof(StandardDataSource<,>));
         });
 
         // If it doesn't throw, registration succeeded
@@ -131,10 +129,11 @@ public class PartiallyConstructedGenericTests
         var sp = services.BuildServiceProvider();
         var factory = sp.GetRequiredService<IDataSourceFactory>();
 
-        var personCvm = ReflectionRepositoryFactory.Reflection.GetClassViewModel<Person>()!;
+        // Use Company because it has no custom data source overrides
+        var companyCvm = ReflectionRepositoryFactory.Reflection.GetClassViewModel<Company>()!;
 
-        var dataSource = factory.GetDefaultDataSource(personCvm, personCvm);
-        await Assert.That(dataSource).IsTypeOf<PartiallyConstructedDataSource<Person>>();
+        var dataSource = factory.GetDefaultDataSource(companyCvm, companyCvm);
+        await Assert.That(dataSource).IsTypeOf<PartiallyConstructedDataSource<Company>>();
     }
 
     [Test]
@@ -152,9 +151,9 @@ public class PartiallyConstructedGenericTests
         var sp = services.BuildServiceProvider();
         var factory = sp.GetRequiredService<IBehaviorsFactory>();
 
-        var personCvm = ReflectionRepositoryFactory.Reflection.GetClassViewModel<Person>()!;
+        var companyCvm = ReflectionRepositoryFactory.Reflection.GetClassViewModel<Company>()!;
 
-        var behaviors = factory.GetDefaultBehaviors(personCvm);
-        await Assert.That(behaviors).IsTypeOf<PartiallyConstructedBehaviors<Person>>();
+        var behaviors = factory.GetDefaultBehaviors(companyCvm);
+        await Assert.That(behaviors).IsTypeOf<PartiallyConstructedBehaviors<Company>>();
     }
 }

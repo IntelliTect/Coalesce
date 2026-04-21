@@ -2,6 +2,7 @@
 - `CrudContext.User` now has a public setter, allowing the user principal to be overridden from the value provided by `IHttpContextAccessor` (e.g. for testing or non-http scenarios).
 - Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 - Support enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` as string-serialized enums. These are generated as string-valued TypeScript enums and serialized as strings over the wire.
+- `UseDefaultDataSource` and `UseDefaultBehaviors` now support partially constructed generics (e.g. `MyDataSource<T> : StandardDataSource<T, AppDbContext>`).
 
 ## Template Changes
 - Added Vuetify 4 CSS layer ordering to `index.html` to work around Vite 8/Rolldown CSS ordering bugs.

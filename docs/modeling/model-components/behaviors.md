@@ -220,4 +220,26 @@ public void ConfigureServices(IServiceCollection services)
     });
 ```
 
-Your custom behaviors class must have the same generic type parameters - `<T, TContext>`. Otherwise, the Microsoft.Extensions.DependencyInjection service provider won't know how to inject it.
+If your application only uses a single `DbContext`, you can also use a partially constructed generic that fixes the context type parameter:
+
+```c#
+public class MyBehaviors<T> : StandardBehaviors<T, AppDbContext>
+    where T : class
+{
+    public MyBehaviors(CrudContext<AppDbContext> context) : base(context)
+    {
+    }
+
+    ...
+}
+```
+
+```c#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddCoalesce(b =>
+    {
+        b.AddContext<AppDbContext>();
+        b.UseDefaultBehaviors(typeof(MyBehaviors<>));
+    });
+```

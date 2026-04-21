@@ -12,7 +12,7 @@ public class EnumStringSerializationTests
         var enumType = ReflectionRepository.Global.GetOrAddType(typeof(StringSerializedEnum));
 
         await Assert.That(enumType.IsEnum).IsTrue();
-        await Assert.That(enumType.IsEnumStringSerializable).IsTrue();
+        await Assert.That(enumType.IsStringEnum).IsTrue();
     }
 
     [Test]
@@ -21,7 +21,7 @@ public class EnumStringSerializationTests
         var enumType = ReflectionRepository.Global.GetOrAddType(typeof(Case.Statuses));
 
         await Assert.That(enumType.IsEnum).IsTrue();
-        await Assert.That(enumType.IsEnumStringSerializable).IsFalse();
+        await Assert.That(enumType.IsStringEnum).IsFalse();
     }
 
     [Test]
@@ -33,8 +33,8 @@ public class EnumStringSerializationTests
         var regularEnumProperty = classViewModel.PropertyByName(nameof(ComplexModel.EnumWithDefault))!;
         var nullableStringEnumProperty = classViewModel.PropertyByName(nameof(ComplexModel.StringEnumNullable))!;
 
-        await Assert.That(stringEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable).IsTrue();
-        await Assert.That(regularEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable).IsFalse();
-        await Assert.That(nullableStringEnumProperty.Type.NullableValueUnderlyingType.IsEnumStringSerializable).IsTrue();
+        await Assert.That(stringEnumProperty.Type.NullableValueUnderlyingType.IsStringEnum).IsTrue();
+        await Assert.That(regularEnumProperty.Type.NullableValueUnderlyingType.IsStringEnum).IsFalse();
+        await Assert.That(nullableStringEnumProperty.Type.NullableValueUnderlyingType.IsStringEnum).IsTrue();
     }
 }

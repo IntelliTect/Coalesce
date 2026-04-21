@@ -27,7 +27,7 @@ public class TsModels : StringBuilderFileGenerator<ReflectionRepository>
                 foreach (var value in model.EnumValues)
                 {
                     b.DocComment(value.Comment ?? value.Description);
-                    if (model.IsEnumStringSerializable)
+                    if (model.IsStringEnum)
                     {
                         b.Line($"{value.Name} = \"{value.Name}\",");
                     }

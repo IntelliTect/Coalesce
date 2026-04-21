@@ -98,7 +98,7 @@ public abstract class TypeViewModel : IAttributeProvider
     /// Returns true if this enum type is annotated with JsonConverter(typeof(JsonStringEnumConverter))
     /// and should be serialized as strings instead of numeric values.
     /// </summary>
-    public bool IsEnumStringSerializable => IsEnum &&
+    public bool IsStringEnum => IsEnum &&
         this.HasAttribute<System.Text.Json.Serialization.JsonConverterAttribute>() &&
         this.GetAttributeValue<System.Text.Json.Serialization.JsonConverterAttribute>(a => a.ConverterType)?.FullyQualifiedName == "System.Text.Json.Serialization.JsonStringEnumConverter";
 

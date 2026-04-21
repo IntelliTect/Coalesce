@@ -230,46 +230,28 @@ export function parseValue(
       return parsed;
 
     case "enum":
-      // For string-serialized enums, keep value as string enum member name
-      if (meta.typeDef.serializeAsString) {
-        if (type === "string") {
-          if (isNullOrWhitespace(value)) {
-            return null;
-          }
-          // Validate that the string is a valid enum member
-          if (meta.typeDef.valueLookup[value]) {
-            return value;
-          }
-          throw parseError(value, meta);
-        }
-        if (type === "number") {
-          // A numeric value may arrive from legacy sources or local storage.
-          // Convert it to the corresponding string enum member name.
-          const enumMember = meta.typeDef.valueLookup[value];
-          if (enumMember) {
-            return enumMember.strValue;
-          }
-          throw parseError(value, meta);
-        }
-        throw parseError(value, meta);
-      }
-
-      // For regular (numeric) enums
-      if (type === "number") return value;
-
-      if (type !== "string") {
-        throw parseError(value, meta);
-      }
-
-      if (isNullOrWhitespace(value)) {
+      if (type === "string" && isNullOrWhitespace(value)) {
         return null;
       }
 
-      const enumParsed = Number(value);
-      if (isNaN(enumParsed)) {
-        throw parseError(value, meta);
+      {
+        const enumMember = meta.typeDef.valueLookup[value];
+        if (enumMember) {
+          return meta.typeDef.format === "string"
+            ? enumMember.strValue
+            : enumMember.value;
+        }
+        if (meta.typeDef.format !== "string") {
+          if (type === "number") return value;
+          if (type === "string") {
+            const parsed = Number(value);
+            if (!isNaN(parsed)) return parsed;
+          }
+        } else {
+          if (type === "string") return value;
+        }
       }
-      return enumParsed;
+      throw parseError(value, meta);
 
     case "string":
       if (type === "string") return value;

@@ -237,10 +237,11 @@ export interface EnumType<K extends string = string> extends Metadata {
   readonly values: EnumMember[];
 
   /**
-   * True if this enum should be serialized as strings instead of numbers for JSON.
-   * This is set when the enum has JsonStringEnumConverter attribute.
+   * The format of this enum's values over the wire.
+   * When `"string"`, enum values are serialized as their string member names instead of numbers.
+   * Set when the enum has `JsonStringEnumConverter` attribute.
    */
-  readonly serializeAsString?: boolean;
+  readonly format?: "string";
 
   // TODO: support [Flags] enums? Would need special handling for displaying/editing, and a flag on the metadata to flag it as [Flags]
 }

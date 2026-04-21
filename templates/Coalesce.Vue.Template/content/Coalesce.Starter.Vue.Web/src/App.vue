@@ -189,9 +189,8 @@ const routeMeta = computed(() => {
 const isForbidden = computed(() => {
   if (
     routeMeta.value?.permissions &&
-    !userInfo.value?.permissions?.some(
-      // @ts-expect-error indexing enum with arbitrary string
-      (r) => routeMeta.value?.permissions?.includes(Permission[r as any]),
+    !userInfo.value?.permissions?.some((r) =>
+      routeMeta.value?.permissions?.includes(r),
     )
   ) {
     return true;

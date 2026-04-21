@@ -69,7 +69,7 @@ export class AuditLogPropertyListViewModel extends ListViewModel<$models.AuditLo
 
 export interface RoleViewModel extends $models.Role {
   name: string | null;
-  permissions: $models.Permission[] | null;
+  permissionEnums: $models.Permission[] | null;
   id: string | null;
 }
 export class RoleViewModel extends ViewModel<$models.Role, $apiClients.RoleApiClient, string> implements $models.Role  {

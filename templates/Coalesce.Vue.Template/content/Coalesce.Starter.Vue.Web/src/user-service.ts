@@ -34,9 +34,7 @@ export const userInfo = computed(() => {
 /** Returns true if the user has any of the specified permissions */
 export function can(...permission: Permission[]) {
   return (
-    userInfo.value?.permissions?.some((r) =>
-      permission.map((p) => Permission[p]).includes(r),
-    ) || false
+    userInfo.value?.permissions?.some((r) => permission.includes(r)) || false
   );
 }
 //#endif

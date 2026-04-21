@@ -255,12 +255,7 @@
                 <h3>Effective Permissions:</h3>
                 <div style="max-height: 300px; overflow-y: auto">
                   <div
-                    v-for="permission in PermissionMeta.values.map((p) => ({
-                      meta: p,
-                      roles: user.roles.filter((r) =>
-                        r.permissions?.includes(p.value),
-                      ),
-                    }))"
+                    v-for="permission in effectivePermissions"
                     :key="permission.meta.strValue"
                   >
                     <span v-if="permission.roles.length">
@@ -337,6 +332,18 @@ const props = defineProps<{ id: string }>();
 const user = new UserViewModel();
 
 const isUserAdmin = computed(() => can(Permission.UserAdmin));
+
+const effectivePermissions = computed(() =>
+  PermissionMeta.values.map((permission) => ({
+    meta: permission,
+    roles: user.roles.filter((role) =>
+      role.permissionEnums?.some(
+        (rolePerm) =>
+          PermissionMeta.valueLookup[rolePerm]?.value === permission.value,
+      ),
+    ),
+  })),
+);
 
 //#if Tenancy
 const isGlobalAdmin = computed(() =>

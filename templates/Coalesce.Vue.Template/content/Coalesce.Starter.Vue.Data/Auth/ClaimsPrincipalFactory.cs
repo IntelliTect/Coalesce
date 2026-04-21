@@ -70,7 +70,7 @@ public class ClaimsPrincipalFactory(
             .AsNoTracking()
             .Select(r => r.Role!)
             .ToListAsync())
-            .SelectMany(role => role.Permissions!)
+            .SelectMany(role => role.PermissionEnums!)
             .ToHashSet();
 
         var permissionIdentity = new ClaimsIdentity(

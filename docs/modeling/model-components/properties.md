@@ -10,6 +10,22 @@ The following kinds of properties may be declared on your models.
 
 Most common built-in primitive (numerics, strings, booleans) and other scalar data types (enums, [date types](/topics/working-with-dates.md), `Guid`, `Uri`), and their nullable variants, are all supported as model properties. Collections of these types are also supported.
 
+#### Enum String Serialization
+
+Enums can be serialized as strings in API responses by annotating them with `[JsonConverter(typeof(JsonStringEnumConverter))]`:
+
+```c#
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum Status
+{
+    Active = 1,
+    Inactive = 2,
+    Pending = 3
+}
+```
+
+When this attribute is present, enum values will be sent and received as strings (e.g., `"Active"`) in JSON instead of numbers. The generated TypeScript enums will use string values (e.g., `Active = "Active"`), and Coalesce handles the conversion transparently.
+
 ### Object Properties
 
 Properties whose type is another complex object (as opposed to a [primitive or scalar](#primitives-scalars-dates)) fall into two categories based on whether the property type has a `DbSet<T>` on the `DbContext`:

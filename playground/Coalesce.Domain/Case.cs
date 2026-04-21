@@ -12,12 +12,15 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
+using System.Text.Json.Serialization;
+
 namespace Coalesce.Domain;
 
 [Table("Case")]
 [Create(PermissionLevel = SecurityPermissionLevels.AllowAll)]
 public class Case
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Statuses
     {
         Open,

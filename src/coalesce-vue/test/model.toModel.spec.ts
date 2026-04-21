@@ -61,7 +61,19 @@ const dtoToModelMappings = <MappingData[]>[
   { meta: cmProps.enumWithDefault, dto: "10", model: 10 },
   // Enums should parse any number - not just valid enum values. This allows for flags enums.
   { meta: cmProps.enumWithDefault, dto: 123, model: 123 },
+  // String enum member names should resolve to their numeric value
+  { meta: cmProps.enumWithDefault, dto: "Value10", model: 10 },
   ...unparsable(cmProps.enumWithDefault, "abc", {}, [], true),
+
+  // String-serialized enum
+  { meta: cmProps.stringEnum, dto: "FirstValue", model: "FirstValue" },
+  // Numeric value should be converted to string enum member name
+  { meta: cmProps.stringEnum, dto: 1, model: "FirstValue" },
+  // Numeric string should also resolve to string enum member name
+  { meta: cmProps.stringEnum, dto: "1", model: "FirstValue" },
+  // Unknown string values pass through (server may have newer enum members)
+  { meta: cmProps.stringEnum, dto: "UnknownValue", model: "UnknownValue" },
+  ...unparsable(cmProps.stringEnum, {}, [], true),
 
   // Date
   {

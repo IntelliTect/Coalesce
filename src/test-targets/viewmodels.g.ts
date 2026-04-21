@@ -447,6 +447,8 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
   clientValidationInt: number | null;
   clientValidationString: string | null;
   enumNullable: $models.Statuses | null;
+  stringEnum: $models.StringSerializedEnum | null;
+  stringEnumNullable: $models.StringSerializedEnum | null;
   readOnlyPrimitiveCollection: string[] | null;
   mutablePrimitiveCollection: string[] | null;
   primitiveEnumerable: string[] | null;

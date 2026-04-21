@@ -243,7 +243,8 @@ export function parseValue(
           throw parseError(value, meta);
         }
         if (type === "number") {
-          // Convert numeric value to string enum member name
+          // A numeric value may arrive from legacy sources or local storage.
+          // Convert it to the corresponding string enum member name.
           const enumMember = meta.typeDef.valueLookup[value];
           if (enumMember) {
             return enumMember.strValue;

@@ -179,7 +179,7 @@ export function parseValue(value: null | undefined, meta: Value): null;
 export function parseValue(value: any, meta: StringValue): null | string;
 export function parseValue(value: any, meta: NumberValue): null | number;
 export function parseValue(value: any, meta: BooleanValue): null | boolean;
-export function parseValue(value: any, meta: EnumValue): null | number;
+export function parseValue(value: any, meta: EnumValue): null | number | string;
 export function parseValue(value: any, meta: DateValue): null | Date;
 export function parseValue(value: any, meta: FileValue): null | Blob | File;
 export function parseValue(
@@ -208,7 +208,6 @@ export function parseValue(
 
   switch (meta.type) {
     case "number":
-    case "enum":
       if (type === "number") return value;
 
       if (type !== "string") {
@@ -229,6 +228,47 @@ export function parseValue(
         throw parseError(value, meta);
       }
       return parsed;
+
+    case "enum":
+      // For string-serialized enums, keep value as string enum member name
+      if (meta.typeDef.serializeAsString) {
+        if (type === "string") {
+          if (isNullOrWhitespace(value)) {
+            return null;
+          }
+          // Validate that the string is a valid enum member
+          if (meta.typeDef.valueLookup[value]) {
+            return value;
+          }
+          throw parseError(value, meta);
+        }
+        if (type === "number") {
+          // Convert numeric value to string enum member name
+          const enumMember = meta.typeDef.valueLookup[value];
+          if (enumMember) {
+            return enumMember.strValue;
+          }
+          throw parseError(value, meta);
+        }
+        throw parseError(value, meta);
+      }
+
+      // For regular (numeric) enums
+      if (type === "number") return value;
+
+      if (type !== "string") {
+        throw parseError(value, meta);
+      }
+
+      if (isNullOrWhitespace(value)) {
+        return null;
+      }
+
+      const enumParsed = Number(value);
+      if (isNaN(enumParsed)) {
+        throw parseError(value, meta);
+      }
+      return enumParsed;
 
     case "string":
       if (type === "string") return value;

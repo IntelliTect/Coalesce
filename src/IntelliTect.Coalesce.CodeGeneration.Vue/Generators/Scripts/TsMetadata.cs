@@ -183,6 +183,12 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
             b.StringProp("displayName", model.DisplayName);
             b.StringProp("type", "enum");
 
+            // Add flag for string serialization if this enum has JsonStringEnumConverter
+            if (model.IsEnumStringSerializable)
+            {
+                b.Prop("serializeAsString", "true");
+            }
+
             string enumShape = string.Join("|", model.EnumValues.Select(ev => $"\"{ev.Name}\""));
             b.Line($"...getEnumMeta<{enumShape}>([");
             foreach (var value in model.EnumValues)

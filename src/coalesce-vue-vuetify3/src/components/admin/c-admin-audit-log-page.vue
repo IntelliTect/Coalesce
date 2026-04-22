@@ -76,7 +76,7 @@
               />
 
               <c-select
-                v-if="'foreignKey' in userPropMeta"
+                v-if="userPropMeta && 'foreignKey' in userPropMeta"
                 v-model:key-value="filter[userPropMeta.foreignKey.name]"
                 :for="userPropMeta"
                 clearable

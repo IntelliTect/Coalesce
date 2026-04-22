@@ -409,6 +409,37 @@ Manually cancels the current request.
 
   Manually cancel the current request. The promise of the cancelled invocation will be resolved with `undefined` (it is NOT rejected). If using concurrency mode `"allow"`, only the most recent invocation is cancelled.
 
+### getPromise() {#getpromise}
+
+Returns the promise of the currently pending request.
+
+- **Type**
+
+  ```ts
+  // ItemResult callers
+  getPromise(): Promise<TResult> | undefined
+
+  // ListResult callers
+  getPromise(): Promise<TResult[]> | undefined
+  ```
+
+- **Details**
+
+  Returns the same promise that was returned when the caller was invoked, or `undefined` if no request is pending. This is useful when code that didn't initiate the request needs to await its completion.
+
+- **Example**
+
+  ```ts
+  // Await a pending $load or trigger a new one:
+  await (viewModel.$load.getPromise() || viewModel.$load());
+  ```
+
+  ```ts
+  // Wait for any in-flight save to finish before proceeding:
+  await viewModel.$save.getPromise();
+  doSomethingAfterSave();
+  ```
+
 ### onFulfilled() {#onfulfilled}
 
 Adds a callback to be invoked when a success response is received.

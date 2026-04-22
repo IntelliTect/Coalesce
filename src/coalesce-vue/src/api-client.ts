@@ -1388,6 +1388,8 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
     args: any[],
   ): Promise<ItemResult<TResult> | ListResult<TResult>>;
 
+  protected _pendingPromise: Promise<any> | undefined;
+
   constructor(
     apiClient: ApiClient<any>,
     invoker: ApiCallerInvoker<
@@ -1398,7 +1400,9 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
   ) {
     // Create our invoker function that will ultimately be our instance object.
     const invokeFunc = function invokeFunc(this: any, ...args: TArgs) {
-      return invoke._invokeInternal(this, invoker, [...args]);
+      return (invoke._pendingPromise = invoke._invokeInternal(this, invoker, [
+        ...args,
+      ]));
     };
 
     const invoke = invokeFunc as unknown as this;
@@ -1614,7 +1618,9 @@ export abstract class ApiState<
   /** Invoke a call to the API endpoint after an affirmative confirmation from the user. */
   confirmInvoke(message: string, ...args: TArgs) {
     if (!confirm(message)) return;
-    return this._invokeInternal(this, this.invoker, [...args]);
+    return (this._pendingPromise = this._invokeInternal(this, this.invoker, [
+      ...args,
+    ]));
   }
 
   private _callbacks: {
@@ -1919,6 +1925,8 @@ export abstract class ApiState<
 
       throw error;
     } finally {
+      this._pendingPromise = undefined;
+
       if (this._debounceSignal) {
         this._debounceSignal.resolve();
         this._debounceSignal = null;
@@ -1986,6 +1994,14 @@ export class ItemApiState<
 > extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: TMethod;
+
+  /**
+   * Returns the promise of the currently pending request,
+   * or `undefined` if no request is pending.
+   */
+  getPromise(): Promise<TResult> | undefined {
+    return this._pendingPromise;
+  }
 
   private readonly __validationIssues = ref<ValidationIssue[] | null>(null);
   /** Validation issues returned by the previous request. */
@@ -2141,7 +2157,11 @@ export class ItemApiStateWithArgs<
     // called will be used, rather than the state at the time when the actual API call gets made.
     args = { ...args };
 
-    return this._invokeInternal(this, this.argsInvoker, [args]);
+    return (this._pendingPromise = this._invokeInternal(
+      this,
+      this.argsInvoker,
+      [args],
+    ));
   }
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
@@ -2207,6 +2227,14 @@ export class ListApiState<
 > extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: TMethod;
+
+  /**
+   * Returns the promise of the currently pending request,
+   * or `undefined` if no request is pending.
+   */
+  getPromise(): Promise<TResult[]> | undefined {
+    return this._pendingPromise;
+  }
 
   private readonly __page = ref<number | null>(null);
   /** Page number returned by the previous request. */
@@ -2325,7 +2353,11 @@ export class ListApiStateWithArgs<
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
-    return this._invokeInternal(this, this.argsInvoker, [args]);
+    return (this._pendingPromise = this._invokeInternal(
+      this,
+      this.argsInvoker,
+      [args],
+    ));
   }
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */

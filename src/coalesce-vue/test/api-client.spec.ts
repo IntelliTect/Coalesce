@@ -12,6 +12,7 @@ import {
   ListParameters,
   type ItemResult,
   type ItemResultPromise,
+  type ListResult,
   type AxiosRequestConfig,
   type AxiosListResult,
   type ListResultPromise,
@@ -983,6 +984,107 @@ describe("$makeCaller", () => {
     expect(res1).toBeUndefined();
     expect(res2).toBeUndefined();
     expect(res3).toBeTruthy();
+  });
+
+  test("getPromise returns undefined when no request is pending", () => {
+    const endpointMock = makeEndpointMock();
+    const caller = new PersonApiClient().$makeCaller("item", (c, num: number) =>
+      endpointMock(num),
+    );
+    expect(caller.getPromise()).toBeUndefined();
+  });
+
+  test("getPromise returns the invocation promise", async () => {
+    const endpointMock = makeEndpointMock();
+    const caller = new PersonApiClient().$makeCaller(
+      "item",
+      async (c, num: number) => {
+        await delay(20);
+        return await endpointMock(num);
+      },
+    );
+
+    const invocation = caller(1);
+    expect(caller.getPromise()).toBe(invocation);
+
+    const result = await caller.getPromise();
+    const _typeCheck: number | undefined = result;
+    expect(result).toBe(1);
+    expect(caller.isLoading).toBe(false);
+    expect(caller.wasSuccessful).toBe(true);
+
+    // Should be undefined after completion
+    expect(caller.getPromise()).toBeUndefined();
+  });
+
+  test("getPromise on list caller returns array type", async () => {
+    const endpointMock = vitest.fn(() => {
+      return Promise.resolve({
+        data: <ListResult<number>>{
+          wasSuccessful: true,
+          list: [1, 2, 3],
+        },
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config: {},
+      }) as ListResultPromise<number>;
+    });
+    const caller = new PersonApiClient().$makeCaller("list", async (c) => {
+      await delay(20);
+      return await endpointMock();
+    });
+
+    caller();
+    const result = await caller.getPromise();
+    const _typeCheck: number[] | undefined = result;
+    expect(result).toEqual([1, 2, 3]);
+  });
+
+  test("getPromise rejects when request fails", async () => {
+    const caller = new PersonApiClient().$makeCaller("item", async () => {
+      await delay(20);
+      throw new Error("fail");
+    });
+
+    const invocation = caller().catch(() => {});
+    const pending = caller.getPromise();
+    expect(pending).toBeDefined();
+
+    await expect(pending).rejects.toThrow("fail");
+    expect(caller.isLoading).toBe(false);
+
+    // Should be undefined after completion
+    expect(caller.getPromise()).toBeUndefined();
+
+    await invocation;
+  });
+
+  test("getPromise tracks the latest request with cancel concurrency", async () => {
+    AxiosClient.defaults.adapter = vitest.fn().mockImplementation(async () => {
+      await delay(20);
+      return <AxiosResponse<any>>{
+        data: { wasSuccessful: true, object: { personId: 1 } },
+        status: 200,
+      };
+    });
+
+    const caller = new PersonApiClient()
+      .$makeCaller("item", (c) => c.get(1))
+      .setConcurrency("cancel");
+
+    const prom1 = caller();
+    expect(caller.getPromise()).toBe(prom1);
+
+    // Second call cancels the first; getPromise should now track the second
+    const prom2 = caller();
+    expect(caller.getPromise()).toBe(prom2);
+    expect(caller.getPromise()).not.toBe(prom1);
+
+    await prom1;
+    await prom2;
+    expect(caller.isLoading).toBe(false);
+    expect(caller.getPromise()).toBeUndefined();
   });
 
   test("handles successful file response", async () => {

@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Coalesce.Starter.Vue.Web.Pages;
 
 [AllowAnonymous]
+[EnableRateLimiting("auth")]
 public class ConfirmEmailModel(UserManager<User> userManager, SignInManager<User> signInManager) : PageModel
 {
     public const string InvalidError = "The link is no longer valid.";
@@ -16,8 +18,8 @@ public class ConfirmEmailModel(UserManager<User> userManager, SignInManager<User
     public async Task<IActionResult> OnGetAsync(string userId, string code, string? newEmail)
     {
         if (
-            string.IsNullOrWhiteSpace(userId) || 
-            string.IsNullOrWhiteSpace(code) || 
+            string.IsNullOrWhiteSpace(userId) ||
+            string.IsNullOrWhiteSpace(code) ||
             (await userManager.FindByIdAsync(userId)) is not { } user
         )
         {

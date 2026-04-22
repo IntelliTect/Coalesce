@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using System.ComponentModel.DataAnnotations;
 
 namespace Coalesce.Starter.Vue.Web.Pages;
 
 [AllowAnonymous]
+[EnableRateLimiting("auth")]
 public class SignInModel(
     SignInManager<User> signInManager
 #if (Passwords || Passkeys)

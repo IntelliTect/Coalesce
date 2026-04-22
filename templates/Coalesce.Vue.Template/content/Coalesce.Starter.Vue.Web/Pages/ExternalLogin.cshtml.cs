@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -24,6 +25,7 @@ using System.Security.Cryptography;
 namespace Coalesce.Starter.Vue.Web.Pages;
 
 [AllowAnonymous]
+[EnableRateLimiting("auth")]
 public class ExternalLoginModel(
     AppDbContext db,
     SignInManager<User> signInManager,

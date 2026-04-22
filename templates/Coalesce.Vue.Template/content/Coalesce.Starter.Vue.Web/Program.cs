@@ -26,6 +26,9 @@ using Azure.Identity;
 #if (Passwords || Passkeys || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)
 using Coalesce.Starter.Vue.Data.Communication;
 #endif
+#if Identity
+using System.Threading.RateLimiting;
+#endif
 #if Hangfire
 using Hangfire;
 using Hangfire.SqlServer;
@@ -94,6 +97,20 @@ builder.AddAzureBlobContainerClient("Blobs");
 #endif
 #if Identity
 builder.ConfigureAuthentication();
+
+services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", context =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 12,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 4,
+            }));
+});
 
 #endif
 #if EmailSendGrid
@@ -199,6 +216,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+#if Identity
+app.UseRateLimiter();
+#endif
 
 app.UseViteStaticFiles();
 app.UseNoCacheResponseHeader();

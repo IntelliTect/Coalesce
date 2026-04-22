@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using System.ComponentModel.DataAnnotations;
 
 namespace Coalesce.Starter.Vue.Web.Pages;
@@ -11,8 +12,9 @@ namespace Coalesce.Starter.Vue.Web.Pages;
 #nullable disable
 
 [AllowAnonymous]
+[EnableRateLimiting("auth")]
 public class ForgotPasswordModel(
-    UserManager<User> userManager, 
+    UserManager<User> userManager,
     UserManagementService userManagementService
 ) : PageModel
 {

@@ -1,13 +1,14 @@
 # 6.5.0
 - `CrudContext.User` now has a public setter, allowing the user principal to be overridden from the value provided by `IHttpContextAccessor` (e.g. for testing or non-http scenarios).
-- Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 - Support enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` as string-serialized enums. These are generated as string-valued TypeScript enums and serialized as strings over the wire.
+- Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 
 ## Template Changes
 - Added Vuetify 4 CSS layer ordering to `index.html` to work around Vite 8/Rolldown CSS ordering bugs.
 - Replaced deprecated `typeface-roboto` with `@fontsource/roboto/latin.css` and `@fontsource/roboto/latin-italic.css`.
 - The first-party login flow is now two-stage: enter username first, then choose between password, passkey, or a one-time email code. When `Passkeys` is enabled, users who sign in with password or email code are then prompted to create a passkey.
 - `Role.Permissions` are no longer EF-mapped as enums. The EF property is now `List<string>`, with a `[NotMapped]` `PermissionEnums` wrapper that silently drops unrecognized values. This prevents `InvalidOperationException` when a `Permission` enum member is removed but old values remain in the database.
+- Added rate limiting to authentication pages (sign-in, register, forgot password, reset password, email confirmation, external login) to mitigate brute-force abuse.
 
 # 6.4.0
 - Caller `args` objects now include `$metadata`, enabling `useBindToQueryString` to automatically serialize/deserialize their members correctly without custom `parse`/`stringify`.
@@ -20,7 +21,12 @@
 - Fix: c-select `autofocus` aggressively stealing focus from other elements.
 
 ## Template Changes
-- Assorted template improvements
+- Added `.npmrc` with `min-release-age=2` and `ignore-scripts=true` to mitigate supply chain attacks.
+- Added Dependabot configuration for GitHub Actions dependency updates.
+- Added Vite warmup for nested view files (`./src/views/**/*.vue`).
+- Removed deprecated `baseUrl` from `tsconfig.json` and updated `paths` to use relative `./src/*` instead.
+- Renamed deprecated VS Code setting `typescript.tsdk` to `js/ts.tsdk.path`.
+- Added AI agent guidelines to `AGENTS.md`: prefer `read/problems` over `npm run build` for validation (to avoid breaking HMR), use SCSS in `.vue` files, and use `date-fns` for date formatting.
 - Template test projects now use TUnit instead of xUnit.
 
 # 6.3.0

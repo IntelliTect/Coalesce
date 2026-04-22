@@ -309,7 +309,7 @@ export interface UserInfo extends Model<typeof metadata.UserInfo> {
   email: string | null
   fullName: string | null
   roles: string[] | null
-  permissions: string[] | null
+  permissions: Permission[] | null
   tenantId: string | null
   tenantName: string | null
 }

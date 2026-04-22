@@ -18,7 +18,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         private string _Email;
         private string _FullName;
         private System.Collections.Generic.ICollection<string> _Roles;
-        private System.Collections.Generic.ICollection<string> _Permissions;
+        private System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> _Permissions;
         private string _TenantId;
         private string _TenantName;
 
@@ -47,7 +47,7 @@ namespace Coalesce.Starter.Vue.Web.Models
             get => _Roles;
             set { _Roles = value; Changed(nameof(Roles)); }
         }
-        public System.Collections.Generic.ICollection<string> Permissions
+        public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> Permissions
         {
             get => _Permissions;
             set { _Permissions = value; Changed(nameof(Permissions)); }
@@ -119,7 +119,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         public string Email { get; set; }
         public string FullName { get; set; }
         public System.Collections.Generic.ICollection<string> Roles { get; set; }
-        public System.Collections.Generic.ICollection<string> Permissions { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Data.Permission> Permissions { get; set; }
         public string TenantId { get; set; }
         public string TenantName { get; set; }
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using System.ComponentModel.DataAnnotations;
 
 namespace Coalesce.Starter.Vue.Web.Pages;
@@ -10,6 +11,7 @@ namespace Coalesce.Starter.Vue.Web.Pages;
 #nullable disable
 
 [AllowAnonymous]
+[EnableRateLimiting("auth")]
 public class ResetPasswordModel(UserManager<User> userManager, SignInManager<User> signInManager) : PageModel
 {
     public const string InvalidError = "The link is no longer valid.";

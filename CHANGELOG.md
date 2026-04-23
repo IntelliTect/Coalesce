@@ -1,8 +1,8 @@
 # 6.5.0
-- `CrudContext.User` now has a public setter, allowing the user principal to be overridden from the value provided by `IHttpContextAccessor` (e.g. for testing or non-http scenarios).
+- `CrudContext.User` now has a public setter, allowing the user principal to be overridden (e.g. for testing or non-HttpContext scenarios).
 - Support enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` as string-serialized enums. These are generated as string-valued TypeScript enums and serialized as strings over the wire.
-- Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 - Added `getPromise()` method to API callers, returning the current invocation's promise (or `undefined` if idle).
+- Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 
 ## Template Changes
 - Added Vuetify 4 CSS layer ordering to `index.html` to work around Vite 8/Rolldown CSS ordering bugs.

@@ -63,12 +63,12 @@
     "vuetify": "^3.7.1 || ^4.0.0"
   },
   "optionalDependencies": {
-    "vue-router": "^4.4.1"
+    "vue-router": "^4.4.1 || ^5.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue-jsx": "^5.1.5",
     "coalesce-vue": "../coalesce-vue",
-    "vue-router": "^4.4.1",
+    "vue-router": "^4.4.1 || ^5.0.0",
     "vuetify": "3.10.3"
   }
 }

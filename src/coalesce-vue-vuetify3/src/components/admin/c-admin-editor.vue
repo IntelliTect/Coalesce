@@ -101,8 +101,10 @@
                       // Reload when a c-select-many-to-many item is deleted,
                       // since delete responses have no payloads and the delete
                       // might have affected a computed property on the model
-                      model.$load()
+                      model.$load();
+                      lastSavedAt = new Date();
                     "
+                    @added="lastSavedAt = new Date()"
                   >
                     <c-admin-display :model="model" :for="prop" />
                   </c-input>
@@ -177,14 +179,33 @@
       >
         <span class="hidden-sm-and-down">Save</span>
       </v-btn>
-      <v-btn
+      <v-chip
         v-else
-        disabled
-        prepend-icon="fa fa-save"
-        :loading="model.$save.isLoading"
+        class="c-admin-editor--autosave-chip"
+        color="success"
+        variant="tonal"
       >
-        Auto-save enabled
-      </v-btn>
+        <template #prepend>
+          <div class="c-admin-editor--autosave-chip--indicator">
+            <v-progress-circular
+              v-if="model.$save.isLoading"
+              indeterminate
+              size="14"
+              width="2"
+            />
+            <v-icon v-else icon="fa fa-save" start />
+          </div>
+        </template>
+        <template v-if="lastSavedAt">
+          Auto-saved
+          <c-display
+            :value="lastSavedAt"
+            :format="{ distance: true, addSuffix: true, includeSeconds: true }"
+            class="ml-1"
+          />
+        </template>
+        <template v-else> Auto-save enabled </template>
+      </v-chip>
     </v-card-actions>
   </v-card>
 </template>
@@ -200,7 +221,7 @@ import {
 
 import { getRefNavRoute } from "./util";
 import { isPropReadOnly } from "../../util";
-import { watch, computed, useTemplateRef } from "vue";
+import { watch, computed, useTemplateRef, ref, onUnmounted } from "vue";
 
 defineOptions({
   name: "c-admin-editor",
@@ -231,6 +252,27 @@ const form = useTemplateRef("form");
 watch(form, (form) => {
   form?.validate?.();
 });
+
+const lastSavedAt = ref<Date>();
+watch(
+  () => props.model.$save.isLoading,
+  (isLoading, wasLoading) => {
+    // Detect when loading transitions from true to false and the save was successful
+    if (wasLoading && !isLoading && props.model.$save.wasSuccessful) {
+      lastSavedAt.value = new Date();
+    }
+  },
+);
+
+// Update the display every 10 seconds to keep the "ago" text fresh
+const updateInterval = setInterval(() => {
+  if (lastSavedAt.value) {
+    // Force a re-render by reassigning the same value
+    lastSavedAt.value = new Date(lastSavedAt.value);
+  }
+}, 10000);
+
+onUnmounted(() => clearInterval(updateInterval));
 
 function propInputBinds(p: Property) {
   const readonly = isPropReadOnly(p, props.model);
@@ -315,7 +357,6 @@ const isBulkSaveDirty = computed(() => {
 
 <style lang="scss">
 @use "sass:math";
-
 .c-admin-editor--row {
   // Center each row so that things are nicely aligned,
   // especially in the case where labels are long enough to have to wrap.
@@ -371,5 +412,14 @@ $text-height: 10px;
 .c-admin-editor--img-preview img {
   max-width: 100px;
   display: block;
+}
+.c-admin-editor--autosave-chip--indicator {
+  min-width: 20px;
+  display: flex;
+  justify-content: center;
+  margin-right: 4px;
+  .v-icon {
+    margin: 0 !important;
+  }
 }
 </style>

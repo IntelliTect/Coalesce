@@ -2,6 +2,7 @@
 - `CrudContext.User` now has a public setter, allowing the user principal to be overridden (e.g. for testing or non-HttpContext scenarios).
 - Support enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` as string-serialized enums. These are generated as string-valued TypeScript enums and serialized as strings over the wire.
 - Added `getPromise()` method to API callers, returning the current invocation's promise (or `undefined` if idle).
+- Improved auto-save indicator in `c-admin-editor`.
 - Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 
 ## Template Changes

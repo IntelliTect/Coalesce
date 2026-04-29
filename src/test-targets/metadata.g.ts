@@ -1582,6 +1582,7 @@ export const Company = (domain.types.Company = {
       type: "string",
       role: "value",
       dontSerialize: true,
+      noFilter: true,
     },
   },
   methods: {},
@@ -1824,6 +1825,7 @@ export const ComplexModel = (domain.types.ComplexModel = {
       displayName: "Unmapped Settable String",
       type: "string",
       role: "value",
+      noFilter: true,
     },
     adminReadableString: {
       name: "adminReadableString",
@@ -2311,6 +2313,7 @@ export const ComplexModel = (domain.types.ComplexModel = {
         type: "string",
       },
       role: "value",
+      noFilter: true,
     },
     mutablePrimitiveCollection: {
       name: "mutablePrimitiveCollection",
@@ -2323,6 +2326,7 @@ export const ComplexModel = (domain.types.ComplexModel = {
         type: "string",
       },
       role: "value",
+      noFilter: true,
     },
     primitiveEnumerable: {
       name: "primitiveEnumerable",
@@ -2335,6 +2339,7 @@ export const ComplexModel = (domain.types.ComplexModel = {
         type: "string",
       },
       role: "value",
+      noFilter: true,
     },
   },
   methods: {
@@ -5162,6 +5167,7 @@ export const Person = (domain.types.Person = {
       type: "string",
       role: "value",
       dontSerialize: true,
+      noFilter: true,
     },
     companyId: {
       name: "companyId",

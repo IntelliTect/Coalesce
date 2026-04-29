@@ -3,6 +3,7 @@
 - Support enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` as string-serialized enums. These are generated as string-valued TypeScript enums and serialized as strings over the wire.
 - Added `getPromise()` method to API callers, returning the current invocation's promise (or `undefined` if idle).
 - Improved auto-save indicator in `c-admin-editor`.
+- `c-list-filters` now uses new `noFilter` metadata to determine which properties are filterable, which results in proper alignment with what the server will allow.
 - Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 
 ## Template Changes

@@ -335,6 +335,16 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
                 b.Line("createOnly: true,");
             }
 
+            // Only emit noFilter when the property's type would make the client
+            // think it's filterable, but the server won't actually filter on it (e.g. [NotMapped] primitives).
+            if (!prop.IsUrlFilterParameter && (
+                prop.PureType.IsPrimitive ||
+                prop.PureType.IsValidKeyType
+            ))
+            {
+                b.Line("noFilter: true,");
+            }
+
 
             if (prop.IsClientWritable && prop.IsClientSerializable && (
                 prop.Type.TsTypeKind is

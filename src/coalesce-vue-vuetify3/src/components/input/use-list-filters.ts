@@ -36,7 +36,7 @@ export function useListFilters(list: Ref<ListViewModel | undefined | null>) {
     const filterNames = (Object.values(meta.props) as Property[])
       .filter(
         (p) =>
-          !p.dontSerialize &&
+          !p.noFilter &&
           (filterTypes.includes(p.type) ||
             (p.type == "collection" && filterTypes.includes(p.itemType.type))),
       )

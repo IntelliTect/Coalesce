@@ -459,6 +459,9 @@ export interface PropertyBase {
 
   /** Enum indicating what admin views the property is hidden on, if any. */
   readonly hidden?: HiddenAreas;
+
+  /** True if the property is not filterable via the list `filter` parameter. */
+  readonly noFilter?: boolean | undefined;
 }
 
 /** Represents a primitive property */

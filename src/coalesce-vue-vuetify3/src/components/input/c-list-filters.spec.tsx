@@ -231,4 +231,26 @@ describe("CListFilters", () => {
     await listItems.find((i) => i.text().includes("Item 3"))!.trigger("click");
     expect(list.$filter.dateOnlyPkId).toBe("");
   });
+
+  test("excludes properties with noFilter metadata from filter options", async () => {
+    const { list } = setupListAndWatcher();
+    const wrapper = await mountFiltersComponent(list);
+
+    // Open the filters menu
+    const filterButton = wrapper.find(".c-list-filters");
+    await filterButton.trigger("click");
+    await flushPromises();
+
+    const items = getWrapper(".v-overlay__content").findAll(".v-list-item");
+
+    // unmappedSettableString has noFilter: true - should have no filter button
+    const noFilterItem = items.find((item) =>
+      item.text().includes("Unmapped Settable String"),
+    )!;
+    expect(noFilterItem.find(".fa-filter").exists()).toBe(false);
+
+    // name is a normal filterable string - should have a filter button
+    const filterableItem = items.find((item) => item.text().includes("Name"))!;
+    expect(filterableItem.find(".fa-filter").exists()).toBe(true);
+  });
 });

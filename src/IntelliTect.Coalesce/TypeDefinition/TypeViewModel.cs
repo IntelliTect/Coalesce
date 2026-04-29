@@ -281,13 +281,13 @@ public abstract class TypeViewModel : IAttributeProvider
     {
         get
         {
-            if (IsArray)
-            {
-                return ArrayType!;
-            }
-
             if (IsCollection)
             {
+                if (IsArray)
+                {
+                    return ArrayType!;
+                }
+
                 return (
                     GenericArgumentsFor(typeof(ICollection<>))
                     ?? GenericArgumentsFor(typeof(IEnumerable<>))

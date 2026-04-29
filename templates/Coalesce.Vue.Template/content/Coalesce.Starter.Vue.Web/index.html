@@ -6,25 +6,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <title>MyAppName</title>
-
-    <!-- Vuetify 4 CSS layer order. Must appear before any component styles
-         to prevent reset rules from overriding component styles.
-         Workaround for Vite 8/Rolldown CSS ordering bugs:
-         https://github.com/vuetifyjs/vuetify/issues/22752
-         https://github.com/vitejs/vite/issues/21903 -->
-    <style>
-      @layer vuetify-core {
-        @layer reset, base;
-      }
-      @layer vuetify-components;
-      @layer vuetify-overrides;
-      @layer vuetify-utilities {
-        @layer theme-base, typography, helpers, theme-background, theme-foreground;
-      }
-      @layer vuetify-final {
-        @layer transitions, trumps;
-      }
-    </style>
   </head>
   <body>
     <noscript>

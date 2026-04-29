@@ -22,11 +22,12 @@ steps:
     inputs:
       version: "24.x"
 
-  - task: Npm@1
-    displayName: npm ci
-    inputs:
-      command: "ci"
-      workingDir: $(webDir)
+  - script: npm install -g pnpm@11
+    displayName: Install pnpm
+
+  - script: pnpm install --frozen-lockfile
+    displayName: pnpm install
+    workingDirectory: $(webDir)
 
   - task: DotNetCoreCLI@2
     inputs:
@@ -42,19 +43,13 @@ steps:
       workingDirectory: "$(webDir)"
     displayName: Check Coalesce has run
 
-  - task: Npm@1
-    displayName: npm run lint
-    inputs:
-      command: "custom"
-      workingDir: $(webDir)
-      customCommand: "run lint"
+  - script: pnpm lint
+    displayName: pnpm lint
+    workingDirectory: $(webDir)
 
-  - task: Npm@1
-    displayName: npm run build
-    inputs:
-      command: "custom"
-      workingDir: $(webDir)
-      customCommand: "run build"
+  - script: pnpm build
+    displayName: pnpm build
+    workingDirectory: $(webDir)
 
   - task: DotNetCoreCLI@2
     displayName: dotnet build

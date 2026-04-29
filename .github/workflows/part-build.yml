@@ -223,6 +223,14 @@ jobs:
         with:
           skip-install: "true"
 
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
+      - name: Install pnpm
+        run: npm install -g pnpm@11
+
       - name: Download Artifacts
         uses: actions/download-artifact@v8
         with:

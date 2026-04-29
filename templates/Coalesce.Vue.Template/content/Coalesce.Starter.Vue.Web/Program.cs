@@ -191,6 +191,7 @@ if (app.Environment.IsDevelopment())
     app.UseViteDevelopmentServer(c =>
     {
         c.DevServerPort = 5002;
+        c.PackageManagerCommand = "pnpm";
     });
 
     app.MapCoalesceSecurityOverview("coalesce-security");

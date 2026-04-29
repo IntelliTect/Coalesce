@@ -306,6 +306,7 @@ Use \`read_template_file\` to read the template versions of these files, then co
 - **vite.config.ts** — New plugins, build config changes, code splitting strategy
 - **eslint.config.mjs** — New rules, plugin changes. If the user is still on \`.eslintrc\`, suggest migrating to flat config.
 - **tsconfig.json**, **tsconfig.node.json**
+- **pnpm-workspace.yaml** — overrides, allowBuilds, and other pnpm settings (if using or switching to pnpm)
 - **.npmrc**
 - **.editorconfig**
 - **.vscode/settings.json**

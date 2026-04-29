@@ -5,11 +5,12 @@ import { userInfo } from "../user-service";
 import router from "../router";
 
 function generateHexId(): string {
-  let id = "";
-  for (let i = 0; i < 32; i++) {
-    id += ((Math.random() * 16) | 0).toString(16);
+  if (crypto.randomUUID) {
+    return crypto.randomUUID().replace(/-/g, "");
   }
-  return id;
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 const appInsights = new ApplicationInsights({

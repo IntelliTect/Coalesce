@@ -46,7 +46,7 @@ export interface AspNetCoreHmrPluginOptions {
   offerConfigurationSuggestions?: boolean;
 
   /** If true (default), will invoke `npm ls` on start to validate that actual installed packages
-   * match the versions defined in package.json. Only supports `npm`, not `pnpm`.
+   * match the versions defined in package.json. Only supports `npm`.
    */
   checkPackageVersions?: boolean;
 }
@@ -636,7 +636,7 @@ export async function getCertPaths(certName?: string) {
 
   if (!certificateName) {
     console.error(
-      "getCertPaths: Invalid certificate name. Run this script in the context of an npm/pnpm script or pass --name=<<app>> explicitly.",
+      "getCertPaths: Invalid certificate name. Run this script in the context of an package manager script or pass --name=<<app>> explicitly.",
     );
     process.exit(-1);
   }

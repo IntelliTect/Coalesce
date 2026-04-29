@@ -27,7 +27,7 @@ internal static class ViteDevelopmentServerMiddleware
         ViteServerOptions options
     )
     {
-        var pkgManagerCommand = spaBuilder.Options.PackageManagerCommand;
+        var pkgManagerCommand = spaBuilder.Options.PackageManagerCommand = options.PackageManagerCommand;
         var sourcePath = spaBuilder.Options.SourcePath;
         var portNumber = options.DevServerPort;
         if (string.IsNullOrEmpty(sourcePath))

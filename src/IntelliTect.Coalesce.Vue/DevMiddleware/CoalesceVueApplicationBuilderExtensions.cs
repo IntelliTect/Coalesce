@@ -34,7 +34,6 @@ public static class CoalesceVueApplicationBuilderExtensions
                 filteredApp.UseSpa(spa =>
                 {
                     spa.Options.SourcePath = ".";
-                    spa.Options.PackageManagerCommand = options.PackageManagerCommand;
                     var getPortTask = ViteDevelopmentServerMiddleware.Attach(spa, options);
 
                     if (options.WaitForReady)

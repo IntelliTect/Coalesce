@@ -50,6 +50,7 @@ import axios, {
 
 // Re-exports for more convenient imports in generated code.
 export type { AxiosPromise, AxiosRequestConfig } from "axios";
+export { isAxiosError } from "axios";
 
 /* Api Response Objects */
 

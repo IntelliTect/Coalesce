@@ -118,9 +118,10 @@ internal static class ViteDevelopmentServerMiddleware
                         stdErr.Contains($"{pkgManagerCommand}: not found", StringComparison.OrdinalIgnoreCase) ||
                         stdErr.Contains($"{pkgManagerCommand}: command not found", StringComparison.OrdinalIgnoreCase))
                     {
+                        var sep = new string('-', 40);
                         message += pkgManagerCommand == "npm"
-                            ? "\n\n'npm' is not installed. Install Node.js from https://nodejs.org/ (npm is included)."
-                            : $"\n\n'{pkgManagerCommand}' is not installed. Install it with: npm install -g {pkgManagerCommand}";
+                            ? $"\n{sep}\nInstall Node.js from https://nodejs.org/ (npm is included).\n{sep}"
+                            : $"\n{sep}\nInstall it with: npm install -g {pkgManagerCommand}\n{sep}";
                     }
 
                     throw new InvalidOperationException(message, ex);

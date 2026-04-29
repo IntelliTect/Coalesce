@@ -108,10 +108,22 @@ internal static class ViteDevelopmentServerMiddleware
                 }
                 catch (EndOfStreamException ex)
                 {
-                    throw new InvalidOperationException(
+                    var stdErr = stdErrReader.ReadAsPlainString();
+                    var message =
                         $"The {pkgManagerCommand} script '{options.NpmScriptName}' exited without indicating that the " +
                         "server was listening for requests. The error output was: \n\n" +
-                        $"{stdErrReader.ReadAsPlainString()}", ex);
+                        stdErr;
+
+                    if (stdErr.Contains($"'{pkgManagerCommand}' is not recognized", StringComparison.OrdinalIgnoreCase) ||
+                        stdErr.Contains($"{pkgManagerCommand}: not found", StringComparison.OrdinalIgnoreCase) ||
+                        stdErr.Contains($"{pkgManagerCommand}: command not found", StringComparison.OrdinalIgnoreCase))
+                    {
+                        message += pkgManagerCommand == "npm"
+                            ? "\n\n'npm' is not installed. Install Node.js from https://nodejs.org/ (npm is included)."
+                            : $"\n\n'{pkgManagerCommand}' is not installed. Install it with: npm install -g {pkgManagerCommand}";
+                    }
+
+                    throw new InvalidOperationException(message, ex);
                 }
 
                 return portNumber.Value;

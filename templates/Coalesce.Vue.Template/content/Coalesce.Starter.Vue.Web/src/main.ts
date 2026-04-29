@@ -2,8 +2,7 @@ import { createApp } from "vue";
 import { createVuetify } from "vuetify";
 import { createCoalesceVuetify } from "coalesce-vue-vuetify3";
 import { aliases, fa } from "vuetify/iconsets/fa";
-import { AxiosClient as CoalesceAxiosClient } from "coalesce-vue";
-import { isAxiosError } from "axios";
+import { AxiosClient as CoalesceAxiosClient, isAxiosError } from "coalesce-vue";
 
 import App from "./App.vue";
 import router from "./router";

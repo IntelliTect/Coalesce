@@ -1,9 +1,10 @@
 # 6.5.0
-- `CrudContext.User` now has a public setter, allowing the user principal to be overridden (e.g. for testing or non-HttpContext scenarios).
 - Support enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` as string-serialized enums. These are generated as string-valued TypeScript enums and serialized as strings over the wire.
 - Added `getPromise()` method to API callers, returning the current invocation's promise (or `undefined` if idle).
 - Improved auto-save indicator in `c-admin-editor`.
 - `c-list-filters` now uses new `noFilter` metadata to determine which properties are filterable, which results in proper alignment with what the server will allow.
+- `CrudContext.User` now has a public setter, allowing the user principal to be overridden (e.g. for testing or non-HttpContext scenarios).
+- `UseViteDevelopmentServer` now exposes a `PackageManagerCommand` option (defaults to "npm") to configure which package manager runs the dev script. Improved error messages when the configured package manager is not installed.
 - Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 
 ## Template Changes

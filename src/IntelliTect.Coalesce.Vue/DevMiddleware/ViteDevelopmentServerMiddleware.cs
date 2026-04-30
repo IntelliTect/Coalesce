@@ -27,7 +27,7 @@ internal static class ViteDevelopmentServerMiddleware
         ViteServerOptions options
     )
     {
-        var pkgManagerCommand = spaBuilder.Options.PackageManagerCommand;
+        var pkgManagerCommand = spaBuilder.Options.PackageManagerCommand = options.PackageManagerCommand;
         var sourcePath = spaBuilder.Options.SourcePath;
         var portNumber = options.DevServerPort;
         if (string.IsNullOrEmpty(sourcePath))
@@ -108,10 +108,23 @@ internal static class ViteDevelopmentServerMiddleware
                 }
                 catch (EndOfStreamException ex)
                 {
-                    throw new InvalidOperationException(
+                    var stdErr = stdErrReader.ReadAsPlainString();
+                    var message =
                         $"The {pkgManagerCommand} script '{options.NpmScriptName}' exited without indicating that the " +
                         "server was listening for requests. The error output was: \n\n" +
-                        $"{stdErrReader.ReadAsPlainString()}", ex);
+                        stdErr;
+
+                    if (stdErr.Contains($"'{pkgManagerCommand}' is not recognized", StringComparison.OrdinalIgnoreCase) ||
+                        stdErr.Contains($"{pkgManagerCommand}: not found", StringComparison.OrdinalIgnoreCase) ||
+                        stdErr.Contains($"{pkgManagerCommand}: command not found", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var sep = new string('-', 40);
+                        message += pkgManagerCommand == "npm"
+                            ? $"\n{sep}\nInstall Node.js from https://nodejs.org/ (npm is included).\n{sep}"
+                            : $"\n{sep}\nInstall it with: npm install -g {pkgManagerCommand}\n{sep}";
+                    }
+
+                    throw new InvalidOperationException(message, ex);
                 }
 
                 return portNumber.Value;

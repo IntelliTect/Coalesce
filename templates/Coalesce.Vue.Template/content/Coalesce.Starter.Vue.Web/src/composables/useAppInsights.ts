@@ -1,9 +1,17 @@
 import { ApplicationInsights } from "@microsoft/applicationinsights-web";
-import { generateW3CId } from "@microsoft/applicationinsights-core-js";
 import { watch } from "vue";
 
 import { userInfo } from "../user-service";
 import router from "../router";
+
+function generateHexId(): string {
+  if (crypto.randomUUID) {
+    return crypto.randomUUID().replace(/-/g, "");
+  }
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 const appInsights = new ApplicationInsights({
   config: !APPLICATIONINSIGHTS_CONNECTION_STRING
@@ -66,7 +74,10 @@ router.afterEach((to, from) => {
       // Otherwise, each successive page view will get lumped in with the root page view.
       // This will also split up telemetry by page view in Aspire (but the wrapping page view
       // span itself will be missing from Aspire since we don't do OTLP ingest here).
-      appInsights.context.telemetryTrace.traceID = generateW3CId();
+      const traceCtx = appInsights.getTraceCtx();
+      if (traceCtx) {
+        traceCtx.traceId = generateHexId();
+      }
     }
     isFirstNavigation = false;
 

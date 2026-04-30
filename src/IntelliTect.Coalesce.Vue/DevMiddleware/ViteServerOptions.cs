@@ -41,4 +41,10 @@ public class ViteServerOptions
     /// </summary>
     public bool WaitForReady { get; set; } = true;
 
+    /// <summary>
+    /// The package manager command used to run scripts (e.g. "pnpm", "npm").
+    /// Defaults to "npm".
+    /// </summary>
+    public string PackageManagerCommand { get; set; } = "npm";
+
 }

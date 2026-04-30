@@ -46,7 +46,7 @@ export interface AspNetCoreHmrPluginOptions {
   offerConfigurationSuggestions?: boolean;
 
   /** If true (default), will invoke `npm ls` on start to validate that actual installed packages
-   * match the versions defined in package.json.
+   * match the versions defined in package.json. Only supports `npm`.
    */
   checkPackageVersions?: boolean;
 }
@@ -164,7 +164,11 @@ export function createAspNetCoreHmrPlugin({
           });
         });
 
-        if (checkPackageVersions) {
+        // Package version checking uses `npm ls` which is npm-specific.
+        if (
+          checkPackageVersions &&
+          process.env.npm_config_user_agent?.startsWith("npm")
+        ) {
           const packageVersions = (async () => {
             const packageLock = getNpmDependencies("--package-lock-only");
             const nodeModules = getNpmDependencies("");
@@ -632,7 +636,7 @@ export async function getCertPaths(certName?: string) {
 
   if (!certificateName) {
     console.error(
-      "getCertPaths: Invalid certificate name. Run this script in the context of an npm/yarn script or pass --name=<<app>> explicitly.",
+      "getCertPaths: Invalid certificate name. Run this script in the context of an package manager script or pass --name=<<app>> explicitly.",
     );
     process.exit(-1);
   }

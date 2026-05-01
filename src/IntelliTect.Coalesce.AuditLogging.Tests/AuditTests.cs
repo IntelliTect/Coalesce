@@ -212,6 +212,88 @@ public class AuditTests : IDisposable
         );
     }
 
+    [Test]
+    [Repeat(3)]
+    public async Task WithFullApp_ConcurrentSavesAndSingletonInterceptor_DoesNotCorruptAuditState()
+    {
+        // Arrange - use a file-based SQLite DB so concurrent connections work
+        var dbPath = Path.Combine(Path.GetTempPath(), $"audit_test_{Guid.NewGuid():N}.db");
+        var connString = $"Data Source={dbPath}";
+
+        var builder = CreateAppBuilder();
+
+        builder.Services.AddSingleton<IAuditOperationContext<TestAuditLog>, TestOperationContext>();
+
+        // IMPORTANT: This configuration MUST:
+        // - Call UseCoalesceAuditLogging in the service registration, not in OnConfiguring.
+        //   OnConfiguring will produce a new AuditInterceptor on each instance, which mitigates the issue.
+        // - Use AddDbContextFactory so that the DbContextOptions end up registered as a singleton,
+        //   which then results in a singleton AuditInterceptor.
+        builder.Services.AddDbContextFactory<TestDbContext>(options => options
+            .UseSqlite(connString)
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<IAuditOperationContext<TestAuditLog>>()
+            )
+        );
+
+        var app = builder.Build();
+        var factory = app.Services.GetRequiredService<IDbContextFactory<TestDbContext>>();
+
+        using (var db = factory.CreateDbContext()) { db.Database.EnsureCreated(); }
+
+        // Act: Use a barrier to force both tasks to call SaveChangesAsync concurrently,
+        // maximizing the chance of the race between SavingChanges and SavedChanges.
+        const int iterations = 50;
+        int count1 = 0, count2 = 0;
+        for (int i = 0; i < iterations; i++)
+        {
+            using var barrier = new Barrier(2);
+
+            var task1 = Task.Run(async () =>
+            {
+                using var db = factory.CreateDbContext();
+                db.Add(new AppUser { Name = $"t1-{i}" });
+                barrier.SignalAndWait();
+                await db.SaveChangesAsync();
+                count1++;
+            });
+
+            var task2 = Task.Run(async () =>
+            {
+                using var db = factory.CreateDbContext();
+                db.Add(new AppUser { Name = $"t2-{i}" });
+                barrier.SignalAndWait();
+                await db.SaveChangesAsync();
+                count2++;
+            });
+
+            await Task.WhenAll(task1, task2);
+        }
+
+        // Assert: All saves produced audit logs with expected values
+        using var verifyDb = factory.CreateDbContext();
+        var logs = verifyDb.AuditLogs.Include(l => l.Properties).Where(l => l.Type == nameof(AppUser)).ToList();
+        await Assert.That(logs.Count).IsEqualTo(iterations * 2);
+
+        var t1Logs = logs.Where(l => l.Description!.StartsWith("t1-")).ToList();
+        var t2Logs = logs.Where(l => l.Description!.StartsWith("t2-")).ToList();
+        await Assert.That(t1Logs.Count).IsEqualTo(iterations);
+        await Assert.That(t2Logs.Count).IsEqualTo(iterations);
+
+        // Every audit log should have the augmented field from TestOperationContext
+        foreach (var log in logs)
+        {
+            await Assert.That(log.CustomField1).IsEqualTo("from TestOperationContext");
+            await Assert.That(log.Properties!.Any(p => p.PropertyName == nameof(AppUser.Name) && p.NewValue == log.Description)).IsTrue();
+        }
+
+        // Cleanup
+        verifyDb.Dispose();
+        await app.DisposeAsync();
+        SqliteConnection.ClearAllPools();
+        File.Delete(dbPath);
+    }
+
 
     [Test]
     [Arguments(PropertyDescriptionMode.None, null)]

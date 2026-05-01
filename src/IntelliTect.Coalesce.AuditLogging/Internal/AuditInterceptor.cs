@@ -14,6 +14,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,7 +25,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
 {
     private readonly AuditOptions _options;
 
-    private CoalesceAudit? _audit;
+    private static readonly ConditionalWeakTable<DbContext, CoalesceAudit> _audits = [];
 
     private IAuditLogDbContext<TAuditLog> GetContext(DbContextEventData data)
         => (IAuditLogDbContext<TAuditLog>)(data.Context ?? throw new InvalidOperationException("DbContext unavailable."));
@@ -36,15 +37,17 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        _audit = null;
+        var db = eventData.Context!;
+        _audits.Remove(db);
         if (GetContext(eventData).SuppressAudit) return result;
 
-        _audit = new CoalesceAudit(_options.AuditConfiguration ?? new());
-        _audit.PreSaveChanges(eventData.Context!);
+        var audit = new CoalesceAudit(_options.AuditConfiguration ?? new());
+        _audits.AddOrUpdate(db, audit);
+        audit.PreSaveChanges(db);
 
         if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
         {
-            await _audit.PopulateOldDescriptions(eventData.Context!, true);
+            await audit.PopulateOldDescriptions(db, true);
         }
 
         return result;
@@ -54,16 +57,18 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         DbContextEventData eventData,
         InterceptionResult<int> result)
     {
-        _audit = null;
+        var db = eventData.Context!;
+        _audits.Remove(db);
         if (GetContext(eventData).SuppressAudit) return result;
 
-        _audit = new CoalesceAudit(_options.AuditConfiguration ?? new());
-        _audit.PreSaveChanges(eventData.Context!);
+        var audit = new CoalesceAudit(_options.AuditConfiguration ?? new());
+        _audits.AddOrUpdate(db, audit);
+        audit.PreSaveChanges(db);
 
         if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
         {
 #pragma warning disable CS4014 // Executes synchronously when async: false
-            _audit.PopulateOldDescriptions(eventData.Context!, async: false);
+            audit.PopulateOldDescriptions(db, async: false);
 #pragma warning restore CS4014
         }
 
@@ -75,10 +80,10 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
     #region SavedChanges
     public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
     {
-        if (_audit is null) return result;
+        if (!_audits.TryGetValue(eventData.Context!, out var audit)) return result;
 
 #pragma warning disable CS4014 // Executes synchronously when async: false
-        SaveAudit(eventData.Context!, _audit, async: false);
+        SaveAudit(eventData.Context!, audit, async: false);
 #pragma warning restore CS4014
 
         return result;
@@ -89,9 +94,9 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         int result,
         CancellationToken cancellationToken = default)
     {
-        if (_audit is null) return result;
+        if (!_audits.TryGetValue(eventData.Context!, out var audit)) return result;
 
-        await SaveAudit(eventData.Context!, _audit, async: true);
+        await SaveAudit(eventData.Context!, audit, async: true);
 
         return result;
     }

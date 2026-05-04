@@ -129,6 +129,15 @@ importers:
         specifier: ^2.1.3
         version: 2.1.3(vite@8.0.10(@types/node@24.12.2)(sass@1.99.0)(yaml@2.8.4))(vue@3.5.33(typescript@6.0.3))(vuetify@4.0.5)
 
+  src/IntelliTect.Coalesce.CodeGeneration.Tests/out:
+    dependencies:
+      coalesce-vue:
+        specifier: workspace:*
+        version: link:../../coalesce-vue
+      vue-router:
+        specifier: ^4.5.0
+        version: 4.6.4(vue@3.5.33(typescript@6.0.3))
+
   src/coalesce-mcp:
     dependencies:
       '@tmcp/adapter-zod-v3':

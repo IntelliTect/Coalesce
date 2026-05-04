@@ -25,29 +25,25 @@ jobs:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v8
 
-      - uses: actions/setup-node@v6
+      - uses: ./.github/actions/setup-js
         with:
-          node-version: 24.x
-          registry-url: "https://registry.npmjs.org"
+          skip-install: "true"
 
-      - name: Update npm
-        run: npm install -g npm@latest
-
-      - name: npm publish coalesce-vue
+      - name: pnpm publish coalesce-vue
         if: ${{ !inputs.skipNpm }}
-        run: npm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
+        run: pnpm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks
 
-      - name: npm publish coalesce-mcp
+      - name: pnpm publish coalesce-mcp
         if: ${{ !inputs.skipNpm }}
-        run: npm publish ./coalesce-mcp/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
+        run: pnpm publish ./coalesce-mcp/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks
 
-      - name: npm publish coalesce-vue-vuetify
+      - name: pnpm publish coalesce-vue-vuetify
         if: ${{ !inputs.skipNpm }}
-        run: for f in ./coalesce-vue-vuetify*/*.tgz; do npm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public; done
+        run: for f in ./coalesce-vue-vuetify*/*.tgz; do pnpm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks; done
 
-      - name: npm publish eslint-plugin-coalesce
+      - name: pnpm publish eslint-plugin-coalesce
         if: ${{ !inputs.skipNpm }}
-        run: npm publish ./eslint-plugin-coalesce/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public
+        run: pnpm publish ./eslint-plugin-coalesce/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks
 
   nuget:
     runs-on: ubuntu-latest

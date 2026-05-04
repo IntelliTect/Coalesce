@@ -16,13 +16,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
-
+      - uses: ./.github/actions/setup-dotnet
       - uses: ./.github/actions/setup-js
       - run: dotnet restore
       - run: dotnet build --no-restore --configuration Release /WarnAsError
@@ -44,12 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
-
+      - uses: ./.github/actions/setup-dotnet
       - uses: ./.github/actions/setup-js
 
       - run: pnpm coalesce
@@ -67,16 +56,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-
-      # setup-node and update npm are only here to preemptively test
-      # the required install of npm@11 that's needed for OIDC npm publish
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Update npm
-        run: npm install -g npm@latest
 
       - uses: ./.github/actions/setup-js
 
@@ -250,18 +229,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
+      - uses: ./.github/actions/setup-dotnet
 
-      - uses: actions/setup-node@v6
+      - uses: ./.github/actions/setup-js
         with:
-          node-version: 24.x
-
-      - run: npm install -g pnpm@11
+          skip-install: "true"
 
       - name: Download Artifacts
         uses: actions/download-artifact@v8

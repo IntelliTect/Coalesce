@@ -1,19 +1,54 @@
 using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.DataSources;
+using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Vue.Generators;
 using IntelliTect.Coalesce.Testing;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Testing.Util;
+using IntelliTect.Coalesce.Validation;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Reflection;
+using System.Runtime.Versioning;
+using TUnit.Core.Interfaces;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests;
 
-public class TargetClassesFullGenerationTest : CodeGenTestBase
+public class VueSuiteFixture : IAsyncInitializer
+{
+    public IRootGenerator Suite { get; private set; } = null!;
+
+    public async Task InitializeAsync()
+    {
+        var executor = new GenerationExecutor(
+            new CoalesceConfiguration
+            {
+                WebProject = new ProjectConfiguration { RootNamespace = "MyProject" }
+            },
+            Microsoft.Extensions.Logging.LogLevel.Information
+        );
+
+        var suite = executor.CreateRootGenerator<VueSuite>()
+            .WithModel(ReflectionRepositoryFactory.Symbol);
+
+        var validationResult = ValidateContext.Validate(suite.Model);
+        await Assert.That(validationResult.Where(r => r.IsError)).IsEmpty();
+
+        var tfmAttr = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>()!;
+        var outDir = Path.Combine(FilesystemExtensions.GetRepoRoot().FullName, "src", "IntelliTect.Coalesce.CodeGeneration.Tests", "out", tfmAttr.FrameworkName!, "VueSuite");
+        suite = suite.WithOutputPath(outDir);
+
+        await suite.GenerateAsync();
+        Suite = suite;
+    }
+}
+
+[ClassDataSource<VueSuiteFixture>(Shared = SharedType.PerTestSession)]
+public class TargetClassesFullGenerationTest(VueSuiteFixture fixture) : CodeGenTestBase
 {
     // #IF directive so this doesn't needlessly run for multiple TFMs. It only needs to run for one.
 #if NET10_0
@@ -55,44 +90,24 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
 #endif
 
     [Test]
-    public async Task VueOutputCompiles()
+    [Arguments("5")]
+    [Arguments("5.9")]
+    [Arguments("6")]
+    public async Task VueOutputTypescriptCompiles(string tsVersion)
     {
-        var executor = BuildExecutor();
+        var outputPath = fixture.Suite.EffectiveOutputPath.Replace("\\", "/");
 
-        var suite = executor.CreateRootGenerator<VueSuite>()
-            .WithModel(ReflectionRepositoryFactory.Symbol);
-        suite = await ConfigureAndValidateSuite(suite);
-        await suite.GenerateAsync();
-
-        await Task.WhenAll(
-            Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5")),
-            Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5.5")),
-            Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5.9")),
-            Task.Run(() => AssertSuiteCSharpOutputCompiles(suite))
-        );
-    }
-
-    protected async Task AssertVueSuiteTypescriptOutputCompiles(IRootGenerator suite, string tsVersion)
-    {
-        var coalesceVue = GetRepoRoot().GetDirectory("src/coalesce-vue");
-
-        await Assert.That(coalesceVue.GetDirectory("node_modules").Exists).IsTrue().Because("Test relies on NPM packages for coalesce-vue being restored.");
-
-        // We use coalesce-vue as our working directory here
-        // because it contains both tsc and all the dependencies of the generated code.
-        var workingDirectory = coalesceVue.FullName.Replace("\\", "/");
         var tsConfig =
         $$"""
         {
           "compilerOptions": {
             "target": "ES2022",
+            "module": "preserve",
+            "moduleResolution": "bundler",
             "strict": true,
-            "moduleResolution": "node",
             "verbatimModuleSyntax": true,
-            "baseUrl": ".",
             "paths": {
-              "coalesce-vue/lib/*": [ "{{workingDirectory}}/src/*" ],
-              "*": [ "{{workingDirectory}}/node_modules/*" ],
+              "coalesce-vue/lib/*": [ "../../node_modules/coalesce-vue/src/*" ],
             },
             "types": ["vue-router"]
           },
@@ -101,14 +116,20 @@ public class TargetClassesFullGenerationTest : CodeGenTestBase
           ],
         }
         """;
-        var tsConfigPath = $"{suite.EffectiveOutputPath}/tsconfig.{tsVersion}.json";
+        var tsConfigPath = $"{outputPath}/tsconfig.{tsVersion}.json";
         File.WriteAllText(tsConfigPath, tsConfig);
 
         await AssertTypescriptProjectCompiles(
             tsConfigPath: tsConfigPath,
-            workingDirectory: workingDirectory,
+            workingDirectory: outputPath,
             tsVersion: tsVersion
         );
+    }
+
+    [Test]
+    public async Task VueOutputCSharpCompiles()
+    {
+        await AssertSuiteCSharpOutputCompiles(fixture.Suite);
     }
 
     [Test]

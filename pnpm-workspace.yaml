@@ -1,5 +1,6 @@
 packages:
   - src/*
+  - src/IntelliTect.Coalesce.CodeGeneration.Tests/out
   - playground/*
   - docs
 

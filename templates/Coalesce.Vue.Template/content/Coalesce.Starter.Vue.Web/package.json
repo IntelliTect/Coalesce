@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.0.1",
   "scripts": {
-    "dev": "vite",
+    "dev": "pnpm install && vite",
     "build": "vite build && vue-tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -13,20 +14,17 @@
     "coalesce": "dotnet coalesce"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.2.6",
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@microsoft/applicationinsights-web": "^3.4.1",
     "@vueuse/core": "^14.3.0",
-    "coalesce-vue": "6.4.0",
-    "coalesce-vue-vuetify3": "6.4.0",
-    "@fontsource/roboto": "^5.2.6",
+    "coalesce-vue": "6.5.0-beta.20260429.1",
+    "coalesce-vue-vuetify3": "6.5.0-beta.20260429.1",
+    "date-fns": "^4.0.0",
+    "date-fns-tz": "^3.0.0",
     "vue": "^3.5.33",
     "vue-router": "^5.0.6",
     "vuetify": "^4.0.6"
-  },
-  "overrides": {
-    "js-beautify": {
-      "glob": "13.0.6"
-    }
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
@@ -37,7 +35,7 @@
     "@vue/test-utils": "^2.4.10",
     "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-coalesce": "^6.4.0",
+    "eslint-plugin-coalesce": "^6.5.0-beta.20260429.1",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-vue": "^10.9.0",
     "jsdom": "^29.1.1",

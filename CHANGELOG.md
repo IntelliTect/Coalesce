@@ -7,12 +7,21 @@
 - `UseViteDevelopmentServer` now exposes a `PackageManagerCommand` option (defaults to "npm") to configure which package manager runs the dev script. Improved error messages when the configured package manager is not installed.
 - Fix: `no-sort-in-computed` eslint rule false positive when sorting a locally-declared array variable inside `computed()`.
 - Fix: Handle the possibility that Audit logging's `AuditInterceptor` can end up singleton under specific EF usage patterns (e.g. `AddDbContextFactory` + not using `OnConfiguring`).
+- Re-exported `isAxiosError` from `coalesce-vue` to avoid phantom dependency on `axios`.
 
 ## Template Changes
 - Added Vuetify 4 CSS layer ordering to `index.html` to work around Vite 8/Rolldown CSS ordering bugs.
-- Replaced deprecated `typeface-roboto` with `@fontsource/roboto/latin.css` and `@fontsource/roboto/latin-italic.css`.
+- Replaced deprecated `typeface-roboto` package with `@fontsource/roboto/latin.css` and `@fontsource/roboto/latin-italic.css`.
+- The template now uses pnpm instead of npm for better DX. To migrate an existing project:
+  1. Install pnpm: `npm install -g pnpm@11`
+  2. Delete `package-lock.json` and `node_modules`.
+  3. Run `pnpm install` to generate `pnpm-lock.yaml`.
+  4. In `package.json`, change the `"dev"` script to `"pnpm install && vite"`.
+  5. In `Program.cs`, add `c.PackageManagerCommand = "pnpm";` to `UseViteDevelopmentServer` options.
+  6. Add any phantom dependencies that pnpm's strict `node_modules` structure reveals (e.g. `date-fns`, `date-fns-tz`). Build errors or runtime import failures will indicate which ones are missing.
+  7. Update CI/CD scripts to use `pnpm` instead of `npm`, ensuring to add a step to install `pnpm` itself. Replace `npm ci` with `pnpm install --frozen-lockfile`.
 - The first-party password/passkey login flow is now two-stage: enter username first, then choose between password, passkey, or a one-time email code. When `Passkeys` is enabled, users who sign in with password or email code are then prompted to create a passkey.
-- `Role.Permissions` are no longer EF-mapped as enums. The EF property is now `List<string>`, with a `[NotMapped]` `PermissionEnums` wrapper that silently drops unrecognized values. This prevents `InvalidOperationException` when a `Permission` enum member is removed but old values remain in the database.
+- `Role.Permissions` are no longer EF-mapped as enums. The EF property is now `List<string>`, with a `[NotMapped] PermissionEnums` wrapper that drops unrecognized values. This prevents `InvalidOperationException` when a `Permission` enum member is removed but old values remain in the database.
 - Added rate limiting to authentication pages (sign-in, register, forgot password, reset password, email confirmation, external login) to mitigate brute-force abuse.
 
 # 6.4.0

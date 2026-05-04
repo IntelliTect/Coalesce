@@ -49,8 +49,11 @@ jobs:
         with:
           node-version: 24.x
 
-      - name: npm ci
-        run: npm ci
+      - name: Install pnpm
+        run: npm install -g pnpm@11
+
+      - name: pnpm install
+        run: pnpm install --frozen-lockfile
         working-directory: Coalesce.Starter.Vue.Web
 
       - name: Restore Nuget packages
@@ -60,12 +63,12 @@ jobs:
         run: dotnet coalesce --what-if --verify
         working-directory: Coalesce.Starter.Vue.Web
 
-      - name: npm run lint
-        run: npm run lint
+      - name: pnpm lint
+        run: pnpm lint
         working-directory: Coalesce.Starter.Vue.Web
 
-      - name: npm run build
-        run: npm run build
+      - name: pnpm build
+        run: pnpm build
         working-directory: Coalesce.Starter.Vue.Web
 
       - name: dotnet build

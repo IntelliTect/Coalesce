@@ -1,0 +1,5 @@
+overrides:
+  js-beautify>glob: "13.0.6"
+
+allowBuilds:
+  "@parcel/watcher": true

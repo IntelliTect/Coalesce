@@ -218,7 +218,6 @@ jobs:
       - uses: actions/checkout@v6
 
       - uses: ./.github/actions/setup-dotnet
-
       - uses: ./.github/actions/setup-js
         with:
           skip-install: "true"

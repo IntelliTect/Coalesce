@@ -64,9 +64,6 @@ jobs:
       - name: pnpm test
         run: pnpm test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue.results.xml
 
-      - name: update version
-        run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
-
       - run: pnpm build
       - run: pnpm pack
 
@@ -93,9 +90,6 @@ jobs:
       - name: pnpm test
         run: pnpm test
 
-      - name: update version
-        run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
-
       - run: pnpm build
       - run: pnpm pack
 
@@ -121,9 +115,6 @@ jobs:
 
       - name: pnpm test
         run: pnpm test
-
-      - name: update version
-        run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 
       - name: update template dependency versions
         shell: pwsh
@@ -157,9 +148,6 @@ jobs:
       - run: pnpm build
       - run: pnpm lint
       - run: pnpm test
-
-      - name: update version
-        run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 
       - run: pnpm pack
 

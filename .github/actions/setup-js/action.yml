@@ -27,3 +27,8 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: pnpm install --frozen-lockfile
+
+    - name: Set package versions
+      if: env.COALESCE_VERSION != ''
+      shell: bash
+      run: find . -path ./node_modules -prune -o -name 'package.json' -print | xargs grep -l '0.1.0-local' | xargs sed -i "s/0.1.0-local/$COALESCE_VERSION/g"

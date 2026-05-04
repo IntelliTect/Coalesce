@@ -22,6 +22,8 @@ jobs:
       id-token: write
 
     steps:
+      - uses: actions/checkout@v6
+
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v8
 
@@ -29,21 +31,9 @@ jobs:
         with:
           skip-install: "true"
 
-      - name: pnpm publish coalesce-vue
+      - name: pnpm publish
         if: ${{ !inputs.skipNpm }}
-        run: pnpm publish ./coalesce-vue/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks
-
-      - name: pnpm publish coalesce-mcp
-        if: ${{ !inputs.skipNpm }}
-        run: pnpm publish ./coalesce-mcp/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks
-
-      - name: pnpm publish coalesce-vue-vuetify
-        if: ${{ !inputs.skipNpm }}
-        run: for f in ./coalesce-vue-vuetify*/*.tgz; do pnpm publish $f --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks; done
-
-      - name: pnpm publish eslint-plugin-coalesce
-        if: ${{ !inputs.skipNpm }}
-        run: pnpm publish ./eslint-plugin-coalesce/*.tgz --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks
+        run: for f in ./**/*.tgz; do pnpm publish "$f" --tag ${{ inputs.prereleaseSlug || 'latest' }} --access public --no-git-checks; done
 
   nuget:
     runs-on: ubuntu-latest

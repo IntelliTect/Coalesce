@@ -39,7 +39,7 @@ public class VueSuiteFixture : IAsyncInitializer
         await Assert.That(validationResult.Where(r => r.IsError)).IsEmpty();
 
         var tfmAttr = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>()!;
-        var outDir = Path.Combine(FilesystemExtensions.GetRepoRoot().FullName, "src", "IntelliTect.Coalesce.CodeGeneration.Tests", "out", tfmAttr.FrameworkName!, "VueSuite");
+        var outDir = Path.Combine(CodeGenTestBase.GetRepoRoot().FullName, "src", "IntelliTect.Coalesce.CodeGeneration.Tests", "out", tfmAttr.FrameworkName!, "VueSuite");
         suite = suite.WithOutputPath(outDir);
 
         await suite.GenerateAsync();

@@ -18,9 +18,9 @@ runs:
         node-version: 24.x
         registry-url: "https://registry.npmjs.org"
 
-    - name: Install pnpm
+    - name: Enable corepack
       shell: bash
-      run: npm install -g pnpm@11
+      run: corepack enable
 
     - name: Install dependencies
       if: inputs.skip-install != 'true'

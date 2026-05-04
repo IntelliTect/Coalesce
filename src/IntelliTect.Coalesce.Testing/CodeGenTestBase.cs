@@ -172,5 +172,16 @@ public class CodeGenTestBase
             .Because(string.Join("\n\n", streams));
     }
 
-    protected static DirectoryInfo GetRepoRoot() => FilesystemExtensions.GetRepoRoot();
+    public static DirectoryInfo GetRepoRoot()
+    {
+        return
+            // Normal usage (e.g. executing out of a /bin folder
+            new DirectoryInfo(Directory.GetCurrentDirectory())
+                .FindFileInAncestorDirectory("Coalesce.slnx")
+                ?.Directory
+        ??
+            // For Live Unit Testing, which makes a copy of the whole repo elsewhere.
+            new DirectoryInfo(Directory.GetCurrentDirectory())
+                .FindDirectoryInAncestorDirectory("b");
+    }
 }

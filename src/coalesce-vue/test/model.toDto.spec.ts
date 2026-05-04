@@ -135,7 +135,7 @@ describe.each(<MappingData[]>[
       test(testTitle, () => {
         const doMap = () => model.mapValueToDto(modelValue, value);
         if (error) {
-          expect(doMap).toThrowError(new RegExp(error, "i"));
+          expect(doMap).toThrow(new RegExp(error, "i"));
           return;
         }
         const mapped = doMap();
@@ -152,7 +152,7 @@ describe.each(<MappingData[]>[
 
 describe("mapToDto", () => {
   test("for object without $metadata, throws", () => {
-    expect(() => model.mapToDto({} as any)).toThrowError(/requires metadata/);
+    expect(() => model.mapToDto({} as any)).toThrow(/requires metadata/);
   });
 
   test("for no value, returns null", () => {

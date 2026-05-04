@@ -23,9 +23,7 @@ const basicModel = {
 
 describe("modelDisplay", () => {
   test("for object without $metadata, throws", () => {
-    expect(() => model.modelDisplay({} as any)).toThrowError(
-      /has no \$metadata/,
-    );
+    expect(() => model.modelDisplay({} as any)).toThrow(/has no \$metadata/);
   });
 
   test("returns value for value prop", () => {
@@ -248,7 +246,7 @@ describe.each(<DisplayData[]>[
     test(`for ${shortStringify(modelValue)}, ${expectedOutcomeDesc}`, () => {
       const doMap = () => model.valueDisplay(modelValue, meta, options);
       if (error) {
-        expect(doMap).toThrowError(new RegExp(error));
+        expect(doMap).toThrow(new RegExp(error));
         return;
       }
 

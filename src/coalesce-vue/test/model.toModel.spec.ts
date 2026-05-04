@@ -188,7 +188,7 @@ dtoToModelMappings.forEach(
         test(testTitle, () => {
           const doMap = () => model.mapValueToModel(dtoValue, meta);
           if (error) {
-            expect(doMap).toThrowError(new RegExp(error));
+            expect(doMap).toThrow(new RegExp(error));
             return;
           }
           const mapped = doMap();
@@ -209,7 +209,7 @@ dtoToModelMappings.forEach(
         test(testTitle, () => {
           const doMap = () => model.convertValueToModel(dtoValue, meta);
           if (error) {
-            expect(doMap).toThrowError(new RegExp(error));
+            expect(doMap).toThrow(new RegExp(error));
             return;
           }
 
@@ -378,7 +378,7 @@ describe("convertToModel", () => {
         },
         $metadata.ComplexModel,
       );
-    }).toThrowError(
+    }).toThrow(
       /found metadata for test where metadata for complexmodel was expected/i,
     );
   });

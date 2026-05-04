@@ -20,7 +20,6 @@ jobs:
       - uses: ./.github/actions/setup-js
       - run: dotnet restore
       - run: dotnet build --no-restore --configuration Release /WarnAsError
-      - run: dotnet test --no-build --configuration Release
       - run: dotnet pack --no-build --configuration Release -p:PackageOutputPath="$(pwd)/out/packages"
 
       - name: "Upload Artifact: NuGet Packages"
@@ -29,7 +28,31 @@ jobs:
           name: packages
           path: out/packages
 
-  validate-vue3-playground:
+      - name: "Upload Artifact: Build Outputs"
+        uses: actions/upload-artifact@v7
+        with:
+          name: dotnet-build
+          path: |
+            **/bin/Release/
+            **/obj/Release/
+          include-hidden-files: true
+
+  test-dotnet:
+    runs-on: ubuntu-latest
+    needs: [build-dotnet]
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-dotnet
+
+      - name: Download Build Outputs
+        uses: actions/download-artifact@v8
+        with:
+          name: dotnet-build
+
+      - run: dotnet test --no-build --configuration Release
+
+  test-vue3-playground:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -205,7 +228,7 @@ jobs:
           name: template-packages
           path: ${{ github.workspace }}/out/packages
 
-  validate-template:
+  test-template:
     runs-on: ubuntu-latest
     name: "test template: ${{matrix.testCase}}"
     needs:

@@ -1,0 +1,24 @@
+name: Setup JS
+description: Setup Node.js, pnpm, and install dependencies
+
+inputs:
+  working-directory:
+    description: Directory to run pnpm install in
+    required: false
+    default: ${{ github.workspace }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 24.x
+
+    - name: Install pnpm
+      shell: bash
+      run: npm install -g pnpm@11
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: pnpm install --frozen-lockfile

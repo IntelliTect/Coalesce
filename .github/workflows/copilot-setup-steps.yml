@@ -35,11 +35,7 @@ jobs:
             9.0.x
             10.0.x
 
-      - name: Install pnpm
-        run: npm install -g pnpm@11
-
-      - name: Install JavaScript dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-js
 
       - name: Restore .NET packages
         run: dotnet restore

@@ -23,8 +23,7 @@ jobs:
             8.0.x
             9.0.x
 
-      - run: npm install -g pnpm@11
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup-js
       - run: dotnet restore
       - run: dotnet build --no-restore --configuration Release /WarnAsError
       - run: dotnet test --no-build --configuration Release
@@ -51,9 +50,7 @@ jobs:
             8.0.x
             9.0.x
 
-      - run: npm install -g pnpm@11
-      - run: pnpm install --frozen-lockfile
-        working-directory: ${{ github.workspace }}
+      - uses: ./.github/actions/setup-js
 
       - run: pnpm coalesce
       - run: pnpm build
@@ -81,11 +78,7 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
 
-      - name: Install pnpm
-        run: npm install -g pnpm@11
-
-      - run: pnpm install --frozen-lockfile
-        working-directory: ${{ github.workspace }}
+      - uses: ./.github/actions/setup-js
 
       - run: pnpm lint
 
@@ -116,9 +109,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - run: npm install -g pnpm@11
-      - run: pnpm install --frozen-lockfile
-        working-directory: ${{ github.workspace }}
+      - uses: ./.github/actions/setup-js
 
       - name: pnpm test
         run: pnpm test
@@ -147,9 +138,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - run: npm install -g pnpm@11
-      - run: pnpm install --frozen-lockfile
-        working-directory: ${{ github.workspace }}
+      - uses: ./.github/actions/setup-js
 
       - name: pnpm test
         run: pnpm test
@@ -183,13 +172,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
-
-      - run: npm install -g pnpm@11
-      - run: pnpm install --frozen-lockfile
-        working-directory: ${{ github.workspace }}
+      - uses: ./.github/actions/setup-js
 
       - run: pnpm build-local-deps # build coalesce-vue
       - run: pnpm build
@@ -220,9 +203,7 @@ jobs:
           # fetch all commits to get last updated time or other git log info
           fetch-depth: 0
 
-      - run: npm install -g pnpm@11
-      - run: pnpm install --frozen-lockfile
-        working-directory: ${{ github.workspace }}
+      - uses: ./.github/actions/setup-js
 
       - name: Build docs
         run: pnpm build
@@ -276,13 +257,11 @@ jobs:
             8.0.x
             9.0.x
 
-      - name: Use Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24.x
 
-      - name: Install pnpm
-        run: npm install -g pnpm@11
+      - run: npm install -g pnpm@11
 
       - name: Download Artifacts
         uses: actions/download-artifact@v8

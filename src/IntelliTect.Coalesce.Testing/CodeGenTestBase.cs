@@ -169,7 +169,7 @@ public class CodeGenTestBase
         await typescriptProcess.WaitForExitAsync();
         var streams = await Task.WhenAll(streamTasks);
         await Assert.That(typescriptProcess.ExitCode).IsEqualTo(0)
-            .Because($"Typescript {tsVersion}\n:" + string.Join("\n\n", streams));
+            .Because(string.Join("\n\n", streams));
     }
 
     protected static DirectoryInfo GetRepoRoot() => FilesystemExtensions.GetRepoRoot();

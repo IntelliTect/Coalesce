@@ -1,0 +1,9 @@
+{
+  "name": "coalesce-vue-output-test",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "coalesce-vue": "workspace:*",
+    "vue-router": "^4.5.0"
+  }
+}

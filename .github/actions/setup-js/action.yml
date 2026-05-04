@@ -1,0 +1,34 @@
+name: Setup JS
+description: Setup Node.js, pnpm, and install dependencies
+
+inputs:
+  working-directory:
+    description: Directory to run pnpm install in
+    required: false
+    default: ${{ github.workspace }}
+  skip-install:
+    description: Skip running pnpm install
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v6
+      with:
+        node-version: 24.x
+        registry-url: "https://registry.npmjs.org"
+
+    - name: Enable corepack
+      shell: bash
+      run: corepack enable
+
+    - name: Install dependencies
+      if: inputs.skip-install != 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: pnpm install --frozen-lockfile
+
+    - name: Set package versions
+      if: env.COALESCE_VERSION != ''
+      shell: bash
+      run: pnpm -r exec sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json

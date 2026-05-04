@@ -25,25 +25,25 @@ After making changes, use these to validate changes:
 ### Run builds
 
 ```bash
-npm ci
+pnpm install
 dotnet build
-cd src/coalesce-vue && npm run build
-cd ../coalesce-vue-vuetify3 && npm run build
-cd ../coalesce-mcp && npm run build
-cd ../eslint-plugin-coalesce && npm run build
+cd src/coalesce-vue && pnpm build
+cd ../coalesce-vue-vuetify3 && pnpm build
+cd ../coalesce-mcp && pnpm build
+cd ../eslint-plugin-coalesce && pnpm build
 ```
 
 ### Run tests
 
 ```bash
 dotnet test
-cd src/coalesce-vue && npm test run
-cd ../coalesce-vue-vuetify3 && npm test run
-cd ../coalesce-mcp && npm test run
-cd ../eslint-plugin-coalesce && npm test run
+cd src/coalesce-vue && pnpm test run
+cd ../coalesce-vue-vuetify3 && pnpm test run
+cd ../coalesce-mcp && pnpm test run
+cd ../eslint-plugin-coalesce && pnpm test run
 ```
 
-Use `npm test run` for Vitest / JS tests - this will make the process exit when complete.
+Use `pnpm test run` for Vitest / JS tests - this will make the process exit when complete.
 
 The .NET test projects use TUnit. To filter tests, pass `--treenode-filter` (run in the working directory of the specific test project):
 
@@ -62,4 +62,4 @@ If you make changes to the template in the `templates` directory, validate the c
 
 ### Documentation
 
-If the documentation was updated, run `npm run build` in the docs folder.
+If the documentation was updated, run `pnpm build` in the docs folder.

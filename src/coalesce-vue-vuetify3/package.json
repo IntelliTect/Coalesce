@@ -44,9 +44,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "npm run build-local-deps && vite build && vue-tsc --noEmit && vue-tsc -p ./tsconfig.build-types.json && npm run buildts",
+    "build": "pnpm build-local-deps && vite build && vue-tsc --noEmit && vue-tsc -p ./tsconfig.build-types.json && pnpm buildts",
     "buildts": "tsc -p ./tsconfig.build-utils.json",
-    "build-local-deps": "cd ../coalesce-vue && npm run build",
+    "build-local-deps": "cd ../coalesce-vue && pnpm build",
     "test": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -59,7 +59,7 @@
     "vue": "^3.5.4"
   },
   "peerDependencies": {
-    "coalesce-vue": "0.1.0-local",
+    "coalesce-vue": "workspace:*",
     "vuetify": "^3.7.1 || ^4.0.0"
   },
   "optionalDependencies": {
@@ -67,7 +67,9 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue-jsx": "^5.1.5",
-    "coalesce-vue": "../coalesce-vue",
+    "axios": "^1.15.0",
+    "coalesce-vue": "workspace:*",
+    "vue-component-type-helpers": "^2.0.0",
     "vue-router": "^4.4.1 || ^5.0.0",
     "vuetify": "3.10.3"
   }

@@ -27,16 +27,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
-            10.0.x
-
-      - name: Install JavaScript dependencies
-        run: npm ci
+      - uses: ./.github/actions/setup-dotnet
+      - uses: ./.github/actions/setup-js
 
       - name: Restore .NET packages
         run: dotnet restore
@@ -47,5 +39,5 @@ jobs:
       - name: Build coalesce-vue-vuetify3
         working-directory: src/coalesce-vue-vuetify3
         run: |
-          npm run build-local-deps
-          npm run build
+          pnpm build-local-deps
+          pnpm build

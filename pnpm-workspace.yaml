@@ -1,0 +1,13 @@
+packages:
+  - src/*
+  - src/IntelliTect.Coalesce.CodeGeneration.Tests/out
+  - playground/*
+  - docs
+
+allowBuilds:
+  "@parcel/watcher": true
+  esbuild: true
+
+overrides:
+  js-beautify>glob: "13.0.6"
+  vite: "^8.0.10"

@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using Assembly = System.Reflection.Assembly;
@@ -74,25 +73,6 @@ public class CodeGenTestBase
             },
             Microsoft.Extensions.Logging.LogLevel.Information
         );
-    }
-
-    protected async Task<T> ConfigureAndValidateSuite<T>(T suite)
-        where T : IRootGenerator
-    {
-        var cwd = new DirectoryInfo(Directory.GetCurrentDirectory());
-        var project = GetRepoRoot().GetDirectory("src/IntelliTect.Coalesce.CodeGeneration.Tests");
-
-        var suiteName = suite.GetType().Name;
-
-        var tfmAttr = Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>();
-
-        suite = suite
-            .WithOutputPath(Path.Combine(project.FullName, "out", tfmAttr.FrameworkName, suiteName));
-
-        var validationResult = ValidateContext.Validate(suite.Model);
-        await Assert.That(validationResult.Where(r => r.IsError)).IsEmpty();
-
-        return suite;
     }
 
     protected Task AssertSuiteCSharpOutputCompiles(IRootGenerator suite)
@@ -189,10 +169,10 @@ public class CodeGenTestBase
         await typescriptProcess.WaitForExitAsync();
         var streams = await Task.WhenAll(streamTasks);
         await Assert.That(typescriptProcess.ExitCode).IsEqualTo(0)
-            .Because($"Typescript {tsVersion}\n:" + string.Join("\n\n", streams));
+            .Because(string.Join("\n\n", streams));
     }
 
-    protected DirectoryInfo GetRepoRoot()
+    public static DirectoryInfo GetRepoRoot()
     {
         return
             // Normal usage (e.g. executing out of a /bin folder

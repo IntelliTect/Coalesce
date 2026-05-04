@@ -400,8 +400,10 @@ export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> {
 }
 
 /** Represents the usage of an 'external type', i.e. an object that is not part of a relational model */
-export interface ObjectValue
-  extends ValueMetaWithTypeDef<"object", ObjectType> {
+export interface ObjectValue extends ValueMetaWithTypeDef<
+  "object",
+  ObjectType
+> {
   readonly role: "value";
 }
 
@@ -521,8 +523,7 @@ export interface ModelValueProperty extends PropertyBase, ModelValue {
  * a 1-to-1 or 1-to-many relationship in a relational model.
  */
 export interface ModelReferenceNavigationProperty
-  extends PropertyBase,
-    ModelValue {
+  extends PropertyBase, ModelValue {
   readonly role: "referenceNavigation";
   // Note: This can be a PrimaryKey in a 1-to-1 situation where the child record's
   // PK is the foreign key into the parent's type.
@@ -547,8 +548,7 @@ export interface BasicCollectionProperty extends PropertyBase, CollectionValue {
  * the foreign objects in a many-to-1 relationship in a relational model.
  */
 export interface ModelCollectionNavigationProperty
-  extends PropertyBase,
-    CollectionValue {
+  extends PropertyBase, CollectionValue {
   readonly role: "collectionNavigation";
   /**
    * Reference to the property on the type contained in this collection that relates

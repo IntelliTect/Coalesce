@@ -132,12 +132,12 @@ export type MethodForSpec<
   MethodKind extends Method = Method,
 > = "__never" extends keyof MethodsOf<TModel> // Check if we only know that the type's method names are any strings
   ? // If so, we have to allow any string because the exact method names aren't known.
-    string | Method
+      string | Method
   : // We know the exact method names of the type, so restrict to just those:
     {
       [K in keyof MethodsOf<TModel>]: MethodsOf<TModel>[K] extends MethodKind
         ? // Allow the method name
-          | (K & string)
+            | (K & string)
             // Or the full method metadata object
             | MethodsOf<TModel>[K]
         : never;

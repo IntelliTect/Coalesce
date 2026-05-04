@@ -104,8 +104,9 @@ export class DataSourceParameters {
   }
 }
 
-export interface SaveParameters<T extends Model<ModelType> = any>
-  extends DataSourceParameters {
+export interface SaveParameters<
+  T extends Model<ModelType> = any,
+> extends DataSourceParameters {
   /**
    * A list of field names to save.
    * If set, only the specified fields as well as any primary key
@@ -409,8 +410,10 @@ export function getMessageForError(error: unknown): string {
         }
 
         // Check for RFC 7807 Problem Details (application/problem+json)
+        const contentType = result.headers?.["content-type"];
         if (
-          result.headers?.["content-type"]?.includes("application/problem+json")
+          (typeof contentType === "string" || Array.isArray(contentType)) &&
+          contentType.includes("application/problem+json")
         ) {
           const problemDetails = result.data as any;
           // Prefer detail over title, as detail is typically more specific

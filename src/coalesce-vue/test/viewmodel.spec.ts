@@ -185,9 +185,9 @@ describe("ViewModel", () => {
       student.$addRule("name", "rule1", (v) => v == "a" || "Test Error 1.");
       student.$addRule("name", "rule2", (v) => v == "b" || "Test Error 2.");
 
-      expect(() => {
+      await expect(() => {
         return student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
-      }).rejects.toThrowError("Test Error 1, Test Error 2.");
+      }).rejects.toThrow("Test Error 1, Test Error 2.");
     });
   });
 

@@ -2,16 +2,7 @@
   "name": "coalesce",
   "version": "0.1.0-local",
   "private": true,
-  "workspaces": [
-    "src/*",
-    "playground/*",
-    "docs"
-  ],
-  "overrides": {
-    "js-beautify": {
-      "glob": "13.0.6"
-    }
-  },
+  "packageManager": "pnpm@11.0.4",
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@vitejs/plugin-vue": "^6.0.6",

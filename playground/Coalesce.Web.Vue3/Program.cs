@@ -89,7 +89,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 
-    app.UseViteDevelopmentServer();
+    app.UseViteDevelopmentServer(c => c.PackageManagerCommand = "pnpm");
 
     app.MapCoalesceSecurityOverview("coalesce-security");
 }

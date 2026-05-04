@@ -84,8 +84,7 @@ export abstract class ViewModel<
   TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = any,
   TPrimaryKey extends string | number | Date = any,
-> implements Model<TModel["$metadata"]>
-{
+> implements Model<TModel["$metadata"]> {
   /** See comments on ReactiveFlags_SKIP for explanation.
    * @internal
    */

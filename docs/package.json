@@ -10,7 +10,7 @@
     "dev": "vitepress dev",
     "build-only": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist",
     "linkcheck": "node check-links.mjs",
-    "build": "npm run build-only && npm run linkcheck"
+    "build": "pnpm build-only && pnpm linkcheck"
   },
   "dependencies": {
     "shiki": "1.4.0"
@@ -18,7 +18,7 @@
   "devDependencies": {
     "gray-matter": "^4.0.3",
     "serve-handler": "^6.1.6",
-    "vitepress": "2.0.0-alpha.12",
+    "vitepress": "2.0.0-alpha.17",
     "wait-on": "^8.0.4"
   }
 }

@@ -44,7 +44,8 @@ internal class NodeScriptRunner : IDisposable
         }
 
         var exeToRun = pkgManagerCommand;
-        var completeArguments = $"run {scriptName} -- {arguments ?? string.Empty}";
+        var argsSeparator = pkgManagerCommand == "npm" ? "-- " : "";
+        var completeArguments = $"run {scriptName} {argsSeparator}{arguments ?? string.Empty}";
         if (OperatingSystem.IsWindows())
         {
             // On Windows, the node executable is a .cmd file, so it can't be executed

@@ -16,8 +16,8 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
     "@mdi/font": "7.1.96",
-    "coalesce-vue": "0.1.0-local",
-    "coalesce-vue-vuetify3": "0.1.0-local",
+    "coalesce-vue": "workspace:*",
+    "coalesce-vue-vuetify3": "workspace:*",
     "@fontsource/roboto": "^5.2.6",
     "@fontsource/roboto-mono": "^5.2.6",
     "vue-facing-decorator": "^2.0.4",
@@ -26,7 +26,7 @@
     "vue": "^3.5.4"
   },
   "devDependencies": {
-    "eslint-plugin-coalesce": "0.1.0-local",
+    "eslint-plugin-coalesce": "workspace:*",
     "vite-plugin-vuetify": "^2.1.3"
   }
 }

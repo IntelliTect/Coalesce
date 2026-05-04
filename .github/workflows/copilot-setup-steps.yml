@@ -35,8 +35,11 @@ jobs:
             9.0.x
             10.0.x
 
+      - name: Install pnpm
+        run: npm install -g pnpm@11
+
       - name: Install JavaScript dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Restore .NET packages
         run: dotnet restore
@@ -47,5 +50,5 @@ jobs:
       - name: Build coalesce-vue-vuetify3
         working-directory: src/coalesce-vue-vuetify3
         run: |
-          npm run build-local-deps
-          npm run build
+          pnpm build-local-deps
+          pnpm build

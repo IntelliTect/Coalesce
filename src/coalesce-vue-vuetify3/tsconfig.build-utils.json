@@ -3,9 +3,11 @@
     "module": "NodeNext",
     "target": "ESNext",
     "outDir": "./dist",
+    "rootDir": "./src",
     "declaration": true,
     "skipLibCheck": true,
-    "moduleResolution": "NodeNext"
+    "moduleResolution": "NodeNext",
+    "types": ["node"]
   },
   "include": ["src/build.ts"],
   "exclude": ["node_modules"]

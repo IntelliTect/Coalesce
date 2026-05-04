@@ -18,5 +18,5 @@
   "chat.tools.terminal.autoApprove": {
     "npx vitest": true
   },
-  "cSpell.words": ["rolldown"]
+  "cSpell.words": ["nodenext", "rolldown"]
 }

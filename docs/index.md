@@ -143,6 +143,8 @@ public class Employee
     [Search, EmailAddress]
     public string Email { get; set; }
 
+    public DateOnly HireDate { get; init; }
+
     [Coalesce]
     public async Task SendWelcomeEmail(
         [Inject] IEmailService emailService)
@@ -155,7 +157,7 @@ public class Employee
 </div>
 <div class="gen-arrow">→</div>
 <div class="gen-output">
-<div class="gen-output-label">Coalesce generates:</div>
+<div class="gen-output-label">Coalesce provides:</div>
 <div class="gen-file-tree">
 <div class="gen-group">
 <div class="gen-group-label">C# — Server</div>
@@ -171,7 +173,9 @@ public class Employee
 </div>
 <div class="gen-group">
 <div class="gen-group-label">Vue — UI</div>
-<div class="gen-file"><span class="gen-file-icon">📄</span> Admin list &amp; editor pages <span class="gen-file-desc">Powered by generated metadata</span></div>
+<div class="gen-file"><span class="gen-file-icon">📄</span> Admin list &amp; editor pages <span class="gen-file-desc">Full CRUD UI out of the box</span></div>
+<div class="gen-file"><span class="gen-file-icon">🧩</span> Input components <span class="gen-file-desc">Dropdowns, date pickers, selects — model-driven</span></div>
+<div class="gen-file"><span class="gen-file-icon">🧩</span> Display components <span class="gen-file-desc">Tables, detail views, lists</span></div>
 </div>
 </div>
 </div>

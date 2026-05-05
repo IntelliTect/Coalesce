@@ -3,3 +3,8 @@ overrides:
 
 allowBuilds:
   "@parcel/watcher": true
+
+minimumReleaseAgeExclude:
+  - coalesce-vue
+  - coalesce-vue-vuetify3
+  - eslint-plugin-coalesce

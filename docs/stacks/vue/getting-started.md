@@ -1,26 +1,22 @@
 # Getting Started
 
+This guide walks you through creating a new Coalesce project, launching it, and building your first page.
+
 ## Environment Setup
 
 Before you begin, ensure that you have all the required tools installed:
 
-- Recent version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download). If you have Visual Studio, you already have this.
+- Recent version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download).
 - A recent version of [Node.js](https://nodejs.org/) (an LTS version is recommended).
-- A compatible IDE
-  - Recommended:
-    - Visual Studio for backend (C#) development
-    - VS Code for frontend (Vue, TypeScript) development (with [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar))
-  - Alternatively, you could use any of these:
-    - VS Code for full stack development
-    - JetBrains Rider
+- An IDE: [VS Code](https://code.visualstudio.com/) with the [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) extension is recommended. [JetBrains Rider](https://www.jetbrains.com/rider/) also works.
 
 ## Creating a Project
 
-The quickest and easiest way to create a new Coalesce Vue application is to use the `dotnet new` template.
+Use the interactive builder below to configure your new project. Select the features you want, choose a namespace, and then copy the generated CLI commands.
 
 ### Feature Selection
 
-First, select the features that you would like included in your project, and choose the root .NET namespace of your project:
+Select the features that you would like included in your project, and choose the root .NET namespace:
 
 <script setup>
 import TemplateBuilder from './TemplateBuilder.vue'
@@ -38,7 +34,7 @@ function copyCode() {
 
 ### Template Instantiation
 
-Next, click the button or manually copy the commands below into your favorite terminal, and execute them! This will create a root folder named <code>{{effectiveFolder}}</code> - execute the script in your `sources`/`repos`/etc folder.
+Next, click the Copy button or manually copy the commands below into your favorite terminal, and execute them! This will create a root directory named <code>{{effectiveFolder}}</code> - execute the script in your `sources` or `repos` directory.
 
 <button @click="copyCode()" style="
 color: var(--vp-button-brand-text);
@@ -71,7 +67,7 @@ dotnet coalesce
 
 </div>
 
-You now have a new Coalesce project! You can open your project's root folder in VS Code, and/or open the root `.slnx` file in Visual Studio to begin development.
+You now have a new Coalesce project! You can open your project's root directory in VS Code, and/or open the root `.slnx` file in Visual Studio to begin development.
 
 If any of the options you chose above require external integrations, you'll need to configure those - follow the instructions for each section that have been placed into `appsettings.json`.
 
@@ -95,7 +91,7 @@ The data project contains all your [entity models](/modeling/model-types/entitie
 
 The Web project is an ASP.NET Core application where the generated outputs from Coalesce are placed. It's also where you'll build your rich front-end pages that users will use to interact with your application.
 
-The structure of the Web project follows the conventions of both ASP.NET Core and Vite. Some specific files and folders are as follows:
+The structure of the Web project follows the conventions of both ASP.NET Core and Vite. Some specific files and directories are as follows:
 
 - `/src` - Files that should be compiled into your frontend application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
 - `/public` - Static assets that should be served directly as files.

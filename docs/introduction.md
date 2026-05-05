@@ -30,7 +30,9 @@ description: Documentation home page for IntelliTect.Coalesce
   <img src=/coalesce-icon-color.svg> Coalesce
 </h1>
 
-Designed to help you quickly build amazing web applications, Coalesce is a rapid-development, code generation-based web application framework created by [IntelliTect](https://intellitect.com) and built on top of:
+Coalesce is a full-stack meta-framework for ASP.NET Core and Vue.js, created by [IntelliTect](https://intellitect.com). You write your data models, business logic, and UI pages — Coalesce generates the API layer, TypeScript clients, ViewModels, and admin UI that connect them.
+
+It is built on top of:
 
 <table>
 <tbody>
@@ -59,26 +61,24 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
 </tbody>
 </table>
 
-## What do I build?
+## What you build
 
 You are responsible for the interesting parts of your application:
 
-- Data Model
-- Business Logic
-- External Integrations
-- Page Content
-- Site Design
-- Custom Scripting
+- **Data models** — EF Core entities and relationships
+- **Business logic** — services, custom methods, integrations
+- **UI pages** — Vue components, layouts, and custom experiences
 
-## What does Coalesce provide?
+## What Coalesce generates
 
 Coalesce builds the parts of your application that are mundane and monotonous to build:
 
-- Client-side [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md) that mirror your data model for both lists and individual objects. Use these to rapidly build your application's various pages.
-- APIs to interact with your models via endpoints like List, Get, Save, and more.
-- Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via dropdowns, enums, etc. Dropdowns support searching and paging automatically.
-- A complete set of [Admin Pages](/stacks/vue/admin-pages.md) that allow you to read, create, edit, and delete data immediately without writing additional code.
-- <Beta/> [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) that enable interaction with your application through an AI chat assistant or other LLM-based tool.
+- [**API controllers & DTOs**](/modeling/model-types/entities.md) — Full CRUD endpoints for every entity and service, with request/response DTOs that enforce security trimming automatically.
+- [**TypeScript ViewModels**](/stacks/vue/layers/viewmodels.md) — Reactive objects with auto-save, bulk saves, dirty tracking, loading states, and validation rules flowing from your C# attributes.
+- [**Vue components**](/stacks/vue/coalesce-vue-vuetify/overview.md) — Data-driven inputs, dropdowns with search and paging, date pickers, tables, and more.
+- [**Admin pages**](/stacks/vue/admin-pages.md) — Full CRUD UI out of the box, no code required.
+- [**Security enforcement**](/topics/security.md) — Role-based, row-level, and property-level security declared in C# and enforced on every API response.
+- <Beta/> [**Semantic Kernel plugins**](/modeling/model-components/attributes/semantic-kernel.md) — AI-powered interaction with your application through LLM-based tools.
 
 ## Getting Started
 

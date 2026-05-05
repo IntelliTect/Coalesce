@@ -34,7 +34,7 @@ All configuration of the way that Coalesce interacts with your projects, includi
 
 There are a couple of extra options which are only available as CLI parameters to ``dotnet coalesce``. These options do not affect the behavior of the code generation - only the behavior of the CLI itself.
 
-- `<configFile>` - First positional parameter. Path to the `coalesce.json` configuration file. If not specified, will search upwards from the current folder for a file named `coalesce.json`.
+- `<configFile>` - First positional parameter. Path to the `coalesce.json` configuration file. If not specified, will search upwards from the current directory for a file named `coalesce.json`.
 - ``--debug`` - When this flag is specified when running ``dotnet coalesce``, Coalesce will wait for a debugger to be attached to its process before starting code generation.
 - `--what-if|-WhatIf` - Runs all code generation, but does not make changes to disk.
 - `--verify` - Assert that the code generation does not have any pending changes to its output. Useful in CI builds when combined with `--what-if` to ensure that developers haven't forgotten to run code gen before committing changes.

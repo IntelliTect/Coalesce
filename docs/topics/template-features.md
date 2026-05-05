@@ -4,7 +4,7 @@ This page provides in-depth details about some of the more advanced template opt
 
 ## Identity
 
-Enabling the Identity template parameter integrates the fundamentals of [ASP.NET Core Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity). This includes storing users in your application database and facilitating sign-in, authentication, and authorization. Most Identity configuration is located in `ProgramAuthConfiguration.cs`, with the implementation spread across classes in the `Auth` folder of your data project and the Razor Pages in the `Pages` directory of your web project.
+Enabling the Identity template parameter integrates the fundamentals of [ASP.NET Core Identity](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity). This includes storing users in your application database and facilitating sign-in, authentication, and authorization. Most Identity configuration is located in `ProgramAuthConfiguration.cs`, with the implementation spread across classes in the `Auth` directory of your data project and the Razor Pages in the `Pages` directory of your web project.
 
 A custom `ClaimsPrincipalFactory` is provided to construct the claims available on each user's `ClaimsPrincipal` (typically accessed using extension methods you can add to `ClaimsPrincipalExtensions`). Additional details concerning the Tenancy template option are detailed in the Tenancy section.
 

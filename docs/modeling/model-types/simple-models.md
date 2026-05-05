@@ -14,7 +14,7 @@ The set of simple models in a Coalesce application looks like this:
 4. For any simple model discovered, any of the property types which qualify under the above rules are also simple models.
 
 ::: warning
-Be careful when using types that you do not own for properties and method returns in your data model. When Coalesce generates simple model ViewModels and DTOs, it will not stop until it has exhausted all paths that can be reached by following public property types and method returns.
+Be careful when using types that you do not own in your data model. When Coalesce is performing type discovery during code generation, it recursively traverses all public property types, method parameters, and method returns.
 
 In general, you should only expose types that you have created so that you will always have full control over them. Mark any properties you don't wish to expose with [[InternalUse]](/modeling/model-components/attributes/internal-use.md), or make those members non-public.
 :::

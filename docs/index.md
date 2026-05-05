@@ -52,7 +52,7 @@ hero:
 
 ### Define Your Models
 
-Write C# classes with Entity Framework. Use attributes to configure behavior, security, and validation. Write service classes for anything that doesn't fit into simple CRUD.
+Write models with Entity Framework. Use attributes to configure behavior, security, and validation. Write service classes for anything that doesn't fit into simple CRUD.
 
 ```cs
 [Create(Roles = "HR")]
@@ -96,7 +96,7 @@ dotnet coalesce
 
 ### Build Your Experience
 
-Use the generated APIs and TypeScript with the provided Vue components to build custom pages with full type-safety. Or, start using the full-featured admin pages right away to view and edit data.
+Use the generated APIs and TypeScript with the provided Vue components to build custom pages with rich features and full type-safety. Or, start using the full-featured admin pages right away to view and edit data.
 
 ```vue
 <template>
@@ -324,7 +324,7 @@ public class Employee
   font-weight: 700;
   text-align: center;
   margin-top: 0px;
-  margin-bottom: 36px;
+  margin-bottom: 48px;
   letter-spacing: -0.02em;
   border: none;
   padding: 0;

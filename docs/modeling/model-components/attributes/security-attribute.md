@@ -29,7 +29,7 @@ For **property-level** security, controls reading of that property any time it w
 Additionally, you can set `NoAutoInclude = true` on the `[Read]` attribute to suppress the [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior). When targeted at a class, prevents all navigation properties of that class' type from being auto-included. When targeted at a navigation property, only that specific navigation property is affected.
 
 #### Example Usage
-``` c#
+``` cs
 [Read(Roles = "Management")]
 public class Employee
 {
@@ -52,7 +52,7 @@ For **class-level** security, controls saving of existing instances of the type 
 For **property-level** security, controls access to the property any time it is accepted as input by any Coalesce built-in or custom endpoint. If a `[Read]` attribute is present, one of its roles must be fulfilled in addition to the roles specified (if any) for the `[Edit]` attribute.
 
 #### Example Usage
-``` c#
+``` cs
 [Edit(Roles = "Management,Payroll")]
 public class Employee
 {
@@ -76,7 +76,7 @@ For **class-level** security, controls saving of new instances of the type throu
 Not applicable to properties.
 
 #### Example Usage
-``` c#
+``` cs
 [Create(Roles = "HumanResources")]
 public class Employee { ... }
 
@@ -92,7 +92,7 @@ For **class-level** security, controls deleting of existing instances of the typ
 Not applicable to properties.
 
 #### Example Usage
-``` c#
+``` cs
 [Delete("HumanResources", "Management")]
 public class Employee { ... }
 

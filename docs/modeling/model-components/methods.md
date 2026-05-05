@@ -10,7 +10,7 @@ These custom methods allow you to implement any custom server-side functionality
 
 Instance Methods can be declared on your [CRUD Models](/modeling/model-types/entities.md). For example:
 
-```c#
+```cs
 public class User
 {
     public int UserId { get; set; }
@@ -50,7 +50,7 @@ Instance methods, as opposed to [static](#static-methods) or [service](#service-
 
 Static Methods can be declared on your [Entity classes](/modeling/model-types/entities.md). For example:
 
-```c#
+```cs
 public class Person
 {
     public int PersonId { get; set; }
@@ -84,7 +84,7 @@ Or, imagine an Invoice class. You might make a static method that returns a summ
 
 Service methods can be declared on a [Coalesce Service](/modeling/model-types/services.md) class:
 
-```c#
+```cs
 [Coalesce, Service]
 public class MyService
 {
@@ -95,7 +95,7 @@ public class MyService
 
 Or, they can be declared via a [Coalesce Service](/modeling/model-types/services.md) _interface_ that has an implementation registered with dependency injection:
 
-```c#
+```cs
 [Coalesce, Service]
 public interface IMyService
 {
@@ -404,7 +404,7 @@ For files that are stored in your database, Coalesce supports a pattern that all
 
 The following is an example of utilizing Table Splitting for database-stored files. Generally speaking, metadata about the file should be stored on the "main" entity, and only the bytes of the content should be split into a separate entity.
 
-```c#
+```cs
 public class AppDbContext : DbContext
 {
     public DbSet<Case> Cases { get; set; }
@@ -499,7 +499,7 @@ Methods can be exposed as [Semantic Kernel plugins](/modeling/model-components/a
 
 When the attribute is placed on a [parameter](#parameters), it provides a description of that parameter to the LLM.
 
-```c#
+```cs
 public class Person
 {
     public int PersonId { get; set; }

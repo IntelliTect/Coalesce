@@ -26,7 +26,7 @@ It is important to note that the value of the includes string will match against
 
 Server code:
 
-``` c#
+``` cs
 public class Person
 {
     // Don't include CreatedBy when editing - will be included for all other views

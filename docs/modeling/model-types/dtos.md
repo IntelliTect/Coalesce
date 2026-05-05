@@ -38,7 +38,7 @@ Next, ensure that one property is annotated with `[Key]` so that Coalesce can kn
 
 Now, populate the required `MapTo` and `MapFrom` methods with code for mapping from and to your DTO, respectively (the methods are named with respect to the underlying entity, not the DTO). Most properties probably map one-to-one in both directions, but you probably created a DTO because you wanted some sort of custom mapping - say, mapping a collection on your entity with a comma-delimited string on the DTO. This is also the place to perform any user-based, role-based, property-level security. You can access the current user on the `IMappingContext` object. 
 
-``` c#
+``` cs
 [Coalesce]
 public class CaseDto : IClassDto<Case>
 {
@@ -73,7 +73,7 @@ Custom DTOs do not utilize property-level [Security Attributes](/modeling/model-
 
 If you have any child objects on your DTO, you can invoke the mapper for some other object using the static `Mapper` class. Also seen in this example is how to respect the [Include Tree](/concepts/include-tree.md) when mapping entity types; however, respecting the `IncludeTree` is optional. Since this DTO is a custom type that you've written, if you're certain your use cases don't need to worry about object graph trimming, then you can ignore the `IncludeTree`. If you do ignore the `IncludeTree`, you should pass `null` to calls to `Mapper` - don't pass in the incoming `IncludeTree`, as this could cause unexpected results.
 
-``` c#
+``` cs
 using IntelliTect.Coalesce.Mapping;
 
 [Coalesce]
@@ -102,7 +102,7 @@ When you create a custom DTO, it will use the [Standard Data Source](/modeling/m
 
 1. As a nested class of the DTO. The relationship between your data source or behaviors and your DTO will be picked up automatically.
 
-    ``` c#
+    ``` cs
     [Coalesce]
     public class CaseDto : IClassDto<Case>
     {
@@ -122,7 +122,7 @@ When you create a custom DTO, it will use the [Standard Data Source](/modeling/m
 
 2. With a `[DeclaredFor]` attribute that references the DTO type:
 
-    ``` c#
+    ``` cs
     [Coalesce]
     public class CaseDto : IClassDto<Case>
     {
@@ -145,7 +145,7 @@ When you create a custom DTO, it will use the [Standard Data Source](/modeling/m
 
 In addition to creating a [Data Source](/modeling/model-components/data-sources.md) by deriving from [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), there also exists a class `ProjectedDtoDataSource` that can be used to easily perform projection from EF model types to your custom DTO types using EF query projections. `ProjectedDtoDataSource` inherits from [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source).
 
-``` c#
+``` cs
 [Coalesce, DeclaredFor(typeof(CaseDto))]
 public class CaseDtoSource : ProjectedDtoDataSource<Case, CaseDto, AppDbContext>
 {

@@ -8,7 +8,7 @@ Specify the allowed file types for a file [method parameter](../methods.md#param
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

@@ -21,7 +21,7 @@ In this example, `Color` is the property exposed to the API, but `ColorHex` is t
 
 If no color is saved in the database (the user hasn't picked a color), one is deterministically created.
 
-``` c#
+``` cs
 public class ApplicationUser
 {
     public int ApplicationUserId { get; set; }

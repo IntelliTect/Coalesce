@@ -10,7 +10,7 @@ Specifies that the targeted model instance method should load the instance it is
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

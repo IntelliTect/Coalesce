@@ -15,7 +15,7 @@ This attribute controls client-side validation only. To perform server-side vali
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }
@@ -41,7 +41,7 @@ Set an error message to be used if any client validations fail
 
 In addition to the following properties, you also customize validation on a per-instance basis of the [ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) using the [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) methods.
 
-``` c#
+``` cs
 public bool IsRequired { get; set; }
 public double MinValue { get; set; } = double.MaxValue;
 public double MaxValue { get; set; } = double.MinValue;

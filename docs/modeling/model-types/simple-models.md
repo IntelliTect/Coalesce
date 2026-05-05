@@ -37,7 +37,7 @@ For example, in the following scenario, these classes are considered simple mode
 * `ReportSummary`, exposed through a property on `ReportResponse`.
 * `ReportSettings`, explicitly marked with `[SimpleModel]`.
 
-``` c#
+``` cs
 [Coalesce, Service]
 public class IReportService {
     public SalesReport GenerateSalesReport(ReportParameters parameters);

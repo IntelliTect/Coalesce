@@ -11,13 +11,13 @@ The extracted attribute values are available in the `attributes` property of the
 
 Register the attribute type at the assembly level in your data project (e.g. in any `.cs` file):
 
-```c#
+```cs
 [assembly: CoalesceMetadata<System.ComponentModel.CategoryAttribute>]
 ```
 
 Then use the attribute on your models:
 
-```c#
+```cs
 [Category("people")]
 public class Person
 {

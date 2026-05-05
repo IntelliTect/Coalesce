@@ -18,7 +18,7 @@ When you define a set of custom behaviors, take note that these are only used by
 
 To create your own behaviors, you simply need to define a class that implements `IntelliTect.Coalesce.IBehaviors<T>`. To expose your behaviors to Coalesce, either place it as a nested class of the type `T` that your behaviors are for, or annotate it with the `[Coalesce]` attribute. Of course, the easiest way to create behaviors that doesn't require you to re-engineer much logic would be to inherit from `IntelliTect.Coalesce.StandardBehaviors<T, TContext>`, and then override only the parts that you need.
 
-```c#
+```cs
 public class Case
 {
     public int CaseId { get; set; }
@@ -197,7 +197,7 @@ You can, of course, create a custom base behaviors class that all your custom im
 
 Simply create a class that implements `IEntityFrameworkBehaviors<,>` (the `StandardBehaviors<,>` already does - feel free to inherit from it), then register it at application startup like so:
 
-```c#
+```cs
 public class MyBehaviors<T, TContext> : StandardBehaviors<T, TContext>
     where T : class
     where TContext : DbContext
@@ -210,7 +210,7 @@ public class MyBehaviors<T, TContext> : StandardBehaviors<T, TContext>
 }
 ```
 
-```c#
+```cs
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddCoalesce(b =>

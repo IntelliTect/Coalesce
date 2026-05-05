@@ -4,7 +4,7 @@
 
 In addition to [role-based](/modeling/model-components/attributes/security-attribute.md) property restrictions, you can also define property restrictions that can execute custom code for each model instance if your logic requires more nuanced decisions than can be made with roles.
 
-``` c#:no-line-numbers
+``` cs:no-line-numbers
 using IntelliTect.Coalesce.DataAnnotations;
 public class Employee 
 {
@@ -55,7 +55,7 @@ If you need to fetch an entity from the database, consider using `DbSet<>.Find` 
 
 For all other cases, consider caching any data you retrieve on the `IPropertyRestriction` instance itself - for example, in a `Dictionary<,>` field. The same restriction instance is used for all objects being mapped in the current request. Restrictions are evaluated serially so concurrency issues are not a concern.
 
-``` c#
+``` cs
 public class SalaryRestriction(AppDbContext db) : IPropertyRestriction<Employee>
 {
     private readonly Dictionary<string, bool> _departmentManagerCache = new();

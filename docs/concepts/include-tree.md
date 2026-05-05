@@ -9,7 +9,7 @@ Without an `IncludeTree` present, Coalesce will map the entire object graph that
 
 For example, suppose you had the following model with a many-to-many relationship (key properties omitted for brevity):
 
-``` c#
+``` cs
 public class Employee
 {
     [ManyToMany("Projects")]
@@ -118,7 +118,7 @@ In these cases, Coalesce provides a pair of extension methods, `.IncludedSeparat
 
 For example:
 
-``` c#
+``` cs
 public override IQueryable<Employee> GetQuery()
 {
     // Load all projects that are complete, and their members, into the db context.
@@ -137,7 +137,7 @@ public override IQueryable<Employee> GetQuery()
 
 You can also override the `GetIncludeTree` method of the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) to achieve the same result:
 
-``` c#
+``` cs
 public override IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => Db
     .Employees
     .IncludedSeparately(e => e.EmployeeProjects)
@@ -155,7 +155,7 @@ An `IncludeTree` can be obtained from any `IQueryable` by calling the `GetInclud
 
 In situations where you need to create an `IncludeTree` without a `DbContext`, there are static methods on `IncludeTree` to help with this.
 
-``` c#
+``` cs
 IncludeTree tree = IncludeTree.For<Person>(q => q
     .Include(p => p.Company)
     .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts)
@@ -170,7 +170,7 @@ IncludeTree tree = IncludeTree.QueryFor<Person>()
 
 To return an `IncludeTree` from a custom method, make that method return an `ItemResult<T>`, and then set the `IncludeTree` property of the `ItemResult` object. For example:
 
-``` c#
+``` cs
 public class Employee
 {
     public async Task<ItemResult<List<Employee>>> GetChainOfCommand(AppDbContext db)

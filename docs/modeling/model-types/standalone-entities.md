@@ -16,7 +16,7 @@ To define a Standalone Entity:
 In the below example, the standalone entity `PageListing` is used as a lightweight, read-only representation of a `Page` EF entity,
 with some properties omitted for performance (`Content`) and other properties simplified (`Author`).
 
-``` c#
+``` cs
 [Coalesce, StandaloneEntity]
 public class PageListing
 {
@@ -64,7 +64,7 @@ public class Page
 
 Building on the previous example, we can make the `Title` of a `PageListing` editable as follows:
 
-``` c#
+``` cs
 [Coalesce, StandaloneEntity]
 [Create(DenyAll)]
 [Delete(DenyAll)]
@@ -95,7 +95,7 @@ public class PageListing
 To add support for creates or deletes, implement the additional necessary actions in the overridden methods on the behaviors, and remove the DenyAll attributes.
 
 
-``` c#
+``` cs
 [Coalesce, StandaloneEntity]
 public class PageListing
 {
@@ -139,7 +139,7 @@ Standalone entities can be created with *any* kind of backing store you can imag
 
 The below example is admittedly contrived, as it is unlikely that you would be using an in-memory collection as a data persistence mechanism. A more likely real-world scenario would be to dependency inject an interface to some other data store.
 
-``` c#
+``` cs
 [Coalesce, StandaloneEntity]
 public class StandaloneExample
 {
@@ -166,7 +166,7 @@ public class StandaloneExample
 
 Building on the previous example, we can add support for saves and deletes by adding a Behaviors implementation:
 
-``` c#
+``` cs
 
 [Coalesce, StandaloneEntity]
 public class StandaloneExample

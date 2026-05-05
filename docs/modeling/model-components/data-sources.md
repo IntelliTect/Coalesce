@@ -10,7 +10,7 @@ By default, each of your models that Coalesce exposes will expose the standard d
 
 To implement your own custom data source, you simply need to define a class that implements `IntelliTect.Coalesce.IDataSource<T>`. To expose your data source to Coalesce, either place it as a nested class of the type `T` that your data source serves, or annotate it with the `[Coalesce]` attribute. Of course, the easiest way to create a data source that doesn't require you to re-engineer much logic would be to inherit from `IntelliTect.Coalesce.StandardDataSource<T, TContext>`, and then override only the parts that you need.
 
-```c#
+```cs
 public class Person
 {
     [DefaultDataSource]
@@ -70,7 +70,7 @@ list.$load(1);
 
 Data sources can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute. This will generate the data source's get and list functionality into kernel functions that can be invoked by an LLM. When the attribute is placed on a [parameter](#custom-parameters), it provides a description of that parameter to the LLM.
 
-```c#
+```cs
 [Coalesce]
 [SemanticKernel("Retrieves products available for sale")]
 public class AvailableProducts : StandardDataSource<Product, AppDbContext>
@@ -101,7 +101,7 @@ Alternative to setting this parameter directly, you can also use the `useRefResp
 
 On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters can be any type supported by Coalesce, including primitives, dates, [Entity Models](/modeling/model-types/entities.md), [Simple Models](/modeling/model-types/simple-models.md), or collections of these types.
 
-```c#
+```cs
 [Coalesce]
 public class NamesStartingWith : StandardDataSource<Person, AppDbContext>
 {
@@ -311,7 +311,7 @@ You can, of course, create a custom base data source that all your custom implem
 
 Simply create a class that implements `IEntityFrameworkDataSource<,>` (the `StandardDataSource<,>` already does - feel free to inherit from it), then register it at application startup like so:
 
-```c#
+```cs
 public class MyDataSource<T, TContext> : StandardDataSource<T, TContext>
     where T : class
     where TContext : DbContext
@@ -324,7 +324,7 @@ public class MyDataSource<T, TContext> : StandardDataSource<T, TContext>
 }
 ```
 
-```c#
+```cs
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddCoalesce(b =>

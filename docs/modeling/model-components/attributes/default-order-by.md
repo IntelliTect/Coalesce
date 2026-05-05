@@ -10,7 +10,7 @@ In the first case (a list of the model itself), this can be overridden by settin
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }
@@ -25,7 +25,7 @@ public class Person
 }
 ```
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }
@@ -66,7 +66,7 @@ When set to `true`, prevents this property from being used as a fallback orderin
 
 If no properties are decorated with `[DefaultOrderBy]`, Coalesce will automatically sort by a property named `Name` if one exists, otherwise by the primary key. Setting `Suppress = true` on the `Name` or primary key property prevents them from being used for this fallback behavior.
 
-``` c#
+``` cs
 public class RandomOrder
 {
     public int Id { get; set; }

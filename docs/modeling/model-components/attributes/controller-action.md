@@ -11,7 +11,7 @@ Specifies how a [custom method](/modeling/model-components/methods.md) is expose
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

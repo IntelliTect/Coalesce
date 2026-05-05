@@ -14,7 +14,7 @@ This attribute may be placed on any type from which an API controller is generat
 
 ## Example Usage
 
-``` c#
+``` cs
 [Controller(ApiRouted = false, ApiControllerSuffix = "Gen", ApiActionsProtected = true)]
 public class Person
 {

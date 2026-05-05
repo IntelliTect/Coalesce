@@ -12,7 +12,7 @@ suppressing the creation of either or both of these.
 
 ## Example Usage
 
-``` c#
+``` cs
 [CreateController(view: false, api: true)]
 public class Person
 {

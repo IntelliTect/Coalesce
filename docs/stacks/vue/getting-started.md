@@ -18,6 +18,8 @@ Before you begin, ensure that you have all the required tools installed:
 
 The quickest and easiest way to create a new Coalesce Vue application is to use the `dotnet new` template.
 
+### Feature Selection
+
 First, select the features that you would like included in your project, and choose the root .NET namespace of your project:
 
 <script setup>
@@ -33,6 +35,8 @@ function copyCode() {
 </script>
 
 <TemplateBuilder v-model:options="templateParams" v-model:namespace="namespace" />
+
+### Template Instantiation
 
 Next, click the button or manually copy the commands below into your favorite terminal, and execute them! This will create a root folder named <code>{{effectiveFolder}}</code> - execute the script in your `sources`/`repos`/etc folder.
 
@@ -71,6 +75,12 @@ You now have a new Coalesce project! You can open your project's root folder in 
 
 If any of the options you chose above require external integrations, you'll need to configure those - follow the instructions for each section that have been placed into `appsettings.json`.
 
+### Launch
+
+To launch the application, run the AppHost project. In Visual Studio, set it as the startup project and press F5. In VS Code, launch the `C#: Aspire Host` configuration. From the command line, `dotnet run` form the `AppHost` directory.
+
+This starts the [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) orchestrator, which launches both the ASP.NET Core backend and the Vite dev server for you. Open the Aspire dashboard URL shown in the terminal to access your running app and monitor its services.
+
 ## Project Structure
 
 ### AppHost Project
@@ -106,7 +116,7 @@ During development, no special effort is required to build your frontend code. C
 
 Let's say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, added a corresponding `DbSet` property to our EF DbContext, and we've ran code generation with `dotnet coalesce`:
 
-```c#
+```cs
 namespace MyApplication.Data.Models
 {
     public class Person

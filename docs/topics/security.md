@@ -284,7 +284,7 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 </td>
 <td>
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 [ReadAttribute]
 ```
 
@@ -298,7 +298,7 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 </td>
 <td>
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 [CreateAttribute] // Affects saves of new entities
 [EditAttribute]   // Affects saves of existing entities
 ```
@@ -313,7 +313,7 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 </td>
 <td>
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 [DeleteAttribute]
 ```
 
@@ -327,7 +327,7 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 </td>
 <td>
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 // Read permission required for the root entity:
 [ReadAttribute]
 
@@ -343,7 +343,7 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 
 Here are some examples of applying security attributes to an entity class. If a particular action doesn't need to be restricted, you can omit that attribute, but this example shows usages of all four:
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 // Allow read access by unauthenticated, anonymous users:
 [Read(SecurityPermissionLevels.AllowAll)]
 // Allow creation of new entities by the Admin and HR roles (params string[] style):
@@ -370,7 +370,7 @@ The default behavior is that all endpoints require an authenticated user (anonym
 
 For example:
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 public class Employee
 {
     public int EmployeeId { get; set; }
@@ -403,7 +403,7 @@ Properties can be hidden from Coalesce entirely, either with the [[InternalUse]]
 
 The properties in the following example are hidden entirely from all Coalesce functionality and generated APIs:
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 using IntelliTect.Coalesce.DataAnnotations;
 public class Employee
 {
@@ -431,7 +431,7 @@ public class Department
 
 A property in Coalesce can be made read-only in any of the following ways:
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 using IntelliTect.Coalesce.DataAnnotations;
 using System.ComponentModel;
 public class Employee
@@ -464,7 +464,7 @@ public class Employee
 
 Reading and writing a property in Coalesce can be restricted by roles:
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 using IntelliTect.Coalesce.DataAnnotations;
 public class Employee
 {
@@ -531,7 +531,7 @@ EF filtered Includes **cannot** be used to apply database-executed filters to _r
 
 A complex example using all three of the above techniques:
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 public class Employee
 {
   public int EmployeeId { get; set; }
@@ -622,7 +622,7 @@ The primary purpose of `TransformResults` is to conditionally load navigation pr
 
 The general technique for using `TransformResults` involves using [EF Core Explicit Loading](https://learn.microsoft.com/en-us/ef/core/querying/related-data/explicit#explicit-loading) to attach additional navigation properties to the result set, and then using Coalesce's `.IncludedSeparately()` method in the data source's `GetQuery` so that Coalesce can still build the correct [Include Tree](/concepts/include-tree.md) to shape the serialization of your results.
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 public class Employee
 {
   public int EmployeeId { get; set; }
@@ -659,7 +659,7 @@ public class Employee
 
 Alternatively, and indeed preferably, you can often formulate a query that does not use iteration and requires only a single database round-trip:
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 public override async Task TransformResultsAsync(
   IReadOnlyList<Employee> results,
   IDataSourceParameters parameters
@@ -720,7 +720,7 @@ In addition to any validation attributes present on your model properties and me
 
 To disable this functionality for your entire application, disable the corresponding configuration options on `CoalesceOptions`. For example, in Startup.cs or Program.cs:
 
-```c#
+```cs
 services.AddCoalesce<AppDbContext>(b => b.Configure(o =>
 {
     // Set either to false to disable:
@@ -739,7 +739,7 @@ Enabling [`ValidateAttributesForMethods`](/modeling/model-components/attributes/
 
 Validation of `/save`, `/bulkSave`, and `/delete` actions against [CRUD Models](/modeling/model-types/crud.md) are performed by the [Behaviors](/modeling/model-components/behaviors.md) for the type. Automatic [attribute based validation](#attribute-validation) can be used (saves only), or Behaviors can be overridden to perform validation and other customization of the save and delete process, as in the following example:
 
-```c#
+```cs
 public class Employee
 {
   public int IsCeo { get; set; }
@@ -771,7 +771,7 @@ public class Employee
 
 For [Custom Methods](/modeling/model-components/methods.md) and [Services](/modeling/model-types/services.md), you can perform your own custom validation and return errors when validation fails. You can also use [attribute based validation](#attribute-validation). Custom methods that need to return errors to the client are recommended to wrap their return type in an `ItemResult<T>`, allowing errors to be received and handled elegantly by your Coalesce Typescript code.
 
-```c#
+```cs
 public class Employee
 {
   public decimal Salary { get; set; }
@@ -795,7 +795,7 @@ If you include the security overview in your production app, you should secure i
 Alternatively, only map the endpoint in non-production environments.
 :::
 
-```c#
+```cs
 // .NET 6+ Program.cs:
 app.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
     new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }

@@ -14,7 +14,7 @@ Specifies whether a DateTime type will have a date and a time, or only a date.
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

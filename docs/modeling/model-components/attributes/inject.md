@@ -12,7 +12,7 @@ This gets translated to a `Microsoft.AspNetCore.Mvc.FromServicesAttribute` in th
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

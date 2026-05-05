@@ -30,7 +30,7 @@ const selectedTitle = ref<string>();
 />
 ```
 
-``` c#
+``` cs
 class Person 
 {
     public int PersonId { get; set; } 

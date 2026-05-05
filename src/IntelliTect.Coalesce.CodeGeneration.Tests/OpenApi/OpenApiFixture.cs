@@ -50,11 +50,16 @@ public class OpenApiFixture
             });
 
         App = hostBuilder.Start();
+        _document = new Lazy<Task<OpenApiDocument>>(LoadDocumentAsync);
     }
 
     public IHost App { get; }
 
-    public async Task<OpenApiDocument> GetDocumentAsync()
+    private readonly Lazy<Task<OpenApiDocument>> _document;
+
+    public Task<OpenApiDocument> GetDocumentAsync() => _document.Value;
+
+    private async Task<OpenApiDocument> LoadDocumentAsync()
     {
         var client = App.GetTestClient();
 

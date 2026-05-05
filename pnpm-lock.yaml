@@ -165,7 +165,7 @@ importers:
         specifier: ^3.5.4
         version: 3.5.33
       axios:
-        specifier: ^1.15.0
+        specifier: ^1.16.0
         version: 1.16.0
       date-fns:
         specifier: ^3.0.0 || ^4.0.0
@@ -213,7 +213,7 @@ importers:
         specifier: ^5.1.5
         version: 5.1.5(vite@8.0.10(@types/node@24.12.2)(sass@1.99.0)(yaml@2.8.4))(vue@3.5.33(typescript@6.0.3))
       axios:
-        specifier: ^1.15.0
+        specifier: ^1.16.0
         version: 1.16.0
       coalesce-vue:
         specifier: workspace:*

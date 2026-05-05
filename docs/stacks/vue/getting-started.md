@@ -77,9 +77,9 @@ If any of the options you chose above require external integrations, you'll need
 
 ### Launch
 
-To launch the application, run the AppHost project. In Visual Studio, set it as the startup project and press F5. In VS Code, launch the `C#: Aspire Host` configuration. From the command line, `dotnet run` form the `AppHost` directory.
+To launch the application, run the AppHost project. In Visual Studio, set it as the startup project and press F5. In VS Code, launch the `C#: Aspire Host` configuration. From the command line, `dotnet run` in the `*.AppHost` directory.
 
-This starts the [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) orchestrator, which launches both the ASP.NET Core backend and the Vite dev server for you. Open the Aspire dashboard URL shown in the terminal to access your running app and monitor its services.
+This starts the [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) orchestrator, which launches both the ASP.NET Core backend and any other local services depending on chosen template options. Open the Aspire dashboard URL shown in the terminal to access your running app and monitor its services. Click the URL on the `app` resource to view your web frontend.
 
 ## Project Structure
 

@@ -4,8 +4,8 @@ layout: home
 
 hero:
   name: "Coalesce"
-  text: Accelerated Web App Development
-  tagline: ASP.NET Core • EF Core • Vue.js • TypeScript
+  text: The full-stack meta-framework for ASP.NET Core and Vue.
+  tagline: Build what matters. Generate the rest.
   image:
     src: /coalesce-icon-color.svg
     alt: Coalesce
@@ -25,17 +25,17 @@ hero:
 ## Why Coalesce?
 
 <div class="props-grid">
-<div class="prop-item">
-<div class="prop-stat">Instant Productivity</div>
-<div class="prop-desc">Go from EF model to working admin UI in minutes, not days or weeks.</div>
+<div class="prop-item prop-item-detailed">
+<div class="prop-stat">Skip the Plumbing</div>
+<p class="prop-description">You build Entity Framework data models, domain services, and rich user interfaces. Coalesce generates API controllers, DTOs, TypeScript models, API clients, and more. Focus on delivering value - we'll handle the trivia.</p>
 </div>
-<div class="prop-item">
-<div class="prop-stat">Zero Boilerplate</div>
-<div class="prop-desc">No hand-writing API controllers, DTOs, fetch calls, or form bindings — that's all generated.</div>
+<div class="prop-item prop-item-detailed">
+<div class="prop-stat">Effortless UX</div>
+<p class="prop-description">Generated ViewModels include auto-save, bulk saves, dirty tracking, loading states, and validation — all flowing from your C# model. Ready-made Vue components give you data-driven dropdowns, date pickers, and more, ready to use in your UIs.</p>
 </div>
-<div class="prop-item">
-<div class="prop-stat">100% Yours</div>
-<div class="prop-desc">All generated code lives in your project — eject or customize anything.</div>
+<div class="prop-item prop-item-detailed">
+<div class="prop-stat">Security Included</div>
+<p class="prop-description">Apply role-based, row-level, and property-level security with simple declarative attributes or completely custom code — whichever fits the scenario. Security trimming is enforced automatically on every API response.</p>
 </div>
 </div>
 </section>
@@ -81,7 +81,7 @@ public class Employee
 
 ### Run Code Generation
 
-A single `dotnet coalesce` command generates everything between your data layer and your UI.
+A single `dotnet coalesce` command generates everything between your domain models and your UI.
 
 ```
 dotnet coalesce
@@ -94,7 +94,7 @@ dotnet coalesce
 <div class="step-number">3</div>
 <div class="step-content">
 
-### Build Your App
+### Build Your Experience
 
 Use the generated APIs and TypeScript with the provided Vue components to build custom pages with full type-safety. Or, start using the full-featured admin pages right away to view and edit data.
 
@@ -184,67 +184,67 @@ public class Employee
 
 ## Coalesce vs. Alternatives
 
-<p class="section-blurb">Unlike one-time scaffolding, Coalesce regenerates as your models evolve. Unlike low-code platforms, you own all the code.</p>
+<p class="section-blurb">Unlike low-code platforms, you're never boxed or locked in. Unlike one-time scaffolding, Coalesce regenerates as your models evolve. </p>
 
 <table class="comparison-table">
 <thead>
 <tr>
 <th></th>
 <th><strong>Coalesce</strong></th>
-<th><strong>Built from Scratch</strong><br><span class="th-example">Controllers, AutoMapper</span></th>
+<th><strong>Low-Code Platforms</strong><br><span class="th-example">Power Apps, OutSystems</span></th>
 <th><strong>API Client Generators</strong><br><span class="th-example">NSwag, OpenAPI codegen</span></th>
-<th><strong>Low-Code Platforms</strong><br><span class="th-example">Power Apps, Airtable</span></th>
+<th><strong>Build from Scratch</strong><br><span class="th-example">Controllers, AutoMapper</span></th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>Time to working CRUD</strong></td>
 <td>✅ Minutes</td>
-<td>❌ Days to weeks</td>
-<td>❌ No server-side generation</td>
 <td>✅ Minutes</td>
+<td>❌ Backend not included</td>
+<td>❌ Days to weeks</td>
 </tr>
 <tr>
-<td><strong>Adapts to model changes</strong></td>
+<td><strong>Adaptability to change</strong></td>
 <td>✅ Re-run codegen</td>
-<td>❌ Manual updates everywhere</td>
-<td>✅ Re-run client gen</td>
 <td>⚠️ Varies by vendor</td>
+<td>✅ Re-run client gen</td>
+<td>❌ Manual updates everywhere</td>
 </tr>
 <tr>
 <td><strong>Admin UI included</strong></td>
 <td>✅ Full-featured</td>
-<td>❌ Not included</td>
-<td>❌ Not included</td>
 <td>✅ Included</td>
+<td>❌ Not included</td>
+<td>❌ Not included</td>
 </tr>
 <tr>
-<td><strong>Server + client generation</strong></td>
-<td>✅ Both layers</td>
-<td>❌ Neither</td>
+<td><strong>Code Generation</strong></td>
+<td>✅ Server &amp; Client</td>
+<td>❌ No source code</td>
 <td>⚠️ Client only</td>
-<td>❌ Proprietary runtime</td>
+<td>❌ Neither</td>
 </tr>
 <tr>
 <td><strong>Fully customizable</strong></td>
 <td>✅ Override anything</td>
+<td>⚠️ Limited</td>
 <td>✅ Full control</td>
 <td>✅ Full control</td>
-<td>❌ Limited</td>
 </tr>
 <tr>
 <td><strong>Security model built-in</strong></td>
 <td>✅ Row & property level</td>
-<td>❌ Build from scratch</td>
-<td>❌ Not included</td>
 <td>⚠️ Vendor-specific</td>
+<td>❌ Not included</td>
+<td>❌ Build from scratch</td>
 </tr>
 <tr>
-<td><strong>Scales with complexity</strong></td>
-<td>✅ Generated code stays in sync</td>
-<td>❌ Maintenance grows with every model</td>
-<td>⚠️ Still need server code</td>
-<td>❌ Hit platform limits fast</td>
+<td><strong>Deployment</strong></td>
+<td>✅ Any host</td>
+<td>❌ Vendor lock-in</td>
+<td>✅ Any host</td>
+<td>✅ Any host</td>
 </tr>
 </tbody>
 </table>
@@ -463,8 +463,8 @@ public class Employee
 /* Value Props */
 .props-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px 32px;
   text-align: center;
 }
 
@@ -475,9 +475,19 @@ public class Employee
   margin-bottom: 8px;
 }
 
-.prop-desc {
-  color: var(--vp-c-text-2);
+.prop-item-detailed .prop-stat {
+  font-size: 28px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.prop-description {
   font-size: 15px;
+  text-align: center !important;
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
+  margin: 0;
+  text-align: left;
 }
 
 /* Comparison */

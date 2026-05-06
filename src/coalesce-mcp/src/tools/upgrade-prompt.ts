@@ -253,59 +253,42 @@ export function registerUpgradeTools(server: McpServerType) {
 
 Use the \`read_template_file\` and \`read_changelog\` tools to read the Coalesce template files and changelog as needed throughout this process.
 
-## Step 1: Determine Current Version
+## Phase 1: Investigate
 
-Find and read the user's \`Directory.Build.props\` to get their current \`CoalesceVersion\`. Also read their web project's \`package.json\` to find the current versions of \`coalesce-vue\`, \`coalesce-vue-vuetify3\`, and \`eslint-plugin-coalesce\`.
+Gather all information needed to understand what's changed and what needs updating. Do NOT make any changes yet.
 
-If the NPM and NuGet versions don't match each other, warn the user immediately — mismatched versions cause bugs.
+### Current State
+Find and read the user's \`Directory.Build.props\` to get their current \`CoalesceVersion\`. Read their web project's \`package.json\` for NPM package versions. Read all \`.csproj\` files for NuGet packages and target frameworks.
 
-Then use \`read_template_file\` to read \`Directory.Build.props\` and \`package.json\` from the template to determine the latest Coalesce version.
+If the NPM and NuGet Coalesce versions don't match each other, warn the user immediately — mismatched versions cause bugs.
+
+Use \`read_template_file\` to read the template's \`Directory.Build.props\`, \`package.json\`, \`Web.csproj\`, and \`Data.csproj\` to determine the latest versions.
 
 If the user is already on the latest version, tell them and stop. Let them know that if this is unexpected, their coalesce-mcp may be outdated.
 
-If upgrading would cross a major version boundary (e.g. 5.x → 6.x), warn the user that major upgrades may require significant changes and suggest upgrading one major version at a time.
+### Changelog
+Use the \`read_changelog\` tool with the user's current version as \`sinceVersion\`. Identify:
+- Breaking changes that require code modifications
+- Template changes that indicate configuration/pattern updates
+- New opt-in features
 
-If the upgrade includes a Vuetify major version change (e.g. Vuetify 3 to 4), warn the user that the Vuetify upgrade is non-trivial for most apps. Suggest they follow the official Vuetify upgrade guide at https://vuetifyjs.com/en/getting-started/upgrade-guide/ alongside the Coalesce upgrade.
+### Dependencies
+Compare ALL dependency versions between the template and the user's project:
 
-## Step 2: Review the Changelog
+- **.NET Target Framework** — Does the template target a newer .NET version?
+- **Coalesce packages** — \`CoalesceVersion\` (NuGet), \`coalesce-vue\`, \`coalesce-vue-vuetify3\`, \`eslint-plugin-coalesce\` (NPM)
+- **NuGet packages** — Compare template \`.csproj\` files against user's. Also scan ALL user \`.csproj\` files for Microsoft packages (\`Microsoft.EntityFrameworkCore.*\`, \`Microsoft.Extensions.*\`, \`Microsoft.AspNetCore.*\`, etc.) that follow the .NET release cadence — these should all be on the same version as each other.
+- **NPM packages** — Packages the user already has that have newer versions in the template. New packages in the template that the user doesn't have. Packages removed from the template.
 
-Use the \`read_changelog\` tool with the user's current version as \`sinceVersion\` to get all changes since their version. Pay special attention to:
-- **Breaking Changes** sections — these require code modifications
-- **Template Changes** sections — these indicate configuration/pattern updates
-- New features that may require opt-in
+The template \`.csproj\` files contain \`#if\` directives for optional features — only consider packages the user actually has. Don't suggest adding packages only relevant to specific template features (e.g. \`@microsoft/applicationinsights-web\` is only for AppInsights).
 
-Summarize the relevant changes for the user before making any modifications.
-
-## Step 3: Update Coalesce Package Versions
-
-1. Update \`CoalesceVersion\` in \`Directory.Build.props\` to match the template's version.
-2. Update \`coalesce-vue\`, \`coalesce-vue-vuetify3\`, and \`eslint-plugin-coalesce\` in the web project's \`package.json\` to match the template's versions.
-
-## Step 4: Compare Third-Party Dependencies
-
-### NPM
-Use \`read_template_file\` to read the template's \`package.json\`, then compare it against the user's \`package.json\`. For each dependency that the user already has:
-- If the template has a newer version, suggest upgrading it.
-- If the template has removed it, mention that (but don't remove it without asking).
-- If the template has added a new package that the user doesn't have, only mention it if it seems universally useful (not gated behind a feature flag).
-
-Do NOT add packages the user doesn't already have if they're only relevant to specific template features (e.g. \`@microsoft/applicationinsights-web\` is only for AppInsights).
-
-### NuGet
-Use \`read_template_file\` to read the template's \`.csproj\` files (\`Web.csproj\`, \`Data.csproj\`) and compare NuGet package versions against the user's \`.csproj\` files:
-- Only suggest upgrades for packages the user already references.
-- Note target framework changes.
-- Packages using \`$(CoalesceVersion)\` will be updated automatically from Step 3.
-
-The template \`.csproj\` files contain \`#if\` directives for optional features — only consider packages the user actually has.
-
-## Step 5: Compare Configuration Files
-
-Use \`read_template_file\` to read the template versions of these files, then compare against the user's versions:
+### Configuration Files
+Use \`read_template_file\` to compare these files against the user's versions and note meaningful differences:
 
 - **vite.config.ts** — New plugins, build config changes, code splitting strategy
-- **eslint.config.mjs** — New rules, plugin changes. If the user is still on \`.eslintrc\`, suggest migrating to flat config.
+- **eslint.config.mjs** — New rules, plugin changes. Note if user is still on \`.eslintrc\`.
 - **tsconfig.json**, **tsconfig.node.json**
+- **pnpm-workspace.yaml** — overrides, allowBuilds, and other pnpm settings
 - **.npmrc**
 - **.editorconfig**
 - **.vscode/settings.json**
@@ -313,22 +296,49 @@ Use \`read_template_file\` to read the template versions of these files, then co
 - **AGENTS.md**
 - **dependabot.yml**
 
-For each file, only suggest changes that are meaningful. Don't rewrite the user's file to match the template exactly — they may have intentional customizations.
+Don't flag differences that are clearly intentional user customizations.
 
-## Step 6: Address Breaking Changes
+### Summary
+Present a clear summary of everything found, organized by category.
 
-Based on the changelog review from Step 2, make any code changes needed to address breaking changes.
+If upgrading would cross a major version boundary (e.g. 5.x → 6.x), warn the user that major upgrades may require significant changes and suggest upgrading one major version at a time.
 
-## Step 7: Post-Upgrade Validation
+If the upgrade includes a Vuetify major version change (e.g. Vuetify 3 to 4), warn the user that the Vuetify upgrade is non-trivial. Suggest they follow the official Vuetify upgrade guide at https://vuetifyjs.com/en/getting-started/upgrade-guide/ alongside the Coalesce upgrade.
 
-Run these commands in order, fixing any errors before proceeding to the next:
+## Phase 2: Ask
 
-1. \`npm install\` in the web project. If it fails due to a recently-published package being blocked by npm's minimum release age policy, offer to re-run with \`npm install --min-release-age=0\` after explaining the risk. Always check for warnings in the npm install output.
+Use \`vscode_askQuestions\` with \`multiSelect: true\` to let the user choose what to do. Separate mandatory items (breaking changes, Coalesce package updates) from optional items. If you don't have that tool or a similar alternative, ask with clearly numbered items in regular output.
+
+Present options grouped by category. For example:
+- Required updates (Coalesce packages, breaking changes) — inform the user these will be done, no need to ask
+- .NET framework upgrade
+- Third-party NuGet package updates
+- Third-party NPM package updates
+- New packages from the template to add
+- Configuration file changes
+- New optional features from the changelog
+
+Each option should have a brief description so the user can make informed choices.
+
+## Phase 3: Execute
+
+Create a TODO for EACH individual item selected by the user (not just the high-level categories — one TODO per package, per breaking change, per config file, etc.). Then work through them:
+
+1. Update all selected dependency versions (Coalesce packages, .NET framework, NuGet, NPM)
+2. Apply selected configuration file changes
+3. Address breaking changes identified in the changelog
+4. Mark each TODO complete as it's resolved
+
+### Validation
+
+After all changes are made, run these commands in order, fixing errors before proceeding:
+
+1. \`pnpm install\` (or \`npm install\`) in the web project. If it fails due to a recently-published package being blocked by npm's minimum release age policy, offer to re-run with \`--min-release-age=0\` after explaining the risk. Always check for warnings in the install output.
 2. \`dotnet restore\` in the solution root
 3. Run Coalesce code generation (use the \`coalesce_generate\` tool, or run \`dotnet coalesce\` in the web project)
 4. \`dotnet build\` to verify .NET compilation
-5. \`npm run build\` in the web project (runs \`vite build && vue-tsc --noEmit\`)
-6. If tests exist, run \`dotnet test\` and \`npm test run\`
+5. \`pnpm run build\` (or \`npm run build\`) in the web project (runs \`vite build && vue-tsc --noEmit\`)
+6. If tests exist, run \`dotnet test\` and \`pnpm test run\` (or \`npm test run\`)
 `;
 
       return {

@@ -33,6 +33,8 @@ public class AppDbContext : DbContext
     public DbSet<StringIdentity> StringIdentities { get; set; }
 
     public DbSet<RecursiveHierarchy> RecursiveHierarchies { get; set; }
+    public DbSet<SelfOwnedTenant> SelfOwnedTenants { get; set; }
+    public DbSet<SelfOwnedTenantConsumer> SelfOwnedTenantConsumers { get; set; }
 
     [InternalUse]
     public DbSet<DbSetIsInternalUse> Internals { get; set; }

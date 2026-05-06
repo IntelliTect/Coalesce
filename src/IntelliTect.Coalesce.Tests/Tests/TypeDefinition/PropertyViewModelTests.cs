@@ -426,4 +426,24 @@ public class PropertyViewModelTests
         await Assert.That(prop.ForeignKeyProperty.Name).IsEqualTo(nameof(OneToOneManyChildren.OneToOneParentId));
     }
 
+    [Test]
+    [PropertyViewModelData<SelfOwnedTenant>(nameof(SelfOwnedTenant.OwnerTenant))]
+    public async Task ReferenceNavigation_SelfReferentialNonConventionalName_DoesNotRecurse(PropertyViewModelData data)
+    {
+        PropertyViewModel prop = data;
+
+        await Assert.That(prop.ForeignKeyProperty).IsNull();
+        await Assert.That(prop.Role).IsEqualTo(PropertyRole.Value);
+    }
+
+    [Test]
+    [PropertyViewModelData<SelfOwnedTenantConsumer>(nameof(SelfOwnedTenantConsumer.OwnerTenant))]
+    public async Task ReferenceNavigation_TargetWithSelfReferenceAndNonConventionalName_DoesNotRecurse(PropertyViewModelData data)
+    {
+        PropertyViewModel prop = data;
+
+        await Assert.That(prop.ForeignKeyProperty).IsNull();
+        await Assert.That(prop.Role).IsEqualTo(PropertyRole.Value);
+    }
+
 }

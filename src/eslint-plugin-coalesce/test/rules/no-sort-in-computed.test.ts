@@ -51,6 +51,10 @@ ruleTester.run("no-sort-in-computed", rule, {
     {
       code: `const sorted = computed(() => { const arr = [...items.value]; arr.sort(); return arr; });`,
     },
+    // .sort() on local variable assigned from .filter() - fine (new array)
+    {
+      code: `const sorted = computed(() => { const filtered = items.filter(x => x); filtered.sort(); return filtered; });`,
+    },
   ],
   invalid: [
     // .sort() on reactive array inside computed

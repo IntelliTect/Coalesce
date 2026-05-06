@@ -23,7 +23,7 @@
     </v-btn>
     <input
       v-model="vm.caseKey"
-      :disabled="vm.caseKey && !vm.$getPropDirty('caseKey')"
+      :disabled="!!vm.caseKey && !vm.$getPropDirty('caseKey')"
       placeholder="PK to load"
     />
 
@@ -133,8 +133,8 @@ const products = [
 const firstName = ref("");
 const lastName = ref("");
 
-useBindToQueryString(firstName, "value", "firstName");
-useBindToQueryString(lastName, "value", "lastName");
+useBindToQueryString(firstName, "firstName");
+useBindToQueryString(lastName, "lastName");
 
 function clearQueryStrings() {
   // If both first & last name are set,

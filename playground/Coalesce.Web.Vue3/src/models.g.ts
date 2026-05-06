@@ -18,15 +18,15 @@ export enum Genders {
 
 
 export enum Statuses {
-  Open = 0,
-  InProgress = 1,
-  Resolved = 2,
+  Open = "Open",
+  InProgress = "InProgress",
+  Resolved = "Resolved",
   
   /** The case was closed without being solved. */
-  ClosedNoSolution = 3,
+  ClosedNoSolution = "ClosedNoSolution",
   
   /** Case closed. */
-  Cancelled = 4,
+  Cancelled = "Cancelled",
 }
 
 

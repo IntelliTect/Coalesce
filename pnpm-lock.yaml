@@ -112,9 +112,6 @@ importers:
       vue:
         specifier: ^3.5.4
         version: 3.5.33(typescript@6.0.3)
-      vue-facing-decorator:
-        specifier: ^2.0.4
-        version: 2.1.20(vue@3.5.33(typescript@6.0.3))
       vue-router:
         specifier: ^4.4.4
         version: 4.6.4(vue@3.5.33(typescript@6.0.3))
@@ -197,7 +194,7 @@ importers:
   src/coalesce-vue-vuetify3:
     dependencies:
       date-fns:
-        specifier: ^3.0.0
+        specifier: ^3.0.0 || ^4.0.0
         version: 3.6.0
       date-fns-tz:
         specifier: ^3.0.0
@@ -2903,11 +2900,6 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-
-  vue-facing-decorator@2.1.20:
-    resolution: {integrity: sha512-Xv987Q+XhhWTPXxzG4HllHxckMahV04wDcRebdd/AWlU/hYm7+tGRo2eD84mpl3rZLZQ74Cr41UlWbGbEQptNA==}
-    peerDependencies:
-      vue: ^3.0.0
 
   vue-router@4.6.4:
     resolution: {integrity: sha512-Hz9q5sa33Yhduglwz6g9skT8OBPii+4bFn88w6J+J4MfEo4KRRpmiNG/hHHkdbRFlLBOqxN8y8gf2Fb0MTUgVg==}
@@ -5696,10 +5688,6 @@ snapshots:
       semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
-
-  vue-facing-decorator@2.1.20(vue@3.5.33(typescript@6.0.3)):
-    dependencies:
-      vue: 3.5.33(typescript@6.0.3)
 
   vue-router@4.6.4(vue@3.5.33(typescript@6.0.3)):
     dependencies:

@@ -34,7 +34,7 @@ One-to-one relationships can be represented in Coalesce, but require fairly spec
 
 In a shared-key one-to-one relationship, the dependent/child entity's primary key is also its foreign key to the principal/parent entity. The dependent side must explicitly annotate its PK with `[ForeignKey]` pointing at the parent navigation property:
 
-```c#
+```cs
 public class OneToOneParent
 {
     public int Id { get; set; }
@@ -57,7 +57,7 @@ The `[InverseProperty]` attribute can optionally be added to the parent's naviga
 
 In a separate-key one-to-one relationship, the dependent entity has its own distinct primary key and a separate foreign key property with a unique constraint:
 
-```c#
+```cs
 [Index(nameof(ParentId), IsUnique = true)]
 public class OneToOneSeparateKeyChild
 {
@@ -86,7 +86,7 @@ Coalesce is compatible with TPH, TPT, and TPCT entity hierarchies. Define your m
 
 Properties whose type is a [Simple Model](/modeling/model-types/simple-models.md) (i.e., a type without a `DbSet<T>` on your `DbContext`) can be mapped in EF to be stored as JSON using `ComplexProperty` and `ComplexCollection` in `OnModelCreating`:
 
-```c#
+```cs
 public class Order {
     public int OrderId { get; set; }
     public Address ShippingAddress { get; set; }
@@ -104,7 +104,7 @@ public class LineItem {
 }
 ```
 
-```c#
+```cs
 // In DbContext.OnModelCreating:
 modelBuilder.Entity<Order>(e =>
 {

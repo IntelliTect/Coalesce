@@ -1,3 +1,7 @@
+# 6.5.1
+- `vue`, `date-fns`, and `date-fns-tz` are now peer dependencies instead of direct dependencies of `coalesce-vue` and `coalesce-vue-vuetify3`.
+- Fix margin issue in `c-admin-audit-log-page` on Vuetify 4.
+
 # 6.5.0
 - Support enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` as string-serialized enums. These are generated as string-valued TypeScript enums and serialized as strings over the wire.
 - Added `getPromise()` method to API callers, returning the current invocation's promise (or `undefined` if idle).

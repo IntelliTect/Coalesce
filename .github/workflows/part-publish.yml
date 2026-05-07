@@ -14,6 +14,10 @@ on:
         required: false
         type: boolean
         default: false
+      skipTemplate:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   npm:
@@ -52,7 +56,7 @@ jobs:
 
       - name: dotnet nuget push
         if: ${{ !inputs.skipNuget }}
-        run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --skip-duplicate
 
   docs:
     runs-on: ubuntu-latest

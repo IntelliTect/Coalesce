@@ -12,7 +12,7 @@
 
 ## Installing dependencies
 
-This project uses NPM workspaces. To install NPM packages, you only need to run `npm ci` once, in the repository root. Running `npm ci` in any other directory will cause problems.
+This project uses pnpm workspaces. To install packages, run `pnpm install` once in the repository root.
 
 ## Debugging Code Generation
 
@@ -47,7 +47,7 @@ dotnet run -- <path-to-coalesce.json> --debug
 
 ```bash
 cd docs
-npm run dev
+pnpm dev
 ```
 
 Then open the documentation in your browser at the URL provided in the output after launching.
@@ -56,4 +56,4 @@ Then open the documentation in your browser at the URL provided in the output af
 
 Execute `dotnet run`, or launch the `playground/Coalesce.Web.Vue3` project from Visual Studio.
 
-If you need to run code generation for the playground project, run `npm run coalesce` in the `playground/Coalesce.Web.Vue3` directory. This will compile and then execute the local Coalesce CLI against the playground project.
+If you need to run code generation for the playground project, run `pnpm coalesce` in the `playground/Coalesce.Web.Vue3` directory. This will compile and then execute the local Coalesce CLI against the playground project.

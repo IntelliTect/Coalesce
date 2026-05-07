@@ -66,6 +66,149 @@ export default defineConfig({
     },
     theme: "dark-plus",
     codeTransformers: [
+      // Color Vue component tags green (like VS Code with Volar)
+      {
+        name: "vue-component-tag-color",
+        code(hast: any) {
+          if (this.options.lang !== "vue") return;
+          const componentTagRegex = /^[A-Z]|^[a-z]+-[a-z]/;
+
+          // Walk each line and look for patterns: <ComponentName or </ComponentName
+          for (const line of hast.children) {
+            if (line.type !== "element") continue;
+            const spans = line.children?.filter(
+              (c: any) => c.type === "element",
+            );
+            if (!spans) continue;
+
+            for (let i = 0; i < spans.length; i++) {
+              const span = spans[i];
+              const prevSpan = spans[i - 1];
+              const text = span.children?.[0]?.value;
+              const prevText = prevSpan?.children?.[0]?.value;
+
+              if (!text) continue;
+
+              // If previous token ends with < or </ and this token matches component pattern
+              if (
+                prevText &&
+                (prevText.endsWith("<") || prevText.endsWith("</")) &&
+                componentTagRegex.test(text)
+              ) {
+                span.properties = span.properties || {};
+                span.properties.style = "color:#4EC9B0";
+              }
+            }
+          }
+        },
+      },
+      // Color bound attribute values like TypeScript expressions
+      {
+        name: "vue-bound-attr-ts-color",
+        code(hast: any) {
+          if (this.options.lang !== "vue") return;
+          for (const line of hast.children) {
+            if (line.type !== "element") continue;
+            const spans = line.children?.filter(
+              (c: any) => c.type === "element",
+            );
+            if (!spans) continue;
+
+            for (let i = 0; i < spans.length; i++) {
+              const span = spans[i];
+              const text = span.children?.[0]?.value;
+              if (!text) continue;
+
+              // Check if previous spans indicate this is a bound attribute value
+              // Pattern: attr name starting with : or @, then =, then "value"
+              const prevSpan = spans[i - 1];
+              const prevPrevSpan = spans[i - 2];
+              const prevText = prevSpan?.children?.[0]?.value;
+              const prevPrevText = prevPrevSpan?.children?.[0]?.value;
+
+              const isBoundValue =
+                prevText === "=" &&
+                prevPrevText &&
+                (prevPrevText.trimStart().startsWith(":") ||
+                  prevPrevText.trimStart().startsWith("@") ||
+                  prevPrevText.trimStart().startsWith("v-"));
+
+              if (!isBoundValue) continue;
+
+              // Replace the single string span with multiple colored spans
+              const inner = text.slice(1, -1); // strip quotes
+              if (!inner) continue;
+
+              // Tokenize the expression simply
+              const tokens: { text: string; color: string }[] = [];
+              const tokenRegex =
+                /(\$?\w+)|(\.\s*)|([[\](),])|(\s+)|(["'`][^"'`]*["'`])/g;
+              let match;
+              let lastIndex = 0;
+
+              while ((match = tokenRegex.exec(inner)) !== null) {
+                if (match.index > lastIndex) {
+                  tokens.push({
+                    text: inner.slice(lastIndex, match.index),
+                    color: "#D4D4D4",
+                  });
+                }
+                if (match[1]) {
+                  // identifier
+                  tokens.push({ text: match[1], color: "#9CDCFE" });
+                } else if (match[2]) {
+                  // dot
+                  tokens.push({ text: match[2], color: "#D4D4D4" });
+                } else if (match[3]) {
+                  // brackets/parens
+                  tokens.push({ text: match[3], color: "#D4D4D4" });
+                } else if (match[4]) {
+                  // whitespace
+                  tokens.push({ text: match[4], color: "#D4D4D4" });
+                } else if (match[5]) {
+                  // string literal
+                  tokens.push({ text: match[5], color: "#CE9178" });
+                }
+                lastIndex = match.index + match[0].length;
+              }
+              if (lastIndex < inner.length) {
+                tokens.push({
+                  text: inner.slice(lastIndex),
+                  color: "#D4D4D4",
+                });
+              }
+
+              // Build new children: opening quote + tokens + closing quote
+              const newChildren: any[] = [
+                {
+                  type: "element",
+                  tagName: "span",
+                  properties: { style: "color:#D4D4D4" },
+                  children: [{ type: "text", value: text[0] }],
+                },
+                ...tokens.map((t) => ({
+                  type: "element",
+                  tagName: "span",
+                  properties: { style: `color:${t.color}` },
+                  children: [{ type: "text", value: t.text }],
+                })),
+                {
+                  type: "element",
+                  tagName: "span",
+                  properties: { style: "color:#D4D4D4" },
+                  children: [{ type: "text", value: text[text.length - 1] }],
+                },
+              ];
+
+              // Replace the span in the line's children
+              const idx = line.children.indexOf(span);
+              if (idx !== -1) {
+                line.children.splice(idx, 1, ...newChildren);
+              }
+            }
+          }
+        },
+      },
       // Remove code lines annotated with [!code hide]
       {
         name: "remove-code-hide",

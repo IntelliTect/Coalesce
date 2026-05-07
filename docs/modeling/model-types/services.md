@@ -21,7 +21,7 @@ For each service in your application's model, Coalesce will generate:
 
 Coalesce services are instantiated from your applications dependency injection container when invoked. The type annotated with `[Coalesce, Service]` must be resolvable from that container. For example:
 
-``` c#
+``` cs
 // In Program.cs
 builder.Services.AddScoped<IWeatherService, WeatherService>();
 ```
@@ -33,7 +33,7 @@ Although it is not required to use an interface (you can generate endpoints dire
 
 You can customize the security and other behavior of each method with [ExecuteAttribute](/modeling/model-components/attributes/execute.md).
 
-``` c#
+``` cs
 [Coalesce, Service]
 public interface IWeatherService
 {
@@ -44,7 +44,7 @@ public interface IWeatherService
 ### Implementations
 If you choose to generate directly from the implementation instead of an interface, annotate the class itself with `[Coalesce, Service]` rather than the interface. Unlike interfaces, each method you want to expose on the class must be explicitly annotated with the `[Coalesce]` attribute.
 
-``` c#
+``` cs
 [Coalesce, Service]
 public class WeatherService(AppDbContext db)
 {
@@ -67,7 +67,7 @@ public class WeatherService(AppDbContext db)
 
 When a service method is annotated with `[SemanticKernel]`, Coalesce will generate a Semantic Kernel plugin that exposes that method as a function that can be called by AI models or other Semantic Kernel components. Each method must be individually annotated because a semantic description of each function must be provided to the model.
 
-``` c#
+``` cs
 [Coalesce, Service]
 public interface IWeatherService
 {

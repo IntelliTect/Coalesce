@@ -55,6 +55,7 @@ export const Statuses = domain.enums.Statuses = {
   name: "Statuses" as const,
   displayName: "Statuses",
   type: "enum",
+  format: "string",
   ...getEnumMeta<"Open"|"InProgress"|"Resolved"|"ClosedNoSolution"|"Cancelled">([
   {
     value: 0,
@@ -1511,6 +1512,7 @@ export const Company = domain.types.Company = {
       type: "string",
       role: "value",
       dontSerialize: true,
+      noFilter: true,
     },
   },
   methods: {
@@ -1716,11 +1718,6 @@ export const Person = domain.types.Person = {
       type: "string",
       subtype: "email",
       role: "value",
-      meta: {
-        featureFlag: {
-          flag: "new-email-validation",
-        },
-      },
       rules: {
         email: val => !val || /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<> ()\[\]\\.,;:\s@"]+)*)|(".+ "))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val.trim()) || "Email must be a valid email address.",
       }
@@ -1738,6 +1735,7 @@ export const Person = domain.types.Person = {
       displayName: "Height",
       type: "number",
       role: "value",
+      noFilter: true,
     },
     casesAssigned: {
       name: "casesAssigned",
@@ -1831,6 +1829,7 @@ export const Person = domain.types.Person = {
       type: "string",
       role: "value",
       dontSerialize: true,
+      noFilter: true,
     },
     companyId: {
       name: "companyId",

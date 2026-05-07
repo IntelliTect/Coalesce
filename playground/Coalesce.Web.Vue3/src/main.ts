@@ -40,7 +40,6 @@ const examples = import.meta.glob("@/examples/**/*.vue");
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: "/test", component: () => import("./components/test.vue") },
     {
       path: "/test-setup",
       component: () => import("./components/test-setup.vue"),

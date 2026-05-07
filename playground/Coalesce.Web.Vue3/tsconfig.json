@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020", // not esnext because of https://github.com/microsoft/TypeScript/issues/45297
+    "target": "ES2023",
     "module": "esnext",
     "strict": true,
     "jsx": "preserve",
@@ -10,14 +10,13 @@
     "allowSyntheticDefaultImports": true,
     "noEmitOnError": true,
     "sourceMap": true,
-    "preserveSymlinks": true,
-    "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       // Add modules here that are getting duplicated due to the fact that we symlink in coalesce-vue and coalesce-vue-vuetify.
 
       // Vue must be deduplicated for `GlobalComponents` to work
-      "vue": ["node_modules/vue"],
+      "vue": ["./node_modules/vue"],
 
       "coalesce-vue": ["../../src/coalesce-vue/src"],
       "coalesce-vue/*": ["../../src/coalesce-vue/src/*"],

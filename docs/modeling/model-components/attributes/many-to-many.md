@@ -12,7 +12,7 @@ The name specified in the attribute will be used as the name of a collection of 
 
 ## Example Usage
 In this example, we have a Person entity and an Appointment entity that share a many-to-many relationship. The PersonAppointment entity serves as the required middle table.
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }
@@ -55,7 +55,7 @@ The name of the collection that will contain the set of objects on the other sid
 
 The name of the navigation property on the middle entity that points at the far side of the many-to-many relationship. Use this to resolve ambiguities when the middle table of the many-to-many relationship has more than two reference navigation properties on it.
 
-``` c#
+``` cs
 public class Person
 {
     ...

@@ -23,7 +23,7 @@ Add a reference to the Nuget package `IntelliTect.Coalesce.AuditLogging` to your
 
 Define the entity type that will hold the audit records in your database:
 
-``` c#
+``` cs
 using IntelliTect.Coalesce.AuditLogging;
 
 [Read(Roles = "Administrator")]
@@ -46,7 +46,7 @@ You should also apply security to restrict reading of these records to only the 
 
 On your `DbContext`, implement the `IAuditLogDbContext<AuditLog>` interface using the class you just created as the type parameter. Then register the Coalesce audit logging extension in your `DbContext`'s `OnConfiguring` method so that saves will be intercepted and audit log entries created.
 
-``` c#
+``` cs
 [Coalesce]
 public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 {
@@ -66,7 +66,7 @@ You could also perform this setup in your web project when calling `.AddDbContex
 
 The above code also contains a reference to a class `OperationContext`. This is the service that will allow you to populate additional custom properties on your audit entries. You'll want to define it as follows:
 
-``` c#
+``` cs
 public class OperationContext : DefaultAuditOperationContext<AuditLog>
 {
     // Inject any additional desired services in the constructor:
@@ -106,7 +106,7 @@ import { CAdminAuditLogPage } from 'coalesce-vue-vuetify3';
 
 You can turn audit logging on or off for individual operations by implementing the `SuppressAudit` property on your DbContext. For example, implement it as an auto-property as follows and then set it to `true` in application code when desired: 
 
-``` c#
+``` cs
 [Coalesce]
 public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 {
@@ -121,7 +121,7 @@ Coalesce's audit logging uses Entity Framework's change tracking capabilities to
 
 You can configure which entities and properties to include or exclude from auditing, as well as customize how property values are formatted in the audit logs. Coalesce's configuration extensions allow for targeted configuration per context without relying on global static singletons. For example:
 
-``` c#
+``` cs
 public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -143,7 +143,7 @@ public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 
 For SQL Server databases, audit logging uses stored procedures by default instead of executing the merge SQL directly. This provides better performance through compiled execution plans and easier monitoring/troubleshooting:
 
-``` c#
+``` cs
 public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -187,7 +187,7 @@ A lightweight alternative or addition to full audit logging is audit stamping - 
 
 Coalesce offers a simple mechanism to register an Entity Framework save interceptor to perform this kind of action (this **does NOT** require the `IntelliTect.Coalesce.AuditLogging` package). This mechanism operates on all saves that go through Entity Framework, eliminating the need to perform this manually in individual Behaviors, Services, and Custom Methods:
 
-``` c#
+``` cs
 services.AddDbContext<AppDbContext>(options => options
     .UseSqlServer(connectionString) // (or other provider)
     .UseStamping<TrackingBase>((entity, user) => entity.SetTracking(user))
@@ -196,7 +196,7 @@ services.AddDbContext<AppDbContext>(options => options
 
 In the above example, `TrackingBase` is an interface or class that you would write as part of your application that defines the properties and mechanisms for performing the tracking operation. For example:
 
-``` c#
+``` cs
 public abstract class TrackingBase
 {
     [Read, Display(Order = 1000)]

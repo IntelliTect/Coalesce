@@ -121,7 +121,7 @@ In this approach, there are two tables: A primary configuration table that is fr
 
 For example:
 
-``` c#
+``` cs
 
 [Delete(DenyAll)]
 public class ProductConfiguration 

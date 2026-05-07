@@ -450,6 +450,9 @@ defineExpose({
   }
   td {
     vertical-align: top;
+    pre {
+      margin: 0;
+    }
   }
 }
 

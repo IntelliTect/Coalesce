@@ -48,7 +48,7 @@ Searches on collection navigation properties usually don't translate well with E
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

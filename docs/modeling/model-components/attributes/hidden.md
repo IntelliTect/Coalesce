@@ -13,7 +13,7 @@ Do not use it to keep certain data private - use the [Security Attributes](/mode
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

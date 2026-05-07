@@ -1,12 +1,23 @@
 name: Setup .NET
 description: Setup .NET SDK
 
+inputs:
+  include-all-runtimes:
+    description: "Install all targeted runtimes (for running tests on multiple TFMs)"
+    required: false
+    default: "false"
+
 runs:
   using: composite
   steps:
     - uses: actions/setup-dotnet@v5
+      if: inputs.include-all-runtimes == 'true'
       with:
         dotnet-version: |
           8.0.x
           9.0.x
           10.0.x
+    - uses: actions/setup-dotnet@v5
+      if: inputs.include-all-runtimes != 'true'
+      with:
+        dotnet-version: 10.0.x

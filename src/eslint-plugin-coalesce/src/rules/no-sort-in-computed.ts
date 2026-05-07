@@ -113,7 +113,8 @@ const rule: Rule.RuleModule = {
         if (
           computedDepth > 0 &&
           node.id.type === "Identifier" &&
-          node.init?.type === "ArrayExpression"
+          node.init &&
+          isNewArrayProducer(node.init as Rule.Node)
         ) {
           localArrayVars[localArrayVars.length - 1].add(node.id.name);
         }

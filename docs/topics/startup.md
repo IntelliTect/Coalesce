@@ -12,7 +12,7 @@ The easiest way to get started with Coalesce is to use the [Coalesce project tem
 
 For Coalesce to work in your application, you must register the needed services in your `Program.cs`. Doing so is simple:
 
-``` c#
+``` cs
 // Program.cs
 builder.Services.AddCoalesce<AppDbContext>();
 ```
@@ -21,7 +21,7 @@ builder.Services.AddCoalesce<AppDbContext>();
 
 This registers all the basic services that Coalesce needs to work with your EF DbContext. However, many more options are available. Here's a more complete invocation of `AddCoalesce` that takes advantage of many of the options available:
 
-``` c#
+``` cs
 // Program.cs
 builder.Services.AddCoalesce(b => b
     .AddContext<AppDbContext>()
@@ -135,7 +135,7 @@ Prevents ASP.NET Core from injecting the browser refresh script during developme
 
 Call this method at the very start of your `Program.cs`, before creating the `WebApplicationBuilder`:
 
-``` c#
+``` cs
 // Program.cs
 CoalesceOptions.PreventAspNetBrowserRefresh();
 
@@ -153,11 +153,11 @@ Configures static file middleware with optimizations for Vite build output. This
 
 This calls `UseStaticFiles` internally, so it should be used in place of, not in addition to, a call to UseStaticFiles. If you need more advanced control, you should instead use UseStaticFiles directly.
 
-``` c#
+``` cs
 app.UseViteStaticFiles();
 ```
 
-``` c#
+``` cs
 // With custom authorization:
 app.UseViteStaticFiles(new()
 {
@@ -175,7 +175,7 @@ Adds a `Cache-Control: no-cache, no-store` header to all responses that reach th
 
 This is useful for preventing browsers from unexpectedly caching API responses. Usually this is placed just after `.UseViteStaticFiles()`.
 
-``` c#
+``` cs
 app.UseNoCacheResponseHeader();
 ```
 
@@ -185,11 +185,11 @@ Adds an `X-App-Build` response header to all responses that reach this point in 
 
 On the client, this header is used by the [`<CAppUpdateAlert>`](/stacks/vue/coalesce-vue-vuetify/components/c-app-update-alert.md) component (or the `useAppUpdateCheck` composable from `coalesce-vue`) to detect when a new version of the application has been deployed and notify the user to refresh.
 
-``` c#
+``` cs
 app.UseAppVersionHeader();
 ```
 
-``` c#
+``` cs
 // With a custom version string:
 app.UseAppVersionHeader("2.1.0-rc1");
 ```
@@ -206,7 +206,7 @@ Maps a route that presents an HTML page with a comprehensive overview of all typ
 
 See the [Security Overview](/topics/security.md#security-overview-page) documentation for more details.
 
-``` c#
+``` cs
 app.MapCoalesceSecurityOverview("coalesce-security")
     .RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
 ```

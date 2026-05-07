@@ -2,6 +2,7 @@
   <Import Project="../Common.props" />
   <PropertyGroup>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Core library for IntelliTect Coalesce. Learn more at https://coalesce.intellitect.com/</Description>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <Nullable>enable</Nullable>

@@ -46,7 +46,7 @@ Override the action buttons. Receives a `reload` function as a slot prop that tr
 
 The server must emit an `X-App-Build` response header for this component to function. Add the following to your ASP.NET Core middleware pipeline:
 
-``` c#
+``` cs
 app.UseAppVersionHeader();
 ```
 

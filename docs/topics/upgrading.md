@@ -23,7 +23,7 @@ First, upgrade the NPM dependencies in your web project.
 
 ## NuGet upgrades
 
-Coalesce projects usually have a single variable, `CoalesceVersion`, to control all Coalesce NuGet package dependencies, declared in `Directory.Build.props`. This file is in the root of the solution, next to the `.sln` file; it is also included in the "Solution Items" folder in Visual Studio's Solution Explorer.
+Coalesce projects usually have a single variable, `CoalesceVersion`, to control all Coalesce NuGet package dependencies, declared in `Directory.Build.props`. This file is in the root of the solution, next to the `.sln` file; it is also included in the "Solution Items" directory in Visual Studio's Solution Explorer.
 
 To upgrade the NuGet packages:
 1. Update the value of `CoalesceVersion` with the new version number.

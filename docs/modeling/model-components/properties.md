@@ -14,7 +14,7 @@ Most common built-in primitive (numerics, strings, booleans) and other scalar da
 
 Enums can be serialized as strings in API responses by annotating them with `[JsonConverter(typeof(JsonStringEnumConverter))]`:
 
-```c#
+```cs
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum Status
 {

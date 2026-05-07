@@ -10,7 +10,7 @@ If this attribute is not used, and a property named `Name` exists on the model, 
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

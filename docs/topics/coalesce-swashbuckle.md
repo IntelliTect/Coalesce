@@ -27,7 +27,7 @@ Note: You do not need to install the `Swashbuckle.AspNetCore` package separately
 
 Update your Program.cs file to configure OpenAPI document generation with Coalesce-specific enhancements:
 
-```c#:no-line-numbers
+```cs:no-line-numbers
 builder.Services.AddSwaggerGen(config =>
 {
     config.AddCoalesce(); // Add coalesce specific configuration
@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(config =>
 
 Add the OpenAPI document endpoint in your HTTP pipeline:
 
-```c#
+```cs
 app.MapSwagger();
 ```
 
@@ -59,7 +59,7 @@ The primary effect is an adjustment of parameter definitions to account for Coal
 
 To illustrate the impact of the `IntelliTect.Coalesce.Swashbuckle` package, let's examine the Patient model and its representation in OpenAPI.
 
-```c#
+```cs
 public class Patient
 {
     public int PatientId { get; init; }
@@ -96,7 +96,7 @@ ASP.NET Core includes [built-in OpenAPI document generation](https://learn.micro
 
 Adding it is as simple as installing `Microsoft.AspNetCore.OpenApi`, then in Program.cs:
 
-``` c#
+``` cs
 services.AddOpenApi();
 ```
 
@@ -116,7 +116,7 @@ Once you have OpenAPI document generation configured, you need to choose a UI to
 
 Add Scalar to your HTTP pipeline:
 
-```c#
+```cs
 // With Swashbuckle:
 app.MapScalarApiReference(c => c.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json");
 
@@ -134,7 +134,7 @@ The traditional [Swagger UI](https://swagger.io/tools/swagger-ui/) is also fully
 
 Add Swagger UI to your HTTP pipeline:
 
-```c#
+```cs
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");

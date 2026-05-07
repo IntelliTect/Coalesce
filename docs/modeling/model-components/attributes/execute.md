@@ -9,7 +9,7 @@ For other security controls, see [Security Attributes](/modeling/model-component
 
 ## Example Usage
 
-``` c#
+``` cs
 public class Person
 {
     public int PersonId { get; set; }

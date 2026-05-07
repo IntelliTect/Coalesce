@@ -19,8 +19,8 @@
   ],
   "exports": {
     ".": {
-      "style": "./dist/coalesce-vue-vuetify.css",
       "types": "./dist/index.d.ts",
+      "style": "./dist/coalesce-vue-vuetify.css",
       "default": "./dist/index.js"
     },
     "./build": {

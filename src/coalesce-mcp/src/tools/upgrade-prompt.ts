@@ -260,8 +260,6 @@ Gather all information needed to understand what's changed and what needs updati
 ### Current State
 Find and read the user's \`Directory.Build.props\` to get their current \`CoalesceVersion\`. Read their web project's \`package.json\` for NPM package versions. Read all \`.csproj\` files for NuGet packages and target frameworks.
 
-If the NPM and NuGet Coalesce versions don't match each other, warn the user immediately — mismatched versions cause bugs.
-
 Use \`read_template_file\` to read the template's \`Directory.Build.props\`, \`package.json\`, \`Web.csproj\`, and \`Data.csproj\` to determine the latest versions.
 
 If the user is already on the latest version, tell them and stop. Let them know that if this is unexpected, their coalesce-mcp may be outdated.
@@ -289,7 +287,6 @@ Use \`read_template_file\` to compare these files against the user's versions an
 - **eslint.config.mjs** — New rules, plugin changes. Note if user is still on \`.eslintrc\`.
 - **tsconfig.json**, **tsconfig.node.json**
 - **pnpm-workspace.yaml** — overrides, allowBuilds, and other pnpm settings
-- **.npmrc**
 - **.editorconfig**
 - **.vscode/settings.json**
 - **.vscode/mcp.json**
@@ -307,18 +304,23 @@ If the upgrade includes a Vuetify major version change (e.g. Vuetify 3 to 4), wa
 
 ## Phase 2: Ask
 
-Use \`vscode_askQuestions\` with \`multiSelect: true\` to let the user choose what to do. Separate mandatory items (breaking changes, Coalesce package updates) from optional items. If you don't have that tool or a similar alternative, ask with clearly numbered items in regular output.
+Use \`vscode_askQuestions\` with \`multiSelect: true\` to let the user choose which significant changes to apply. If you don't have that tool or a similar alternative, ask with clearly numbered items in regular output.
 
-Present options grouped by category. For example:
-- Required updates (Coalesce packages, breaking changes) — inform the user these will be done, no need to ask
-- .NET framework upgrade
-- Third-party NuGet package updates
-- Third-party NPM package updates
-- New packages from the template to add
-- Configuration file changes
+Do NOT ask about:
+- Coalesce package updates (always do these)
+- Breaking changes from the changelog (always apply)
+- Minor/patch version bumps of dependencies
+- devDependency upgrades
+- Routine NuGet package bumps that simply track .NET SDK versions
+
+Only present options for decisions that meaningfully affect the project:
+- .NET target framework upgrade (e.g. net9.0 → net10.0)
+- Major version upgrades of app dependencies (e.g. Vuetify 3 → 4)
 - New optional features from the changelog
+- Significant configuration file changes (new files, structural changes — not minor tweaks)
+- New packages from the template that the user doesn't have yet
 
-Each option should have a brief description so the user can make informed choices.
+Each option should have a brief description so the user can make informed choices. Inform the user that Coalesce packages, breaking changes, and routine dependency bumps will be applied automatically.
 
 ## Phase 3: Execute
 
@@ -331,14 +333,15 @@ Create a TODO for EACH individual item selected by the user (not just the high-l
 
 ### Validation
 
-After all changes are made, run these commands in order, fixing errors before proceeding:
+After all changes are made, run these commands in order, fixing errors before proceeding (if the project uses pnpm, use it in place of npm):
 
-1. \`pnpm install\` (or \`npm install\`) in the web project. If it fails due to a recently-published package being blocked by npm's minimum release age policy, offer to re-run with \`--min-release-age=0\` after explaining the risk. Always check for warnings in the install output.
+1. \`npm install\` in the web project. If it fails due to a recently-published package being blocked by npm's minimum release age policy, offer to re-run with \`--min-release-age=0\` after explaining the risk. Always check for warnings in the install output.
 2. \`dotnet restore\` in the solution root
 3. Run Coalesce code generation (use the \`coalesce_generate\` tool, or run \`dotnet coalesce\` in the web project)
 4. \`dotnet build\` to verify .NET compilation
-5. \`pnpm run build\` (or \`npm run build\`) in the web project (runs \`vite build && vue-tsc --noEmit\`)
-6. If tests exist, run \`dotnet test\` and \`pnpm test run\` (or \`npm test run\`)
+5. \`npm run build\` in the web project
+6. \`npm run lint\` in the web project — fix all warnings and errors
+7. If tests exist, run \`dotnet test\` and \`npm test run\`
 `;
 
       return {

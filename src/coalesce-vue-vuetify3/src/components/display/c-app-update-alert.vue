@@ -2,7 +2,7 @@
   <v-snackbar
     :model-value="isUpdateAvailable"
     :timeout="-1"
-    color="info"
+    color="primary"
     location="bottom left"
     class="c-app-update-alert"
   >

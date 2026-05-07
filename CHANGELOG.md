@@ -18,11 +18,11 @@
 - Replaced deprecated `typeface-roboto` package with `@fontsource/roboto/latin.css` and `@fontsource/roboto/latin-italic.css`.
 - The template now uses pnpm instead of npm for better DX. To migrate an existing project:
   1. Install pnpm: `npm install -g pnpm@11`
-  2. Delete `package-lock.json`, and copy `pnpm-workspace.yaml` from the template into your web project root.
-  3. Run `pnpm clean`, then `pnpm install`.
+  2. Delete `package-lock.json`, and copy `pnpm-workspace.yaml` and the root `package.json` from the template into your solution root (next to your `.slnx`). Add your web project as a package in the workspace (`packages: - YourProject.Web`).
+  3. Run `pnpm install`.
   4. In `Program.cs`, add `c.PackageManagerCommand = "pnpm";` to `UseViteDevelopmentServer` options.
   5. Add any phantom dependencies that pnpm's strict `node_modules` structure reveals (e.g. `date-fns`, `date-fns-tz`). Build errors or runtime import failures will indicate which ones are missing.
-  6. Update CI/CD scripts to use `pnpm` instead of `npm`, ensuring to add a step to install `pnpm` itself. Replace `npm ci` with `pnpm install --frozen-lockfile`.
+  6. Update CI/CD scripts to use `pnpm` instead of `npm`. Add a step to install pnpm. Run `pnpm install --frozen-lockfile` from the solution root. Replace other `npm` commands with `pnpm`.
 - The first-party password/passkey login flow is now two-stage: enter username first, then choose between password, passkey, or a one-time email code. When `Passkeys` is enabled, users who sign in with password or email code are then prompted to create a passkey.
 - `Role.Permissions` are no longer EF-mapped as enums. The EF property is now `List<string>`, with a `[NotMapped] PermissionEnums` wrapper that drops unrecognized values. This prevents `InvalidOperationException` when a `Permission` enum member is removed but old values remain in the database.
 - Added rate limiting to authentication pages (sign-in, register, forgot password, reset password, email confirmation, external login) to mitigate brute-force abuse.

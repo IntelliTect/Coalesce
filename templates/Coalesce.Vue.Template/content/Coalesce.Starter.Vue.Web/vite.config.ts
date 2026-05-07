@@ -24,6 +24,9 @@ export default defineConfig({
               test: /\.s?css|type=style/,
               priority: 30,
             },
+            //#if AppInsights
+            { name: "appi", test: /applicationinsights/, priority: 20 },
+            //#endif
             {
               name(moduleId: string) {
                 // Suggest that top level node_modules folders should have their own chunk.

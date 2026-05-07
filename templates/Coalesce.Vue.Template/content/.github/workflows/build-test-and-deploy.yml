@@ -54,7 +54,6 @@ jobs:
 
       - name: pnpm install
         run: pnpm install --frozen-lockfile
-        working-directory: Coalesce.Starter.Vue.Web
 
       - name: Restore Nuget packages
         run: dotnet restore

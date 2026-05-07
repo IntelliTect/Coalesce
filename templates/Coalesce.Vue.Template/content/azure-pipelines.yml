@@ -27,7 +27,6 @@ steps:
 
   - script: pnpm install --frozen-lockfile
     displayName: pnpm install
-    workingDirectory: $(webDir)
 
   - task: DotNetCoreCLI@2
     inputs:

@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from "node:url";
+import { execSync } from "node:child_process";
 
 import { defineConfig } from "vite";
 
@@ -95,6 +96,13 @@ export default defineConfig({
   },
 
   server: {
+    fs: {
+      allow: [
+        // Workaround https://github.com/vitejs/vite/issues/22405
+        execSync("pnpm store path", { encoding: "utf8" }).trim(),
+        ".",
+      ],
+    },
     warmup: {
       clientFiles: ["./src/views/**/*.vue"],
     },

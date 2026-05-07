@@ -82,6 +82,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     include: ["**/*.spec.{ts,tsx}"],
+    setupFiles: ["./test/setup.ts"],
     server: {
       deps: {
         inline: [/vuetify/],

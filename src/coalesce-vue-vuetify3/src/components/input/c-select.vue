@@ -4,6 +4,8 @@
     v-model="mainValue"
     class="c-select"
     role="combobox"
+    aria-haspopup="listbox"
+    :aria-label="inputBindAttrs.label"
     :class="{
       'c-select--is-menu-active': menuOpen,
       'c-select--multiple': effectiveMultiple,
@@ -141,11 +143,13 @@
             max-height="302"
             density="compact"
             :aria-multiselectable="effectiveMultiple"
+            aria-live="polite"
             role="listbox"
             v-bind="listProps"
           >
             <v-list-item
               v-if="createItemLabel"
+              role="option"
               class="c-select__create-item"
               :class="{
                 'c-select__create-item--end': props.create?.position === 'end',
@@ -194,7 +198,9 @@
             >
               <v-list-item v-bind="item.props">
                 <template v-if="effectiveMultiple" #prepend>
-                  <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
+                  <v-list-item-action start inert>
+                    <v-checkbox-btn :modelValue="item.selected" />
+                  </v-list-item-action>
                 </template>
                 <v-list-item-title>
                   <slot
@@ -222,6 +228,7 @@
                   listCaller.pageSize &&
                   listItems.length >= listCaller.pageSize)
               "
+              role="presentation"
               class="text-grey font-italic"
             >
               Max {{ listCaller.pageSize }} items retrieved. Refine your search

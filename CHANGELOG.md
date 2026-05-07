@@ -1,6 +1,7 @@
 # 6.5.1
 - `vue`, `date-fns`, and `date-fns-tz` are now peer dependencies instead of direct dependencies of `coalesce-vue` and `coalesce-vue-vuetify3`.
 - Fix margin issue in `c-admin-audit-log-page` on Vuetify 4.
+- `c-select`: Improved accessibility — multi-select checkboxes are now `inert`, and `aria-haspopup`, `aria-labelledby`, and `aria-live` attributes are now set.
 
 # 6.5.0
 - Support enums annotated with `[JsonConverter(typeof(JsonStringEnumConverter))]` as string-serialized enums. These are generated as string-valued TypeScript enums and serialized as strings over the wire.

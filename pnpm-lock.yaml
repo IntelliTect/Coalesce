@@ -209,6 +209,9 @@ importers:
       '@vitejs/plugin-vue-jsx':
         specifier: ^5.1.5
         version: 5.1.5(vite@8.0.10(@types/node@24.12.2)(sass@1.99.0)(yaml@2.8.4))(vue@3.5.33(typescript@6.0.3))
+      axe-core:
+        specifier: ^4.11.4
+        version: 4.11.4
       axios:
         specifier: ^1.16.0
         version: 1.16.0
@@ -1513,6 +1516,10 @@ packages:
 
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
+
+  axe-core@4.11.4:
+    resolution: {integrity: sha512-KunSNx+TVpkAw/6ULfhnx+HWRecjqZGTOyquAoWHYLRSdK1tB5Ihce1ZW+UY3fj33bYAFWPu7W/GRSmmrCGuxA==}
+    engines: {node: '>=4'}
 
   axios@1.16.0:
     resolution: {integrity: sha512-6hp5CwvTPlN2A31g5dxnwAX0orzM7pmCRDLnZSX772mv8WDqICwFjowHuPs04Mc8deIld1+ejhtaMn5vp6b+1w==}
@@ -4270,6 +4277,8 @@ snapshots:
       js-tokens: 10.0.0
 
   asynckit@0.4.0: {}
+
+  axe-core@4.11.4: {}
 
   axios@1.16.0:
     dependencies:

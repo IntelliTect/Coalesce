@@ -26,7 +26,7 @@ export default defineConfig({
               priority: 30,
             },
             //#if AppInsights
-            { name: "appi", test: /applicationinsights/, priority: 20 },
+            { name: "appI", test: /applicationinsights/, priority: 20 },
             //#endif
             {
               name(moduleId: string) {

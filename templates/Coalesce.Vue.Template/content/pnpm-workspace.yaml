@@ -1,0 +1,15 @@
+packages:
+  - Coalesce.Starter.Vue.Web
+
+overrides:
+  js-beautify>glob: "13.0.6"
+
+allowBuilds:
+  "@parcel/watcher": true
+
+minimumReleaseAgeExclude:
+  - coalesce-vue
+  - coalesce-vue-vuetify3
+  - eslint-plugin-coalesce
+
+enableGlobalVirtualStore: true

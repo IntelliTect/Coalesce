@@ -287,6 +287,7 @@ Use \`read_template_file\` to compare these files against the user's versions an
 - **eslint.config.mjs** — New rules, plugin changes. Note if user is still on \`.eslintrc\`.
 - **tsconfig.json**, **tsconfig.node.json**
 - **pnpm-workspace.yaml** — overrides, allowBuilds, and other pnpm settings
+- **.npmrc**
 - **.editorconfig**
 - **.vscode/settings.json**
 - **.vscode/mcp.json**

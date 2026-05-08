@@ -12,7 +12,7 @@
   "xml.format.maxLineWidth": 0,
   "chat.tools.terminal.autoApprove": {
     "dotnet test": true,
-    "npm test": true,
+    "pnpm test": true,
     "dotnet tool restore": true,
     "dotnet restore": true,
     "dotnet build": true

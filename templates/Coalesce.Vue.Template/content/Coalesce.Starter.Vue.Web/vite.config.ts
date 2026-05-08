@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from "node:url";
+import { execSync } from "node:child_process";
 
 import { defineConfig } from "vite";
 
@@ -24,11 +25,16 @@ export default defineConfig({
               test: /\.s?css|type=style/,
               priority: 30,
             },
+            //#if AppInsights
+            { name: "appI", test: /applicationinsights/, priority: 20 },
+            //#endif
             {
               name(moduleId: string) {
                 // Suggest that top level node_modules folders should have their own chunk.
                 return (
-                  /node_modules[/\\]([^/\\]+)/i.exec(moduleId)?.[1] ?? null
+                  /node_modules[/\\](?:\.pnpm[/\\])?(@?[^@/\\]+)/i.exec(
+                    moduleId,
+                  )?.[1] ?? null
                 );
               },
             },
@@ -90,6 +96,13 @@ export default defineConfig({
   },
 
   server: {
+    fs: {
+      allow: [
+        // Workaround https://github.com/vitejs/vite/issues/22405
+        execSync("pnpm store path", { encoding: "utf8" }).trim(),
+        ".",
+      ],
+    },
     warmup: {
       clientFiles: ["./src/views/**/*.vue"],
     },

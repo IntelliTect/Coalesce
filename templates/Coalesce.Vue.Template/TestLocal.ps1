@@ -37,10 +37,10 @@ Push-Location $outDir/*.Web
 try {
     dotnet restore
     dotnet coalesce
-    npm i
+    pnpm install
     npx tsc -p ./tsconfig.node.json
-    npm run build
-    npm run lint:fix # ensure all lint issues are auto-fixable
+    pnpm build
+    pnpm lint:fix # ensure all lint issues are auto-fixable
     # CS9113: Parameter '<param>' is unread. (too annoying to fix this for every possible combination of template params)
     dotnet build .. /nowarn:CS9113
 

@@ -308,6 +308,7 @@
             "**/*.g.ts",
             "**/*.lock.json",
             "**/package-lock.json",
+            "**/pnpm-lock.yaml",
             "**/DEVELOPMENT.md"
           ]
         },

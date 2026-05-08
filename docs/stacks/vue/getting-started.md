@@ -8,6 +8,7 @@ Before you begin, ensure that you have all the required tools installed:
 
 - Recent version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download).
 - A recent version of [Node.js](https://nodejs.org/) (an LTS version is recommended).
+- [pnpm](https://pnpm.io/) - install with `npm install -g pnpm@11`
 - An IDE: [VS Code](https://code.visualstudio.com/) with the [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) extension is recommended. [JetBrains Rider](https://www.jetbrains.com/rider/) also works.
 
 ## Creating a Project
@@ -58,8 +59,8 @@ font-weight: 600;
 dotnet new install IntelliTect.Coalesce.Vue.Template
 dotnet new coalescevue -n {{effectiveNamespace}} -o {{effectiveFolder}} {{templateParams}}
 cd {{effectiveFolder}}/*.Web
-npm i --min-release-age=0
-npm run lint:fix
+pnpm install
+pnpm lint:fix
 dotnet restore
 dotnet coalesce
 
@@ -104,7 +105,7 @@ The structure of the Web project follows the conventions of both ASP.NET Core an
 The frontend build system uses [Vite](https://vitejs.dev/). You are strongly encouraged to read through at least the first few pages of the [Vite Documentation](https://vitejs.dev/guide/) before getting started on any development.
 :::
 
-During development, no special effort is required to build your frontend code. Coalesce's `UseViteDevelopmentServer` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`). For more details on how the Vite integration works, see [Vite Integration](/topics/vite-integration.md).
+During development, no special effort is required to build your frontend code. Coalesce's `UseViteDevelopmentServer` in ASP.NET Core will take care of that automatically when the application starts. Package install is automatic via the `dev` script in `package.json`. For more details on how the Vite integration works, see [Vite Integration](/topics/vite-integration.md).
 
 @[import-md "after":"MARKER:data-modeling", "before":"MARKER:data-modeling-end"](../agnostic/getting-started-modeling.md)
 

@@ -1,7 +1,7 @@
 {
   "name": "coalesce-starter-vue",
   "private": true,
-  "packageManager": "pnpm@11.0.1",
+  "packageManager": "pnpm@11.0.8",
   "devDependencies": {
     "eslint": "^10.3.0"
   }

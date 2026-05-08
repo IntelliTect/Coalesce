@@ -44,9 +44,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "pnpm build-local-deps && vite build && vue-tsc --noEmit && vue-tsc -p ./tsconfig.build-types.json && pnpm buildts",
+    "prebuild": "pnpm --filter=coalesce-vue run build",
+    "build": "vite build && vue-tsc --noEmit && vue-tsc -p ./tsconfig.build-types.json && pnpm buildts",
     "buildts": "tsc -p ./tsconfig.build-utils.json",
-    "build-local-deps": "cd ../coalesce-vue && pnpm build",
     "test": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

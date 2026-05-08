@@ -38,6 +38,4 @@ jobs:
 
       - name: Build coalesce-vue-vuetify3
         working-directory: src/coalesce-vue-vuetify3
-        run: |
-          pnpm build-local-deps
-          pnpm build
+        run: pnpm build

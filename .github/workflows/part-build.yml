@@ -154,7 +154,6 @@ jobs:
 
       - uses: ./.github/actions/setup-js
 
-      - run: pnpm build-local-deps # build coalesce-vue
       - run: pnpm build
       - run: pnpm lint
       - run: pnpm test

@@ -1,10 +1,20 @@
 # Upgrading Coalesce
 
-Upgrading your project's version of Coalesce is a relatively straightforward process. The latest version of Coalesce can be viewed [on npm](https://www.npmjs.com/package/coalesce-vue?activeTab=versions) or [on NuGet](https://www.nuget.org/packages/IntelliTect.Coalesce#versions-body-tab).
+Upgrading your project's version of Coalesce can be done automatically with the [Coalesce MCP server](/topics/mcp-server.md), or manually.
+
+## Upgrading with an AI Agent (Recommended)
+
+The Coalesce MCP server includes an `upgrade` prompt that walks an AI agent through the entire upgrade process — updating package versions, reviewing the changelog for breaking changes, comparing your configuration against the latest template, and running post-upgrade validation.
+
+To use it, first ensure the [Coalesce MCP server](/topics/mcp-server.md) is configured in your project. Then, in VS Code's Copilot Chat, type `/mcp` and select the **Upgrade Coalesce** prompt. The agent will handle the rest interactively.
+
+## Manual Upgrades
+
+The latest version of Coalesce can be viewed [on npm](https://www.npmjs.com/package/coalesce-vue?activeTab=versions) or [on NuGet](https://www.nuget.org/packages/IntelliTect.Coalesce#versions-body-tab).
 
 You should always use the same version for both NPM and NuGet dependencies. Having mismatched versions in a single project can introduce errors or subtle bugs.
 
-## NPM upgrades
+### NPM upgrades
 
 First, upgrade the NPM dependencies in your web project.
 
@@ -12,8 +22,8 @@ First, upgrade the NPM dependencies in your web project.
 ``` json 
 {
   "dependencies": {
-    "coalesce-vue": "5.3.1",
-    "coalesce-vue-vuetify3": "5.3.1",
+    "coalesce-vue": "COALESCE_VERSION",
+    "coalesce-vue-vuetify3": "COALESCE_VERSION",
   }
 }
 ```
@@ -21,7 +31,7 @@ First, upgrade the NPM dependencies in your web project.
 3. Run `npm i` in your web project to install the new versions.
 
 
-## NuGet upgrades
+### NuGet upgrades
 
 Coalesce projects usually have a single variable, `CoalesceVersion`, to control all Coalesce NuGet package dependencies, declared in `Directory.Build.props`. This file is in the root of the solution, next to the `.sln` file; it is also included in the "Solution Items" directory in Visual Studio's Solution Explorer.
 
@@ -30,7 +40,7 @@ To upgrade the NuGet packages:
 ``` xml
 <Project>
   <PropertyGroup>
-    <CoalesceVersion>5.3.1</CoalesceVersion>
+    <CoalesceVersion>COALESCE_VERSION</CoalesceVersion>
   </PropertyGroup>
 </Project>
 ```

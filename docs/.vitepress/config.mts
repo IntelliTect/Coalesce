@@ -60,6 +60,14 @@ export default defineConfig({
   title: "Coalesce",
   description: "Documentation for Coalesce by IntelliTect",
   head: [["link", { rel: "shortcut icon", href: "/favicon.ico" }]],
+
+  transformHtml(html) {
+    return html.replaceAll(
+      "COALESCE_VERSION",
+      process.env.COALESCE_VERSION || "x.y.z",
+    );
+  },
+
   markdown: {
     config(md) {
       registerImportMdPlugin(md);

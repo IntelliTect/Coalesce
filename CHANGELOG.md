@@ -1,10 +1,12 @@
 # 6.5.1
 - `vue`, `date-fns`, and `date-fns-tz` are now peer dependencies instead of direct dependencies of `coalesce-vue` and `coalesce-vue-vuetify3`.
-- Fix margin issue in `c-admin-audit-log-page` on Vuetify 4.
 - `c-select`: Improved accessibility — multi-select checkboxes are now `inert`, and `aria-haspopup`, `aria-labelledby`, and `aria-live` attributes are now set.
+- Fix Vuetify 4 issues:
+  - Margin issue in `c-admin-audit-log-page` `pre` elements
+  - Color issue in `c-time-picker`.
 
 - The template now uses pnpm instead of npm for better DX. To migrate an existing project:
-  1. Install pnpm: `npm install -g pnpm@11`
+  1. Install pnpm: `npm install -g pnpm`
   2. Delete `package-lock.json`, and copy `pnpm-workspace.yaml` and the root `package.json` from the template into your solution root (next to your `.slnx`). Add your web project as a package in the workspace (`packages: - YourProject.Web`).
   3. Run `pnpm install`.
   4. In `Program.cs`, add `c.PackageManagerCommand = "pnpm";` to `UseViteDevelopmentServer` options.

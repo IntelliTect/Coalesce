@@ -427,9 +427,7 @@ function lerp(a: number, b: number, alpha: number) {
   border-radius: 8px;
   user-select: none;
   border: none;
-  background: none;
   font: inherit;
-  color: inherit;
   cursor: pointer;
 
   &:disabled {
@@ -445,9 +443,9 @@ function lerp(a: number, b: number, alpha: number) {
     }
   }
 
-  &.c-time-picker__item-active {
-    color: rgb(var(--v-theme-on-secondary));
-    background: rgb(var(--v-theme-secondary));
+  &:not(.c-time-picker__item-active) {
+    color: inherit;
+    background: none;
   }
 }
 </style>

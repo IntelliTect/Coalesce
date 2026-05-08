@@ -6,6 +6,7 @@
   >
     <c-admin-table
       class="c-admin-table-page--table"
+      tag="section"
       :list="listVM"
       :color
       :autoSave
@@ -16,6 +17,7 @@
 
     <c-admin-methods
       class="c-admin-table-page--methods"
+      tag="section"
       :model="listVM"
       :area="HiddenAreas.List"
       :color

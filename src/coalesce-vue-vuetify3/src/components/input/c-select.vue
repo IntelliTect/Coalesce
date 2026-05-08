@@ -5,7 +5,6 @@
     class="c-select"
     role="combobox"
     aria-haspopup="listbox"
-    :aria-label="inputBindAttrs.label"
     :class="{
       'c-select--is-menu-active': menuOpen,
       'c-select--multiple': effectiveMultiple,

@@ -35,6 +35,7 @@
               density="compact"
               class="mr-2"
               title="Toggle Visibility"
+              :aria-label="`Toggle ${prop.displayName} Visibility`"
               :model-value="selectedColumns?.includes(prop.name) ?? false"
             />
           </template>
@@ -55,6 +56,7 @@
                   height="32"
                   :color="filter.isActive ? 'primary' : undefined"
                   :variant="filter.isActive ? 'flat' : 'text'"
+                  :aria-label="`Filter ${prop.displayName}`"
                   class="mr-n3"
                 >
                   <v-icon>fa fa-filter</v-icon>
@@ -78,7 +80,7 @@
             </v-menu>
           </template>
         </v-list-item>
-        <v-divider></v-divider>
+        <v-divider role="presentation"></v-divider>
         <v-list-item @click="resetToDefault">
           <template #prepend>
             <v-icon style="margin-left: 2px; margin-right: -21px">

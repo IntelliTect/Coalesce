@@ -2,6 +2,7 @@
   <v-container class="c-admin-editor-page" :class="'type-' + metadata.name">
     <c-admin-editor
       class="c-admin-editor-page--editor"
+      tag="section"
       :model="viewModel"
       :color="color"
       @deleted="onDeleted"
@@ -9,6 +10,7 @@
 
     <c-admin-methods
       class="c-admin-editor-page--methods"
+      tag="section"
       :model="viewModel"
       :area="HiddenAreas.Edit"
       auto-reload-model

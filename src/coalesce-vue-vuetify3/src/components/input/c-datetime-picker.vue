@@ -31,6 +31,9 @@
     v-bind="inputBindAttrs"
     v-model:focused="focused"
     class="c-datetime-picker"
+    role="combobox"
+    :aria-expanded="menu"
+    :aria-controls="popupId"
     :class="{ 'has-today-btn': showTodayButton }"
     :placeholder="internalFormat"
     :append-inner-icon="
@@ -66,7 +69,7 @@
         min-width="1px"
         @update:model-value="!$event ? closeMenu() : openMenu()"
       >
-        <v-card class="d-flex" @keydown.enter="closeMenu()">
+        <v-card :id="popupId" class="d-flex" @keydown.enter="closeMenu()">
           <v-date-picker
             v-if="showDate"
             ref="datePickerRef"
@@ -84,7 +87,7 @@
             @keydown="handleDateKeydown"
           >
             <template v-if="showTodayButton" #actions>
-              <v-btn @click="setToday"> Today </v-btn>
+              <v-btn :color @click="setToday"> Today </v-btn>
               <v-spacer />
             </template>
           </v-date-picker>
@@ -106,17 +109,17 @@
               {{ displayedTime || "&nbsp;" }}
             </template>
           </c-time-picker>
-          <v-fab
-            app
-            location="bottom right"
-            :color="color"
+          <v-btn
+            :color
             size="x-small"
             icon="$complete"
             tabindex="-1"
             :title="$vuetify.locale.t('$vuetify.close')"
+            :aria-label="$vuetify.locale.t('$vuetify.close')"
+            class="c-datetime-picker__close-btn"
             @click="menu = false"
           >
-          </v-fab>
+          </v-btn>
         </v-card>
       </v-menu>
     </template>
@@ -184,7 +187,7 @@ import {
   Model,
   DateValue,
 } from "coalesce-vue";
-import { computed, ref, watch, useTemplateRef } from "vue";
+import { computed, ref, watch, useId, useTemplateRef } from "vue";
 import {
   ForSpec,
   InheritExcludePropNames,
@@ -262,6 +265,7 @@ const datePickerRef = useTemplateRef("datePickerRef");
 const timePickerRef = useTemplateRef("timePickerRef");
 
 const modelValue = defineModel<Date | null | undefined>();
+const popupId = useId();
 
 const { inputBindAttrs, valueMeta, valueOwner } = useMetadataProps(props);
 
@@ -704,6 +708,7 @@ watch(focused, (focused) => {
 </script>
 
 <style lang="scss">
+$bottom-padding: 8px;
 .c-datetime-picker__menu {
   > .v-card {
     @media screen and (max-width: 600px) {
@@ -713,7 +718,25 @@ watch(focused, (focused) => {
         flex-grow: 1;
       }
     }
+
+    position: relative;
+
+    .c-datetime-picker__close-btn {
+      position: absolute;
+      right: $bottom-padding;
+      bottom: $bottom-padding;
+    }
   }
+
+  .v-date-picker-years__content {
+    /* Fix vuetify default 32px padding which causes overflow */
+    padding-inline: 16px;
+  }
+
+  .v-picker__actions {
+    padding: $bottom-padding $bottom-padding $bottom-padding;
+  }
+
   .has-today-btn {
     max-height: 365px;
   }

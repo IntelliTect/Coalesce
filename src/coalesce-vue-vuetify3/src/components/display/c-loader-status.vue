@@ -190,6 +190,7 @@ const props = withDefaults(
     progressPlaceholder: true,
     height: 10,
     color: "primary",
+    ariaLabel: "Loading",
     // Prevent our flags from defaulting to `false`. We need them to default to `undefined`
     // so we can detect if they were specified at all.
     noProgress: undefined,

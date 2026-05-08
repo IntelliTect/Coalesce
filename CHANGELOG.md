@@ -1,6 +1,6 @@
 # 6.5.1
+- Broad improvements to accessibility issues identified by axe-core across all components.
 - `vue`, `date-fns`, and `date-fns-tz` are now peer dependencies instead of direct dependencies of `coalesce-vue` and `coalesce-vue-vuetify3`.
-- `c-select`: Improved accessibility — multi-select checkboxes are now `inert`, and `aria-haspopup`, `aria-labelledby`, and `aria-live` attributes are now set.
 - Fix Vuetify 4 issues:
   - Margin issue in `c-admin-audit-log-page` `pre` elements
   - Color issue in `c-time-picker`.

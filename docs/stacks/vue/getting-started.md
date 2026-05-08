@@ -8,7 +8,7 @@ Before you begin, ensure that you have all the required tools installed:
 
 - Recent version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download).
 - A recent version of [Node.js](https://nodejs.org/) (an LTS version is recommended).
-- [pnpm](https://pnpm.io/) - install with `npm install -g pnpm@11`
+- [pnpm](https://pnpm.io/) - install with `npm install -g pnpm`
 - An IDE: [VS Code](https://code.visualstudio.com/) with the [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) extension is recommended. [JetBrains Rider](https://www.jetbrains.com/rider/) also works.
 
 ## Creating a Project

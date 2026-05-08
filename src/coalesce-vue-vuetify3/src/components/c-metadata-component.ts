@@ -353,7 +353,13 @@ export function buildVuetifyAttrs(
   }
 
   if (!valueMeta) {
-    return { ...attrs };
+    return {
+      ...attrs,
+      "aria-label":
+        (attrs as any)?.["aria-label"] ||
+        (attrs as any)?.ariaLabel ||
+        (attrs as any)?.label,
+    };
   }
 
   const modelMeta = model ? model.$metadata : null;
@@ -381,6 +387,15 @@ export function buildVuetifyAttrs(
           : undefined,
 
     ...attrs,
+
+    // Provide aria-label as the accessible name for the input.
+    // Vuetify renders `label` as aria-hidden, so it doesn't serve as the accessible name.
+    // Placed after ...attrs so an explicit aria-label from the caller wins,
+    // but won't be blanked out by `label=""` (which is used to hide the visual label).
+    "aria-label":
+      (attrs as any)?.["aria-label"] ||
+      (attrs as any)?.ariaLabel ||
+      valueMeta?.displayName,
   };
 }
 

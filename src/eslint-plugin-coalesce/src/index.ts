@@ -1,7 +1,7 @@
 import type { ESLint, Linter } from "eslint";
-import noLoadBeforeAutoLoad from "./rules/no-load-before-auto-load.js";
-import noSortInComputed from "./rules/no-sort-in-computed.js";
-import noStaticRouterImport from "./rules/no-static-router-import.js";
+import noLoadBeforeAutoLoad from "./rules/no-load-before-auto-load.ts";
+import noSortInComputed from "./rules/no-sort-in-computed.ts";
+import noStaticRouterImport from "./rules/no-static-router-import.ts";
 
 const rules = {
   "no-load-before-auto-load": noLoadBeforeAutoLoad,

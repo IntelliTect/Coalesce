@@ -11,3 +11,5 @@ allowBuilds:
 overrides:
   js-beautify>glob: "13.0.6"
   vite: "^8.0.10"
+
+enableGlobalVirtualStore: true

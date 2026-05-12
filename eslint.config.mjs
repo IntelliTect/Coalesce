@@ -2,7 +2,7 @@ import pluginVue from "eslint-plugin-vue";
 import vueTsEslintConfig from "@vue/eslint-config-typescript";
 import pluginVitest from "@vitest/eslint-plugin";
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
-import coalesce from "eslint-plugin-coalesce";
+import coalesce from "./src/eslint-plugin-coalesce/src/index.ts";
 
 export default [
   {

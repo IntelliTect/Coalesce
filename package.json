@@ -23,7 +23,6 @@
     "cspell": "8.19.3",
     "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-coalesce": "workspace:*",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-vue": "^10.9.0",
     "jsdom": "^29.1.1",

@@ -479,6 +479,58 @@ public abstract class PropertyViewModel : ValueViewModel
     }
 
 
+    private string? GetDirectForeignKeyPropertyName()
+    {
+        var name =
+            // Use the foreign key attribute
+            this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
+
+            // Use the ForeignKey Attribute on the key property if it is there.
+            ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
+
+            // Look for a property that follows convention.
+            ?? Name + ConventionalIdSuffix;
+
+        if (EffectiveParent.PropertyByName(name) is not null)
+        {
+            return name;
+        }
+
+        if (Object?.Name is { } objectName)
+        {
+            if (Name.Length > objectName.Length && Name.EndsWith(objectName, StringComparison.Ordinal))
+            {
+                var strippedName = Name[..^objectName.Length];
+                if (EffectiveParent.PropertyByName(strippedName) is not null)
+                {
+                    return strippedName;
+                }
+            }
+
+            var typeNameConvention = objectName + ConventionalIdSuffix;
+            if (EffectiveParent.PropertyByName(typeNameConvention) is not null)
+            {
+                return typeNameConvention;
+            }
+        }
+
+        return null;
+    }
+
+    private PropertyViewModel? GetDirectForeignKeyProperty()
+    {
+        var prop = GetDirectForeignKeyPropertyName() is { } name
+            ? EffectiveParent.PropertyByName(name)
+            : null;
+
+        if (prop == null || !prop.Type.IsValidKeyType || !prop.IsDbMapped)
+        {
+            return null;
+        }
+
+        return prop;
+    }
+
     private LazyValue<PropertyViewModel?> _ForeignKeyProperty;
     /// <summary>
     /// If this is a navigation property, returns the property that holds the foreign key. 
@@ -508,18 +560,7 @@ public abstract class PropertyViewModel : ValueViewModel
         else if (Type.IsPOCO)
         {
             // `this` may be a reference navigation prop
-
-            var name =
-                // Use the foreign key attribute
-                this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
-
-                // Use the ForeignKey Attribute on the key property if it is there.
-                ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
-
-                // Look for a property that follows convention.
-                ?? Name + ConventionalIdSuffix;
-
-            prop = EffectiveParent.PropertyByName(name);
+            prop = GetDirectForeignKeyProperty();
 
             if (prop == null)
             {
@@ -539,7 +580,7 @@ public abstract class PropertyViewModel : ValueViewModel
                         // This is what allows us to think of our own PK as also being a FK
                         // into the other type (even if that's the exact opposite of the relationship in practice).
                         // This is admittedly a bit of a hack.
-                        InverseProperty.ForeignKeyProperty?.IsPrimaryKey == true
+                        InverseProperty.GetDirectForeignKeyProperty()?.IsPrimaryKey == true
                     )
                     {
                         return EffectiveParent.PrimaryKey;
@@ -550,8 +591,9 @@ public abstract class PropertyViewModel : ValueViewModel
                     // Handle the similar scenario as above, but when InversePropertyAttribute
                     // is not present. See "OneToOneParent"/"SharedKeyChild1".
                     if (Object!.ClientProperties.Any(p =>
-                        p.ForeignKeyProperty == Object.PrimaryKey &&
-                        p.Type == this.EffectiveParent.Type
+                        p != this &&
+                        p.Type == this.EffectiveParent.Type &&
+                        p.GetDirectForeignKeyProperty() == Object.PrimaryKey
                     ))
                     {
                         return EffectiveParent.PrimaryKey;
@@ -598,7 +640,12 @@ public abstract class PropertyViewModel : ValueViewModel
             var prop = EffectiveParent.PropertyByName(name);
             if (prop == null || !prop.IsPOCO || !prop.IsDbMapped)
             {
-                return null;
+                return EffectiveParent.Properties.SingleOrDefault(p =>
+                    p != this &&
+                    p.IsPOCO &&
+                    p.IsDbMapped &&
+                    p.GetDirectForeignKeyProperty() == this
+                );
             }
 
             return prop;

@@ -10,7 +10,9 @@
     "dev": "vitepress dev",
     "build-only": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist",
     "linkcheck": "node check-links.mjs",
-    "build": "pnpm build-only && pnpm linkcheck"
+    "build": "pnpm build-only && pnpm linkcheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "shiki": "1.4.0"

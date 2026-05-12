@@ -1,6 +1,7 @@
 <template>
-  <h4 v-if="html" v-html="html" class="code-prop" :id="idAttr"></h4>
-  <h4 v-else class="code-prop" :id="idAttr">
+  <!-- eslint-disable-next-line vue/no-v-html -->
+  <h4 v-if="html" :id="idAttr" class="code-prop" v-html="html"></h4>
+  <h4 v-else :id="idAttr" class="code-prop">
     <!-- Temporary uncolored content that matches the result as best as possible to avoid FOUC -->
     <pre
       class="shiki"
@@ -13,56 +14,10 @@
   </h4>
 </template>
 
-<style lang="scss">
-p + .code-prop {
-  margin-top: 36px;
-}
-
-h4.code-prop {
-  font-size: 16px;
-}
-.code-prop {
-  margin-top: 10px;
-  font-weight: inherit !important;
-
-  .shiki {
-    margin: 0;
-    padding: 2px 8px;
-    white-space: normal;
-    background-color: var(--vp-code-block-bg) !important;
-    border-radius: 5px;
-    .line {
-      display: block;
-      white-space: pre-wrap;
-    }
-  }
-
-  $selector: ".code-prop,h1,h2,h3,h4,h5";
-
-  + :not(#{$selector}),
-  + :not(#{$selector}) + :not(#{$selector}),
-  + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}),
-  + :not(#{$selector})
-    + :not(#{$selector})
-    + :not(#{$selector})
-    + :not(#{$selector}),
-  + :not(#{$selector})
-    + :not(#{$selector})
-    + :not(#{$selector})
-    + :not(#{$selector})
-    + :not(#{$selector}) {
-    // Position the elements following the <Prop> to be left-indented past the code block,
-    // and reduce the top margin to be a little closer to the code block.
-    margin-top: 4px;
-    margin-left: 20px;
-  }
-}
-</style>
-
 <script lang="ts">
 import { defineComponent } from "vue";
 
-var highlighters = new Map<string, ReturnType<typeof highlighterFactory>>();
+const highlighters = new Map<string, ReturnType<typeof highlighterFactory>>();
 async function highlighterFactory(lang) {
   // Dynamic import to avoid dependency in production builds
   const shiki = await import("shiki");
@@ -136,7 +91,7 @@ export default defineComponent({
 
   methods: {
     async renderHtml() {
-      var ctorDesc: string | null = null;
+      let ctorDesc: string | null = null;
       if (this.ctor) {
         ctorDesc = "// Also settable via constructor parameter #" + this.ctor;
 
@@ -198,7 +153,7 @@ export default defineComponent({
       const { highlighter } = await getHighlighter(this.lang)!;
 
       const noClass = this.noClass;
-      let html = highlighter.codeToHtml(code, {
+      const html = highlighter.codeToHtml(code, {
         lang: this.lang,
         theme: "dark-plus",
         transformers: [
@@ -219,3 +174,49 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+p + .code-prop {
+  margin-top: 36px;
+}
+
+h4.code-prop {
+  font-size: 16px;
+}
+.code-prop {
+  margin-top: 10px;
+  font-weight: inherit !important;
+
+  .shiki {
+    margin: 0;
+    padding: 2px 8px;
+    white-space: normal;
+    background-color: var(--vp-code-block-bg) !important;
+    border-radius: 5px;
+    .line {
+      display: block;
+      white-space: pre-wrap;
+    }
+  }
+
+  $selector: ".code-prop,h1,h2,h3,h4,h5";
+
+  + :not(#{$selector}),
+  + :not(#{$selector}) + :not(#{$selector}),
+  + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}),
+  + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector}),
+  + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector}) {
+    // Position the elements following the <Prop> to be left-indented past the code block,
+    // and reduce the top margin to be a little closer to the code block.
+    margin-top: 4px;
+    margin-left: 20px;
+  }
+}
+</style>

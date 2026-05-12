@@ -3,7 +3,7 @@
     <h1>JSON Complex Property (CurrentWeather)</h1>
     <v-row>
       <v-col>
-        <v-card class="pa-4" v-if="person.currentWeather">
+        <v-card v-if="person.currentWeather" class="pa-4">
           <c-input :model="person.currentWeather" for="tempFahrenheit" />
           <c-input :model="person.currentWeather" for="humidity" />
           <c-input

@@ -1,4 +1,4 @@
-import { mountApp, flushPromises, getWrapper } from "@test/util";
+import { mountApp, flushPromises } from "@test/util";
 import { CListFilters } from "..";
 import { ComplexModelListViewModel } from "@test-targets/viewmodels.g";
 

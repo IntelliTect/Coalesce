@@ -2,7 +2,11 @@
   <h1>v-model:keyValue (+ query bind)</h1>
   <v-row>
     <v-col>
-      <c-select for="Person" multiple v-model:keyValue="selectedIds"></c-select>
+      <c-select
+        v-model:key-value="selectedIds"
+        for="Person"
+        multiple
+      ></c-select>
     </v-col>
     <v-col>
       {{ selectedIds }}
@@ -13,9 +17,9 @@
   <v-row>
     <v-col>
       <c-select
+        v-model:object-value="selectedModels"
         for="Person"
         multiple
-        v-model:objectValue="selectedModels"
         open-on-clear
         :create="{
           getLabel(search: string, items: Person[]) {
@@ -36,10 +40,10 @@
   <v-row>
     <v-col>
       <c-select
+        v-model:key-value="selectedIds2"
+        v-model:object-value="selectedModels2"
         for="Person"
         multiple
-        v-model:keyValue="selectedIds2"
-        v-model:objectValue="selectedModels2"
         :rules="[(v) => `Rule test: rule received ${v}`]"
       ></c-select>
     </v-col>
@@ -93,13 +97,13 @@
   <v-row>
     <v-col>
       <v-autocomplete
+        v-model="selectedPlain"
         multiple
         label="Cats"
         chips
-        closableChips
+        closable-chips
         clearable
         :items="['Grace', 'Freya', 'Autumn', 'Junipur', 'Molly']"
-        v-model="selectedPlain"
       />
     </v-col>
     <v-col>

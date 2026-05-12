@@ -90,7 +90,7 @@ const createImportCodeBlockRule =
       importedFiles.push(importedCode.importFilePath);
     }
 
-    var tokens = state.md.parse(importedCode.importCode, state.env);
+    const tokens = state.md.parse(importedCode.importCode, state.env);
     for (let i = 0; i < tokens.length; i++) {
       const token = tokens[i];
       const newToken = state.push(token.type, token.tag, token.nesting);
@@ -125,7 +125,7 @@ function resolveImportCode(
     prepend,
     append,
   }: ImportCodeTokenMeta,
-  { path: filePath }: MarkdownEnv
+  { path: filePath }: MarkdownEnv,
 ) {
   let importFilePath = importPath;
 
@@ -164,13 +164,13 @@ function resolveImportCode(
   let firstLine = lines.findIndex((l) => match(l, start ?? after));
   if (firstLine == -1) {
     throw new Error(
-      `import-md: start/after delimiter not found (importing ${importPath})`
+      `import-md: start/after delimiter not found (importing ${importPath})`,
     );
   }
   firstLine += start ? 0 : 1;
 
   const lastLine =
-    before ?? end
+    (before ?? end)
       ? firstLine +
         lines.slice(firstLine).findIndex((l) => match(l, before ?? end)) +
         (end ? 1 : 0)
@@ -183,7 +183,7 @@ function resolveImportCode(
 
   if (!content.trim()) {
     throw new Error(
-      `import-md: Imported content was empty Perhaps the delimiters are incorrect? (importing ${importPath})`
+      `import-md: Imported content was empty Perhaps the delimiters are incorrect? (importing ${importPath})`,
     );
   }
 

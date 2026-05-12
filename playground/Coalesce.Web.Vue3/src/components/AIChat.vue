@@ -35,8 +35,8 @@
           icon
           size="small"
           variant="text"
-          @click.stop="resetChat"
           title="Reset chat"
+          @click.stop="resetChat"
         >
           <i class="fa-solid fa-rotate-left" style="font-size: 18px"></i>
         </v-btn>
@@ -44,8 +44,8 @@
           icon
           size="small"
           variant="text"
-          @click.stop="minimized = !minimized"
           title="Minimize"
+          @click.stop="minimized = !minimized"
         >
           <i
             :class="[
@@ -58,7 +58,7 @@
       </div>
     </v-card-title>
     <template v-if="!minimized">
-      <v-card-text class="chat-history flex-grow-1" ref="historyRef">
+      <v-card-text ref="historyRef" class="chat-history flex-grow-1">
         <div
           v-for="(msg, idx) in messages"
           :key="idx"
@@ -99,17 +99,17 @@
           rows="1"
           class="w-100"
           variant="solo"
+          hide-details
           @keydown.enter.exact.prevent="send"
           @keydown.up.exact.prevent="fillLastMessage"
-          hide-details
         />
         <v-btn
           :disabled="!input.trim()"
           :loading="endpoint.isLoading"
-          @click="send"
           color="primary"
           variant="flat"
           prepend-icon="fa fa-paper-plane"
+          @click="send"
         >
           Send
         </v-btn>
@@ -125,7 +125,7 @@ import { AIAgentServiceViewModel } from "@/viewmodels.g";
 
 type CallableEndpointKeys = {
   [K in keyof AIAgentServiceViewModel]: AIAgentServiceViewModel[K] extends {
-    invoke: Function;
+    invoke: (...args: any[]) => any;
   }
     ? K
     : never;

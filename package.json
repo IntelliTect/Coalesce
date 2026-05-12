@@ -5,6 +5,8 @@
   "packageManager": "pnpm@11.0.8",
   "scripts": {
     "build": "pnpm -r --filter=./src/* run build",
+    "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint:fix",
     "coalesce": "pnpm -C playground/Coalesce.Web.Vue3 coalesce",
     "docs": "pnpm -C docs dev",
     "play": "dotnet run --project playground/Coalesce.Web.Vue3",

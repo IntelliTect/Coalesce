@@ -8,15 +8,15 @@
   </p>
   <v-row>
     <v-col>
-      <c-select for="Person" multiple v-model:keyValue="selectedIds">
+      <c-select v-model:key-value="selectedIds" for="Person" multiple>
         <template #list-item-outer="{ props, item, selected, select }">
           <v-list-item v-bind="props">
             <template #prepend>
               <v-list-item-action start inert>
                 <v-checkbox-btn
                   :model-value="selected"
-                  @update:model-value="select"
                   tabindex="-1"
+                  @update:model-value="select"
                 />
               </v-list-item-action>
             </template>
@@ -36,15 +36,15 @@
   <p>Full control over list-item rendering with custom content</p>
   <v-row>
     <v-col>
-      <c-select for="Case" multiple v-model:keyValue="selectedCaseIds">
+      <c-select v-model:key-value="selectedCaseIds" for="Case" multiple>
         <template #list-item-outer="{ props, item, selected, select }">
           <v-list-item v-bind="props">
             <template #prepend>
               <v-list-item-action start inert>
                 <v-checkbox-btn
                   :model-value="selected"
-                  @update:model-value="select"
                   tabindex="-1"
+                  @update:model-value="select"
                 />
               </v-list-item-action>
             </template>

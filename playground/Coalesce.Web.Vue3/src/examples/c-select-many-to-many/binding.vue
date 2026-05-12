@@ -5,7 +5,7 @@
       <c-select-many-to-many :model="caseVm" for="caseProducts" />
     </v-col>
     <v-col>
-      <v-btn @click="caseVm.$bulkSave()" :loading="caseVm.$bulkSave.isLoading">
+      <v-btn :loading="caseVm.$bulkSave.isLoading" @click="caseVm.$bulkSave()">
         Save
       </v-btn>
       <br />
@@ -45,7 +45,7 @@
         :model="caseVm2"
         for="caseProducts"
         clearable
-        :itemTitle="
+        :item-title="
           (item) =>
             (item.caseProductId?.toString() || 'new') + ':' + item.product?.name
         "

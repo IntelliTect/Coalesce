@@ -9,8 +9,8 @@
 
       <!-- <div class="nav-items"> -->
       <v-switch
-        label="Dark Mode"
         v-model="darkMode"
+        label="Dark Mode"
         hide-details
         class="mx-3"
         density="compact"
@@ -34,6 +34,7 @@
             v-for="t in Object.values($metadata.types).filter(
               (t) => t.type == 'model',
             )"
+            :key="t.name"
             :to="'/admin/' + t.name"
             :title="t.displayName"
           />
@@ -45,7 +46,7 @@
     <v-main>
       <router-view v-slot="{ Component }">
         <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
-        <component ref="routerView" :is="Component" :key="$route.path" />
+        <component :is="Component" ref="routerView" :key="$route.path" />
       </router-view>
 
       <AIChat title="OmniTool" endpoint="chatAgent" class="right-0" />

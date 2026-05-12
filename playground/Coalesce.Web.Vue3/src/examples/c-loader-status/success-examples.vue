@@ -19,8 +19,8 @@
         >
           <v-btn
             color="primary"
-            @click="simulateSuccessWithMessage"
             :loading="person1.$save.isLoading"
+            @click="simulateSuccessWithMessage"
           >
             Save Person (with message)
           </v-btn>
@@ -35,8 +35,8 @@
         <c-loader-status :loaders="person2.$save">
           <v-btn
             color="primary"
-            @click="simulateSuccessDefault"
             :loading="person2.$save.isLoading"
+            @click="simulateSuccessDefault"
           >
             Save Person (hidden)
           </v-btn>
@@ -53,8 +53,8 @@
         <c-loader-status :loaders="person3.$save" show-success>
           <v-btn
             color="primary"
-            @click="simulateSuccessNoMessage"
             :loading="person3.$save.isLoading"
+            @click="simulateSuccessNoMessage"
           >
             Save (default message)
           </v-btn>
@@ -69,8 +69,8 @@
         <c-loader-status :loaders="person4.$save" show-retry>
           <v-btn
             color="error"
-            @click="person4.$save()"
             :loading="person4.$save.isLoading"
+            @click="person4.$save()"
           >
             Trigger Error
           </v-btn>
@@ -90,8 +90,8 @@
         >
           <v-btn
             color="primary"
-            @click="simulateSuccessFlags"
             :loading="person5.$save.isLoading"
+            @click="simulateSuccessFlags"
           >
             Save with flags string
           </v-btn>
@@ -118,16 +118,16 @@
             <v-btn
               variant="outlined"
               prepend-icon="fa fa-refresh"
-              @click="simulateSuccessWithSlots"
               :disabled="person6.$save.isLoading"
+              @click="simulateSuccessWithSlots"
             >
               Retry
             </v-btn>
           </template>
           <v-btn
             color="primary"
-            @click="simulateSuccessWithSlots"
             :loading="person6.$save.isLoading"
+            @click="simulateSuccessWithSlots"
           >
             Save with Slots
           </v-btn>
@@ -140,7 +140,7 @@
 
     <v-row>
       <v-col>
-        <v-btn color="secondary" @click="resetAll" variant="outlined">
+        <v-btn color="secondary" variant="outlined" @click="resetAll">
           Reset All States
         </v-btn>
       </v-col>

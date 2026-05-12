@@ -6,7 +6,7 @@
         style="height: calc(100vh - var(--v-layout-top))"
       >
         <v-list density="compact" style="width: 220px">
-          <template v-for="dir in pages">
+          <template v-for="dir in pages" :key="dir.name">
             <div
               class="font-weight-medium text-uppercase mt-3 mx-2 pt-3 pb-1"
               style="border-top: 1px solid rgba(var(--v-theme-on-surface), 0.3)"
@@ -15,6 +15,7 @@
             </div>
             <v-list-item
               v-for="page in dir.children"
+              :key="page.path"
               :to="'/examples/' + page.path"
               :title="page.name"
               class="pl-8"
@@ -43,7 +44,7 @@ import { computed } from "vue";
 const examples = import.meta.glob("@/examples/**/*.vue");
 const pages = computed(() => {
   const paths = Object.entries(examples).map((e) =>
-    e[0].replace("/src/examples/", "")
+    e[0].replace("/src/examples/", ""),
   );
   const directories = new Set(paths.map((e) => e.substring(0, e.indexOf("/"))));
   return [...directories.values()]

@@ -2,7 +2,11 @@
   <h1>v-model:keyValue (+ query bind)</h1>
   <v-row>
     <v-col>
-      <c-select for="Person" v-model:keyValue="selectedId" clearable></c-select>
+      <c-select
+        v-model:key-value="selectedId"
+        for="Person"
+        clearable
+      ></c-select>
     </v-col>
     <v-col>
       {{ selectedId }}
@@ -13,8 +17,8 @@
   <v-row>
     <v-col>
       <c-select
+        v-model:object-value="selectedModel"
         for="Person"
-        v-model:objectValue="selectedModel"
         clearable
       ></c-select>
     </v-col>
@@ -27,9 +31,9 @@
   <v-row>
     <v-col>
       <c-select
+        v-model:key-value="selectedId2"
+        v-model:object-value="selectedModel2"
         for="Person"
-        v-model:keyValue="selectedId2"
-        v-model:objectValue="selectedModel2"
         clearable
       ></c-select>
     </v-col>
@@ -42,7 +46,7 @@
   <h1>v-model via c-input</h1>
   <v-row>
     <v-col>
-      <c-input for="Person" v-model="selectedModel3" clearable></c-input>
+      <c-input v-model="selectedModel3" for="Person" clearable></c-input>
     </v-col>
     <v-col>
       {{ selectedModel3?.name }}
@@ -53,12 +57,12 @@
   <v-row>
     <v-col>
       <v-autocomplete
+        v-model="selectedPlain"
         label="Cats"
         chips
-        closableChips
+        closable-chips
         clearable
         :items="['Grace', 'Freya', 'Autumn', 'Junipur', 'Molly']"
-        v-model="selectedPlain"
       />
     </v-col>
     <v-col>
@@ -70,8 +74,8 @@
   <v-row>
     <v-col>
       <c-select
+        v-model:object-value="selectedWithCreate"
         for="Person"
-        v-model:objectValue="selectedWithCreate"
         clearable
         :create="createConfig"
       ></c-select>
@@ -86,8 +90,8 @@
   <v-row>
     <v-col>
       <c-select
+        v-model:object-value="selectedWithCreateEnd"
         for="Person"
-        v-model:objectValue="selectedWithCreateEnd"
         clearable
         :create="{ ...createConfig, position: 'end' }"
       ></c-select>

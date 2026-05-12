@@ -1,4 +1,4 @@
-import { mountApp, flushPromises, mockEndpoint } from "@test/util";
+import { mountApp, flushPromises } from "@test/util";
 import CLS from "./c-loader-status.vue";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 

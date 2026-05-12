@@ -105,8 +105,4 @@ function onInput(value: unknown) {
 
   modelValue.value = items;
 }
-
-// Access this so it will throw an error if the meta props aren't in order.
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-collectionMeta.value;
 </script>

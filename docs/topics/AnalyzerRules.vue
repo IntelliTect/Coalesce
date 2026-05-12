@@ -27,14 +27,6 @@
   </div>
 </template>
 
-<style lang="scss">
-.analyzer-rules {
-  .rule-heading {
-    margin: 1.5rem 0 0.5rem 0;
-  }
-}
-</style>
-
 <script setup lang="ts">
 import analyzerReleasesContent from "../../src/IntelliTect.Coalesce.Analyzer/AnalyzerReleases.Shipped.md?raw";
 
@@ -126,3 +118,11 @@ function parseAnalyzerReleases(content: string): AnalyzerRelease[] {
   return releases;
 }
 </script>
+
+<style lang="scss">
+.analyzer-rules {
+  .rule-heading {
+    margin: 1.5rem 0 0.5rem 0;
+  }
+}
+</style>

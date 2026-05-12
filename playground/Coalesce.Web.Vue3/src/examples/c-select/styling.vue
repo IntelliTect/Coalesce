@@ -37,15 +37,15 @@
   </c-select>
 
   <h1>c-select slots</h1>
-  <c-select for="Person" multiple v-model="people" variant="outlined">
+  <c-select v-model="people" for="Person" multiple variant="outlined">
     <!-- c-select specific slots -->
     <template #selected-item="{ item, index, remove }">
       <v-chip
         size="small"
         closable
-        @click:close="remove"
         color="purple"
         class="ma-1"
+        @click:close="remove"
       >
         <v-icon start>fa fa-star</v-icon>
         {{ item.name }} (#{{ index + 1 }})

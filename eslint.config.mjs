@@ -2,28 +2,43 @@ import pluginVue from "eslint-plugin-vue";
 import vueTsEslintConfig from "@vue/eslint-config-typescript";
 import pluginVitest from "@vitest/eslint-plugin";
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
+import coalesce from "eslint-plugin-coalesce";
+
 export default [
   {
     name: "app/files-to-lint",
     files: ["**/*.{ts,mts,tsx,vue}"],
-    languageOptions: {
-      parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
-        // or, in CommonJS, __dirname
-      },
-    },
   },
 
   {
     name: "app/files-to-ignore",
-    ignores: ["dist/**", "**/*.g.ts", "**/coverage/**", "eslint.config.mjs"],
+    ignores: [
+      "templates/**",
+      "**/node_modules/**",
+      "**/bin/**",
+      "**/.vitepress/cache/**",
+      "**/.vitepress/dist/**",
+      "**/obj/**",
+      "**/wwwroot/**",
+      "**/coverage/**",
+      "**/*.g.ts",
+      "src/coalesce-vue/lib/**",
+      "src/coalesce-vue-vuetify3/dist/**",
+      "src/eslint-plugin-coalesce/lib/**",
+      "src/coalesce-mcp/dist/**",
+      "eslint.config.mjs",
+    ],
   },
 
   ...pluginVue.configs["flat/recommended"],
   ...vueTsEslintConfig(),
   {
     ...pluginVitest.configs.recommended,
-    files: ["src/**/__tests__/*", "src/**/*.spec.*"],
+    files: [
+      "src/*/src/**/__tests__/*",
+      "src/*/src/**/*.spec.*",
+      "playground/*/src/**/*.spec.*",
+    ],
   },
   eslintPluginPrettier,
 
@@ -37,9 +52,6 @@ export default [
       ],
 
       "vue/multi-word-component-names": "off",
-      "vue/attribute-hyphenation": "off",
-      "vue/component-definition-name-casing": "off",
-      "vue/require-default-prop": "off", // Annoying and wrong about defineProps
       "vue/no-template-shadow": ["error", { allow: ["props"] }],
       "vue/no-mutating-props": ["error", { shallowOnly: true }],
 
@@ -49,6 +61,7 @@ export default [
       "no-undef": "off", // Redundant with Typescript
 
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
@@ -61,12 +74,36 @@ export default [
     },
   },
 
+  // coalesce-vue-vuetify3 overrides
+  {
+    name: "coalesce-vue-vuetify3/overrides",
+    files: ["src/coalesce-vue-vuetify3/**/*.{ts,mts,tsx,vue}"],
+    rules: {
+      "vue/attribute-hyphenation": "off",
+      "vue/component-definition-name-casing": "off",
+      "vue/require-default-prop": "off",
+    },
+  },
+
+  // TSX overrides (no-unused-expressions is too noisy with JSX)
   {
     name: "app/tsx-overrides",
     files: ["**/*.tsx"],
     rules: {
       "@typescript-eslint/no-unused-expressions": "off",
       "vitest/expect-expect": "off", // https://github.com/vitest-dev/eslint-plugin-vitest/issues/697
+    },
+  },
+
+  // Playground uses eslint-plugin-coalesce
+  {
+    name: "playground/overrides",
+    files: ["playground/**/*.{ts,mts,tsx,vue}"],
+    ...coalesce.configs.recommended,
+    rules: {
+      ...coalesce.configs.recommended.rules,
+      "vue/require-default-prop": "off",
+      "@typescript-eslint/no-unused-vars": "off",
     },
   },
 ];

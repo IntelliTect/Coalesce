@@ -11,9 +11,9 @@
         class="template-builder-option"
       >
         <input
+          v-model="selections"
           type="checkbox"
           :disabled="!param.meetsReqs"
-          v-model="selections"
           :value="param.key"
         />
         <div style="flex-grow: 1">
@@ -72,8 +72,8 @@
           Root Namespace:
         </span>
         <input
-          type="text"
           v-model="namespace"
+          type="text"
           placeholder="MyCompany.MyProject"
           class="border"
           style="
@@ -90,36 +90,6 @@
     </div>
   </div>
 </template>
-
-<style lang="scss">
-.template-builder {
-  .border {
-    border: 1px solid var(--vp-code-bg);
-    border-radius: 4px;
-  }
-}
-.template-builder-option {
-  border-radius: 4px;
-  padding: 8px;
-  display: flex;
-  align-items: start;
-  cursor: pointer;
-
-  input[type="checkbox"] {
-    height: 22px;
-    width: 22px;
-    margin-right: 16px;
-    flex-shrink: 0;
-  }
-
-  &:hover {
-    background-color: var(--vp-code-bg);
-    transition:
-      color 0.25s,
-      background-color 0.5s;
-  }
-}
-</style>
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
@@ -269,3 +239,33 @@ function displayReq(req: Requirements, exclude?: Set<string>): string | null {
   }
 }
 </script>
+
+<style lang="scss">
+.template-builder {
+  .border {
+    border: 1px solid var(--vp-code-bg);
+    border-radius: 4px;
+  }
+}
+.template-builder-option {
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  align-items: start;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    height: 22px;
+    width: 22px;
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background-color: var(--vp-code-bg);
+    transition:
+      color 0.25s,
+      background-color 0.5s;
+  }
+}
+</style>

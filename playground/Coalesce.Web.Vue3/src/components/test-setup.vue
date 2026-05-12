@@ -1,23 +1,23 @@
 <template>
   <v-container>
     <c-select
+      v-model="vm.assignedTo"
       for="Person"
       :params="{ pageSize: 400 }"
-      v-model="vm.assignedTo"
     ></c-select>
 
-    <v-btn @click="add" prepend-icon="fa fa-plus"> Add Product </v-btn>
+    <v-btn prepend-icon="fa fa-plus" @click="add"> Add Product </v-btn>
     <v-btn
-      @click="vm.$bulkSave()"
       :loading="vm.$bulkSave.isLoading"
       prepend-icon="fa fa-save"
+      @click="vm.$bulkSave()"
     >
       Save
     </v-btn>
     <v-btn
-      @click="vm.$load()"
       :loading="vm.$load.isLoading"
       prepend-icon="fa fa-sync"
+      @click="vm.$load()"
     >
       Load
     </v-btn>
@@ -32,25 +32,25 @@
 
     <c-input :model="vm" for="title"></c-input>
     <c-input :model="vm" for="caseProducts"></c-input>
-    <div v-for="x in vm.caseProducts">
+    <div v-for="x in vm.caseProducts" :key="x.$stableId">
       <v-btn
         variant="text"
         size="x-small"
+        icon="fa fa-trash"
         @click="
           x.product?.$remove();
           x.product = null;
           x.$remove();
         "
-        icon="fa fa-trash"
       ></v-btn>
       <v-btn
         variant="text"
         size="x-small"
+        icon="fa fa-sync"
         @click="
           x.product?.$remove();
           x.product = newProduct();
         "
-        icon="fa fa-sync"
       ></v-btn>
       {{ x.product?.name }}: (pk: {{ x.$primaryKey }}, ref {{ x.$stableId }})
     </div>

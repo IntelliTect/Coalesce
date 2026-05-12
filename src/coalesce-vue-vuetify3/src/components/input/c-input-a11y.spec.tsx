@@ -1,6 +1,6 @@
-import { mountApp, mount, flushPromises, mockEndpoint } from "@test/util";
+import { mountApp, flushPromises, mockEndpoint } from "@test/util";
 import { CInput } from "..";
-import { ComplexModel, Statuses, Test } from "@test-targets/models.g";
+import { Statuses, Test } from "@test-targets/models.g";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 
 // Rules to disable that are caused by Vuetify internals, not our code:

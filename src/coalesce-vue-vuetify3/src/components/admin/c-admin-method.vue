@@ -12,7 +12,8 @@
         md="4"
         lg="3"
       >
-        <c-input
+        <component
+          :is="resolveAdminInputComponent(param)"
           :model="caller"
           :for="param.name"
           hide-details="auto"
@@ -27,7 +28,7 @@
             :label="param.displayName"
             error-messages="Data type not supported for admin page input."
           ></v-text-field>
-        </c-input>
+        </component>
       </v-col>
     </v-row>
 
@@ -121,7 +122,8 @@
               </template>
             </div>
 
-            <c-display
+            <component
+              :is="resolveAdminDisplayComponent(methodMeta.return)"
               v-else-if="caller.result != null"
               v-model="caller.result"
               element="pre"
@@ -148,16 +150,25 @@
   setup
   generic="TModel extends ViewModel | ListViewModel | ServiceViewModel"
 >
-import { computed, ref } from "vue";
+import {
+  computed,
+  inject,
+  ref,
+  getCurrentInstance,
+  type Component,
+} from "vue";
 import { ViewModel, ListViewModel, ServiceViewModel } from "coalesce-vue";
 import type {
   DisplayOptions,
   AnyArgCaller,
   ItemApiState,
   Method,
+  Value,
 } from "coalesce-vue";
-import { getCurrentInstance } from "vue";
 import { MethodForSpec } from "../c-metadata-component";
+import { coalesceVuetifyKey } from "../../install";
+import CInput from "../input/c-input.vue";
+import CDisplay from "../display/c-display.vue";
 
 defineOptions({
   name: "c-admin-method",
@@ -185,6 +196,15 @@ const props = defineProps<{
 
 const fileDownloadKind = ref<"preview" | "download">("preview");
 const instance = getCurrentInstance()!;
+const coalesce = inject(coalesceVuetifyKey, null);
+
+function resolveAdminInputComponent(param: Value): Component {
+  return coalesce?.adminValueComponents.input.get(param) ?? CInput;
+}
+
+function resolveAdminDisplayComponent(value: Value): Component {
+  return coalesce?.adminValueComponents.display.get(value) ?? CDisplay;
+}
 
 const methodMeta = computed((): Method => {
   const modelMeta = props.model.$metadata;

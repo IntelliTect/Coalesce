@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { CAdminEditorPage, CAdminTablePage } from "../src";
-import { createCoalesceVuetify } from "../src/install";
+import {
+  createCoalesceVuetify,
+  type CoalesceVuetifyOptions,
+} from "../src/install";
 import {
   mount,
   DOMWrapper,
@@ -62,6 +65,30 @@ const vuetify = createVuetify({ components, directives });
 const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
 });
+
+function createAdminRouter() {
+  return createRouter({
+    history: createWebHistory(),
+    routes: [
+      {
+        path: "/",
+        component: async () => h("div"),
+      },
+      {
+        path: "/admin/:type",
+        name: "coalesce-admin-list",
+        component: CAdminTablePage,
+        props: (route) => ({ ...route.params, color: "primary" }),
+      },
+      {
+        path: "/admin/:type/item/:id?",
+        name: "coalesce-admin-item",
+        component: CAdminEditorPage,
+        props: (route) => ({ ...route.params, color: "primary" }),
+      },
+    ],
+  });
+}
 
 // HACK, pending release of https://github.com/vuejs/test-utils/pull/2242.
 // Adapted from node_modules/@vue/test-utils/dist/mount.d.ts
@@ -155,33 +182,35 @@ const mountVuetify = function (
       plugins: [
         vuetify,
         coalesceVuetify,
-        createRouter({
-          history: createWebHistory(),
-          routes: [
-            {
-              path: "/",
-              component: async () => h("div"),
-            },
-            {
-              path: "/admin/:type",
-              name: "coalesce-admin-list",
-              component: CAdminTablePage,
-              props: (route) => ({ ...route.params, color: "primary" }),
-            },
-            {
-              path: "/admin/:type/item/:id?",
-              name: "coalesce-admin-item",
-              component: CAdminEditorPage,
-              props: (route) => ({ ...route.params, color: "primary" }),
-            },
-          ],
-        }),
+        createAdminRouter(),
       ],
     },
   });
 
   return wrapper;
 } as typeof betterMount;
+
+export function mountWithCoalesceOptions(
+  component: ArgumentsType<typeof betterMount>[0],
+  options: ArgumentsType<typeof betterMount>[1],
+  coalesceOptions: Omit<CoalesceVuetifyOptions, "metadata">,
+) {
+  const wrapper = mount(component, {
+    ...options,
+    global: {
+      plugins: [
+        vuetify,
+        createCoalesceVuetify({
+          metadata: $metadata,
+          ...coalesceOptions,
+        }),
+        createAdminRouter(),
+      ],
+    },
+  });
+
+  return wrapper;
+}
 
 const mountApp = function (
   component: ArgumentsType<typeof betterMount>[0],

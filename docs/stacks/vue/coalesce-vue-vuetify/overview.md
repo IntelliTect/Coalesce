@@ -14,6 +14,22 @@ All Coalesce projects should be started from the [Coalesce project template](/st
 
 If for whatever reason you find yourself adding Coalesce to an existing project, use the template as a reference for what configuration needs to be added to your project.
 
+You can also override admin-page input/display components for specific metadata values:
+
+```ts
+const coalesceVuetify = createCoalesceVuetify({
+  metadata: $metadata,
+  adminValueComponents: {
+    input: new Map([
+      [$metadata.types.Person.props.firstName, CustomPersonNameInput],
+    ]),
+    display: new Map([
+      [$metadata.types.Person.props.firstName, CustomPersonNameDisplay],
+    ]),
+  },
+});
+```
+
 
 ## Display Components
 

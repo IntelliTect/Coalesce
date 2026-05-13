@@ -87,7 +87,8 @@
             <v-col class="py-0 align-self-start" style="flex-basis: 1px">
               <div class="c-admin-editor--input-row">
                 <div class="c-admin-editor--input-col">
-                  <c-input
+                  <component
+                    :is="resolveAdminInputComponent(prop)"
                     :model="model"
                     :for="prop"
                     v-bind="propInputBinds(prop)"
@@ -106,8 +107,12 @@
                     "
                     @added="lastSavedAt = new Date()"
                   >
-                    <c-admin-display :model="model" :for="prop" />
-                  </c-input>
+                    <component
+                      :is="resolveAdminDisplayComponent(prop)"
+                      :model="model"
+                      :for="prop"
+                    />
+                  </component>
                 </div>
                 <div
                   v-if="prop.type == 'model'"
@@ -221,7 +226,18 @@ import {
 
 import { getRefNavRoute } from "./util";
 import { isPropReadOnly } from "../../util";
-import { watch, computed, useTemplateRef, ref, onUnmounted } from "vue";
+import {
+  watch,
+  computed,
+  useTemplateRef,
+  ref,
+  onUnmounted,
+  inject,
+  type Component,
+} from "vue";
+import { coalesceVuetifyKey } from "../../install";
+import CInput from "../input/c-input.vue";
+import CAdminDisplay from "./c-admin-display.vue";
 
 defineOptions({
   name: "c-admin-editor",
@@ -246,6 +262,15 @@ const emit = defineEmits<{
 }>();
 
 const form = useTemplateRef("form");
+const coalesce = inject(coalesceVuetifyKey, null);
+
+function resolveAdminInputComponent(prop: Property): Component {
+  return coalesce?.adminOverrides.input.get(prop) ?? CInput;
+}
+
+function resolveAdminDisplayComponent(prop: Property): Component {
+  return coalesce?.adminOverrides.display.get(prop) ?? CAdminDisplay;
+}
 
 // Validate the form when it is rendered to trigger all validation messages.
 // This will either be immediate for a create scenario, or delayed until load for an edit.

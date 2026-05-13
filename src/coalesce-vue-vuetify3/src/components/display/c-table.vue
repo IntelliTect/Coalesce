@@ -47,8 +47,9 @@
               :class="['prop-' + prop.name]"
               class="text-xs-left"
             >
-              <c-input
+              <component
                 v-if="editable && !isPropReadOnly(prop, item)"
+                :is="admin ? resolveAdminInputComponent(prop) : CInput"
                 :model="item"
                 :for="prop"
                 label=""
@@ -61,11 +62,19 @@
                 validate-on="eager"
               >
                 <!-- Rows and auto-grow for textarea inputs -->
-                <c-admin-display v-if="admin" :model="item" :for="prop" />
-                <c-display v-else :model="item" :for="prop" />
-              </c-input>
+                <component
+                  :is="admin ? resolveAdminDisplayComponent(prop) : CDisplay"
+                  :model="item"
+                  :for="prop"
+                />
+              </component>
 
-              <c-admin-display v-else-if="admin" :model="item" :for="prop" />
+              <component
+                v-else-if="admin"
+                :is="resolveAdminDisplayComponent(prop)"
+                :model="item"
+                :for="prop"
+              />
               <c-display v-else :model="item" :for="prop" />
             </td>
             <slot
@@ -81,10 +90,22 @@
 </template>
 
 <script setup lang="ts" generic="TList extends ListViewModel = ListViewModel">
-import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
-import { ListViewModel, ModelType, HiddenAreas } from "coalesce-vue";
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  ref,
+  useTemplateRef,
+  inject,
+  type Component,
+} from "vue";
+import { ListViewModel, ModelType, HiddenAreas, Property } from "coalesce-vue";
 import { VTable } from "vuetify/components";
 import { isPropReadOnly } from "../../util";
+import { coalesceVuetifyKey } from "../../install";
+import CInput from "../input/c-input.vue";
+import CAdminDisplay from "../admin/c-admin-display.vue";
+import CDisplay from "./c-display.vue";
 
 const props = defineProps<{
   list: TList;
@@ -116,6 +137,15 @@ const emit = defineEmits<{ "click:item": [arg: ViewModelType] }>();
 // Silly wrapper because using `list` directly in the template
 // has Typescript bugs right now in vue-language-tools.
 const listVm = computed(() => props.list);
+const coalesce = inject(coalesceVuetifyKey, null);
+
+function resolveAdminInputComponent(prop: Property): Component {
+  return coalesce?.adminOverrides.input.get(prop) ?? CInput;
+}
+
+function resolveAdminDisplayComponent(prop: Property): Component {
+  return coalesce?.adminOverrides.display.get(prop) ?? CAdminDisplay;
+}
 
 const cTable = useTemplateRef("cTable");
 const isHorizontalScrollbarVisible = ref(false);

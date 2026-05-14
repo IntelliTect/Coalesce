@@ -235,7 +235,10 @@ describe("CAdminEditor", () => {
       undefined,
       {
         adminOverrides: [
-          [$metadata.types.Person.props.firstName, { input: CustomInput, display: CustomDisplay }],
+          [
+            $metadata.types.Person.props.firstName,
+            { input: CustomInput, display: CustomDisplay },
+          ],
         ],
       },
     );

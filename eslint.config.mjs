@@ -48,6 +48,10 @@ export default [
       "src/*/src/**/*.spec.*",
       "playground/*/src/**/*.spec.*",
     ],
+    rules: {
+      ...pluginVitest.configs.recommended.rules,
+      "vue/one-component-per-file": "off",
+    },
   },
   eslintPluginPrettier,
 

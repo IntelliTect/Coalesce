@@ -14,22 +14,7 @@ All Coalesce projects should be started from the [Coalesce project template](/st
 
 If for whatever reason you find yourself adding Coalesce to an existing project, use the template as a reference for what configuration needs to be added to your project.
 
-You can also override admin-page input/display components for specific metadata values:
-
-```ts
-const coalesceVuetify = createCoalesceVuetify({
-  metadata: $metadata,
-  adminOverrides: {
-    input: new Map([
-      [$metadata.types.Person.props.firstName, CustomPersonNameInput],
-    ]),
-    display: new Map([
-      [$metadata.types.Person.props.firstName, CustomPersonNameDisplay],
-    ]),
-  },
-});
-```
-
+You can override the input and display components used in admin pages for specific model properties or method parameters — see [Customizing Admin Components](/stacks/vue/admin-pages.md#customizing-admin-components) for details.
 
 ## Display Components
 

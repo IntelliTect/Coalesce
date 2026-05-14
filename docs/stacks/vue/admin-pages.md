@@ -90,9 +90,113 @@ You can customize the paths any way you like, as long as the routes retain these
 - **Edit View**: `/admin/Person/edit/123` - Form to edit Person with ID 123
 
 
+## Customizing Admin Components
+
+You can replace the default input and display components used by admin pages for specific model properties or method parameters. This allows you to provide richer, domain-specific UI — such as custom editors, formatted displays, or icon-based status indicators — while keeping the standard admin pages for everything else.
+
+### Configuration
+
+Pass an `adminOverrides` option to `createCoalesceVuetify()`. The `input` and `display` maps use metadata `Value` objects (model properties, method parameters, or method return values from your generated `$metadata`) as keys and Vue components as values.
+
+```ts
+import { createCoalesceVuetify } from 'coalesce-vue-vuetify3';
+import $metadata from '@/metadata.g';
+import MyStatusInput from '@/components/MyStatusInput.vue';
+import MyStatusDisplay from '@/components/MyStatusDisplay.vue';
+
+const coalesceVuetify = createCoalesceVuetify({
+  metadata: $metadata,
+  adminOverrides: {
+    input: new Map([
+      [$metadata.types.Case.props.status, MyStatusInput],
+    ]),
+    display: new Map([
+      [$metadata.types.Case.props.status, MyStatusDisplay],
+    ]),
+  },
+});
+```
+
+### Where overrides apply
+
+| Surface | Input override | Display override |
+|---|---|---|
+| [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) — editable properties | ✅ Replaces `c-input` | ✅ Replaces `c-admin-display` (read-only mode) |
+| [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md) — method parameters | ✅ Replaces `c-input` | — |
+| [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md) — method return value | — | ✅ Replaces `c-display` |
+| [c-table](/stacks/vue/coalesce-vue-vuetify/components/c-table.md) with `admin` prop — columns | ✅ Replaces `c-input` (editable mode) | ✅ Replaces `c-admin-display` |
+
+### Custom input component
+
+A custom input component is rendered in place of `c-input`. It receives the same `model` and `for` props that `c-input` accepts, plus any extra props that the admin surface passes (e.g. `density`, `variant`):
+
+```vue
+<template>
+  <!-- Wrap c-input to get all the standard behaviour, then override slots -->
+  <c-input v-bind="$attrs" :model="model" :for="props.for">
+    <template #selection>
+      <MyStatusDisplay :model="model" />
+    </template>
+    <template #item="{ props: itemProps, item }">
+      <v-list-item v-bind="itemProps" :title="undefined">
+        <MyStatusDisplay :value="item.strValue" />
+      </v-list-item>
+    </template>
+  </c-input>
+</template>
+
+<script setup lang="ts">
+import type { Model, Property } from 'coalesce-vue';
+
+const props = defineProps<{
+  model: Model<any>;
+  for: Property;
+}>();
+</script>
+```
+
+### Custom display component
+
+A custom display component is rendered in place of `c-admin-display` or `c-display`. For model properties and method parameters it receives `model` and `for` props. For method return values it receives a `modelValue` prop (used with `v-model`) like `c-display` does.
+
+Design your display component to handle both cases when keying on a property that may also appear as a method return:
+
+```vue
+<template>
+  <span class="my-status-display">
+    <v-icon size="small" :color="config.color">{{ config.icon }}</v-icon>
+    {{ config.label }}
+  </span>
+</template>
+
+<script setup lang="ts">
+import type { Model } from 'coalesce-vue';
+import { computed } from 'vue';
+
+const props = defineProps<{
+  /** Provided when used as a property display (c-admin-editor, c-table). */
+  model?: Model<any>;
+  /** Provided when used as a method return display (c-admin-method). */
+  modelValue?: string;
+}>();
+
+const statusConfigs: Record<string, { icon: string; color: string; label: string }> = {
+  Open:             { icon: 'fa fa-circle-dot',   color: '#1976D2', label: 'Open' },
+  InProgress:       { icon: 'fa fa-spinner',       color: '#F57C00', label: 'In Progress' },
+  Resolved:         { icon: 'fa fa-circle-check',  color: '#388E3C', label: 'Resolved' },
+  Cancelled:        { icon: 'fa fa-circle-xmark',  color: '#D32F2F', label: 'Cancelled' },
+};
+
+const config = computed(() => {
+  const key = props.modelValue ?? (props.model as any)?.status;
+  return statusConfigs[key] ?? { icon: 'fa fa-circle', color: 'inherit', label: String(key ?? '') };
+});
+</script>
+```
+
 ## Overriding Admin Pages
 
-You can create custom admin pages for specific types while keeping the default pages for others. This is useful when you need specialized functionality for certain models. 
+You can create custom admin pages for specific types while keeping the default pages for others. This is useful when you need specialized functionality for certain models.
 
 Add routes that match before the generic admin routes to override specific types. You can also use this technique to override the metadata for certain routes - for example, to attach required permissions to a route.
 

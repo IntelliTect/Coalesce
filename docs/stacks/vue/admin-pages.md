@@ -146,10 +146,11 @@ A custom input component is rendered in place of `c-input`. It receives the same
 </template>
 
 <script setup lang="ts">
-import type { Model, Property } from 'coalesce-vue';
+import type { Property } from 'coalesce-vue';
+import type { Case } from '@/models.g';
 
 const props = defineProps<{
-  model: Model<any>;
+  model: Case;
   for: Property;
 }>();
 </script>
@@ -170,12 +171,12 @@ Design your display component to handle both cases when keying on a property tha
 </template>
 
 <script setup lang="ts">
-import type { Model } from 'coalesce-vue';
+import type { Case } from '@/models.g';
 import { computed } from 'vue';
 
 const props = defineProps<{
   /** Provided when used as a property display (c-admin-editor, c-table). */
-  model?: Model<any>;
+  model?: Case;
   /** Provided when used as a method return display (c-admin-method). */
   modelValue?: string;
 }>();
@@ -188,7 +189,7 @@ const statusConfigs: Record<string, { icon: string; color: string; label: string
 };
 
 const config = computed(() => {
-  const key = props.modelValue ?? (props.model as any)?.status;
+  const key = props.modelValue ?? props.model?.status;
   return statusConfigs[key] ?? { icon: 'fa fa-circle', color: 'inherit', label: String(key ?? '') };
 });
 </script>

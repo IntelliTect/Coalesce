@@ -54,47 +54,60 @@ type _ValueType<
             : any
         : any;
 
-// This isn't perfect because c-input delegates to so many different types,
-// but its good enough to get most of them.
-type InheritedProps = Omit<
-  VInput["$props"] & VField["$props"],
-  | InheritExcludePropNames
-  | "direction"
-  | "rules"
-  | "focused"
-  | "dirty"
-  | "active"
->;
+// _ValueType and _MetadataType both resolve TModel+TFor through the same branching:
+//   - ApiState caller → method param args type / param metadata
+//   - Direct metadata object ref → MetadataToModelType / TFor itself
+//   - String enum type name → EnumTypeLookup / synthetic EnumValue
+//   - String prop name on a model → MetadataToModelType of prop / prop metadata
+//
+// _ValueType resolves to the concrete TS value type (e.g. number, string, Statuses).
+// _MetadataType resolves to the Coalesce metadata descriptor (e.g. EnumValue, Property).
+//
+// SelectSlotItemType uses _MetadataType to guard whether the field is enum-related,
+// then _ValueType to narrow the EnumMember's `value`/`strValue` to the concrete enum type.
 
-type SelectSlotItemType<
+type _MetadataType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>,
 > =
   TModel extends ApiStateTypeWithArgs<infer TMethod, any, any, any>
     ? TMethod extends Method
       ? TFor extends keyof TMethod["params"]
-        ? TMethod["params"][TFor] extends
-            | EnumValue
-            | (CollectionValue & { itemType: EnumValue })
-          ? EnumMember
-          : never
+        ? TMethod["params"][TFor]
         : never
       : never
-    : TFor extends EnumValue | (CollectionValue & { itemType: EnumValue })
-      ? EnumMember
+    : TFor extends Value
+      ? TFor
       : TFor extends string
         ? TFor extends keyof EnumTypeLookup
-          ? EnumMember
+          ? // Wrap in synthetic EnumValue so stage 2's guard is uniform.
+            // MetadataToModelType resolves this via typeDef.name → EnumTypeLookup.
+            EnumValue & { readonly typeDef: { readonly name: TFor } }
           : TModel extends Model
             ? TFor extends PropNames<TModel["$metadata"]>
-              ? TModel["$metadata"]["props"][TFor] extends
-                  | EnumValue
-                  | (CollectionValue & { itemType: EnumValue })
-                ? EnumMember
-                : never
+              ? TModel["$metadata"]["props"][TFor]
               : never
             : never
         : never;
+
+type SelectSlotItemType<
+  TModel extends Model | DataSource | AnyArgCaller | undefined,
+  TFor extends ForSpec<TModel>,
+> =
+  // `infer R` makes this distributive over union types like Property,
+  // so that enum members of the union pass the guard even when the full union wouldn't.
+  _MetadataType<TModel, TFor> extends infer R
+    ? R extends EnumValue | (CollectionValue & { itemType: EnumValue })
+      ? EnumMember & {
+          readonly value: _ValueType<TModel, TFor> extends number
+            ? _ValueType<TModel, TFor>
+            : number;
+          readonly strValue: _ValueType<TModel, TFor> extends string
+            ? _ValueType<TModel, TFor>
+            : string;
+        }
+      : never
+    : never;
 
 // Duplicated from Vuetify because Vuetify doesn't export this type
 // https://github.com/vuetifyjs/vuetify/blob/a36dfb8c4764376ce2af0d994983238dbd96f5bf/packages/vuetify/src/composables/list-items.ts#L10
@@ -162,6 +175,18 @@ type InheritedSlots<
     TFor
   >[Property];
 };
+
+// This isn't perfect because c-input delegates to so many different types,
+// but its good enough to get most of them.
+type InheritedProps = Omit<
+  VInput["$props"] & VField["$props"],
+  | InheritExcludePropNames
+  | "direction"
+  | "rules"
+  | "focused"
+  | "dirty"
+  | "active"
+>;
 </script>
 
 <script

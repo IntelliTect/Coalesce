@@ -10,40 +10,39 @@
 
 <script setup lang="ts">
 import { Statuses } from "@/models.g";
-import type { Model } from "coalesce-vue";
+import $metadata from "@/metadata.g";
 import { computed } from "vue";
 
 const props = defineProps<{
-  model?: Model<any>;
-  /** Direct value of the status enum, for use in dropdown item slots. */
-  value?: Statuses;
+  modelValue?: Statuses;
 }>();
 
-const statusConfigs: Record<
-  string,
-  { icon: string; color: string; label: string }
-> = {
-  Open: { icon: "fa fa-circle-dot", color: "#1976D2", label: "Open" },
-  InProgress: { icon: "fa fa-spinner", color: "#F57C00", label: "In Progress" },
-  Resolved: { icon: "fa fa-circle-check", color: "#388E3C", label: "Resolved" },
-  ClosedNoSolution: {
-    icon: "fa fa-ban",
-    color: "#757575",
-    label: "Closed, No Solution",
-  },
-  Cancelled: {
-    icon: "fa fa-circle-xmark",
-    color: "#D32F2F",
-    label: "Cancelled",
-  },
+const statusIcons: Record<string, string> = {
+  Open: "fa fa-circle-dot",
+  InProgress: "fa fa-spinner",
+  Resolved: "fa fa-circle-check",
+  ClosedNoSolution: "fa fa-ban",
+  Cancelled: "fa fa-circle-xmark",
+};
+
+const statusColors: Record<string, string> = {
+  Open: "#1976D2",
+  InProgress: "#F57C00",
+  Resolved: "#388E3C",
+  ClosedNoSolution: "#757575",
+  Cancelled: "#D32F2F",
 };
 
 const fallback = { icon: "fa fa-circle", color: "inherit", label: "" };
 
 const statusConfig = computed(() => {
-  const key = props.value ?? (props.model as any)?.status;
-  if (typeof key === "string") return statusConfigs[key] ?? fallback;
-  return fallback;
+  const key = props.modelValue;
+  if (!key) return fallback;
+  return {
+    icon: statusIcons[key] ?? fallback.icon,
+    color: statusColors[key] ?? fallback.color,
+    label: $metadata.enums.Statuses.valueLookup[key]?.displayName ?? key,
+  };
 });
 </script>
 

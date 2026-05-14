@@ -111,6 +111,7 @@
                       :is="resolveAdminDisplayComponent(prop)"
                       :model="model"
                       :for="prop"
+                      :model-value="(model as any)[prop.name]"
                     />
                   </component>
                 </div>

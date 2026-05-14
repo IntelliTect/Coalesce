@@ -66,6 +66,7 @@
                   :is="admin ? resolveAdminDisplayComponent(prop) : CDisplay"
                   :model="item"
                   :for="prop"
+                  :model-value="(item as any)[prop.name]"
                 />
               </component>
 
@@ -74,6 +75,7 @@
                 v-else-if="admin"
                 :model="item"
                 :for="prop"
+                :model-value="(item as any)[prop.name]"
               />
               <c-display v-else :model="item" :for="prop" />
             </td>

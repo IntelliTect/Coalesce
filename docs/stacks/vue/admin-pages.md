@@ -158,9 +158,7 @@ const props = defineProps<{
 
 ### Custom display component
 
-A custom display component is rendered in place of `c-admin-display` or `c-display`. For model properties and method parameters it receives `model` and `for` props. For method return values it receives a `modelValue` prop (used with `v-model`) like `c-display` does.
-
-Design your display component to handle both cases when keying on a property that may also appear as a method return:
+A custom display component is rendered in place of `c-admin-display` or `c-display`. It always receives a `modelValue` prop containing the property's current value, plus `model` and `for` props when rendering a model property (in `c-admin-editor` and `c-table`).
 
 ```vue
 <template>
@@ -171,14 +169,10 @@ Design your display component to handle both cases when keying on a property tha
 </template>
 
 <script setup lang="ts">
-import type { Case } from '@/models.g';
 import $metadata from '@/metadata.g';
 import { computed } from 'vue';
 
 const props = defineProps<{
-  /** Provided when used as a property display (c-admin-editor, c-table). */
-  model?: Case;
-  /** Provided when used as a method return display (c-admin-method). */
   modelValue?: string;
 }>();
 
@@ -189,12 +183,10 @@ const statusConfigs: Record<string, { icon: string; color: string }> = {
   Cancelled:        { icon: 'fa fa-circle-xmark',  color: '#D32F2F' },
 };
 
-const key = computed(() => props.modelValue ?? props.model?.status);
-
-const config = computed(() => statusConfigs[key.value] ?? { icon: 'fa fa-circle', color: 'inherit' });
+const config = computed(() => statusConfigs[props.modelValue] ?? { icon: 'fa fa-circle', color: 'inherit' });
 
 const label = computed(() =>
-  $metadata.enums.Statuses.valueLookup[key.value]?.displayName ?? String(key.value ?? '')
+  $metadata.enums.Statuses.valueLookup[props.modelValue]?.displayName ?? String(props.modelValue ?? '')
 );
 </script>
 ```

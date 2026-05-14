@@ -140,11 +140,11 @@ const listVm = computed(() => props.list);
 const coalesce = inject(coalesceVuetifyKey, null);
 
 function resolveAdminInputComponent(prop: Property): Component {
-  return coalesce?.adminValueComponents.input.get(prop) ?? CInput;
+  return coalesce?.adminOverrides.input.get(prop) ?? CInput;
 }
 
 function resolveAdminDisplayComponent(prop: Property): Component {
-  return coalesce?.adminValueComponents.display.get(prop) ?? CAdminDisplay;
+  return coalesce?.adminOverrides.display.get(prop) ?? CAdminDisplay;
 }
 
 const cTable = useTemplateRef("cTable");

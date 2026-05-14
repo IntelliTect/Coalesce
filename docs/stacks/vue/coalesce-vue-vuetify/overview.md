@@ -19,7 +19,7 @@ You can also override admin-page input/display components for specific metadata 
 ```ts
 const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
-  adminValueComponents: {
+  adminOverrides: {
     input: new Map([
       [$metadata.types.Person.props.firstName, CustomPersonNameInput],
     ]),

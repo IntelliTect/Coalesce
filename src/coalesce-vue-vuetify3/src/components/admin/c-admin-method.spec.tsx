@@ -51,7 +51,8 @@ describe("CAdminMethod", () => {
     const CustomInput = defineComponent({
       name: "CustomMethodInput",
       setup(_, { slots }) {
-        return () => h("div", { class: "custom-method-input" }, slots.default?.());
+        return () =>
+          h("div", { class: "custom-method-input" }, slots.default?.());
       },
     });
 
@@ -66,7 +67,7 @@ describe("CAdminMethod", () => {
       () => <CAdminMethod model={vm} for="rename" />,
       undefined,
       {
-        adminValueComponents: {
+        adminOverrides: {
           input: new Map([
             [$metadata.types.Person.methods.rename.params.name, CustomInput],
           ]),

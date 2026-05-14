@@ -265,11 +265,11 @@ const form = useTemplateRef("form");
 const coalesce = inject(coalesceVuetifyKey, null);
 
 function resolveAdminInputComponent(prop: Property): Component {
-  return coalesce?.adminValueComponents.input.get(prop) ?? CInput;
+  return coalesce?.adminOverrides.input.get(prop) ?? CInput;
 }
 
 function resolveAdminDisplayComponent(prop: Property): Component {
-  return coalesce?.adminValueComponents.display.get(prop) ?? CAdminDisplay;
+  return coalesce?.adminOverrides.display.get(prop) ?? CAdminDisplay;
 }
 
 // Validate the form when it is rendered to trigger all validation messages.

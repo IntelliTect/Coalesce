@@ -150,13 +150,7 @@
   setup
   generic="TModel extends ViewModel | ListViewModel | ServiceViewModel"
 >
-import {
-  computed,
-  inject,
-  ref,
-  getCurrentInstance,
-  type Component,
-} from "vue";
+import { computed, inject, ref, getCurrentInstance, type Component } from "vue";
 import { ViewModel, ListViewModel, ServiceViewModel } from "coalesce-vue";
 import type {
   DisplayOptions,
@@ -199,11 +193,11 @@ const instance = getCurrentInstance()!;
 const coalesce = inject(coalesceVuetifyKey, null);
 
 function resolveAdminInputComponent(param: Value): Component {
-  return coalesce?.adminValueComponents.input.get(param) ?? CInput;
+  return coalesce?.adminOverrides.input.get(param) ?? CInput;
 }
 
 function resolveAdminDisplayComponent(value: Value): Component {
-  return coalesce?.adminValueComponents.display.get(value) ?? CDisplay;
+  return coalesce?.adminOverrides.display.get(value) ?? CDisplay;
 }
 
 const methodMeta = computed((): Method => {

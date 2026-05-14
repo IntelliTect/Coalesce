@@ -218,7 +218,8 @@ describe("CAdminEditor", () => {
     const CustomInput = defineComponent({
       name: "CustomInput",
       setup(_, { slots }) {
-        return () => h("div", { class: "custom-admin-input" }, slots.default?.());
+        return () =>
+          h("div", { class: "custom-admin-input" }, slots.default?.());
       },
     });
 
@@ -233,8 +234,10 @@ describe("CAdminEditor", () => {
       () => <CAdminEditor model={vm} props={["firstName"]} />,
       undefined,
       {
-        adminValueComponents: {
-          input: new Map([[$metadata.types.Person.props.firstName, CustomInput]]),
+        adminOverrides: {
+          input: new Map([
+            [$metadata.types.Person.props.firstName, CustomInput],
+          ]),
           display: new Map([
             [$metadata.types.Person.props.firstName, CustomDisplay],
           ]),

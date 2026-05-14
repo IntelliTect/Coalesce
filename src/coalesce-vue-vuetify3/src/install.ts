@@ -13,7 +13,7 @@ export interface CoalesceVuetifyOptions {
   components?: Record<string, any>;
 
   /** Components to use in admin interfaces for specific metadata values. */
-  adminValueComponents?: {
+  adminOverrides?: {
     /** Replaces c-input for matching metadata values in admin interfaces. */
     input?: ReadonlyMap<MetadataValue, Component>;
     /** Replaces c-admin-display / c-display for matching metadata values in admin interfaces. */
@@ -25,7 +25,7 @@ export interface CoalesceVuetifyInstance {
   /** A reference to the whole set of Coalesce-generated metadata for the application,
    * as exported from `metadata.g.ts`, e.g. `import metadata from '@/metadata.g'`. */
   readonly metadata: Domain;
-  readonly adminValueComponents: {
+  readonly adminOverrides: {
     readonly input: ReadonlyMap<MetadataValue, Component>;
     readonly display: ReadonlyMap<MetadataValue, Component>;
   };
@@ -43,12 +43,12 @@ declare module "vue" {
 export const createCoalesceVuetify = (options: CoalesceVuetifyOptions) => {
   return {
     install(app: App) {
-      const { metadata, components = {}, adminValueComponents } = options;
+      const { metadata, components = {}, adminOverrides } = options;
       const instance: CoalesceVuetifyInstance = {
         metadata,
-        adminValueComponents: {
-          input: adminValueComponents?.input ?? new Map(),
-          display: adminValueComponents?.display ?? new Map(),
+        adminOverrides: {
+          input: adminOverrides?.input ?? new Map(),
+          display: adminOverrides?.display ?? new Map(),
         },
       };
 

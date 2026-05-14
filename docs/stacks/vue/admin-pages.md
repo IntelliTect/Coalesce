@@ -133,7 +133,7 @@ A custom input component is rendered in place of `c-input`. It receives the same
 ```vue
 <template>
   <!-- Wrap c-input to get all the standard behaviour, then override slots -->
-  <c-input v-bind="$attrs" :model="model" :for="props.for">
+  <c-input :model="model" :for="props.for">
     <template #selection>
       <MyStatusDisplay :model="model" />
     </template>

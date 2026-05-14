@@ -2,6 +2,7 @@
 - Broad improvements to accessibility issues identified by axe-core across all components.
 - `vue`, `date-fns`, and `date-fns-tz` are now peer dependencies instead of direct dependencies of `coalesce-vue` and `coalesce-vue-vuetify3`.
 - Fix self-referential foreign key infinite recursion in code generation.
+- Fix `c-input` not correctly matching the selected item in `v-select` for string-serialized enums (enums with `format: "string"`). The component now uses `strValue` instead of `value` as the `item-value` key when the enum has string format.
 - Fix Vuetify 4 issues:
   - Margin issue in `c-admin-audit-log-page` `pre` elements
   - Color issue in `c-time-picker`.

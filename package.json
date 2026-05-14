@@ -2,7 +2,7 @@
   "name": "coalesce",
   "version": "0.1.0-local",
   "private": true,
-  "packageManager": "pnpm@11.0.8",
+  "packageManager": "pnpm@11.1.2",
   "scripts": {
     "build": "pnpm -r --filter=./src/* run build",
     "lint": "pnpm -r run lint",

@@ -48,8 +48,8 @@
               class="text-xs-left"
             >
               <component
-                v-if="editable && !isPropReadOnly(prop, item)"
                 :is="admin ? resolveAdminInputComponent(prop) : CInput"
+                v-if="editable && !isPropReadOnly(prop, item)"
                 :model="item"
                 :for="prop"
                 label=""
@@ -70,8 +70,8 @@
               </component>
 
               <component
-                v-else-if="admin"
                 :is="resolveAdminDisplayComponent(prop)"
+                v-else-if="admin"
                 :model="item"
                 :for="prop"
               />

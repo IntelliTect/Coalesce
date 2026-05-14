@@ -179,11 +179,7 @@ const mountVuetify = function (
   const wrapper = mount(component, {
     ...options,
     global: {
-      plugins: [
-        vuetify,
-        coalesceVuetify,
-        createAdminRouter(),
-      ],
+      plugins: [vuetify, coalesceVuetify, createAdminRouter()],
     },
   });
 

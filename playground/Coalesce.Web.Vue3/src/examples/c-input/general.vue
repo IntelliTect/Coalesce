@@ -32,13 +32,11 @@
       <c-input :model="caseVm" for="status" variant="outlined">
         <template #item="{ item, props }">
           <v-list-item v-bind="props" :title="undefined">
-            {{
-              "displayName" in item ? item.displayName : item.raw.displayName
-            }}: {{ item.value }}
+            {{ item.displayName }}: {{ item.value }}
           </v-list-item>
         </template>
         <template #selection="{ item }">
-          {{ "displayName" in item ? item.displayName : item.title }}:
+          {{ item.displayName }}:
           {{ item.value }}
         </template>
       </c-input>

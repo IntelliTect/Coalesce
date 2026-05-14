@@ -294,14 +294,14 @@ describe("CInput", () => {
 
     // Verify item slot received full EnumMember objects (not synthetic string items)
     expect(slotItems.length).toBeGreaterThan(0);
-    const rawItem = slotItems[0].item.raw;
-    // raw should be the full EnumMember object, not just a string
-    expect(typeof rawItem).toBe("object");
-    expect(rawItem).toHaveProperty("displayName");
-    expect(rawItem).toHaveProperty("strValue");
-    expect(rawItem).toHaveProperty("value");
-    expect(rawItem.displayName).toBe("First Value");
-    expect(rawItem.strValue).toBe("FirstValue");
+    const item = slotItems[0].item;
+    // item should be the full EnumMember object, not just a string
+    expect(typeof item).toBe("object");
+    expect(item).toHaveProperty("displayName");
+    expect(item).toHaveProperty("strValue");
+    expect(item).toHaveProperty("value");
+    expect(item.displayName).toBe("First Value");
+    expect(item.strValue).toBe("FirstValue");
   });
 
   test("caller model - date value", async () => {

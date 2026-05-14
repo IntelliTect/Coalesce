@@ -8,7 +8,7 @@
     "lint": "pnpm -r run lint",
     "lint:fix": "pnpm -r run lint:fix",
     "coalesce": "pnpm -C playground/Coalesce.Web.Vue3 coalesce",
-    "docs": "pnpm -C docs dev",
+    "doc": "pnpm -C docs dev",
     "play": "dotnet run --project playground/Coalesce.Web.Vue3",
     "template": "pwsh templates/Coalesce.Vue.Template/TestLocal.ps1",
     "test": "pnpm -r --filter=./src/* run test run"

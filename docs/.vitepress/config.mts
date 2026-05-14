@@ -5,6 +5,13 @@ import path from "path";
 import fs from "fs";
 import url from "url";
 import matter from "gray-matter";
+import templateGlobalJson from "../../templates/Coalesce.Vue.Template/content/global.json";
+import templatePackageJson from "../../templates/Coalesce.Vue.Template/content/package.json";
+
+const dotnetMajorVersion = templateGlobalJson.sdk.version.split(".")[0];
+const nodeMajorVersion = (templatePackageJson.engines as any).node.match(
+  /\d+/,
+)[0];
 
 function autoTitle(link: string) {
   const fullPath = path.join(
@@ -61,11 +68,14 @@ export default defineConfig({
   description: "Documentation for Coalesce by IntelliTect",
   head: [["link", { rel: "shortcut icon", href: "/favicon.ico" }]],
 
+  transformPageData(pageData) {
+    pageData.frontmatter.dotnetVersion ??= dotnetMajorVersion;
+    pageData.frontmatter.nodeVersion ??= nodeMajorVersion;
+  },
+
   transformHtml(html) {
-    return html.replaceAll(
-      "COALESCE_VERSION",
-      process.env.COALESCE_VERSION || "x.y.z",
-    );
+    return html
+      .replaceAll("COALESCE_VERSION", process.env.COALESCE_VERSION || "x.y.z");
   },
 
   markdown: {

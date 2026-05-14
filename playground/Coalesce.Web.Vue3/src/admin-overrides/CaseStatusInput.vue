@@ -1,5 +1,5 @@
 <template>
-  <c-input v-bind="$attrs" :model="model" :for="for">
+  <c-input v-bind="$attrs" :model="model" :for="props.for">
     <template #selection>
       <CaseStatusDisplay :model="model" />
     </template>

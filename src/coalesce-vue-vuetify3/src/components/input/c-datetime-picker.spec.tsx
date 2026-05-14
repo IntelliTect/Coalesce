@@ -139,7 +139,8 @@ describe("CDatetimePicker", () => {
     const overlay = await openMenu(wrapper);
 
     expect(overlay.findAll(".c-time-picker__item-active")).toHaveLength(3);
-    expect(overlay.text()).contains("August 1970");
+    expect(overlay.text()).contains("Aug");
+    expect(overlay.text()).contains("1970");
     expect(overlay.text()).contains("Sun, Aug 2");
     expect(overlay.find(".c-time-picker-header").text()).equals("1:51 PM PDT");
   });

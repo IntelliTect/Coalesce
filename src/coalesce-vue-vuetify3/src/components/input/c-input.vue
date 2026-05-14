@@ -66,35 +66,67 @@ type InheritedProps = Omit<
   | "active"
 >;
 
-type SelectSlotItemType<
+// Resolve the concrete TS enum type from enum value metadata via MetadataToModelType.
+// For collection enum values, unwrap to the itemType first.
+type _EnumModelType<T> = T extends CollectionValue & { itemType: EnumValue }
+  ? MetadataToModelType<T["itemType"]>
+  : T extends EnumValue
+    ? MetadataToModelType<T>
+    : unknown;
+
+// Augment EnumMember with the resolved TS enum type on `value` (for numeric enums)
+// or `strValue` (for string enums), preserving the base type for the other property.
+type _TypedEnumMember<T> = EnumMember & {
+  readonly value: _EnumModelType<T> extends number ? _EnumModelType<T> : number;
+  readonly strValue: _EnumModelType<T> extends string
+    ? _EnumModelType<T>
+    : string;
+};
+
+// Resolves the typed EnumMember for c-input's select-like slots (item, selection, chip).
+//
+// Stage 1 (_ResolvedFor): Resolve the TModel+TFor combination to value metadata:
+//   - ApiState caller → method param metadata
+//   - Direct metadata object ref → TFor itself
+//   - String enum type name → synthetic EnumValue carrying the name so
+//     MetadataToModelType can resolve it through EnumTypeLookup
+//   - String prop name on a model → property metadata
+//
+// Stage 2 (SelectSlotItemType): If the resolved metadata is enum-related,
+// produce a _TypedEnumMember; otherwise `never` (non-enum props have no select items).
+type _ResolvedFor<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>,
 > =
   TModel extends ApiStateTypeWithArgs<infer TMethod, any, any, any>
     ? TMethod extends Method
       ? TFor extends keyof TMethod["params"]
-        ? TMethod["params"][TFor] extends
-            | EnumValue
-            | (CollectionValue & { itemType: EnumValue })
-          ? EnumMember
-          : never
+        ? TMethod["params"][TFor]
         : never
       : never
-    : TFor extends EnumValue | (CollectionValue & { itemType: EnumValue })
-      ? EnumMember
+    : TFor extends Value
+      ? TFor
       : TFor extends string
         ? TFor extends keyof EnumTypeLookup
-          ? EnumMember
+          ? // Wrap in synthetic EnumValue so stage 2's guard is uniform.
+            // MetadataToModelType resolves this via typeDef.name → EnumTypeLookup.
+            EnumValue & { readonly typeDef: { readonly name: TFor } }
           : TModel extends Model
             ? TFor extends PropNames<TModel["$metadata"]>
-              ? TModel["$metadata"]["props"][TFor] extends
-                  | EnumValue
-                  | (CollectionValue & { itemType: EnumValue })
-                ? EnumMember
-                : never
+              ? TModel["$metadata"]["props"][TFor]
               : never
             : never
         : never;
+
+type SelectSlotItemType<
+  TModel extends Model | DataSource | AnyArgCaller | undefined,
+  TFor extends ForSpec<TModel>,
+> =
+  _ResolvedFor<TModel, TFor> extends infer R
+    ? R extends EnumValue | (CollectionValue & { itemType: EnumValue })
+      ? _TypedEnumMember<R>
+      : never
+    : never;
 
 // Duplicated from Vuetify because Vuetify doesn't export this type
 // https://github.com/vuetifyjs/vuetify/blob/a36dfb8c4764376ce2af0d994983238dbd96f5bf/packages/vuetify/src/composables/list-items.ts#L10

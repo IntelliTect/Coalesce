@@ -1,5 +1,5 @@
 # 6.5.2
-- Fix `c-input` failing to match selected items for string-serialized enums (`[JsonStringEnumConverter]`), causing broken display and item slot props.
+- Fix `c-input` using numeric enum values instead of string values for string-serialized enums (`[JsonStringEnumConverter]`), causing the selected item to not be found in the dropdown.
 
 # 6.5.1
 - Broad improvements to accessibility issues identified by axe-core across all components.

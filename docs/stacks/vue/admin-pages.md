@@ -126,7 +126,7 @@ const coalesceVuetify = createCoalesceVuetify({
 
 ### Custom input component
 
-A custom input component is rendered in place of `c-input`. It receives `model` and `for` props (note: `for` is always a resolved `Property` metadata object, never a string), plus any extra props that the admin surface passes (e.g. `density`, `variant`):
+A custom input component is rendered in place of `c-input`. It receives `model` and `for` props, plus any extra props that the admin surface passes (e.g. `density`, `variant`). The `for` prop is the resolved metadata value for the overridden surface: for editable model fields this is a `Property`, and for method parameters it is a `Value` metadata object, not a string:
 
 ```vue
 <template>

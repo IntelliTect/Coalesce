@@ -15,7 +15,7 @@
         <component
           :is="resolveAdminInputComponent(param)"
           :model="caller"
-          :for="param.name"
+          :for="param"
           hide-details="auto"
           density="compact"
           variant="outlined"

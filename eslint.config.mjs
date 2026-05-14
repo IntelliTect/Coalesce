@@ -4,6 +4,8 @@ import pluginVitest from "@vitest/eslint-plugin";
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
 import coalesce from "./src/eslint-plugin-coalesce/src/index.ts";
 
+const tsconfigRootDir = import.meta.dirname;
+
 export default [
   {
     name: "app/files-to-lint",
@@ -32,6 +34,13 @@ export default [
 
   ...pluginVue.configs["flat/recommended"],
   ...vueTsEslintConfig(),
+  {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir,
+      },
+    },
+  },
   {
     ...pluginVitest.configs.recommended,
     files: [

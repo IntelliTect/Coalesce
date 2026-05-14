@@ -1,4 +1,5 @@
 import path from "path";
+import { execSync } from "node:child_process";
 
 import { defineConfig } from "vite";
 
@@ -85,8 +86,12 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     fs: {
-      // repo root, where some NPM packages may be restored to
-      allow: [path.resolve(__dirname, "../../")],
+      allow: [
+        // Workaround https://github.com/vitejs/vite/issues/22405
+        execSync("pnpm store path", { encoding: "utf8" }).trim(),
+        // repo root, where some NPM packages may be restored to
+        path.resolve(__dirname, "../../"),
+      ],
     },
     warmup: {
       clientFiles: ["./src/**/*.vue"],

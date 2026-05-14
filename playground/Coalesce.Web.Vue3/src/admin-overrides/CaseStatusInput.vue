@@ -1,5 +1,5 @@
 <template>
-  <c-input v-bind="$attrs" :model="model" :for="props.for">
+  <c-input v-bind="$attrs" :model="model" for="status">
     <template #selection>
       <CaseStatusDisplay :model-value="model.status" />
     </template>
@@ -12,11 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import type { Model, Property } from "coalesce-vue";
 import CaseStatusDisplay from "./CaseStatusDisplay.vue";
+import { Case } from "@/models.g";
 
 const props = defineProps<{
-  model: Model<any>;
-  for: Property;
+  model: Case;
 }>();
 </script>

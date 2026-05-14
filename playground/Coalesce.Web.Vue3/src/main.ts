@@ -106,7 +106,10 @@ const vuetify = createVuetify({
 const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
   adminOverrides: [
-    [$metadata.types.Case.props.status, { input: CaseStatusInput, display: CaseStatusDisplay }],
+    [
+      $metadata.types.Case.props.status,
+      { input: CaseStatusInput, display: CaseStatusDisplay },
+    ],
   ],
 });
 

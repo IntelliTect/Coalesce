@@ -131,25 +131,24 @@ A custom input component is rendered in place of `c-input`. It receives `model` 
 ```vue
 <template>
   <!-- Wrap c-input to get all the standard behavior, then override slots -->
-  <c-input :model="model" :for="props.for">
+  <c-input :model="model" for="status">
     <template #selection>
-      <MyStatusDisplay :model="model" />
+      <MyStatusDisplay :model-value="model.status" />
     </template>
     <template #item="{ props: itemProps, item }">
       <v-list-item v-bind="itemProps" :title="undefined">
-        <MyStatusDisplay :value="item.strValue" />
+        <MyStatusDisplay :model-value="item.value" />
       </v-list-item>
     </template>
   </c-input>
 </template>
 
 <script setup lang="ts">
-import type { Property } from 'coalesce-vue';
+import MyStatusDisplay from './MyStatusDisplay.vue';
 import type { Case } from '@/models.g';
 
 const props = defineProps<{
   model: Case;
-  for: Property;
 }>();
 </script>
 ```
@@ -161,8 +160,8 @@ A custom display component is rendered in place of `c-admin-display` or `c-displ
 ```vue
 <template>
   <span class="my-status-display">
-    <v-icon size="small" :color="config.color">{{ config.icon }}</v-icon>
-    {{ label }}
+    <v-icon size="small" :color="statusConfig.color" class="mr-1">{{ statusConfig.icon }}</v-icon>
+    <span :style="{ color: statusConfig.color }">{{ statusConfig.label }}</span>
   </span>
 </template>
 
@@ -172,21 +171,36 @@ import $metadata from '@/metadata.g';
 import { computed } from 'vue';
 
 const props = defineProps<{
-  modelValue?: Statuses;
+  modelValue?: Statuses | null;
 }>();
 
-const statusConfigs: Record<Statuses, { icon: string; color: string }> = {
-  [Statuses.Open]:             { icon: 'fa fa-circle-dot',   color: '#1976D2' },
-  [Statuses.InProgress]:       { icon: 'fa fa-spinner',       color: '#F57C00' },
-  [Statuses.Resolved]:         { icon: 'fa fa-circle-check',  color: '#388E3C' },
-  [Statuses.Cancelled]:        { icon: 'fa fa-circle-xmark',  color: '#D32F2F' },
+const statusIcons: Record<Statuses, string> = {
+  [Statuses.Open]:             'fa fa-circle-dot',
+  [Statuses.InProgress]:       'fa fa-spinner',
+  [Statuses.Resolved]:         'fa fa-circle-check',
+  [Statuses.ClosedNoSolution]: 'fa fa-ban',
+  [Statuses.Cancelled]:        'fa fa-circle-xmark',
 };
 
-const config = computed(() => statusConfigs[props.modelValue] ?? { icon: 'fa fa-circle', color: 'inherit' });
+const statusColors: Record<Statuses, string> = {
+  [Statuses.Open]:             '#1976D2',
+  [Statuses.InProgress]:       '#F57C00',
+  [Statuses.Resolved]:         '#388E3C',
+  [Statuses.ClosedNoSolution]: '#757575',
+  [Statuses.Cancelled]:        '#D32F2F',
+};
 
-const label = computed(() =>
-  $metadata.enums.Statuses.valueLookup[props.modelValue]?.displayName ?? String(props.modelValue ?? '')
-);
+const fallback = { icon: 'fa fa-circle', color: 'inherit', label: '' };
+
+const statusConfig = computed(() => {
+  const key = props.modelValue;
+  if (!key) return fallback;
+  return {
+    icon: statusIcons[key] ?? fallback.icon,
+    color: statusColors[key] ?? fallback.color,
+    label: $metadata.enums.Statuses.valueLookup[key]?.displayName ?? key,
+  };
+});
 </script>
 ```
 

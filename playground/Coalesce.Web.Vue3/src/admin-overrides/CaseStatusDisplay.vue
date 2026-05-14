@@ -14,7 +14,7 @@ import $metadata from "@/metadata.g";
 import { computed } from "vue";
 
 const props = defineProps<{
-  modelValue?: Statuses;
+  modelValue?: Statuses | null;
 }>();
 
 const statusIcons: Record<Statuses, string> = {

@@ -1,3 +1,6 @@
+# 6.6.0
+- Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
+
 # 6.5.2
 - Fix `c-input` using numeric enum values instead of string values for string-serialized enums (`[JsonStringEnumConverter]`), causing the selected item to not be found in the dropdown.
 
@@ -5,7 +8,6 @@
 - Broad improvements to accessibility issues identified by axe-core across all components.
 - `vue`, `date-fns`, and `date-fns-tz` are now peer dependencies instead of direct dependencies of `coalesce-vue` and `coalesce-vue-vuetify3`.
 - Fix self-referential foreign key infinite recursion in code generation.
-- Added `createCoalesceVuetify({ adminOverrides })` for per-metadata admin input/display component overrides.
 - Fix Vuetify 4 issues:
   - Margin issue in `c-admin-audit-log-page` `pre` elements
   - Color issue in `c-time-picker`.

@@ -54,47 +54,19 @@ type _ValueType<
             : any
         : any;
 
-// This isn't perfect because c-input delegates to so many different types,
-// but its good enough to get most of them.
-type InheritedProps = Omit<
-  VInput["$props"] & VField["$props"],
-  | InheritExcludePropNames
-  | "direction"
-  | "rules"
-  | "focused"
-  | "dirty"
-  | "active"
->;
-
-// Resolve the concrete TS enum type from enum value metadata via MetadataToModelType.
-// For collection enum values, unwrap to the itemType first.
-type _EnumModelType<T> = T extends CollectionValue & { itemType: EnumValue }
-  ? MetadataToModelType<T["itemType"]>
-  : T extends EnumValue
-    ? MetadataToModelType<T>
-    : unknown;
-
-// Augment EnumMember with the resolved TS enum type on `value` (for numeric enums)
-// or `strValue` (for string enums), preserving the base type for the other property.
-type _TypedEnumMember<T> = EnumMember & {
-  readonly value: _EnumModelType<T> extends number ? _EnumModelType<T> : number;
-  readonly strValue: _EnumModelType<T> extends string
-    ? _EnumModelType<T>
-    : string;
-};
-
-// Resolves the typed EnumMember for c-input's select-like slots (item, selection, chip).
+// _ValueType and _MetadataType both resolve TModel+TFor through the same branching:
+//   - ApiState caller → method param args type / param metadata
+//   - Direct metadata object ref → MetadataToModelType / TFor itself
+//   - String enum type name → EnumTypeLookup / synthetic EnumValue
+//   - String prop name on a model → MetadataToModelType of prop / prop metadata
 //
-// Stage 1 (_ResolvedFor): Resolve the TModel+TFor combination to value metadata:
-//   - ApiState caller → method param metadata
-//   - Direct metadata object ref → TFor itself
-//   - String enum type name → synthetic EnumValue carrying the name so
-//     MetadataToModelType can resolve it through EnumTypeLookup
-//   - String prop name on a model → property metadata
+// _ValueType resolves to the concrete TS value type (e.g. number, string, Statuses).
+// _MetadataType resolves to the Coalesce metadata descriptor (e.g. EnumValue, Property).
 //
-// Stage 2 (SelectSlotItemType): If the resolved metadata is enum-related,
-// produce a _TypedEnumMember; otherwise `never` (non-enum props have no select items).
-type _ResolvedFor<
+// SelectSlotItemType uses _MetadataType to guard whether the field is enum-related,
+// then _ValueType to narrow the EnumMember's `value`/`strValue` to the concrete enum type.
+
+type _MetadataType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>,
 > =
@@ -122,9 +94,18 @@ type SelectSlotItemType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>,
 > =
-  _ResolvedFor<TModel, TFor> extends infer R
+  // `infer R` makes this distributive over union types like Property,
+  // so that enum members of the union pass the guard even when the full union wouldn't.
+  _MetadataType<TModel, TFor> extends infer R
     ? R extends EnumValue | (CollectionValue & { itemType: EnumValue })
-      ? _TypedEnumMember<R>
+      ? EnumMember & {
+          readonly value: _ValueType<TModel, TFor> extends number
+            ? _ValueType<TModel, TFor>
+            : number;
+          readonly strValue: _ValueType<TModel, TFor> extends string
+            ? _ValueType<TModel, TFor>
+            : string;
+        }
       : never
     : never;
 
@@ -194,6 +175,18 @@ type InheritedSlots<
     TFor
   >[Property];
 };
+
+// This isn't perfect because c-input delegates to so many different types,
+// but its good enough to get most of them.
+type InheritedProps = Omit<
+  VInput["$props"] & VField["$props"],
+  | InheritExcludePropNames
+  | "direction"
+  | "rules"
+  | "focused"
+  | "dirty"
+  | "active"
+>;
 </script>
 
 <script

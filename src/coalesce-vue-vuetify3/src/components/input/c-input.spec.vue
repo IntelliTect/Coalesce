@@ -45,11 +45,28 @@
       }}</span>
     </template>
   </c-input>
+
+  <!-- Broad Property type: item should not be `never` -->
+  <c-input :model="broadModel" :for="broadFor">
+    <template #item="slotProps">
+      <span>{{ slotProps.item.displayName }}</span>
+    </template>
+    <template #selection="slotProps">
+      <span>{{ slotProps.item.strValue }}</span>
+    </template>
+  </c-input>
 </template>
 
 <script setup lang="ts">
+import type { Model, Property } from "coalesce-vue";
 import { Statuses, StringSerializedEnum } from "@test-targets/models.g";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 
 const vm = new ComplexModelViewModel();
+
+// Simulates a wrapper component that accepts broad model/for types
+// (like CaseStatusInput). Ensures the enum slot guard distributes
+// over the Property union so `item` is not `never`.
+const broadModel = {} as Model<any>;
+const broadFor = {} as Property;
 </script>

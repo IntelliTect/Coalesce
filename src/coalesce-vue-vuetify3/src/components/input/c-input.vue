@@ -461,7 +461,9 @@ function render() {
       }
       data.items = items;
       data["item-title"] = "displayName" satisfies keyof EnumMember;
-      data["item-value"] = "value" satisfies keyof EnumMember;
+      data["item-value"] = (
+        valueMeta.typeDef.format === "string" ? "strValue" : "value"
+      ) satisfies keyof EnumMember;
       // maps to the prop "subtitle" on v-list-item
       data["item-props"] = (item: EnumMember) => ({
         subtitle: item.description,
@@ -503,7 +505,9 @@ function render() {
         data["chips"] = true;
         data["closable-chips"] = true;
         data["item-title"] = "displayName";
-        data["item-value"] = "value";
+        data["item-value"] = (
+          valueMeta.itemType.typeDef.format === "string" ? "strValue" : "value"
+        ) satisfies keyof EnumMember;
         // maps to the prop "subtitle" on v-list-item
         data["item-props"] = (item: any) => ({ subtitle: item.description });
 

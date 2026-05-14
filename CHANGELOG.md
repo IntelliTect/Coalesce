@@ -1,3 +1,6 @@
+# 6.5.2
+- Fix `c-input` using numeric enum values instead of string values for string-serialized enums (`[JsonStringEnumConverter]`), causing the selected item to not be found in the dropdown.
+
 # 6.5.1
 - Broad improvements to accessibility issues identified by axe-core across all components.
 - `vue`, `date-fns`, and `date-fns-tz` are now peer dependencies instead of direct dependencies of `coalesce-vue` and `coalesce-vue-vuetify3`.

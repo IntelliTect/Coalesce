@@ -13,6 +13,7 @@ import {
   CaseProduct,
   ComplexModel,
   Statuses,
+  StringSerializedEnum,
   Test,
 } from "@test-targets/models.g";
 import {
@@ -20,6 +21,7 @@ import {
   ComplexModelViewModel,
 } from "@test-targets/viewmodels.g";
 import { Model } from "coalesce-vue";
+import { h } from "vue";
 import { VueWrapper } from "@vue/test-utils";
 
 describe("CInput", () => {
@@ -249,6 +251,57 @@ describe("CInput", () => {
     ]);
     expect(wrapper.text()).contains("In Progress");
     expect(wrapper.text()).contains("Cancelled");
+  });
+
+  test("enum - string format", async () => {
+    const model = new ComplexModelViewModel({
+      stringEnum: StringSerializedEnum.SecondValue,
+    });
+    const wrapper = mount(() => <CInput model={model} for="stringEnum" />);
+
+    // Assert resting state shows the display name (not the raw strValue "SecondValue")
+    expect(wrapper.text()).contains("Second Value");
+
+    // Open the dropdown and select the first item (First Value)
+    await wrapper.find(".v-field").trigger("mousedown");
+    await wrapper.findAllComponents(VListItem)[0].trigger("click");
+
+    // The model should be set to the string strValue, not a number
+    expect(model.stringEnum).toBe(StringSerializedEnum.FirstValue);
+    expect(wrapper.text()).contains("First Value");
+  });
+
+  test("enum - string format - item slot receives full EnumMember", async () => {
+    const model = new ComplexModelViewModel({
+      stringEnum: StringSerializedEnum.SecondValue,
+    });
+
+    // Capture items provided to the item slot
+    const slotItems: any[] = [];
+    const wrapper = mount(() => (
+      <CInput model={model} for="stringEnum">
+        {{
+          item: (slotProps: any) => {
+            slotItems.push(slotProps);
+            return h(VListItem, slotProps.props);
+          },
+        }}
+      </CInput>
+    ));
+
+    // Open the dropdown to populate the item slot
+    await wrapper.find(".v-field").trigger("mousedown");
+
+    // Verify item slot received full EnumMember objects (not synthetic string items)
+    expect(slotItems.length).toBeGreaterThan(0);
+    const rawItem = slotItems[0].item.raw;
+    // raw should be the full EnumMember object, not just a string
+    expect(typeof rawItem).toBe("object");
+    expect(rawItem).toHaveProperty("displayName");
+    expect(rawItem).toHaveProperty("strValue");
+    expect(rawItem).toHaveProperty("value");
+    expect(rawItem.displayName).toBe("First Value");
+    expect(rawItem.strValue).toBe("FirstValue");
   });
 
   test("caller model - date value", async () => {

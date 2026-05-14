@@ -166,12 +166,13 @@ Design your display component to handle both cases when keying on a property tha
 <template>
   <span class="my-status-display">
     <v-icon size="small" :color="config.color">{{ config.icon }}</v-icon>
-    {{ config.label }}
+    {{ label }}
   </span>
 </template>
 
 <script setup lang="ts">
 import type { Case } from '@/models.g';
+import $metadata from '@/metadata.g';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -181,17 +182,20 @@ const props = defineProps<{
   modelValue?: string;
 }>();
 
-const statusConfigs: Record<string, { icon: string; color: string; label: string }> = {
-  Open:             { icon: 'fa fa-circle-dot',   color: '#1976D2', label: 'Open' },
-  InProgress:       { icon: 'fa fa-spinner',       color: '#F57C00', label: 'In Progress' },
-  Resolved:         { icon: 'fa fa-circle-check',  color: '#388E3C', label: 'Resolved' },
-  Cancelled:        { icon: 'fa fa-circle-xmark',  color: '#D32F2F', label: 'Cancelled' },
+const statusConfigs: Record<string, { icon: string; color: string }> = {
+  Open:             { icon: 'fa fa-circle-dot',   color: '#1976D2' },
+  InProgress:       { icon: 'fa fa-spinner',       color: '#F57C00' },
+  Resolved:         { icon: 'fa fa-circle-check',  color: '#388E3C' },
+  Cancelled:        { icon: 'fa fa-circle-xmark',  color: '#D32F2F' },
 };
 
-const config = computed(() => {
-  const key = props.modelValue ?? props.model?.status;
-  return statusConfigs[key] ?? { icon: 'fa fa-circle', color: 'inherit', label: String(key ?? '') };
-});
+const key = computed(() => props.modelValue ?? props.model?.status);
+
+const config = computed(() => statusConfigs[key.value] ?? { icon: 'fa fa-circle', color: 'inherit' });
+
+const label = computed(() =>
+  $metadata.enums.Statuses.valueLookup[key.value]?.displayName ?? String(key.value ?? '')
+);
 </script>
 ```
 

@@ -82,7 +82,7 @@ internal class EventedStreamReader
 
     internal static readonly Regex AnsiColorRegex = new Regex("\x001b\\[[0-9;]*m", RegexOptions.None, TimeSpan.FromSeconds(1));
 
-    private static string StripAnsiColors(string line)
+    internal static string StripAnsiColors(string line)
         => AnsiColorRegex.Replace(line, string.Empty);
 
     private async Task Run()

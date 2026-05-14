@@ -88,6 +88,15 @@ internal class NodeScriptRunner : IDisposable
         };
     }
 
+    // Matches vite's URL announcement lines (e.g. "➜  Local:   https://..." and "➜  Network: https://...")
+    // that refer to the internal vite HMR server port, not the actual application URL.
+    // These are confusing to users and can cause tools that auto-launch browsers to open the wrong URL.
+    private static readonly System.Text.RegularExpressions.Regex ViteUrlAnnouncementRegex = new(
+        @"➜\s+(Local|Network):\s+https?://",
+        System.Text.RegularExpressions.RegexOptions.None,
+        TimeSpan.FromSeconds(1)
+    );
+
     public void AttachToLogger(ILogger logger)
     {
         // When the node task emits complete lines, pass them through to the real logger.
@@ -99,6 +108,9 @@ internal class NodeScriptRunner : IDisposable
 
         StdOut.OnReceivedLine += line =>
         {
+            // Suppress vite's URL announcement lines - they point to the internal HMR port,
+            // not the application URL, which confuses users and browser-launching tools.
+            if (ViteUrlAnnouncementRegex.IsMatch(EventedStreamReader.StripAnsiColors(line))) return;
             Console.Write("\u001b[32mvite\u001b[0m: " + line);
         };
 

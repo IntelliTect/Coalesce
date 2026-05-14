@@ -199,11 +199,12 @@ const label = computed(() =>
 </script>
 ```
 
-## Overriding Admin Pages
+## Replacing Admin Pages Per Type
 
-You can create custom admin pages for specific types while keeping the default pages for others. This is useful when you need specialized functionality for certain models.
+The [Customizing Admin Components](#customizing-admin-components) section above lets you swap individual input/display components within the standard admin pages. If you need to go further — replacing an entire admin page with a fully custom view for a specific model type — you can do so via the router.
 
-Add routes that match before the generic admin routes to override specific types. You can also use this technique to override the metadata for certain routes - for example, to attach required permissions to a route.
+Because vue-router matches routes in order, placing type-specific routes before the generic `coalesce-admin-list` / `coalesce-admin-item` catch-all routes causes them to be used for that type while all others continue using the default admin pages. You can also use this technique to attach route-level metadata, such as required permissions, to specific types.
+
 
 ```typescript
 const router = new Router({

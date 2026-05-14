@@ -227,18 +227,8 @@ import {
 
 import { getRefNavRoute } from "./util";
 import { isPropReadOnly } from "../../util";
-import {
-  watch,
-  computed,
-  useTemplateRef,
-  ref,
-  onUnmounted,
-  inject,
-  type Component,
-} from "vue";
-import { coalesceVuetifyKey } from "../../install";
-import CInput from "../input/c-input.vue";
-import CAdminDisplay from "./c-admin-display.vue";
+import { useAdminOverrides } from "../../composables/useAdminOverrides";
+import { watch, computed, useTemplateRef, ref, onUnmounted } from "vue";
 
 defineOptions({
   name: "c-admin-editor",
@@ -263,15 +253,8 @@ const emit = defineEmits<{
 }>();
 
 const form = useTemplateRef("form");
-const coalesce = inject(coalesceVuetifyKey, null);
-
-function resolveAdminInputComponent(prop: Property): Component {
-  return coalesce?.adminOverrides.input.get(prop) ?? CInput;
-}
-
-function resolveAdminDisplayComponent(prop: Property): Component {
-  return coalesce?.adminOverrides.display.get(prop) ?? CAdminDisplay;
-}
+const { resolveAdminInputComponent, resolveAdminDisplayComponent } =
+  useAdminOverrides();
 
 // Validate the form when it is rendered to trigger all validation messages.
 // This will either be immediate for a create scenario, or delayed until load for an edit.

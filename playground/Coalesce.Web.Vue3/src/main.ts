@@ -105,10 +105,9 @@ const vuetify = createVuetify({
 });
 const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
-  adminOverrides: {
-    input: new Map([[$metadata.types.Case.props.status, CaseStatusInput]]),
-    display: new Map([[$metadata.types.Case.props.status, CaseStatusDisplay]]),
-  },
+  adminOverrides: [
+    [$metadata.types.Case.props.status, { input: CaseStatusInput, display: CaseStatusDisplay }],
+  ],
 });
 
 const app = createApp(App);

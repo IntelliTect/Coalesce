@@ -67,14 +67,16 @@ describe("CAdminMethod", () => {
       () => <CAdminMethod model={vm} for="rename" />,
       undefined,
       {
-        adminOverrides: {
-          input: new Map([
-            [$metadata.types.Person.methods.rename.params.name, CustomInput],
-          ]),
-          display: new Map([
-            [$metadata.types.Person.methods.rename.return, CustomDisplay],
-          ]),
-        },
+        adminOverrides: [
+          [
+            $metadata.types.Person.methods.rename.params.name,
+            { input: CustomInput },
+          ],
+          [
+            $metadata.types.Person.methods.rename.return,
+            { display: CustomDisplay },
+          ],
+        ],
       },
     );
 

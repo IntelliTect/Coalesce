@@ -234,14 +234,9 @@ describe("CAdminEditor", () => {
       () => <CAdminEditor model={vm} props={["firstName"]} />,
       undefined,
       {
-        adminOverrides: {
-          input: new Map([
-            [$metadata.types.Person.props.firstName, CustomInput],
-          ]),
-          display: new Map([
-            [$metadata.types.Person.props.firstName, CustomDisplay],
-          ]),
-        },
+        adminOverrides: [
+          [$metadata.types.Person.props.firstName, { input: CustomInput, display: CustomDisplay }],
+        ],
       },
     );
 

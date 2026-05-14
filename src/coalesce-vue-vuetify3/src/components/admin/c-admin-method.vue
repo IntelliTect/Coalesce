@@ -150,19 +150,16 @@
   setup
   generic="TModel extends ViewModel | ListViewModel | ServiceViewModel"
 >
-import { computed, inject, ref, getCurrentInstance, type Component } from "vue";
+import { computed, ref, getCurrentInstance } from "vue";
 import { ViewModel, ListViewModel, ServiceViewModel } from "coalesce-vue";
 import type {
   DisplayOptions,
   AnyArgCaller,
   ItemApiState,
   Method,
-  Value,
 } from "coalesce-vue";
 import { MethodForSpec } from "../c-metadata-component";
-import { coalesceVuetifyKey } from "../../install";
-import CInput from "../input/c-input.vue";
-import CDisplay from "../display/c-display.vue";
+import { useAdminOverrides } from "../../composables/useAdminOverrides";
 
 defineOptions({
   name: "c-admin-method",
@@ -190,15 +187,8 @@ const props = defineProps<{
 
 const fileDownloadKind = ref<"preview" | "download">("preview");
 const instance = getCurrentInstance()!;
-const coalesce = inject(coalesceVuetifyKey, null);
-
-function resolveAdminInputComponent(param: Value): Component {
-  return coalesce?.adminOverrides.input.get(param) ?? CInput;
-}
-
-function resolveAdminDisplayComponent(value: Value): Component {
-  return coalesce?.adminOverrides.display.get(value) ?? CDisplay;
-}
+const { resolveAdminInputComponent, resolveAdminDisplayComponent } =
+  useAdminOverrides();
 
 const methodMeta = computed((): Method => {
   const modelMeta = props.model.$metadata;

@@ -17,20 +17,20 @@ const props = defineProps<{
   modelValue?: Statuses;
 }>();
 
-const statusIcons: Record<string, string> = {
-  Open: "fa fa-circle-dot",
-  InProgress: "fa fa-spinner",
-  Resolved: "fa fa-circle-check",
-  ClosedNoSolution: "fa fa-ban",
-  Cancelled: "fa fa-circle-xmark",
+const statusIcons: Record<Statuses, string> = {
+  [Statuses.Open]: "fa fa-circle-dot",
+  [Statuses.InProgress]: "fa fa-spinner",
+  [Statuses.Resolved]: "fa fa-circle-check",
+  [Statuses.ClosedNoSolution]: "fa fa-ban",
+  [Statuses.Cancelled]: "fa fa-circle-xmark",
 };
 
-const statusColors: Record<string, string> = {
-  Open: "#1976D2",
-  InProgress: "#F57C00",
-  Resolved: "#388E3C",
-  ClosedNoSolution: "#757575",
-  Cancelled: "#D32F2F",
+const statusColors: Record<Statuses, string> = {
+  [Statuses.Open]: "#1976D2",
+  [Statuses.InProgress]: "#F57C00",
+  [Statuses.Resolved]: "#388E3C",
+  [Statuses.ClosedNoSolution]: "#757575",
+  [Statuses.Cancelled]: "#D32F2F",
 };
 
 const fallback = { icon: "fa fa-circle", color: "inherit", label: "" };

@@ -4,6 +4,13 @@ import { metadataKey } from "./composables/useMetadata";
 
 type MetadataValue = Value & object;
 
+export interface AdminOverride {
+  /** Replaces c-input for this metadata value in admin interfaces. */
+  input?: Component;
+  /** Replaces c-admin-display for this metadata value in admin interfaces. */
+  display?: Component;
+}
+
 export interface CoalesceVuetifyOptions {
   /** A reference to the whole set of Coalesce-generated metadata for the application,
    * as exported from `metadata.g.ts`, e.g. `import metadata from '@/metadata.g'`. */
@@ -13,22 +20,16 @@ export interface CoalesceVuetifyOptions {
   components?: Record<string, any>;
 
   /** Components to use in admin interfaces for specific metadata values. */
-  adminOverrides?: {
-    /** Replaces c-input for matching metadata values in admin interfaces. */
-    input?: ReadonlyMap<MetadataValue, Component>;
-    /** Replaces c-admin-display / c-display for matching metadata values in admin interfaces. */
-    display?: ReadonlyMap<MetadataValue, Component>;
-  };
+  adminOverrides?:
+    | ReadonlyMap<MetadataValue, AdminOverride>
+    | ReadonlyArray<readonly [MetadataValue, AdminOverride]>;
 }
 
 export interface CoalesceVuetifyInstance {
   /** A reference to the whole set of Coalesce-generated metadata for the application,
    * as exported from `metadata.g.ts`, e.g. `import metadata from '@/metadata.g'`. */
   readonly metadata: Domain;
-  readonly adminOverrides: {
-    readonly input: ReadonlyMap<MetadataValue, Component>;
-    readonly display: ReadonlyMap<MetadataValue, Component>;
-  };
+  readonly adminOverrides: ReadonlyMap<MetadataValue, AdminOverride>;
 }
 
 export const coalesceVuetifyKey: InjectionKey<CoalesceVuetifyInstance> =
@@ -46,10 +47,11 @@ export const createCoalesceVuetify = (options: CoalesceVuetifyOptions) => {
       const { metadata, components = {}, adminOverrides } = options;
       const instance: CoalesceVuetifyInstance = {
         metadata,
-        adminOverrides: {
-          input: adminOverrides?.input ?? new Map(),
-          display: adminOverrides?.display ?? new Map(),
-        },
+        adminOverrides: adminOverrides
+          ? adminOverrides instanceof Map
+            ? adminOverrides
+            : new Map(adminOverrides)
+          : new Map(),
       };
 
       for (const key in components) {

@@ -92,21 +92,12 @@
 </template>
 
 <script setup lang="ts" generic="TList extends ListViewModel = ListViewModel">
-import {
-  computed,
-  onMounted,
-  onUnmounted,
-  ref,
-  useTemplateRef,
-  inject,
-  type Component,
-} from "vue";
-import { ListViewModel, ModelType, HiddenAreas, Property } from "coalesce-vue";
+import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
+import { ListViewModel, ModelType, HiddenAreas } from "coalesce-vue";
 import { VTable } from "vuetify/components";
 import { isPropReadOnly } from "../../util";
-import { coalesceVuetifyKey } from "../../install";
+import { useAdminOverrides } from "../../composables/useAdminOverrides";
 import CInput from "../input/c-input.vue";
-import CAdminDisplay from "../admin/c-admin-display.vue";
 import CDisplay from "./c-display.vue";
 
 const props = defineProps<{
@@ -139,15 +130,8 @@ const emit = defineEmits<{ "click:item": [arg: ViewModelType] }>();
 // Silly wrapper because using `list` directly in the template
 // has Typescript bugs right now in vue-language-tools.
 const listVm = computed(() => props.list);
-const coalesce = inject(coalesceVuetifyKey, null);
-
-function resolveAdminInputComponent(prop: Property): Component {
-  return coalesce?.adminOverrides.input.get(prop) ?? CInput;
-}
-
-function resolveAdminDisplayComponent(prop: Property): Component {
-  return coalesce?.adminOverrides.display.get(prop) ?? CAdminDisplay;
-}
+const { resolveAdminInputComponent, resolveAdminDisplayComponent } =
+  useAdminOverrides();
 
 const cTable = useTemplateRef("cTable");
 const isHorizontalScrollbarVisible = ref(false);

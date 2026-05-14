@@ -96,7 +96,7 @@ You can replace the default input and display components used by admin pages for
 
 ### Configuration
 
-Pass an `adminOverrides` option to `createCoalesceVuetify()`. The `input` and `display` maps use metadata `Value` objects (model properties, method parameters, or method return values from your generated `$metadata`) as keys and Vue components as values.
+Pass an `adminOverrides` option to `createCoalesceVuetify()`. It accepts an array of `[metadata, override]` pairs, where metadata is a `Value` object from your generated `$metadata` (a model property, method parameter, or method return value), and override is an object with optional `input` and/or `display` component replacements.
 
 ```ts
 import { createCoalesceVuetify } from 'coalesce-vue-vuetify3';
@@ -106,14 +106,12 @@ import MyStatusDisplay from '@/components/MyStatusDisplay.vue';
 
 const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
-  adminOverrides: {
-    input: new Map([
-      [$metadata.types.Case.props.status, MyStatusInput],
-    ]),
-    display: new Map([
-      [$metadata.types.Case.props.status, MyStatusDisplay],
-    ]),
-  },
+  adminOverrides: [
+    [$metadata.types.Case.props.status, {
+      input: MyStatusInput,
+      display: MyStatusDisplay,
+    }],
+  ],
 });
 ```
 
@@ -123,16 +121,16 @@ const coalesceVuetify = createCoalesceVuetify({
 |---|---|---|
 | [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) — editable properties | ✅ Replaces `c-input` | ✅ Replaces `c-admin-display` (read-only mode) |
 | [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md) — method parameters | ✅ Replaces `c-input` | — |
-| [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md) — method return value | — | ✅ Replaces `c-display` |
+| [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md) — method return value | — | ✅ Replaces `c-admin-display` |
 | [c-table](/stacks/vue/coalesce-vue-vuetify/components/c-table.md) with `admin` prop — columns | ✅ Replaces `c-input` (editable mode) | ✅ Replaces `c-admin-display` |
 
 ### Custom input component
 
-A custom input component is rendered in place of `c-input`. It receives the same `model` and `for` props that `c-input` accepts, plus any extra props that the admin surface passes (e.g. `density`, `variant`):
+A custom input component is rendered in place of `c-input`. It receives `model` and `for` props (note: `for` is always a resolved `Property` metadata object, never a string), plus any extra props that the admin surface passes (e.g. `density`, `variant`):
 
 ```vue
 <template>
-  <!-- Wrap c-input to get all the standard behaviour, then override slots -->
+  <!-- Wrap c-input to get all the standard behavior, then override slots -->
   <c-input :model="model" :for="props.for">
     <template #selection>
       <MyStatusDisplay :model="model" />
@@ -169,18 +167,19 @@ A custom display component is rendered in place of `c-admin-display` or `c-displ
 </template>
 
 <script setup lang="ts">
+import { Statuses } from '@/models.g';
 import $metadata from '@/metadata.g';
 import { computed } from 'vue';
 
 const props = defineProps<{
-  modelValue?: string;
+  modelValue?: Statuses;
 }>();
 
-const statusConfigs: Record<string, { icon: string; color: string }> = {
-  Open:             { icon: 'fa fa-circle-dot',   color: '#1976D2' },
-  InProgress:       { icon: 'fa fa-spinner',       color: '#F57C00' },
-  Resolved:         { icon: 'fa fa-circle-check',  color: '#388E3C' },
-  Cancelled:        { icon: 'fa fa-circle-xmark',  color: '#D32F2F' },
+const statusConfigs: Record<Statuses, { icon: string; color: string }> = {
+  [Statuses.Open]:             { icon: 'fa fa-circle-dot',   color: '#1976D2' },
+  [Statuses.InProgress]:       { icon: 'fa fa-spinner',       color: '#F57C00' },
+  [Statuses.Resolved]:         { icon: 'fa fa-circle-check',  color: '#388E3C' },
+  [Statuses.Cancelled]:        { icon: 'fa fa-circle-xmark',  color: '#D32F2F' },
 };
 
 const config = computed(() => statusConfigs[props.modelValue] ?? { icon: 'fa fa-circle', color: 'inherit' });

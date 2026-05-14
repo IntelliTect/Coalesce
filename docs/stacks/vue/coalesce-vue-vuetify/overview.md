@@ -14,8 +14,6 @@ All Coalesce projects should be started from the [Coalesce project template](/st
 
 If for whatever reason you find yourself adding Coalesce to an existing project, use the template as a reference for what configuration needs to be added to your project.
 
-You can override the input and display components used in admin pages for specific model properties or method parameters — see [Customizing Admin Components](/stacks/vue/admin-pages.md#customizing-admin-components) for details.
-
 ## Display Components
 
 <table>
@@ -229,3 +227,5 @@ These components are used to construct the [Admin Pages](/stacks/vue/admin-pages
 @[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-audit-log-page.md) 
 </td></tr>
 </tbody></table>
+
+The input and display components used by these admin components can be customized per-property — see [Customizing Admin Components](/stacks/vue/admin-pages.md#customizing-admin-components) for details.

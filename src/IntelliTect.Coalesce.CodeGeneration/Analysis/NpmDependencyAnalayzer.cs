@@ -13,28 +13,25 @@ internal class NpmDependencyAnalayzer(GenerationContext context, ILogger<NpmDepe
 {
     public async Task<string?> GetNpmPackageVersion(string packageName)
     {
-        var packageLockPath = Path.Combine(context.WebProject.ProjectPath, "package-lock.json");
-        var fileInfo = new FileInfo(packageLockPath);
+        // Read version directly from the installed package's package.json.
+        // This works regardless of the package manager (npm, pnpm, yarn).
+        var packageJsonPath = Path.Combine(context.WebProject.ProjectPath, "node_modules", packageName, "package.json");
+        var fileInfo = new FileInfo(packageJsonPath);
         if (!fileInfo.Exists)
         {
-            logger.LogDebug("Unable to determine installed coalesce-vue version: package-lock.json not found.");
+            logger.LogDebug("Unable to determine installed {Package} version: {Path} not found.", packageName, packageJsonPath);
             return null;
         }
 
         try
         {
-            var content = await JsonSerializer.DeserializeAsync<JsonElement>(fileInfo.OpenRead());
-            var version = content
-                .GetProperty("packages")
-                .GetProperty("node_modules/" + packageName)
-                .GetProperty("version")
-                .GetString();
-
-            return version;
+            using var stream = fileInfo.OpenRead();
+            var content = await JsonSerializer.DeserializeAsync<JsonElement>(stream);
+            return content.GetProperty("version").GetString();
         }
         catch (Exception ex)
         {
-            logger.LogDebug(ex, "Unable to determine installed coalesce-vue version");
+            logger.LogDebug(ex, "Unable to determine installed {Package} version", packageName);
             return null;
         }
     }

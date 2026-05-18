@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+    <ProjectReference Include="..\IntelliTect.Coalesce.MultiTenancy\IntelliTect.Coalesce.MultiTenancy.csproj" />
     <ProjectReference Include="..\IntelliTect.Coalesce.Testing\IntelliTect.Coalesce.Testing.csproj" />
   </ItemGroup>
 
@@ -19,7 +20,6 @@
     <PackageReference Include="Moq" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
-
 
 
 </Project>

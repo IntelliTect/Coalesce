@@ -24,6 +24,7 @@
     <File Path="src/Directory.Build.props" />
     <Project Path="src/IntelliTect.Coalesce.Analyzer/IntelliTect.Coalesce.Analyzer.csproj" />
     <Project Path="src/IntelliTect.Coalesce.AuditLogging/IntelliTect.Coalesce.AuditLogging.csproj" />
+    <Project Path="src/IntelliTect.Coalesce.MultiTenancy/IntelliTect.Coalesce.MultiTenancy.csproj" />
     <Project Path="src/IntelliTect.Coalesce.CodeGeneration.Api/IntelliTect.Coalesce.CodeGeneration.Api.csproj" />
     <Project Path="src/IntelliTect.Coalesce.CodeGeneration.Vue/IntelliTect.Coalesce.CodeGeneration.Vue.csproj" />
     <Project Path="src/IntelliTect.Coalesce.CodeGeneration/IntelliTect.Coalesce.CodeGeneration.csproj" />

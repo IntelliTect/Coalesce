@@ -9,6 +9,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.7" />
 
     <PackageReference Include="IntelliTect.Coalesce" Version="$(CoalesceVersion)" />
+    <!--#if(Tenancy) -->
+    <PackageReference Include="IntelliTect.Coalesce.MultiTenancy" Version="$(CoalesceVersion)" />
+    <!--#endif -->
     <!--#if(AuditLogs) -->
     <PackageReference Include="IntelliTect.Coalesce.AuditLogging" Version="$(CoalesceVersion)" />
     <!--#endif -->

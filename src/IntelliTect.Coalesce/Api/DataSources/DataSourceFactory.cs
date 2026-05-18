@@ -36,8 +36,7 @@ public class DataSourceFactory : IDataSourceFactory
             return GetDefaultDataSourceType(servedType, declaredFor);
         }
 
-        var dataSourceClassViewModel = declaredFor
-            .ClientDataSources(reflectionRepository)
+        var dataSourceClassViewModel = GetDataSourcesForTypeHierarchy(declaredFor)
             .FirstOrDefault(t => t.ClientTypeName.Equals(dataSourceName, InvariantCultureIgnoreCase))
             ?? throw new DataSourceNotFoundException(servedType, declaredFor, dataSourceName);
 
@@ -72,17 +71,13 @@ public class DataSourceFactory : IDataSourceFactory
 
     protected Type GetDefaultDataSourceType(ClassViewModel servedType, ClassViewModel declaredFor)
     {
-        var dataSources = declaredFor.ClientDataSources(reflectionRepository).ToList();
-        var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
-
-        if (defaultSource != null)
+        foreach (var (_, dataSources) in GetDataSourcesGroupedByHierarchy(declaredFor))
         {
-            return defaultSource.Type.TypeInfo;
-        }
+            var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
+            if (defaultSource != null) return defaultSource.Type.TypeInfo;
 
-        if (declaredFor.IsStandaloneEntity && dataSources.Count == 1)
-        {
-            return dataSources[0].Type.TypeInfo;
+            if (declaredFor.IsStandaloneEntity && dataSources.Count == 1)
+                return dataSources[0].Type.TypeInfo;
         }
 
         if (servedType.DbContext is null)
@@ -95,6 +90,34 @@ public class DataSourceFactory : IDataSourceFactory
             servedType.Type.TypeInfo,
             servedType.DbContext.Type.TypeInfo
         );
+    }
+
+    /// <summary>
+    /// Returns all client data sources for <paramref name="declaredFor"/> and then for each of its
+    /// base types in order from most-derived to least-derived.
+    /// Data sources on more-derived types take precedence over those on base types.
+    /// </summary>
+    private IEnumerable<ClassViewModel> GetDataSourcesForTypeHierarchy(ClassViewModel declaredFor)
+    {
+        foreach (var (_, dataSources) in GetDataSourcesGroupedByHierarchy(declaredFor))
+            foreach (var ds in dataSources)
+                yield return ds;
+    }
+
+    /// <summary>
+    /// Returns the data sources for <paramref name="declaredFor"/> and each of its
+    /// base types in order from most-derived to least-derived, grouped by declaring type.
+    /// </summary>
+    private IEnumerable<(ClassViewModel Type, IReadOnlyList<ClassViewModel> DataSources)> GetDataSourcesGroupedByHierarchy(ClassViewModel declaredFor)
+    {
+        var ownSources = declaredFor.ClientDataSources(reflectionRepository).ToList();
+        if (ownSources.Count > 0) yield return (declaredFor, ownSources);
+
+        foreach (var baseType in declaredFor.ClientBaseTypes)
+        {
+            var baseSources = baseType.ClientDataSources(reflectionRepository).ToList();
+            if (baseSources.Count > 0) yield return (baseType, baseSources);
+        }
     }
 
     public IDataSource<TServed> GetDefaultDataSource<TServed, TDeclaredFor>()

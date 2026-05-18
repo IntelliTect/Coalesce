@@ -47,7 +47,8 @@
               :class="['prop-' + prop.name]"
               class="text-xs-left"
             >
-              <c-input
+              <component
+                :is="admin ? resolveAdminInputComponent(prop) : CInput"
                 v-if="editable && !isPropReadOnly(prop, item)"
                 :model="item"
                 :for="prop"
@@ -61,11 +62,21 @@
                 validate-on="eager"
               >
                 <!-- Rows and auto-grow for textarea inputs -->
-                <c-admin-display v-if="admin" :model="item" :for="prop" />
-                <c-display v-else :model="item" :for="prop" />
-              </c-input>
+                <component
+                  :is="admin ? resolveAdminDisplayComponent(prop) : CDisplay"
+                  :model="item"
+                  :for="prop"
+                  :model-value="(item as any)[prop.name]"
+                />
+              </component>
 
-              <c-admin-display v-else-if="admin" :model="item" :for="prop" />
+              <component
+                :is="resolveAdminDisplayComponent(prop)"
+                v-else-if="admin"
+                :model="item"
+                :for="prop"
+                :model-value="(item as any)[prop.name]"
+              />
               <c-display v-else :model="item" :for="prop" />
             </td>
             <slot
@@ -85,6 +96,9 @@ import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { ListViewModel, ModelType, HiddenAreas } from "coalesce-vue";
 import { VTable } from "vuetify/components";
 import { isPropReadOnly } from "../../util";
+import { useAdminOverrides } from "../../composables/useAdminOverrides";
+import CInput from "../input/c-input.vue";
+import CDisplay from "./c-display.vue";
 
 const props = defineProps<{
   list: TList;
@@ -116,6 +130,8 @@ const emit = defineEmits<{ "click:item": [arg: ViewModelType] }>();
 // Silly wrapper because using `list` directly in the template
 // has Typescript bugs right now in vue-language-tools.
 const listVm = computed(() => props.list);
+const { resolveAdminInputComponent, resolveAdminDisplayComponent } =
+  useAdminOverrides();
 
 const cTable = useTemplateRef("cTable");
 const isHorizontalScrollbarVisible = ref(false);

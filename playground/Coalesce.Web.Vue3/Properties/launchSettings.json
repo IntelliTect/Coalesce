@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Coalesce.Web.Vue3": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "hotReloadEnabled": false,
+      "applicationUrl": "https://localhost:54979;https://0.0.0.0:54979"
+    }
+  }
+}

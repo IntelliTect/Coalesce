@@ -26,6 +26,9 @@ import App from "./App.vue";
 import "@/viewmodels.g";
 import $metadata from "@/metadata.g";
 
+import CaseStatusInput from "@/admin-overrides/CaseStatusInput.vue";
+import CaseStatusDisplay from "@/admin-overrides/CaseStatusDisplay.vue";
+
 import testWorker from "./worker.ts?worker";
 import Examples from "./components/Examples.vue";
 new testWorker();
@@ -102,6 +105,12 @@ const vuetify = createVuetify({
 });
 const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
+  adminOverrides: [
+    [
+      $metadata.types.Case.props.status,
+      { input: CaseStatusInput, display: CaseStatusDisplay },
+    ],
+  ],
 });
 
 const app = createApp(App);

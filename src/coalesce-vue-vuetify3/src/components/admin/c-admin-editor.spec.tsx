@@ -7,7 +7,9 @@ import {
   OneToOneSharedKeyChild1ViewModel,
   ZipCodeViewModel,
 } from "@test-targets/viewmodels.g";
-import { mockEndpoint, mount } from "@test/util";
+import $metadata from "@test-targets/metadata.g";
+import { defineComponent, h } from "vue";
+import { mockEndpoint, mount, mountWithCoalesceOptions } from "@test/util";
 
 describe("CAdminEditor", () => {
   test("types", () => {
@@ -208,5 +210,41 @@ describe("CAdminEditor", () => {
       expect(vm.$primaryKey).toBe("98052");
       expect(vm.$isDirty).toBeFalsy();
     });
+  });
+
+  test("renders registered admin input/display overrides for a property", () => {
+    const vm = new PersonViewModel();
+
+    const CustomInput = defineComponent({
+      name: "CustomInput",
+      setup(_, { slots }) {
+        return () =>
+          h("div", { class: "custom-admin-input" }, slots.default?.());
+      },
+    });
+
+    const CustomDisplay = defineComponent({
+      name: "CustomDisplay",
+      setup() {
+        return () => h("div", { class: "custom-admin-display" }, "custom");
+      },
+    });
+
+    const wrapper = mountWithCoalesceOptions(
+      () => <CAdminEditor model={vm} props={["firstName"]} />,
+      undefined,
+      {
+        adminOverrides: [
+          [
+            $metadata.types.Person.props.firstName,
+            { input: CustomInput, display: CustomDisplay },
+          ],
+        ],
+      },
+    );
+
+    const row = wrapper.find(".prop-firstName");
+    expect(row.find(".custom-admin-input").exists()).toBeTruthy();
+    expect(row.find(".custom-admin-display").exists()).toBeTruthy();
   });
 });

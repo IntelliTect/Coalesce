@@ -56,7 +56,8 @@
     "webp",
     "westus",
     "wordprocessingml",
-    "wwwroot"
+    "wwwroot",
+    "xmark",
   ],
   "ignorePaths": [
     "node_modules"

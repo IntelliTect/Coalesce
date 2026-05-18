@@ -12,9 +12,10 @@
         md="4"
         lg="3"
       >
-        <c-input
+        <component
+          :is="resolveAdminInputComponent(param)"
           :model="caller"
-          :for="param.name"
+          :for="param"
           hide-details="auto"
           density="compact"
           variant="outlined"
@@ -27,7 +28,7 @@
             :label="param.displayName"
             error-messages="Data type not supported for admin page input."
           ></v-text-field>
-        </c-input>
+        </component>
       </v-col>
     </v-row>
 
@@ -121,7 +122,8 @@
               </template>
             </div>
 
-            <c-display
+            <component
+              :is="resolveAdminDisplayComponent(methodMeta.return)"
               v-else-if="caller.result != null"
               v-model="caller.result"
               element="pre"
@@ -148,7 +150,7 @@
   setup
   generic="TModel extends ViewModel | ListViewModel | ServiceViewModel"
 >
-import { computed, ref } from "vue";
+import { computed, ref, getCurrentInstance } from "vue";
 import { ViewModel, ListViewModel, ServiceViewModel } from "coalesce-vue";
 import type {
   DisplayOptions,
@@ -156,8 +158,8 @@ import type {
   ItemApiState,
   Method,
 } from "coalesce-vue";
-import { getCurrentInstance } from "vue";
 import { MethodForSpec } from "../c-metadata-component";
+import { useAdminOverrides } from "../../composables/useAdminOverrides";
 
 defineOptions({
   name: "c-admin-method",
@@ -185,6 +187,8 @@ const props = defineProps<{
 
 const fileDownloadKind = ref<"preview" | "download">("preview");
 const instance = getCurrentInstance()!;
+const { resolveAdminInputComponent, resolveAdminDisplayComponent } =
+  useAdminOverrides();
 
 const methodMeta = computed((): Method => {
   const modelMeta = props.model.$metadata;

@@ -74,8 +74,10 @@ export default defineConfig({
   },
 
   transformHtml(html) {
-    return html
-      .replaceAll("COALESCE_VERSION", process.env.COALESCE_VERSION || "x.y.z");
+    return html.replaceAll(
+      "COALESCE_VERSION",
+      process.env.COALESCE_VERSION || "x.y.z",
+    );
   },
 
   markdown: {

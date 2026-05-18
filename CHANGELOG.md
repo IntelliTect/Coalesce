@@ -1,6 +1,6 @@
 # 6.6.0
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
-- `DataSourceFactory` now walks the base type hierarchy when resolving a named or default data source, enabling inheritance scenarios where a derived type can use data sources declared on its base types. An adapter automatically wraps the resolved data source so that it properly serves the derived type.
+- `DataSourceFactory` now walks the base type hierarchy when resolving a named, allowing for the loading of single instances of derived types from their base type's data source. This does not support list operations, which should still always target data sources declared directly on the type being listed.
 
 # 6.5.2
 - Fix `c-input` using numeric enum values instead of string values for string-serialized enums (`[JsonStringEnumConverter]`), causing the selected item to not be found in the dropdown.

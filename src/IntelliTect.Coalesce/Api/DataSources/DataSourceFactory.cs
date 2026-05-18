@@ -106,14 +106,13 @@ public class DataSourceFactory : IDataSourceFactory
 
     protected Type GetDefaultDataSourceType(ClassViewModel servedType, ClassViewModel declaredFor)
     {
-        foreach (var (_, dataSources) in GetDataSourcesGroupedByHierarchy(declaredFor))
-        {
-            var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
-            if (defaultSource != null) return defaultSource.Type.TypeInfo;
+        var dataSources = declaredFor.ClientDataSources(reflectionRepository).ToList();
 
-            if (declaredFor.IsStandaloneEntity && dataSources.Count == 1)
-                return dataSources[0].Type.TypeInfo;
-        }
+        var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
+        if (defaultSource != null) return defaultSource.Type.TypeInfo;
+
+        if (declaredFor.IsStandaloneEntity && dataSources.Count == 1)
+            return dataSources[0].Type.TypeInfo;
 
         if (servedType.DbContext is null)
         {
@@ -177,17 +176,6 @@ public class DataSourceFactory : IDataSourceFactory
     public object GetDefaultDataSource(ClassViewModel servedType, ClassViewModel declaredFor)
     {
         var dataSourceType = GetDefaultDataSourceType(servedType, declaredFor);
-        var dataSource = ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);
-
-        var servedTypeInfo = servedType.Type.TypeInfo;
-        var actualServedType = GetActualServedType(dataSourceType);
-
-        if (actualServedType != null && actualServedType != servedTypeInfo && servedTypeInfo.IsSubclassOf(actualServedType))
-        {
-            var baseClassViewModel = reflectionRepository.GetClassViewModel(actualServedType)!;
-            dataSource = CreateInheritedAdapter(dataSource, actualServedType, servedTypeInfo, baseClassViewModel.SecurityInfo);
-        }
-
-        return dataSource;
+        return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);
     }
 }

@@ -129,7 +129,6 @@ public class DataSourceFactoryTests
     {
         public int Id { get; set; }
 
-        [DefaultDataSource]
         public class SecuredBaseSource : StandardDataSource<SecuredBase>
         {
             public SecuredBaseSource(CrudContext ctx) : base(ctx) { }
@@ -149,16 +148,15 @@ public class DataSourceFactoryTests
     #region Type Resolution Tests
 
     [Test]
-    public async Task GetDefaultDataSourceType_DerivedTypeWithNoSources_UsesBaseDefaultSource()
+    public async Task GetDefaultDataSourceType_DerivedTypeWithNoSources_Throws()
     {
         var (factory, rr) = BuildFactory();
 
         var servedType = rr.GetClassViewModel<StandaloneDerived>()!;
         var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
 
-        var type = factory.GetDataSourceType(servedType, declaredFor, null);
-
-        await Assert.That(type).IsEqualTo(typeof(StandaloneBase.DefaultSource));
+        await Assert.That(() => factory.GetDataSourceType(servedType, declaredFor, null))
+            .Throws<ArgumentException>();
     }
 
     [Test]
@@ -222,7 +220,7 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory();
         var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
 
-        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, nameof(StandaloneBase.NamedSource));
 
         await Assert.That(dataSource).IsNotNull();
         await Assert.That(dataSource).IsTypeOf<InheritedDataSourceAdapter<StandaloneDerived, StandaloneBase>>();
@@ -249,7 +247,7 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory();
         var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
 
-        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, nameof(StandaloneBase.NamedSource));
         var result = await dataSource.GetItemAsync(1, new DataSourceParameters());
 
         await Assert.That(result.WasSuccessful).IsTrue();
@@ -265,7 +263,7 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory();
         var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
 
-        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, nameof(StandaloneBase.NamedSource));
         // Id 3 is a StandaloneBase (not StandaloneDerived)
         var result = await dataSource.GetItemAsync(3, new DataSourceParameters());
 
@@ -279,7 +277,7 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory();
         var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
 
-        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, nameof(StandaloneBase.NamedSource));
         var result = await dataSource.GetMappedItemAsync<StandaloneDerivedDto>(1, new DataSourceParameters());
 
         await Assert.That(result.WasSuccessful).IsTrue();
@@ -299,10 +297,9 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory();
         var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
 
-        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, nameof(StandaloneBase.NamedSource));
 
-        await Assert.That(() => dataSource.GetListAsync(new ListParameters()))
-            .Throws<NotSupportedException>();
+        await Assert.ThrowsAsync<NotSupportedException>(() => dataSource.GetListAsync(new ListParameters()));
     }
 
     [Test]
@@ -311,10 +308,9 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory();
         var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
 
-        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, nameof(StandaloneBase.NamedSource));
 
-        await Assert.That(() => dataSource.GetMappedListAsync<StandaloneDerivedDto>(new ListParameters()))
-            .Throws<NotSupportedException>();
+        await Assert.ThrowsAsync<NotSupportedException>(() => dataSource.GetMappedListAsync<StandaloneDerivedDto>(new ListParameters()));
     }
 
     [Test]
@@ -323,10 +319,9 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory();
         var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
 
-        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, nameof(StandaloneBase.NamedSource));
 
-        await Assert.That(() => dataSource.GetCountAsync(new FilterParameters()))
-            .Throws<NotSupportedException>();
+        await Assert.ThrowsAsync<NotSupportedException>(() => dataSource.GetCountAsync(new FilterParameters()));
     }
 
     #endregion
@@ -343,7 +338,7 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory(user);
         var declaredFor = rr.GetClassViewModel<SecuredDerived>()!;
 
-        var dataSource = factory.GetDataSource<SecuredDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<SecuredDerived>(declaredFor, nameof(SecuredBase.SecuredBaseSource));
         var result = await dataSource.GetItemAsync(1, new DataSourceParameters());
 
         await Assert.That(result.WasSuccessful).IsTrue();
@@ -358,7 +353,7 @@ public class DataSourceFactoryTests
         var (factory, rr) = BuildFactory(user);
         var declaredFor = rr.GetClassViewModel<SecuredDerived>()!;
 
-        var dataSource = factory.GetDataSource<SecuredDerived>(declaredFor, null);
+        var dataSource = factory.GetDataSource<SecuredDerived>(declaredFor, nameof(SecuredBase.SecuredBaseSource));
         var result = await dataSource.GetItemAsync(1, new DataSourceParameters());
 
         await Assert.That(result.WasSuccessful).IsFalse();

@@ -1,19 +1,28 @@
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.DependencyInjection;
+
+#nullable enable
 
 namespace IntelliTect.Coalesce.Tests.Api.DataSources;
 
 public class DataSourceFactoryTests
 {
-    private (DataSourceFactory Factory, ReflectionRepository Repo) BuildFactory()
+    private (DataSourceFactory Factory, ReflectionRepository Repo) BuildFactory(System.Security.Claims.ClaimsPrincipal? user = null)
     {
+        var testUser = user ?? new System.Security.Claims.ClaimsPrincipal(
+            new System.Security.Claims.ClaimsIdentity("test"));
+
         var services = new ServiceCollection();
         services.AddDbContext<AppDbContext>();
         services.AddCoalesce(b => b.AddContext<AppDbContext>());
+        // Override CrudContext with a test-friendly registration (no IHttpContextAccessor needed)
+        services.AddScoped(_ => new CrudContext(() => testUser));
         var sp = services.BuildServiceProvider();
 
         var rr = new ReflectionRepository();
@@ -29,27 +38,35 @@ public class DataSourceFactoryTests
     public class StandaloneBase
     {
         public int Id { get; set; }
+        public string? Name { get; set; }
 
         [DefaultDataSource]
         public class DefaultSource : StandardDataSource<StandaloneBase>
         {
             public DefaultSource(CrudContext ctx) : base(ctx) { }
             public override Task<IQueryable<StandaloneBase>> GetQueryAsync(IDataSourceParameters parameters)
-                => Task.FromResult(Array.Empty<StandaloneBase>().AsQueryable());
+                => Task.FromResult(TestData.AsQueryable());
         }
 
         public class NamedSource : StandardDataSource<StandaloneBase>
         {
             public NamedSource(CrudContext ctx) : base(ctx) { }
             public override Task<IQueryable<StandaloneBase>> GetQueryAsync(IDataSourceParameters parameters)
-                => Task.FromResult(Array.Empty<StandaloneBase>().AsQueryable());
+                => Task.FromResult(TestData.AsQueryable());
         }
+
+        public static IEnumerable<StandaloneBase> TestData =>
+        [
+            new StandaloneDerived { Id = 1, Name = "Derived1", DerivedProp = "D1" },
+            new StandaloneDerived { Id = 2, Name = "Derived2", DerivedProp = "D2" },
+            new StandaloneBase { Id = 3, Name = "Base3" },
+        ];
     }
 
     [Coalesce, StandaloneEntity]
     public class StandaloneDerived : StandaloneBase
     {
-        // No own data sources - should inherit from StandaloneBase
+        public string? DerivedProp { get; set; }
     }
 
     [Coalesce, StandaloneEntity]
@@ -75,7 +92,61 @@ public class DataSourceFactoryTests
         }
     }
 
+    public class StandaloneBaseDto : IResponseDto<StandaloneBase>
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+
+        public void MapFrom(StandaloneBase obj, IMappingContext context, IncludeTree? tree = null)
+        {
+            if (obj == null) return;
+            switch (this)
+            {
+                case StandaloneDerivedDto derived:
+                    derived.MapFrom((StandaloneDerived)obj, context, tree);
+                    return;
+            }
+            Id = obj.Id;
+            Name = obj.Name;
+        }
+    }
+
+    public class StandaloneDerivedDto : StandaloneBaseDto, IResponseDto<StandaloneDerived>
+    {
+        public string? DerivedProp { get; set; }
+
+        public void MapFrom(StandaloneDerived obj, IMappingContext context, IncludeTree? tree = null)
+        {
+            Id = obj.Id;
+            Name = obj.Name;
+            DerivedProp = obj.DerivedProp;
+        }
+    }
+
+    [Coalesce, StandaloneEntity]
+    [Read("Admin")]
+    public class SecuredBase
+    {
+        public int Id { get; set; }
+
+        [DefaultDataSource]
+        public class SecuredBaseSource : StandardDataSource<SecuredBase>
+        {
+            public SecuredBaseSource(CrudContext ctx) : base(ctx) { }
+            public override Task<IQueryable<SecuredBase>> GetQueryAsync(IDataSourceParameters parameters)
+                => Task.FromResult(new SecuredBase[] { new SecuredDerived { Id = 1 } }.AsQueryable());
+        }
+    }
+
+    [Coalesce, StandaloneEntity]
+    public class SecuredDerived : SecuredBase
+    {
+        // No own data sources - inherits from SecuredBase which requires "Admin" role
+    }
+
     #endregion
+
+    #region Type Resolution Tests
 
     [Test]
     public async Task GetDefaultDataSourceType_DerivedTypeWithNoSources_UsesBaseDefaultSource()
@@ -136,9 +207,163 @@ public class DataSourceFactoryTests
         var servedType = rr.GetClassViewModel<StandaloneDerivedWithOwnNamed>()!;
         var declaredFor = rr.GetClassViewModel<StandaloneDerivedWithOwnNamed>()!;
 
-        // NamedSource is on the base type; should still be found for derived type
         var type = factory.GetDataSourceType(servedType, declaredFor, nameof(StandaloneBase.NamedSource));
 
         await Assert.That(type).IsEqualTo(typeof(StandaloneBase.NamedSource));
     }
+
+    #endregion
+
+    #region Adapter Wrapping Tests
+
+    [Test]
+    public async Task GetDataSource_DerivedType_ReturnsAdaptedDataSource()
+    {
+        var (factory, rr) = BuildFactory();
+        var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
+
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+
+        await Assert.That(dataSource).IsNotNull();
+        await Assert.That(dataSource).IsTypeOf<InheritedDataSourceAdapter<StandaloneDerived, StandaloneBase>>();
+    }
+
+    [Test]
+    public async Task GetDataSource_DerivedTypeWithOwnSource_DoesNotWrap()
+    {
+        var (factory, rr) = BuildFactory();
+        var declaredFor = rr.GetClassViewModel<StandaloneDerivedWithOwnDefault>()!;
+
+        var dataSource = factory.GetDataSource<StandaloneDerivedWithOwnDefault>(declaredFor, null);
+
+        await Assert.That(dataSource).IsTypeOf<StandaloneDerivedWithOwnDefault.DerivedDefaultSource>();
+    }
+
+    #endregion
+
+    #region Adapter GetItemAsync Tests
+
+    [Test]
+    public async Task GetItemAsync_AdaptedSource_ReturnsDerivedItem()
+    {
+        var (factory, rr) = BuildFactory();
+        var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
+
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var result = await dataSource.GetItemAsync(1, new DataSourceParameters());
+
+        await Assert.That(result.WasSuccessful).IsTrue();
+        await Assert.That(result.Object).IsNotNull();
+        await Assert.That(result.Object!.Id).IsEqualTo(1);
+        await Assert.That(result.Object).IsTypeOf<StandaloneDerived>();
+        await Assert.That(((StandaloneDerived)result.Object!).DerivedProp).IsEqualTo("D1");
+    }
+
+    [Test]
+    public async Task GetItemAsync_AdaptedSource_BaseOnlyItemReturnsFailure()
+    {
+        var (factory, rr) = BuildFactory();
+        var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
+
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        // Id 3 is a StandaloneBase (not StandaloneDerived)
+        var result = await dataSource.GetItemAsync(3, new DataSourceParameters());
+
+        await Assert.That(result.WasSuccessful).IsFalse();
+        await Assert.That(result.Message).IsNotNull();
+    }
+
+    [Test]
+    public async Task GetMappedItemAsync_AdaptedSource_MapsDerivedItem()
+    {
+        var (factory, rr) = BuildFactory();
+        var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
+
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+        var result = await dataSource.GetMappedItemAsync<StandaloneDerivedDto>(1, new DataSourceParameters());
+
+        await Assert.That(result.WasSuccessful).IsTrue();
+        await Assert.That(result.Object).IsNotNull();
+        await Assert.That(result.Object!.Id).IsEqualTo(1);
+        await Assert.That(result.Object!.Name).IsEqualTo("Derived1");
+        await Assert.That(result.Object!.DerivedProp).IsEqualTo("D1");
+    }
+
+    #endregion
+
+    #region Adapter List/Count Operations Throw
+
+    [Test]
+    public async Task GetListAsync_AdaptedSource_ThrowsNotSupported()
+    {
+        var (factory, rr) = BuildFactory();
+        var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
+
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+
+        await Assert.That(() => dataSource.GetListAsync(new ListParameters()))
+            .Throws<NotSupportedException>();
+    }
+
+    [Test]
+    public async Task GetMappedListAsync_AdaptedSource_ThrowsNotSupported()
+    {
+        var (factory, rr) = BuildFactory();
+        var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
+
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+
+        await Assert.That(() => dataSource.GetMappedListAsync<StandaloneDerivedDto>(new ListParameters()))
+            .Throws<NotSupportedException>();
+    }
+
+    [Test]
+    public async Task GetCountAsync_AdaptedSource_ThrowsNotSupported()
+    {
+        var (factory, rr) = BuildFactory();
+        var declaredFor = rr.GetClassViewModel<StandaloneDerived>()!;
+
+        var dataSource = factory.GetDataSource<StandaloneDerived>(declaredFor, null);
+
+        await Assert.That(() => dataSource.GetCountAsync(new FilterParameters()))
+            .Throws<NotSupportedException>();
+    }
+
+    #endregion
+
+    #region Adapter Security Tests
+
+    [Test]
+    public async Task GetItemAsync_AdaptedSource_UserWithBaseTypeRole_Succeeds()
+    {
+        var user = new System.Security.Claims.ClaimsPrincipal(
+            new System.Security.Claims.ClaimsIdentity(
+                [new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin")],
+                "test"));
+        var (factory, rr) = BuildFactory(user);
+        var declaredFor = rr.GetClassViewModel<SecuredDerived>()!;
+
+        var dataSource = factory.GetDataSource<SecuredDerived>(declaredFor, null);
+        var result = await dataSource.GetItemAsync(1, new DataSourceParameters());
+
+        await Assert.That(result.WasSuccessful).IsTrue();
+    }
+
+    [Test]
+    public async Task GetItemAsync_AdaptedSource_UserWithoutBaseTypeRole_Denied()
+    {
+        // User is authenticated but does NOT have "Admin" role
+        var user = new System.Security.Claims.ClaimsPrincipal(
+            new System.Security.Claims.ClaimsIdentity("test"));
+        var (factory, rr) = BuildFactory(user);
+        var declaredFor = rr.GetClassViewModel<SecuredDerived>()!;
+
+        var dataSource = factory.GetDataSource<SecuredDerived>(declaredFor, null);
+        var result = await dataSource.GetItemAsync(1, new DataSourceParameters());
+
+        await Assert.That(result.WasSuccessful).IsFalse();
+        await Assert.That(result.Message).Contains("not authorized");
+    }
+
+    #endregion
 }

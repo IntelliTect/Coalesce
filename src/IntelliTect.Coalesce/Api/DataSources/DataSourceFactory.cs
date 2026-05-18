@@ -66,7 +66,42 @@ public class DataSourceFactory : IDataSourceFactory
     public object GetDataSource(ClassViewModel servedType, ClassViewModel declaredFor, string? dataSourceName = null)
     {
         var dataSourceType = GetDataSourceType(servedType, declaredFor, dataSourceName);
-        return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);
+        var dataSource = ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);
+
+        // If the resolved data source serves a base type rather than the requested type,
+        // wrap it in an adapter so that single-item retrieval works for the derived type.
+        var servedTypeInfo = servedType.Type.TypeInfo;
+        var actualServedType = GetActualServedType(dataSourceType);
+
+        if (actualServedType != null && actualServedType != servedTypeInfo && servedTypeInfo.IsSubclassOf(actualServedType))
+        {
+            var baseClassViewModel = reflectionRepository.GetClassViewModel(actualServedType)!;
+            dataSource = CreateInheritedAdapter(dataSource, actualServedType, servedTypeInfo, baseClassViewModel.SecurityInfo);
+        }
+
+        return dataSource;
+    }
+
+    /// <summary>
+    /// Gets the T from IDataSource&lt;T&gt; that the given data source type implements.
+    /// </summary>
+    private static Type? GetActualServedType(Type dataSourceType)
+    {
+        return dataSourceType.GetInterfaces()
+            .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDataSource<>))
+            .Select(i => i.GetGenericArguments()[0])
+            .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Creates an <see cref="InheritedDataSourceAdapter{TDerived, TBase}"/> wrapping the given data source.
+    /// </summary>
+    private object CreateInheritedAdapter(object innerDataSource, Type baseType, Type derivedType, ClassSecurityInfo baseTypeSecurityInfo)
+    {
+        var adapterType = typeof(InheritedDataSourceAdapter<,>).MakeGenericType(derivedType, baseType);
+        var crudContext = serviceProvider.GetRequiredService<CrudContext>();
+        Func<System.Security.Claims.ClaimsPrincipal> userAccessor = () => crudContext.User;
+        return Activator.CreateInstance(adapterType, innerDataSource, baseTypeSecurityInfo, userAccessor)!;
     }
 
     protected Type GetDefaultDataSourceType(ClassViewModel servedType, ClassViewModel declaredFor)
@@ -142,6 +177,17 @@ public class DataSourceFactory : IDataSourceFactory
     public object GetDefaultDataSource(ClassViewModel servedType, ClassViewModel declaredFor)
     {
         var dataSourceType = GetDefaultDataSourceType(servedType, declaredFor);
-        return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);
+        var dataSource = ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);
+
+        var servedTypeInfo = servedType.Type.TypeInfo;
+        var actualServedType = GetActualServedType(dataSourceType);
+
+        if (actualServedType != null && actualServedType != servedTypeInfo && servedTypeInfo.IsSubclassOf(actualServedType))
+        {
+            var baseClassViewModel = reflectionRepository.GetClassViewModel(actualServedType)!;
+            dataSource = CreateInheritedAdapter(dataSource, actualServedType, servedTypeInfo, baseClassViewModel.SecurityInfo);
+        }
+
+        return dataSource;
     }
 }

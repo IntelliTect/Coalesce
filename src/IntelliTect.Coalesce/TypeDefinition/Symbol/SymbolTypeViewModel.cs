@@ -187,6 +187,29 @@ public class SymbolTypeViewModel : TypeViewModel
         return AssignableToLookup.Contains(type.Name);
     }
 
+    public override TypeViewModel? OpenGenericSingleClassConstraint
+    {
+        get
+        {
+            if (Symbol is not INamedTypeSymbol ns || ns.TypeParameters.Length != 1) return null;
+
+            var classConstraints = ns.TypeParameters[0].ConstraintTypes
+                .Where(c => c.TypeKind == TypeKind.Class)
+                .ToList();
+            if (classConstraints.Count != 1) return null;
+
+            return GetOrCreate(ReflectionRepository, classConstraints[0]);
+        }
+    }
+
+    public override TypeViewModel? CloseWithTypeArgument(TypeViewModel typeArg)
+    {
+        if (Symbol is not INamedTypeSymbol ns || ns.TypeParameters.Length != 1) return null;
+        if (typeArg is not SymbolTypeViewModel symbolTypeArg) return null;
+        var closed = ns.Construct(symbolTypeArg.Symbol);
+        return GetOrCreate(ReflectionRepository, closed);
+    }
+
     public override bool Equals(object? obj)
     {
         if (!(obj is SymbolTypeViewModel that)) return base.Equals(obj);

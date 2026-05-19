@@ -246,11 +246,46 @@ public abstract class ClassViewModel : IAttributeProvider
     internal IEnumerable<TypeViewModel> ClientNestedTypes =>
         RawNestedTypes.Where(t => !t.IsInternalUse && !t.IsAbstract && !t.IsGeneric);
 
+    /// <summary>
+    /// Open generic nested types that could be inherited data sources.
+    /// Filtered to non-abstract and non-internal-use, but retaining generic types.
+    /// </summary>
+    internal IEnumerable<TypeViewModel> OpenGenericNestedTypes =>
+        RawNestedTypes.Where(t => !t.IsInternalUse && !t.IsAbstract && t.IsGeneric);
+
     public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
         .DataSources
         .Where(d => d.DeclaredFor.Equals(this))
         .Select(d => d.StrategyClass)
+        .Concat(GetInheritedOpenGenericDataSources(repo))
         .OrderBy(d => d.ClientTypeName);
+
+    private IEnumerable<ClassViewModel> GetInheritedOpenGenericDataSources(ReflectionRepository repo)
+    {
+        foreach (var usage in repo.OpenGenericDataSources)
+        {
+            // Check if this type is the constraint type or is derived from it.
+            if (!IsAssignableTo(usage.ConstraintType)) continue;
+
+            var closed = usage.StrategyClass.Type.CloseWithTypeArgument(Type);
+            if (closed?.ClassViewModel is { } cvm) yield return cvm;
+        }
+    }
+
+    /// <summary>
+    /// Returns true if this type is the same as <paramref name="other"/> or is derived from it,
+    /// by walking the base type chain.
+    /// </summary>
+    private bool IsAssignableTo(ClassViewModel other)
+    {
+        var current = (TypeViewModel?)Type;
+        while (current is not null)
+        {
+            if (current.ClassViewModel?.Equals(other) == true) return true;
+            current = current.BaseType;
+        }
+        return false;
+    }
 
     /// <summary>
     /// Returns a property matching the name if it exists.

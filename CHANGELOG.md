@@ -1,6 +1,7 @@
 # 6.6.0
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
 - Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library.
+- Open generic data sources nested in a base class (e.g. `class MyDataSource<T> : StandardDataSource<T, DbCtx> where T : MyBase`) are now automatically available for both the base class and all derived entity types. This works for both default and named data sources.
 
 ## Template Changes
 - Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project:

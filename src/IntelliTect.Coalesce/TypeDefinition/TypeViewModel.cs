@@ -123,6 +123,21 @@ public abstract class TypeViewModel : IAttributeProvider
     public bool IsA<T>() => IsA(typeof(T));
 
     /// <summary>
+    /// For open generic types with exactly one type parameter that has a single class constraint,
+    /// returns the <see cref="TypeViewModel"/> representing that class constraint.
+    /// Returns <see langword="null"/> for all other types.
+    /// </summary>
+    public virtual TypeViewModel? OpenGenericSingleClassConstraint => null;
+
+    /// <summary>
+    /// For open generic types with exactly one type parameter, returns a new closed
+    /// <see cref="TypeViewModel"/> with that parameter bound to <paramref name="typeArg"/>.
+    /// Returns <see langword="null"/> if the type is not a single-parameter open generic, or
+    /// if <paramref name="typeArg"/> is incompatible with the implementation.
+    /// </summary>
+    public virtual TypeViewModel? CloseWithTypeArgument(TypeViewModel typeArg) => null;
+
+    /// <summary>
     /// Convenient accessor for the represented System.Type when in reflection-based contexts.
     /// </summary>
     public virtual Type TypeInfo => throw new InvalidOperationException("TypeInfo not available in the current context");

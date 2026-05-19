@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.Testing.TargetClasses;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Testing.Util;
+using IntelliTect.Coalesce.TypeDefinition;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition;
 
@@ -80,7 +81,7 @@ public class ClassViewModelTests
     }
 
     [Test]
-    public async Task ClientDataSources_ExcludesGenericAndAbstractNestedDataSources()
+    public async Task ClientDataSources_ExcludesAbstractNestedDataSources()
     {
         var repo = ReflectionRepositoryFactory.Reflection;
         var entityVm = repo.GetClassViewModel<Case>()!;
@@ -90,10 +91,69 @@ public class ClassViewModelTests
         // The concrete AllOpenCases should be discovered
         await Assert.That(dataSources).Contains(ds => ds.Name == nameof(Case.AllOpenCases));
 
-        // The open-generic GenericCaseDataSource<T> should NOT be discovered
-        await Assert.That(dataSources).DoesNotContain(ds => ds.Name == "GenericCaseDataSource");
-
         // The abstract AbstractCaseDataSource should NOT be discovered
         await Assert.That(dataSources).DoesNotContain(ds => ds.Name == nameof(Case.AbstractCaseDataSource));
+    }
+
+    [Test]
+    public async Task ClientDataSources_OpenGenericConstrainedToType_DiscoveredForBaseType()
+    {
+        var repo = ReflectionRepositoryFactory.Reflection;
+
+        // GenericCaseDataSource<T> where T : Case is nested in Case and should appear for Case itself.
+        var caseVm = repo.GetClassViewModel<Case>()!;
+        var dataSources = caseVm.ClientDataSources(repo).ToList();
+        await Assert.That(dataSources).Contains(ds => ds.Name == "GenericCaseDataSource");
+
+        // AbstractModelDataSource<T> where T : AbstractModel should appear for AbstractModel.
+        var abstractVm = repo.GetClassViewModel<AbstractModel>()!;
+        var abstractDs = abstractVm.ClientDataSources(repo).ToList();
+        await Assert.That(abstractDs).Contains(ds => ds.Name == "AbstractModelDataSource");
+        await Assert.That(abstractDs).Contains(ds => ds.Name == "DefaultAbstractModelDataSource");
+    }
+
+    [Test]
+    public async Task ClientDataSources_OpenGenericConstrainedToBase_DiscoveredForDerivedTypes()
+    {
+        var repo = ReflectionRepositoryFactory.Reflection;
+
+        // AbstractModelDataSource<T> and DefaultAbstractModelDataSource<T> are nested in AbstractModel.
+        // They should be available for derived types AbstractImpl1 and AbstractImpl2.
+        var impl1Vm = repo.GetClassViewModel<AbstractImpl1>()!;
+        var impl1Sources = impl1Vm.ClientDataSources(repo).ToList();
+        await Assert.That(impl1Sources).Contains(ds => ds.Name == "AbstractModelDataSource");
+        await Assert.That(impl1Sources).Contains(ds => ds.Name == "DefaultAbstractModelDataSource");
+
+        var impl2Vm = repo.GetClassViewModel<AbstractImpl2>()!;
+        var impl2Sources = impl2Vm.ClientDataSources(repo).ToList();
+        await Assert.That(impl2Sources).Contains(ds => ds.Name == "AbstractModelDataSource");
+        await Assert.That(impl2Sources).Contains(ds => ds.Name == "DefaultAbstractModelDataSource");
+    }
+
+    [Test]
+    public async Task ClientDataSources_OpenGenericDefault_IsDefaultForDerivedType()
+    {
+        var repo = ReflectionRepositoryFactory.Reflection;
+
+        var impl1Vm = repo.GetClassViewModel<AbstractImpl1>()!;
+        var defaultSource = impl1Vm.ClientDataSources(repo).SingleOrDefault(ds => ds.IsDefaultDataSource);
+
+        await Assert.That(defaultSource).IsNotNull();
+        await Assert.That(defaultSource!.Name).IsEqualTo("DefaultAbstractModelDataSource");
+    }
+
+    [Test]
+    public async Task ClientDataSources_OpenGenericDerivedType_ClosedWithDerivedType()
+    {
+        var repo = ReflectionRepositoryFactory.Reflection;
+
+        // The closed generic type should be AbstractModel.AbstractModelDataSource<AbstractImpl1>,
+        // not AbstractModel.AbstractModelDataSource<AbstractModel>.
+        var impl1Vm = repo.GetClassViewModel<AbstractImpl1>()!;
+        var impl1Sources = impl1Vm.ClientDataSources(repo).ToList();
+
+        var ds = impl1Sources.First(ds => ds.Name == "AbstractModelDataSource");
+        var typeArg = ds.Type.GenericArgumentsFor(typeof(IDataSource<>))?.Single();
+        await Assert.That(typeArg?.ClassViewModel?.Name).IsEqualTo(nameof(AbstractImpl1));
     }
 }

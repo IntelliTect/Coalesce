@@ -25,7 +25,8 @@ public class ReflectionClassViewModel : ClassViewModel
             ?? new ReflectionClassViewModel(type);
     }
 
-    public override string Name => Info.Name;
+    // Strip generic arity suffix (e.g. `1) to match the behavior of ReflectionTypeViewModel.Name.
+    public override string Name => Info.Name.Replace("`1", "");
 
     public override string Comment => "";
 

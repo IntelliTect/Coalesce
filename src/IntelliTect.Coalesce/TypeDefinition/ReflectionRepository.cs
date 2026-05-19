@@ -23,6 +23,7 @@ public class ReflectionRepository
 
     private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _behaviors = new();
     private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _dataSources = new();
+    private readonly ConcurrentHashSet<OpenGenericDataSourceUsage> _openGenericDataSources = new();
     private readonly ConcurrentHashSet<ClassViewModel> _externalTypes = new();
     private readonly ConcurrentHashSet<ClassViewModel> _customDtos = new();
     private readonly ConcurrentHashSet<ClassViewModel> _services = new();
@@ -81,6 +82,7 @@ public class ReflectionRepository
     public ReadOnlyHashSet<ClassViewModel> Entities => new(_entities);
     public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new(_behaviors);
     public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new(_dataSources);
+    public ReadOnlyHashSet<OpenGenericDataSourceUsage> OpenGenericDataSources => new(_openGenericDataSources);
     public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new(_externalTypes);
     public ReadOnlyHashSet<ClassViewModel> CustomDtos => new(_customDtos);
     public ReadOnlyHashSet<ClassViewModel> Services => new(_services);
@@ -419,6 +421,36 @@ public class ReflectionRepository
         {
             AddCrudStrategy(typeof(IDataSource<>), nestedType, _dataSources, model);
             AddCrudStrategy(typeof(IBehaviors<>), nestedType, _behaviors, model);
+        }
+
+        // Also detect open generic data sources whose single type parameter is constrained to this type.
+        // These will be usable by this type and all of its derived types.
+        foreach (var nestedType in model.OpenGenericNestedTypes)
+        {
+            TryAddOpenGenericDataSource(nestedType, model);
+        }
+    }
+
+    private void TryAddOpenGenericDataSource(TypeViewModel strategyType, ClassViewModel declaredFor)
+    {
+        if (strategyType.ClassViewModel is null) return;
+        if (!strategyType.IsA(typeof(IDataSource<>))) return;
+
+        var constraint = strategyType.OpenGenericSingleClassConstraint;
+        if (constraint?.ClassViewModel is null) return;
+
+        // The constraint type must be the same as the class this is nested in.
+        if (!constraint.ClassViewModel.Equals(declaredFor)) return;
+
+        _openGenericDataSources.Add(new OpenGenericDataSourceUsage(strategyType.ClassViewModel, declaredFor));
+
+        // Discover any external types used as data source parameters on the constraint-closed version.
+        if (strategyType.ClassViewModel.DataSourceParameters is { } parameters)
+        {
+            foreach (var parameter in parameters)
+            {
+                ConditionallyAddAndDiscoverTypesOn(parameter);
+            }
         }
     }
 

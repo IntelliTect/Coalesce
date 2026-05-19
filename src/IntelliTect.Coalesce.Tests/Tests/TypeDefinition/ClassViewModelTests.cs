@@ -118,12 +118,8 @@ public class ClassViewModelTests
         var repo = ReflectionRepositoryFactory.Reflection;
 
         // AbstractModelDataSource<T> and DefaultAbstractModelDataSource<T> are nested in AbstractModel.
-        // They should be available for derived types AbstractImpl1 and AbstractImpl2.
-        var impl1Vm = repo.GetClassViewModel<AbstractImpl1>()!;
-        var impl1Sources = impl1Vm.ClientDataSources(repo).ToList();
-        await Assert.That(impl1Sources).Contains(ds => ds.Name == "AbstractModelDataSource");
-        await Assert.That(impl1Sources).Contains(ds => ds.Name == "DefaultAbstractModelDataSource");
-
+        // They should be available for derived types that don't override them.
+        // AbstractImpl1 overrides both, so use AbstractImpl2 which has no overrides.
         var impl2Vm = repo.GetClassViewModel<AbstractImpl2>()!;
         var impl2Sources = impl2Vm.ClientDataSources(repo).ToList();
         await Assert.That(impl2Sources).Contains(ds => ds.Name == "AbstractModelDataSource");
@@ -135,8 +131,9 @@ public class ClassViewModelTests
     {
         var repo = ReflectionRepositoryFactory.Reflection;
 
-        var impl1Vm = repo.GetClassViewModel<AbstractImpl1>()!;
-        var defaultSource = impl1Vm.ClientDataSources(repo).SingleOrDefault(ds => ds.IsDefaultDataSource);
+        // AbstractImpl2 has no overrides, so it inherits the open generic default.
+        var impl2Vm = repo.GetClassViewModel<AbstractImpl2>()!;
+        var defaultSource = impl2Vm.ClientDataSources(repo).SingleOrDefault(ds => ds.IsDefaultDataSource);
 
         await Assert.That(defaultSource).IsNotNull();
         await Assert.That(defaultSource!.Name).IsEqualTo("DefaultAbstractModelDataSource");
@@ -147,14 +144,14 @@ public class ClassViewModelTests
     {
         var repo = ReflectionRepositoryFactory.Reflection;
 
-        // The closed generic type should be AbstractModel.AbstractModelDataSource<AbstractImpl1>,
+        // The closed generic type should be AbstractModel.AbstractModelDataSource<AbstractImpl2>,
         // not AbstractModel.AbstractModelDataSource<AbstractModel>.
-        var impl1Vm = repo.GetClassViewModel<AbstractImpl1>()!;
-        var impl1Sources = impl1Vm.ClientDataSources(repo).ToList();
+        var impl2Vm = repo.GetClassViewModel<AbstractImpl2>()!;
+        var impl2Sources = impl2Vm.ClientDataSources(repo).ToList();
 
-        var ds = impl1Sources.First(ds => ds.Name == "AbstractModelDataSource");
+        var ds = impl2Sources.First(ds => ds.Name == "AbstractModelDataSource");
         var typeArg = ds.Type.GenericArgumentsFor(typeof(IDataSource<>))?.Single();
-        await Assert.That(typeArg?.ClassViewModel?.Name).IsEqualTo(nameof(AbstractImpl1));
+        await Assert.That(typeArg?.ClassViewModel?.Name).IsEqualTo(nameof(AbstractImpl2));
     }
 
     [Test]

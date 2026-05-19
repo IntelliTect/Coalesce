@@ -61,6 +61,16 @@ public class AbstractImpl2 : AbstractModel
     public string Impl2OnlyField { get; set; }
 }
 
+/// <summary>
+/// A top-level open generic data source constrained to AbstractModel,
+/// discovered via [Coalesce] attribute. Should be available for AbstractModel
+/// itself and all derived types.
+/// </summary>
+[Coalesce]
+public class TopLevelAbstractModelDataSource<T>(CrudContext<AppDbContext> context)
+    : StandardDataSource<T, AppDbContext>(context)
+    where T : AbstractModel;
+
 public class AbstractModelPerson
 {
     public int Id { get; set; }

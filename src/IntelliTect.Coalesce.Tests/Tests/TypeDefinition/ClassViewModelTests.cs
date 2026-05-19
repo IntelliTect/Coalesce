@@ -156,4 +156,24 @@ public class ClassViewModelTests
         var typeArg = ds.Type.GenericArgumentsFor(typeof(IDataSource<>))?.Single();
         await Assert.That(typeArg?.ClassViewModel?.Name).IsEqualTo(nameof(AbstractImpl1));
     }
+
+    [Test]
+    public async Task ClientDataSources_TopLevelOpenGeneric_DiscoveredForConstraintAndDerivedTypes()
+    {
+        var repo = ReflectionRepositoryFactory.Reflection;
+
+        // TopLevelAbstractModelDataSource<T> where T : AbstractModel is decorated with [Coalesce]
+        // and should be discovered for AbstractModel and all derived types.
+        var abstractVm = repo.GetClassViewModel<AbstractModel>()!;
+        var abstractSources = abstractVm.ClientDataSources(repo).ToList();
+        await Assert.That(abstractSources).Contains(ds => ds.Name == "TopLevelAbstractModelDataSource");
+
+        var impl1Vm = repo.GetClassViewModel<AbstractImpl1>()!;
+        var impl1Sources = impl1Vm.ClientDataSources(repo).ToList();
+        await Assert.That(impl1Sources).Contains(ds => ds.Name == "TopLevelAbstractModelDataSource");
+
+        var impl2Vm = repo.GetClassViewModel<AbstractImpl2>()!;
+        var impl2Sources = impl2Vm.ClientDataSources(repo).ToList();
+        await Assert.That(impl2Sources).Contains(ds => ds.Name == "TopLevelAbstractModelDataSource");
+    }
 }

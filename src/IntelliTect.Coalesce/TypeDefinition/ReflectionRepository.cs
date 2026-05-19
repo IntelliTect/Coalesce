@@ -226,6 +226,10 @@ public class ReflectionRepository
                 DiscoverOnApiBackedClass(entity.TypeViewModel.ClassViewModel!);
             }
         }
+        else if (TryAddOpenGenericDataSource(type))
+        {
+            // Handled by helper
+        }
         else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
         {
             // Handled by helper
@@ -427,24 +431,25 @@ public class ReflectionRepository
         // These will be usable by this type and all of its derived types.
         foreach (var nestedType in model.OpenGenericNestedTypes)
         {
-            TryAddOpenGenericDataSource(nestedType, model);
+            TryAddOpenGenericDataSource(nestedType, declaredFor: model);
         }
     }
 
-    private void TryAddOpenGenericDataSource(TypeViewModel strategyType, ClassViewModel declaredFor)
+    private bool TryAddOpenGenericDataSource(TypeViewModel strategyType, ClassViewModel? declaredFor = null)
     {
-        if (strategyType.ClassViewModel is null) return;
-        if (!strategyType.IsA(typeof(IDataSource<>))) return;
+        if (strategyType.ClassViewModel is null) return false;
+        if (!strategyType.IsA(typeof(IDataSource<>))) return false;
 
         var constraint = strategyType.OpenGenericSingleClassConstraint;
-        if (constraint?.ClassViewModel is null) return;
+        if (constraint?.ClassViewModel is null) return false;
 
-        // The constraint type must be the same as the class this is nested in.
-        if (!constraint.ClassViewModel.Equals(declaredFor)) return;
+        // For nested types, require the constraint to match the declaring class.
+        // For top-level [Coalesce]-discovered types, the constraint type itself is the declared-for type.
+        if (declaredFor != null && !constraint.ClassViewModel.Equals(declaredFor)) return false;
 
-        _openGenericDataSources.Add(new OpenGenericDataSourceUsage(strategyType.ClassViewModel, declaredFor));
+        _openGenericDataSources.Add(new OpenGenericDataSourceUsage(strategyType.ClassViewModel, constraint.ClassViewModel));
 
-        // Discover any external types used as data source parameters on the constraint-closed version.
+        // Discover any external types used as data source parameters.
         if (strategyType.ClassViewModel.DataSourceParameters is { } parameters)
         {
             foreach (var parameter in parameters)
@@ -452,6 +457,8 @@ public class ReflectionRepository
                 ConditionallyAddAndDiscoverTypesOn(parameter);
             }
         }
+
+        return true;
     }
 
     public ClassViewModel? GetClassViewModel(Type classType) =>

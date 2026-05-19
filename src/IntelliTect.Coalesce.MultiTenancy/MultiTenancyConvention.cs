@@ -122,15 +122,7 @@ internal class MultiTenancyConvention<TTenanted>(
             // As a workaround, keep the single-column PK and add a composite alternate key
             // that referencing FKs are rewired to use instead.
             var tenantedAk = entityType.AddKey([tenantIdProp, pkProp])!;
-
-            foreach (var fk in entityType.GetReferencingForeignKeys().ToList())
-            {
-                var dependentTenantId = fk.DeclaringEntityType.FindProperty(TenantIdPropName);
-                if (dependentTenantId is null) continue;
-
-                var newFk = fk.DeclaringEntityType.AddForeignKey([dependentTenantId, fk.Properties.Single()], tenantedAk, entityType);
-                newFk.DeleteBehavior = DeleteBehavior.NoAction;
-            }
+            RewireForeignKeys(entityType, tenantedAk);
         }
         else
         {

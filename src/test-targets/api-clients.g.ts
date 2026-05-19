@@ -592,6 +592,11 @@ export class EnumPkApiClient extends ModelApiClient<$models.EnumPk> {
 }
 
 
+export class GenericNestedDsTargetApiClient extends ModelApiClient<$models.GenericNestedDsTarget> {
+  constructor() { super($metadata.GenericNestedDsTarget) }
+}
+
+
 export class MultipleParentsApiClient extends ModelApiClient<$models.MultipleParents> {
   constructor() { super($metadata.MultipleParents) }
 }
@@ -751,6 +756,16 @@ export class RequiredAndInitModelApiClient extends ModelApiClient<$models.Requir
 
 export class RequiredInternalUseModelApiClient extends ModelApiClient<$models.RequiredInternalUseModel> {
   constructor() { super($metadata.RequiredInternalUseModel) }
+}
+
+
+export class SelfOwnedTenantApiClient extends ModelApiClient<$models.SelfOwnedTenant> {
+  constructor() { super($metadata.SelfOwnedTenant) }
+}
+
+
+export class SelfOwnedTenantConsumerApiClient extends ModelApiClient<$models.SelfOwnedTenantConsumer> {
+  constructor() { super($metadata.SelfOwnedTenantConsumer) }
 }
 
 

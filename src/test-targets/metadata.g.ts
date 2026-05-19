@@ -3367,6 +3367,48 @@ export const EnumPk = domain.types.EnumPk = {
   dataSources: {
   },
 }
+export const GenericNestedDsTarget = domain.types.GenericNestedDsTarget = {
+  name: "GenericNestedDsTarget" as const,
+  displayName: "Generic Nested Ds Target",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "GenericNestedDsTarget",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    isActive: {
+      name: "isActive",
+      displayName: "Is Active",
+      type: "boolean",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+    defaultDs: {
+      type: "dataSource",
+      name: "DefaultDs" as const,
+      displayName: "Default Ds",
+      isDefault: true,
+      props: {
+        onlyActive: {
+          name: "onlyActive",
+          displayName: "Only Active",
+          type: "boolean",
+          role: "value",
+        },
+      },
+    },
+  },
+}
 export const MultipleParents = domain.types.MultipleParents = {
   name: "MultipleParents" as const,
   displayName: "Multiple Parents",
@@ -4586,6 +4628,78 @@ export const RequiredInternalUseModel = domain.types.RequiredInternalUseModel = 
       type: "number",
       role: "primaryKey",
       hidden: 3 as HiddenAreas,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const SelfOwnedTenant = domain.types.SelfOwnedTenant = {
+  name: "SelfOwnedTenant" as const,
+  displayName: "Self Owned Tenant",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "SelfOwnedTenant",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    tenantId: {
+      name: "tenantId",
+      displayName: "Tenant Id",
+      type: "number",
+      role: "value",
+    },
+    ownerTenant: {
+      name: "ownerTenant",
+      displayName: "Owner Tenant",
+      type: "model",
+      get typeDef() { return (domain.types.SelfOwnedTenant as ModelType & { name: "SelfOwnedTenant" }) },
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const SelfOwnedTenantConsumer = domain.types.SelfOwnedTenantConsumer = {
+  name: "SelfOwnedTenantConsumer" as const,
+  displayName: "Self Owned Tenant Consumer",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "SelfOwnedTenantConsumer",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    tenantId: {
+      name: "tenantId",
+      displayName: "Tenant Id",
+      type: "number",
+      role: "value",
+    },
+    ownerTenant: {
+      name: "ownerTenant",
+      displayName: "Owner Tenant",
+      type: "model",
+      get typeDef() { return (domain.types.SelfOwnedTenant as ModelType & { name: "SelfOwnedTenant" }) },
+      role: "value",
+      dontSerialize: true,
     },
   },
   methods: {
@@ -5984,6 +6098,7 @@ interface AppDomain extends Domain {
     ExternalParentAsInputOnly: typeof ExternalParentAsInputOnly
     ExternalParentAsOutputOnly: typeof ExternalParentAsOutputOnly
     ExternalTypeWithDtoProp: typeof ExternalTypeWithDtoProp
+    GenericNestedDsTarget: typeof GenericNestedDsTarget
     InitRecordWithDefaultCtor: typeof InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: typeof InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: typeof Location
@@ -6006,6 +6121,8 @@ interface AppDomain extends Domain {
     RecursiveHierarchy: typeof RecursiveHierarchy
     RequiredAndInitModel: typeof RequiredAndInitModel
     RequiredInternalUseModel: typeof RequiredInternalUseModel
+    SelfOwnedTenant: typeof SelfOwnedTenant
+    SelfOwnedTenantConsumer: typeof SelfOwnedTenantConsumer
     Sibling: typeof Sibling
     SimpleModelTarget: typeof SimpleModelTarget
     StandaloneReadonly: typeof StandaloneReadonly

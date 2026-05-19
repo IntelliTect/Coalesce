@@ -244,7 +244,7 @@ public abstract class ClassViewModel : IAttributeProvider
         Methods.Where(m => m.HasAttribute<SemanticKernelAttribute>());
 
     internal IEnumerable<TypeViewModel> ClientNestedTypes =>
-        RawNestedTypes.Where(t => !t.IsInternalUse);
+        RawNestedTypes.Where(t => !t.IsInternalUse && !t.IsAbstract && !t.IsGeneric);
 
     public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
         .DataSources

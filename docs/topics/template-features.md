@@ -29,7 +29,7 @@ The `TenantId` property on `AppDbContext` serves as the single source of truth f
 All tenancy database mechanics are handled by the `IntelliTect.Coalesce.MultiTenancy` package, configured with a single call in `OnConfiguring`:
 
 ```cs
-optionsBuilder.UseCoalesceMultiTenancy<ITenanted>(t => t.TenantId, nameof(TenantIdOrThrow));
+optionsBuilder.UseCoalesceMultiTenancy<ITenanted>(t => t.TenantId, () => TenantIdOrThrow);
 ```
 
 This call registers both a model-finalizing convention and a save interceptor that together provide:

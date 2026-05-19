@@ -1,6 +1,6 @@
 # 6.6.0
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
-- Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library. A single call to `UseCoalesceMultiTenancy<ITenanted>(t => t.TenantId, nameof(TenantIdOrThrow))` in `OnConfiguring` replaces the old `ConfigureTenancy` method, `TenantInterceptor`, and `TenantIdValueGenerator`.
+- Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library.
 
 ## Template Changes
 - Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project:

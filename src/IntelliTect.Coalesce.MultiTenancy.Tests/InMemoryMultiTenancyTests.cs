@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace IntelliTect.Coalesce.MultiTenancy.Tests;
 
@@ -207,10 +206,8 @@ public class InMemoryMultiTenancyTests
         // CurrentTenantId is null, so TenantIdOrThrow will throw
         using var db = new TestDbContext(opts);
 
-        // Value generator runs at Add time via reflection, wrapping in TargetInvocationException.
-        // The inner exception is the InvalidOperationException from TenantIdOrThrow.
-        var ex = Assert.Throws<TargetInvocationException>(() => db.Animals.Add(new Animal { Name = "Rex" }));
-        await Assert.That(ex.InnerException).IsTypeOf<InvalidOperationException>();
+        var ex = Assert.Throws<InvalidOperationException>(() => db.Animals.Add(new Animal { Name = "Rex" }));
+        await Assert.That(ex.Message).Contains("TenantId");
     }
 
     // ── Multiple entities in one SaveChanges ──────────────────────────────────

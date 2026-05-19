@@ -31,7 +31,7 @@ public static class MultiTenancyConvention
 /// ensuring correct handling of TPH hierarchies regardless of entity discovery order.
 /// </para>
 /// </summary>
-public class MultiTenancyConvention<TTenanted>(
+internal class MultiTenancyConvention<TTenanted>(
     string entityTenantIdPropertyName,
     string? providerName,
     Type dbContextType,
@@ -56,8 +56,14 @@ public class MultiTenancyConvention<TTenanted>(
         var dbContextConstant = Expression.Constant(null, dbContextType);
         var tenantIdQueryExpr = Expression.MakeMemberAccess(dbContextConstant, tenantIdValuePropInfo);
 
-        // Build runtime getter via reflection for value generator and interceptor
-        Func<DbContext, object?> tenantIdGetter = db => tenantIdValuePropInfo.GetValue(db);
+        // Build a compiled runtime getter to avoid reflection on each call.
+        var dbParam = Expression.Parameter(typeof(DbContext), "db");
+        Func<DbContext, object?> tenantIdGetter = Expression.Lambda<Func<DbContext, object?>>(
+            Expression.Convert(
+                Expression.MakeMemberAccess(Expression.Convert(dbParam, dbContextType), tenantIdValuePropInfo),
+                typeof(object)),
+            dbParam
+        ).Compile();
 
         var tenantedTypes = modelBuilder.Metadata.GetEntityTypes()
             .Where(e => typeof(TTenanted).IsAssignableFrom(e.ClrType))

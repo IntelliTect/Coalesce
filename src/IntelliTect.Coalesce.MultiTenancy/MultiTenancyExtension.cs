@@ -33,15 +33,31 @@ internal class MultiTenancyExtension<TTenanted> : IDbContextOptionsExtension
 
     public void Validate(IDbContextOptions options) { }
 
-    private sealed class ExtensionInfo(IDbContextOptionsExtension extension) : DbContextOptionsExtensionInfo(extension)
+    private sealed class ExtensionInfo : DbContextOptionsExtensionInfo
     {
+        public ExtensionInfo(MultiTenancyExtension<TTenanted> extension) : base(extension) { }
+
+        private new MultiTenancyExtension<TTenanted> Extension => (MultiTenancyExtension<TTenanted>)base.Extension;
+
         public override bool IsDatabaseProvider => false;
         public override string LogFragment => "using MultiTenancy ";
-        public override int GetServiceProviderHashCode() => 0;
+
+        public override int GetServiceProviderHashCode()
+        {
+            var hash = new HashCode();
+            hash.Add(typeof(TTenanted));
+            hash.Add(Extension._entityTenantIdPropertyName);
+            hash.Add(Extension._contextTenantIdPropertyName);
+            return hash.ToHashCode();
+        }
+
         public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
             => debugInfo["Coalesce:MultiTenancy"] = "1";
+
         public override bool ShouldUseSameServiceProvider(DbContextOptionsExtensionInfo other)
-            => other is ExtensionInfo;
+            => other is ExtensionInfo otherExt
+                && otherExt.Extension._entityTenantIdPropertyName == Extension._entityTenantIdPropertyName
+                && otherExt.Extension._contextTenantIdPropertyName == Extension._contextTenantIdPropertyName;
     }
 }
 

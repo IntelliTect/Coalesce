@@ -17,7 +17,7 @@ public static class MultiTenancyDbContextOptionsBuilderExtensions
     /// </para>
     /// <para>
     /// Call this from <c>OnConfiguring</c> or a standalone options builder:
-    /// <code>optionsBuilder.UseCoalesceMultiTenancy&lt;ITenanted&gt;(t =&gt; t.TenantId, nameof(TenantIdOrThrow));</code>
+    /// <code>optionsBuilder.UseCoalesceMultiTenancy&lt;ITenanted&gt;(t =&gt; t.TenantId, () =&gt; TenantIdOrThrow);</code>
     /// No additional calls in <c>OnModelCreating</c> are needed.
     /// </para>
     /// </summary>

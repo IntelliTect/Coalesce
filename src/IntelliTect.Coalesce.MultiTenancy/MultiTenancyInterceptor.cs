@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
-using System.Reflection;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +18,7 @@ internal class MultiTenancyInterceptor<TTenanted>(string entityTenantIdPropertyN
     : SaveChangesInterceptor
     where TTenanted : class
 {
-    private PropertyInfo? _cachedPropInfo;
+    private Func<DbContext, object?>? _cachedGetter;
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
@@ -37,20 +37,34 @@ internal class MultiTenancyInterceptor<TTenanted>(string entityTenantIdPropertyN
 
     private void Apply(DbContext db)
     {
-        _cachedPropInfo ??= db.GetType().GetProperty(contextTenantIdPropertyName)
-            ?? throw new InvalidOperationException(
-                $"Property '{contextTenantIdPropertyName}' not found on {db.GetType().Name}.");
+        _cachedGetter ??= BuildGetter(db.GetType());
 
         foreach (var entry in db.ChangeTracker.Entries<TTenanted>())
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Property(entityTenantIdPropertyName).CurrentValue = _cachedPropInfo.GetValue(db);
+                entry.Property(entityTenantIdPropertyName).CurrentValue = _cachedGetter(db);
             }
             else if (entry.State == EntityState.Modified && entry.Property(entityTenantIdPropertyName).IsModified)
             {
                 throw new InvalidOperationException($"Cannot change the {entityTenantIdPropertyName} of an existing entity.");
             }
         }
+    }
+
+    private Func<DbContext, object?> BuildGetter(Type dbContextType)
+    {
+        var propInfo = dbContextType.GetProperty(contextTenantIdPropertyName)
+            ?? throw new InvalidOperationException(
+                $"Property '{contextTenantIdPropertyName}' not found on {dbContextType.Name}.");
+
+        var param = Expression.Parameter(typeof(DbContext), "db");
+        return Expression.Lambda<Func<DbContext, object?>>(
+            Expression.Convert(
+                Expression.MakeMemberAccess(
+                    Expression.Convert(param, dbContextType), propInfo),
+                typeof(object)),
+            param
+        ).Compile();
     }
 }

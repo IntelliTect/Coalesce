@@ -161,6 +161,16 @@ public static class SymbolExtensions
                 value = value.Substring(idx + 1);
                 see.ParentNode!.ReplaceChild(xmlDocumentation.CreateTextNode(value), see);
             }
+            foreach (var typeParamRef in xmlDocumentation.SelectNodes("//typeparamref")!.OfType<XmlNode>())
+            {
+                string value = typeParamRef.Attributes?["name"]?.Value ?? "";
+                typeParamRef.ParentNode!.ReplaceChild(xmlDocumentation.CreateTextNode(value), typeParamRef);
+            }
+            foreach (var paramRef in xmlDocumentation.SelectNodes("//paramref")!.OfType<XmlNode>())
+            {
+                string value = paramRef.Attributes?["name"]?.Value ?? "";
+                paramRef.ParentNode!.ReplaceChild(xmlDocumentation.CreateTextNode(value), paramRef);
+            }
             string summary = xmlDocumentation.SelectSingleNode("/member/summary")?.InnerText.Trim() ?? "";
             return Regex.Replace(summary, "\n( +)", "\n");
         }

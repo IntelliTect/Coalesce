@@ -7,6 +7,7 @@ export type AbstractClassViewModel = AbstractClassImplViewModel
 export const AbstractClassViewModel = createAbstractProxyViewModelType<$models.AbstractClass, AbstractClassViewModel>($metadata.AbstractClass, $apiClients.AbstractClassApiClient)
 
 export class AbstractClassListViewModel extends ListViewModel<$models.AbstractClass, $apiClients.AbstractClassApiClient, AbstractClassViewModel> {
+  static DataSources = $models.AbstractClass.DataSources;
   
   public get getCount() {
     const getCount = this.$apiClient.$makeCaller(
@@ -44,6 +45,7 @@ export interface AbstractClassImplViewModel extends $models.AbstractClassImpl {
   set abstractModelPeople(value: (AbstractClassPersonViewModel | $models.AbstractClassPerson)[] | null);
 }
 export class AbstractClassImplViewModel extends ViewModel<$models.AbstractClassImpl, $apiClients.AbstractClassImplApiClient, number> implements $models.AbstractClassImpl  {
+  static DataSources = $models.AbstractClassImpl.DataSources;
   
   
   public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractClassPerson> | null) {
@@ -72,6 +74,7 @@ export class AbstractClassImplViewModel extends ViewModel<$models.AbstractClassI
 defineProps(AbstractClassImplViewModel, $metadata.AbstractClassImpl)
 
 export class AbstractClassImplListViewModel extends ListViewModel<$models.AbstractClassImpl, $apiClients.AbstractClassImplApiClient, AbstractClassImplViewModel> {
+  static DataSources = $models.AbstractClassImpl.DataSources;
   
   public get getCount() {
     const getCount = this.$apiClient.$makeCaller(

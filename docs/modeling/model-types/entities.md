@@ -81,6 +81,7 @@ Coalesce is compatible with TPH, TPT, and TPCT entity hierarchies. Define your m
 - The generated [TypeScript ViewModel](/stacks/vue/layers/viewmodels.md) for an abstract type is not like a regular ViewModel - it functions as a proxy whose primary purpose is to allow usage of `$load` to load a PK value whose concrete type is not known. After a successful load, it transforms itself into an instance of the concrete type.
 - The generated [Model](/stacks/vue/layers/models.md) types **do** mirror your C# inheritance hierarchy using regular TypeScript class inheritance.
 - If you want to expose the discriminator property to the client, map it to a .NET property on the base type [per EF documentation](https://learn.microsoft.com/en-us/ef/core/modeling/inheritance#table-per-hierarchy-and-discriminator-configuration).
+- [Data Sources](/modeling/model-components/data-sources.md#sharing-data-sources-across-an-inheritance-hierarchy) can be shared across the entire hierarchy using an open generic constrained to the base type, avoiding the need to duplicate data source logic for each derived type.
 
 ## JSON-mapped Properties
 

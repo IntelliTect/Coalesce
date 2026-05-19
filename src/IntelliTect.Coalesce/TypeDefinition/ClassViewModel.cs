@@ -35,7 +35,7 @@ public abstract class ClassViewModel : IAttributeProvider
         Type = type;
     }
 
-    public abstract string Name { get; }
+    public virtual string Name => Type.Name;
     public abstract string? Comment { get; }
     public TypeViewModel Type { get; protected set; }
     public abstract bool IsStatic { get; }
@@ -246,11 +246,48 @@ public abstract class ClassViewModel : IAttributeProvider
     internal IEnumerable<TypeViewModel> ClientNestedTypes =>
         RawNestedTypes.Where(t => !t.IsInternalUse && !t.IsAbstract && !t.IsGeneric);
 
-    public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
-        .DataSources
-        .Where(d => d.DeclaredFor.Equals(this))
-        .Select(d => d.StrategyClass)
-        .OrderBy(d => d.ClientTypeName);
+    /// <summary>
+    /// Open generic nested types that could be inherited data sources.
+    /// Filtered to non-abstract and non-internal-use, and only open (unconstructed) generics.
+    /// </summary>
+    internal IEnumerable<TypeViewModel> OpenGenericNestedTypes =>
+        RawNestedTypes.Where(t => !t.IsInternalUse && !t.IsAbstract && t.IsGeneric && !t.IsConstructedGenericType);
+
+    public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo)
+    {
+        var direct = repo
+            .DataSources
+            .Where(d => d.DeclaredFor.Equals(this))
+            .Select(d => d.StrategyClass)
+            .ToList();
+
+        var directNames = new HashSet<string>(direct.Select(d => d.ClientTypeName), StringComparer.OrdinalIgnoreCase);
+        var hasDirectDefault = direct.Any(d => d.IsDefaultDataSource);
+
+        var inherited = GetInheritedOpenGenericDataSources(repo)
+            .Where(d => !directNames.Contains(d.ClientTypeName)
+                && !(hasDirectDefault && d.IsDefaultDataSource))
+            // Deduplicate inherited sources by name (e.g. if multiple base classes
+            // in the hierarchy each declare an open generic with the same name,
+            // take only the first match which is the most derived constraint).
+            .DistinctBy(d => d.ClientTypeName);
+
+        return direct
+            .Concat(inherited)
+            .OrderBy(d => d.ClientTypeName);
+    }
+
+    private IEnumerable<ClassViewModel> GetInheritedOpenGenericDataSources(ReflectionRepository repo)
+    {
+        foreach (var usage in repo.OpenGenericDataSources)
+        {
+            // Check if this type is the constraint type or is derived from it.
+            if (!Type.IsA(usage.ConstraintType.Type)) continue;
+
+            var closed = usage.StrategyClass.Type.CloseWithTypeArgument(Type);
+            if (closed?.ClassViewModel is { } cvm) yield return cvm;
+        }
+    }
 
     /// <summary>
     /// Returns a property matching the name if it exists.

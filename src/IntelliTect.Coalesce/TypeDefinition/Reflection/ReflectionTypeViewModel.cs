@@ -92,6 +92,8 @@ public class ReflectionTypeViewModel : TypeViewModel
 
     public override bool IsGeneric => Info.IsGenericType;
 
+    public override bool IsConstructedGenericType => Info.IsConstructedGenericType;
+
     public override bool IsAbstract => Info.IsAbstract;
 
     public override bool IsArray => Info.IsArray;
@@ -257,6 +259,32 @@ public class ReflectionTypeViewModel : TypeViewModel
     public override ClassViewModel? ClassViewModel { get; }
 
     public override Type TypeInfo => Info;
+
+    public override TypeViewModel? OpenGenericSingleClassConstraint
+    {
+        get
+        {
+            if (!Info.IsGenericTypeDefinition) return null;
+            var typeParams = Info.GetGenericArguments();
+            if (typeParams.Length != 1) return null;
+
+            var classConstraints = typeParams[0].GetGenericParameterConstraints()
+                .Where(c => c.IsClass)
+                .ToList();
+            if (classConstraints.Count != 1) return null;
+
+            return GetOrCreate(ReflectionRepository, classConstraints[0]);
+        }
+    }
+
+    public override TypeViewModel? CloseWithTypeArgument(TypeViewModel typeArg)
+    {
+        if (!Info.IsGenericTypeDefinition || Info.GetGenericArguments().Length != 1) return null;
+        Type closedType;
+        try { closedType = Info.MakeGenericType(typeArg.TypeInfo); }
+        catch { return null; }
+        return GetOrCreate(ReflectionRepository, closedType);
+    }
 
     public override bool Equals(object? obj)
     {

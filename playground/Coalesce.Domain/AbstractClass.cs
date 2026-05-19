@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.DataAnnotations;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,22 @@ public abstract class AbstractClass
 
     [Coalesce]
     public static AbstractClass EchoAbstractModel(AbstractClass model) => model;
+
+    /// <summary>
+    /// A default data source declared with an open generic parameter constrained to <see cref="AbstractClass"/>.
+    /// Because <typeparamref name="T"/> is constrained to <see cref="AbstractClass"/>,
+    /// this data source is automatically used as the default for <see cref="AbstractClass"/>
+    /// and every derived type (e.g. <see cref="AbstractClassImpl"/>) without needing to
+    /// declare a separate data source on each derived class.
+    /// </summary>
+    [DefaultDataSource]
+    public class DefaultSource<T>(CrudContext<AppDbContext> context)
+        : StandardDataSource<T, AppDbContext>(context)
+        where T : AbstractClass
+    {
+        public override IQueryable<T> GetQuery(IDataSourceParameters parameters)
+            => base.GetQuery(parameters).OrderByDescending(e => e.Id);
+    }
 }
 
 public class AbstractClassImpl : AbstractClass

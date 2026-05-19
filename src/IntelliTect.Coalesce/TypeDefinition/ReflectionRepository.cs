@@ -23,6 +23,7 @@ public class ReflectionRepository
 
     private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _behaviors = new();
     private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _dataSources = new();
+    private readonly ConcurrentHashSet<OpenGenericDataSourceUsage> _openGenericDataSources = new();
     private readonly ConcurrentHashSet<ClassViewModel> _externalTypes = new();
     private readonly ConcurrentHashSet<ClassViewModel> _customDtos = new();
     private readonly ConcurrentHashSet<ClassViewModel> _services = new();
@@ -81,6 +82,7 @@ public class ReflectionRepository
     public ReadOnlyHashSet<ClassViewModel> Entities => new(_entities);
     public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new(_behaviors);
     public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new(_dataSources);
+    public ReadOnlyHashSet<OpenGenericDataSourceUsage> OpenGenericDataSources => new(_openGenericDataSources);
     public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new(_externalTypes);
     public ReadOnlyHashSet<ClassViewModel> CustomDtos => new(_customDtos);
     public ReadOnlyHashSet<ClassViewModel> Services => new(_services);
@@ -223,6 +225,18 @@ public class ReflectionRepository
             {
                 DiscoverOnApiBackedClass(entity.TypeViewModel.ClassViewModel!);
             }
+        }
+        else if (TryAddOpenGenericDataSource(type))
+        {
+            // Handled by helper
+        }
+        else if (type.IsConstructedGenericType && type.IsA(typeof(IDataSource<>)))
+        {
+            // Constructed generic data sources (e.g. MyOpenSource<Foo>) are only ever
+            // produced by closing an open generic data source at query/codegen time.
+            // The open generic is already tracked in _openGenericDataSources and gets
+            // resolved on-demand per derived type, so we must not also register the
+            // constructed version in _dataSources, which would cause duplicates.
         }
         else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
         {
@@ -420,6 +434,39 @@ public class ReflectionRepository
             AddCrudStrategy(typeof(IDataSource<>), nestedType, _dataSources, model);
             AddCrudStrategy(typeof(IBehaviors<>), nestedType, _behaviors, model);
         }
+
+        // Also detect open generic data sources whose single type parameter is constrained to this type.
+        // These will be usable by this type and all of its derived types.
+        foreach (var nestedType in model.OpenGenericNestedTypes)
+        {
+            TryAddOpenGenericDataSource(nestedType, declaredFor: model);
+        }
+    }
+
+    private bool TryAddOpenGenericDataSource(TypeViewModel strategyType, ClassViewModel? declaredFor = null)
+    {
+        if (strategyType.ClassViewModel is null) return false;
+        if (!strategyType.IsA(typeof(IDataSource<>))) return false;
+
+        var constraint = strategyType.OpenGenericSingleClassConstraint;
+        if (constraint?.ClassViewModel is null) return false;
+
+        // For nested types, require the constraint to match the declaring class.
+        // For top-level [Coalesce]-discovered types, the constraint type itself is the declared-for type.
+        if (declaredFor != null && !constraint.ClassViewModel.Equals(declaredFor)) return false;
+
+        _openGenericDataSources.Add(new OpenGenericDataSourceUsage(strategyType.ClassViewModel, constraint.ClassViewModel));
+
+        // Discover any external types used as data source parameters.
+        if (strategyType.ClassViewModel.DataSourceParameters is { } parameters)
+        {
+            foreach (var parameter in parameters)
+            {
+                ConditionallyAddAndDiscoverTypesOn(parameter);
+            }
+        }
+
+        return true;
     }
 
     public ClassViewModel? GetClassViewModel(Type classType) =>

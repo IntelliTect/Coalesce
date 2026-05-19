@@ -592,11 +592,6 @@ export class EnumPkApiClient extends ModelApiClient<$models.EnumPk> {
 }
 
 
-export class GenericNestedDsTargetApiClient extends ModelApiClient<$models.GenericNestedDsTarget> {
-  constructor() { super($metadata.GenericNestedDsTarget) }
-}
-
-
 export class MultipleParentsApiClient extends ModelApiClient<$models.MultipleParents> {
   constructor() { super($metadata.MultipleParents) }
 }

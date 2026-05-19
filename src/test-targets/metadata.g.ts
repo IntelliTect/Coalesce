@@ -326,6 +326,28 @@ export const AbstractImpl1 = domain.types.AbstractImpl1 = {
     },
   },
   dataSources: {
+    abstractModelDataSource: {
+      type: "dataSource",
+      name: "AbstractModelDataSource" as const,
+      displayName: "Abstract Model Data Source",
+      props: {
+      },
+    },
+    impl1DefaultDataSource: {
+      type: "dataSource",
+      name: "Impl1DefaultDataSource" as const,
+      displayName: "Impl 1 Default Data Source",
+      isDefault: true,
+      props: {
+      },
+    },
+    topLevelAbstractModelDataSource: {
+      type: "dataSource",
+      name: "TopLevelAbstractModelDataSource" as const,
+      displayName: "Top Level Abstract Model Data Source",
+      props: {
+      },
+    },
   },
 }
 export const AbstractImpl2 = domain.types.AbstractImpl2 = {
@@ -450,6 +472,28 @@ export const AbstractImpl2 = domain.types.AbstractImpl2 = {
     },
   },
   dataSources: {
+    abstractModelDataSource: {
+      type: "dataSource",
+      name: "AbstractModelDataSource" as const,
+      displayName: "Abstract Model Data Source",
+      props: {
+      },
+    },
+    defaultAbstractModelDataSource: {
+      type: "dataSource",
+      name: "DefaultAbstractModelDataSource" as const,
+      displayName: "Default Abstract Model Data Source",
+      isDefault: true,
+      props: {
+      },
+    },
+    topLevelAbstractModelDataSource: {
+      type: "dataSource",
+      name: "TopLevelAbstractModelDataSource" as const,
+      displayName: "Top Level Abstract Model Data Source",
+      props: {
+      },
+    },
   },
 }
 export const AbstractModel = domain.types.AbstractModel = {
@@ -570,6 +614,28 @@ export const AbstractModel = domain.types.AbstractModel = {
     },
   },
   dataSources: {
+    abstractModelDataSource: {
+      type: "dataSource",
+      name: "AbstractModelDataSource" as const,
+      displayName: "Abstract Model Data Source",
+      props: {
+      },
+    },
+    defaultAbstractModelDataSource: {
+      type: "dataSource",
+      name: "DefaultAbstractModelDataSource" as const,
+      displayName: "Default Abstract Model Data Source",
+      isDefault: true,
+      props: {
+      },
+    },
+    topLevelAbstractModelDataSource: {
+      type: "dataSource",
+      name: "TopLevelAbstractModelDataSource" as const,
+      displayName: "Top Level Abstract Model Data Source",
+      props: {
+      },
+    },
   },
 }
 export const AbstractModelPerson = domain.types.AbstractModelPerson = {
@@ -930,6 +996,13 @@ export const Case = domain.types.Case = {
           dateKind: "datetime",
           role: "value",
         },
+      },
+    },
+    genericCaseDataSource: {
+      type: "dataSource",
+      name: "GenericCaseDataSource" as const,
+      displayName: "Generic Case Data Source",
+      props: {
       },
     },
   },
@@ -3365,48 +3438,6 @@ export const EnumPk = domain.types.EnumPk = {
   methods: {
   },
   dataSources: {
-  },
-}
-export const GenericNestedDsTarget = domain.types.GenericNestedDsTarget = {
-  name: "GenericNestedDsTarget" as const,
-  displayName: "Generic Nested Ds Target",
-  get displayProp() { return this.props.id }, 
-  type: "model",
-  controllerRoute: "GenericNestedDsTarget",
-  get keyProp() { return this.props.id }, 
-  behaviorFlags: 7 as BehaviorFlags,
-  props: {
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "number",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-    isActive: {
-      name: "isActive",
-      displayName: "Is Active",
-      type: "boolean",
-      role: "value",
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-    defaultDs: {
-      type: "dataSource",
-      name: "DefaultDs" as const,
-      displayName: "Default Ds",
-      isDefault: true,
-      props: {
-        onlyActive: {
-          name: "onlyActive",
-          displayName: "Only Active",
-          type: "boolean",
-          role: "value",
-        },
-      },
-    },
   },
 }
 export const MultipleParents = domain.types.MultipleParents = {
@@ -6098,7 +6129,6 @@ interface AppDomain extends Domain {
     ExternalParentAsInputOnly: typeof ExternalParentAsInputOnly
     ExternalParentAsOutputOnly: typeof ExternalParentAsOutputOnly
     ExternalTypeWithDtoProp: typeof ExternalTypeWithDtoProp
-    GenericNestedDsTarget: typeof GenericNestedDsTarget
     InitRecordWithDefaultCtor: typeof InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: typeof InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: typeof Location

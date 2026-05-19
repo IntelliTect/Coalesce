@@ -25,8 +25,6 @@ public class ReflectionClassViewModel : ClassViewModel
             ?? new ReflectionClassViewModel(type);
     }
 
-    public override string Name => Info.Name;
-
     public override string Comment => "";
 
     public override bool IsStatic => Info.IsAbstract && Info.IsSealed;

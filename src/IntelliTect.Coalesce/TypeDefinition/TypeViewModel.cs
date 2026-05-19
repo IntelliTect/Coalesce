@@ -54,6 +54,13 @@ public abstract class TypeViewModel : IAttributeProvider
 
     public abstract bool IsGeneric { get; }
 
+    /// <summary>
+    /// True if this is a generic type that has been fully closed with concrete type arguments
+    /// (e.g. <c>List&lt;int&gt;</c>), as opposed to an open generic type definition
+    /// (e.g. <c>List&lt;&gt;</c>) or a non-generic type.
+    /// </summary>
+    public virtual bool IsConstructedGenericType => false;
+
     public abstract bool IsAbstract { get; }
 
     /// <summary>
@@ -121,6 +128,36 @@ public abstract class TypeViewModel : IAttributeProvider
     public abstract TypeViewModel? BaseType { get; }
 
     public bool IsA<T>() => IsA(typeof(T));
+
+    /// <summary>
+    /// Returns true if this type is the same as, or is derived from, <paramref name="other"/>,
+    /// by walking the base type chain.
+    /// </summary>
+    public bool IsA(TypeViewModel other)
+    {
+        var current = (TypeViewModel?)this;
+        while (current is not null)
+        {
+            if (current.Equals(other)) return true;
+            current = current.BaseType;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// For open generic types with exactly one type parameter that has a single class constraint,
+    /// returns the <see cref="TypeViewModel"/> representing that class constraint.
+    /// Returns <see langword="null"/> for all other types.
+    /// </summary>
+    public virtual TypeViewModel? OpenGenericSingleClassConstraint => null;
+
+    /// <summary>
+    /// For open generic types with exactly one type parameter, returns a new closed
+    /// <see cref="TypeViewModel"/> with that parameter bound to <paramref name="typeArg"/>.
+    /// Returns <see langword="null"/> if the type is not a single-parameter open generic, or
+    /// if <paramref name="typeArg"/> is incompatible with the implementation.
+    /// </summary>
+    public virtual TypeViewModel? CloseWithTypeArgument(TypeViewModel typeArg) => null;
 
     /// <summary>
     /// Convenient accessor for the represented System.Type when in reflection-based contexts.

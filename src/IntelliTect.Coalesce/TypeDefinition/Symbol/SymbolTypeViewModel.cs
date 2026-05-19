@@ -77,6 +77,10 @@ public class SymbolTypeViewModel : TypeViewModel
     public override bool IsGeneric =>
         Symbol is INamedTypeSymbol { IsGenericType: true, Arity: > 0 };
 
+    public override bool IsConstructedGenericType =>
+        Symbol is INamedTypeSymbol { IsGenericType: true, Arity: > 0 } ns
+        && !SymbolEqualityComparer.Default.Equals(ns, ns.OriginalDefinition);
+
     public override bool IsAbstract => Symbol.IsAbstract;
 
     public override string Name => Symbol.Name;
@@ -185,6 +189,32 @@ public class SymbolTypeViewModel : TypeViewModel
         // KNOWN SHORTCOMING: This method only checks the name of the type, and not its namespace.
         // For now, this is OK, but should probably be improved in the future so that MyNamespace.String != System.String.
         return AssignableToLookup.Contains(type.Name);
+    }
+
+    public override TypeViewModel? OpenGenericSingleClassConstraint
+    {
+        get
+        {
+            if (Symbol is not INamedTypeSymbol ns || ns.TypeParameters.Length != 1) return null;
+            // Only consider the unbound generic type definition, not constructed generics.
+            if (!SymbolEqualityComparer.Default.Equals(ns, ns.OriginalDefinition)) return null;
+
+            var classConstraints = ns.TypeParameters[0].ConstraintTypes
+                .Where(c => c.TypeKind == TypeKind.Class)
+                .ToList();
+            if (classConstraints.Count != 1) return null;
+
+            return GetOrCreate(ReflectionRepository, classConstraints[0]);
+        }
+    }
+
+    public override TypeViewModel? CloseWithTypeArgument(TypeViewModel typeArg)
+    {
+        if (Symbol is not INamedTypeSymbol ns || ns.TypeParameters.Length != 1) return null;
+        if (!SymbolEqualityComparer.Default.Equals(ns, ns.OriginalDefinition)) return null;
+        if (typeArg is not SymbolTypeViewModel symbolTypeArg) return null;
+        var closed = ns.Construct(symbolTypeArg.Symbol);
+        return GetOrCreate(ReflectionRepository, closed);
     }
 
     public override bool Equals(object? obj)

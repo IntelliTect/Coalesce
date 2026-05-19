@@ -22,8 +22,6 @@ public class SymbolClassViewModel : ClassViewModel
         return (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel(symbol) as SymbolClassViewModel;
     }
 
-    public override string Name => Symbol.Name;
-
     public override string? Comment => Symbol.ExtractXmlComments();
 
     public override bool IsStatic => Symbol.IsStatic;

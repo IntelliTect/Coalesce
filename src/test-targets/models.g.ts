@@ -597,6 +597,46 @@ export class EnumPk {
 }
 
 
+export interface GenericNestedDsTarget extends Model<typeof metadata.GenericNestedDsTarget> {
+  id: number | null
+  isActive: boolean | null
+}
+export class GenericNestedDsTarget {
+  
+  /** Mutates the input object and its descendants into a valid GenericNestedDsTarget implementation. */
+  static convert(data?: Partial<GenericNestedDsTarget>): GenericNestedDsTarget {
+    return convertToModel<GenericNestedDsTarget>(data || {}, metadata.GenericNestedDsTarget) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid GenericNestedDsTarget implementation. */
+  static map(data?: Partial<GenericNestedDsTarget>): GenericNestedDsTarget {
+    return mapToModel<GenericNestedDsTarget>(data || {}, metadata.GenericNestedDsTarget) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.GenericNestedDsTarget; }
+  
+  /** Instantiate a new GenericNestedDsTarget, optionally basing it on the given data. */
+  constructor(data?: Partial<GenericNestedDsTarget> | {[k: string]: any}) {
+    Object.assign(this, GenericNestedDsTarget.map(data || {}));
+  }
+}
+export namespace GenericNestedDsTarget {
+  export namespace DataSources {
+    
+    /** Concrete datasource - SHOULD be discovered. */
+    export class DefaultDs implements DataSource<typeof metadata.GenericNestedDsTarget.dataSources.defaultDs> {
+      readonly $metadata = metadata.GenericNestedDsTarget.dataSources.defaultDs
+      onlyActive: boolean | null = null
+      
+      constructor(params?: Omit<Partial<DefaultDs>, '$metadata'>) {
+        if (params) Object.assign(this, params);
+        return reactiveDataSource(this);
+      }
+    }
+  }
+}
+
+
 export interface MultipleParents extends Model<typeof metadata.MultipleParents> {
   id: number | null
   parent1Id: number | null
@@ -1059,6 +1099,58 @@ export class RequiredInternalUseModel {
   /** Instantiate a new RequiredInternalUseModel, optionally basing it on the given data. */
   constructor(data?: Partial<RequiredInternalUseModel> | {[k: string]: any}) {
     Object.assign(this, RequiredInternalUseModel.map(data || {}));
+  }
+}
+
+
+export interface SelfOwnedTenant extends Model<typeof metadata.SelfOwnedTenant> {
+  id: number | null
+  tenantId: number | null
+  ownerTenant: SelfOwnedTenant | null
+}
+export class SelfOwnedTenant {
+  
+  /** Mutates the input object and its descendants into a valid SelfOwnedTenant implementation. */
+  static convert(data?: Partial<SelfOwnedTenant>): SelfOwnedTenant {
+    return convertToModel<SelfOwnedTenant>(data || {}, metadata.SelfOwnedTenant) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid SelfOwnedTenant implementation. */
+  static map(data?: Partial<SelfOwnedTenant>): SelfOwnedTenant {
+    return mapToModel<SelfOwnedTenant>(data || {}, metadata.SelfOwnedTenant) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.SelfOwnedTenant; }
+  
+  /** Instantiate a new SelfOwnedTenant, optionally basing it on the given data. */
+  constructor(data?: Partial<SelfOwnedTenant> | {[k: string]: any}) {
+    Object.assign(this, SelfOwnedTenant.map(data || {}));
+  }
+}
+
+
+export interface SelfOwnedTenantConsumer extends Model<typeof metadata.SelfOwnedTenantConsumer> {
+  id: number | null
+  tenantId: number | null
+  ownerTenant: SelfOwnedTenant | null
+}
+export class SelfOwnedTenantConsumer {
+  
+  /** Mutates the input object and its descendants into a valid SelfOwnedTenantConsumer implementation. */
+  static convert(data?: Partial<SelfOwnedTenantConsumer>): SelfOwnedTenantConsumer {
+    return convertToModel<SelfOwnedTenantConsumer>(data || {}, metadata.SelfOwnedTenantConsumer) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid SelfOwnedTenantConsumer implementation. */
+  static map(data?: Partial<SelfOwnedTenantConsumer>): SelfOwnedTenantConsumer {
+    return mapToModel<SelfOwnedTenantConsumer>(data || {}, metadata.SelfOwnedTenantConsumer) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.SelfOwnedTenantConsumer; }
+  
+  /** Instantiate a new SelfOwnedTenantConsumer, optionally basing it on the given data. */
+  constructor(data?: Partial<SelfOwnedTenantConsumer> | {[k: string]: any}) {
+    Object.assign(this, SelfOwnedTenantConsumer.map(data || {}));
   }
 }
 
@@ -1885,6 +1977,7 @@ declare module "coalesce-vue/lib/model" {
     ExternalParentAsInputOnly: ExternalParentAsInputOnly
     ExternalParentAsOutputOnly: ExternalParentAsOutputOnly
     ExternalTypeWithDtoProp: ExternalTypeWithDtoProp
+    GenericNestedDsTarget: GenericNestedDsTarget
     InitRecordWithDefaultCtor: InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: Location
@@ -1907,6 +2000,8 @@ declare module "coalesce-vue/lib/model" {
     RecursiveHierarchy: RecursiveHierarchy
     RequiredAndInitModel: RequiredAndInitModel
     RequiredInternalUseModel: RequiredInternalUseModel
+    SelfOwnedTenant: SelfOwnedTenant
+    SelfOwnedTenantConsumer: SelfOwnedTenantConsumer
     Sibling: Sibling
     SimpleModelTarget: SimpleModelTarget
     StandaloneReadonly: StandaloneReadonly

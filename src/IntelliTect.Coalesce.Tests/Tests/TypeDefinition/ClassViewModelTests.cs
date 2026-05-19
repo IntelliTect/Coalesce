@@ -78,4 +78,22 @@ public class ClassViewModelTests
         // Should be empty - no fallback ordering should be applied
         await Assert.That(orderings).IsEmpty();
     }
+
+    [Test]
+    public async Task ClientDataSources_ExcludesGenericAndAbstractNestedDataSources()
+    {
+        var repo = ReflectionRepositoryFactory.Reflection;
+        var entityVm = repo.GetClassViewModel<Case>()!;
+
+        var dataSources = entityVm.ClientDataSources(repo).ToList();
+
+        // The concrete AllOpenCases should be discovered
+        await Assert.That(dataSources).Contains(ds => ds.Name == nameof(Case.AllOpenCases));
+
+        // The open-generic GenericCaseDataSource<T> should NOT be discovered
+        await Assert.That(dataSources).DoesNotContain(ds => ds.Name == "GenericCaseDataSource");
+
+        // The abstract AbstractCaseDataSource should NOT be discovered
+        await Assert.That(dataSources).DoesNotContain(ds => ds.Name == nameof(Case.AbstractCaseDataSource));
+    }
 }

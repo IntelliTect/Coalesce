@@ -87,4 +87,11 @@ public class Case
             .Where(c => MinDate == null || c.OpenedAt > MinDate)
             .IncludeChildren();
     }
+
+    // Generic base datasource - should NOT be auto-discovered as a nested datasource.
+    public class GenericCaseDataSource<T>(CrudContext<AppDbContext> context) : StandardDataSource<T, AppDbContext>(context)
+        where T : Case;
+
+    // Abstract datasource - should NOT be auto-discovered as a nested datasource.
+    public abstract class AbstractCaseDataSource(CrudContext<AppDbContext> context) : StandardDataSource<Case, AppDbContext>(context);
 }

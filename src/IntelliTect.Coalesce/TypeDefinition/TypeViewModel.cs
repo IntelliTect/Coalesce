@@ -54,6 +54,13 @@ public abstract class TypeViewModel : IAttributeProvider
 
     public abstract bool IsGeneric { get; }
 
+    /// <summary>
+    /// True if this is a generic type that has been fully closed with concrete type arguments
+    /// (e.g. <c>List&lt;int&gt;</c>), as opposed to an open generic type definition
+    /// (e.g. <c>List&lt;&gt;</c>) or a non-generic type.
+    /// </summary>
+    public virtual bool IsConstructedGenericType => false;
+
     public abstract bool IsAbstract { get; }
 
     /// <summary>

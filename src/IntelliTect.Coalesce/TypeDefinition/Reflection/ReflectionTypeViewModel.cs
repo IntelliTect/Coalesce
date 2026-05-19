@@ -92,6 +92,8 @@ public class ReflectionTypeViewModel : TypeViewModel
 
     public override bool IsGeneric => Info.IsGenericType;
 
+    public override bool IsConstructedGenericType => Info.IsConstructedGenericType;
+
     public override bool IsAbstract => Info.IsAbstract;
 
     public override bool IsArray => Info.IsArray;

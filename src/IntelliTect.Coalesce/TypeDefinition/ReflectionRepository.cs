@@ -230,6 +230,14 @@ public class ReflectionRepository
         {
             // Handled by helper
         }
+        else if (type.IsConstructedGenericType && type.IsA(typeof(IDataSource<>)))
+        {
+            // Constructed generic data sources (e.g. MyOpenSource<Foo>) are only ever
+            // produced by closing an open generic data source at query/codegen time.
+            // The open generic is already tracked in _openGenericDataSources and gets
+            // resolved on-demand per derived type, so we must not also register the
+            // constructed version in _dataSources, which would cause duplicates.
+        }
         else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
         {
             // Handled by helper

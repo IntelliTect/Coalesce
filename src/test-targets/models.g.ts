@@ -86,6 +86,35 @@ export class AbstractModel {
     Object.assign(this, AbstractModel.map(data || {}));
   }
 }
+export namespace AbstractModel {
+  export namespace DataSources {
+    
+    /** 
+      An open generic data source constrained to AbstractModel.
+      Should be discovered for AbstractModel itself and all derived types (AbstractImpl1, AbstractImpl2).
+    */
+    export class AbstractModelDataSource implements DataSource<typeof metadata.AbstractModel.dataSources.abstractModelDataSource> {
+      readonly $metadata = metadata.AbstractModel.dataSources.abstractModelDataSource
+    }
+    
+    /** 
+      An open generic default data source constrained to AbstractModel.
+      Should be the default data source for AbstractModel and all derived types.
+    */
+    export class DefaultAbstractModelDataSource implements DataSource<typeof metadata.AbstractModel.dataSources.defaultAbstractModelDataSource> {
+      readonly $metadata = metadata.AbstractModel.dataSources.defaultAbstractModelDataSource
+    }
+    
+    /** 
+      A top-level open generic data source constrained to AbstractModel,
+      discovered via [Coalesce] attribute. Should be available for AbstractModel
+      itself and all derived types.
+    */
+    export class TopLevelAbstractModelDataSource implements DataSource<typeof metadata.AbstractModel.dataSources.topLevelAbstractModelDataSource> {
+      readonly $metadata = metadata.AbstractModel.dataSources.topLevelAbstractModelDataSource
+    }
+  }
+}
 
 
 export interface AbstractImpl1 extends Model<typeof metadata.AbstractImpl1> {
@@ -115,6 +144,35 @@ export class AbstractImpl1 {
     Object.assign(this, AbstractImpl1.map(data || {}));
   }
 }
+export namespace AbstractImpl1 {
+  export namespace DataSources {
+    
+    /** 
+      An open generic data source constrained to AbstractModel.
+      Should be discovered for AbstractModel itself and all derived types (AbstractImpl1, AbstractImpl2).
+    */
+    export class AbstractModelDataSource implements DataSource<typeof metadata.AbstractImpl1.dataSources.abstractModelDataSource> {
+      readonly $metadata = metadata.AbstractImpl1.dataSources.abstractModelDataSource
+    }
+    
+    /** 
+      An open generic default data source constrained to AbstractModel.
+      Should be the default data source for AbstractModel and all derived types.
+    */
+    export class DefaultAbstractModelDataSource implements DataSource<typeof metadata.AbstractImpl1.dataSources.defaultAbstractModelDataSource> {
+      readonly $metadata = metadata.AbstractImpl1.dataSources.defaultAbstractModelDataSource
+    }
+    
+    /** 
+      A top-level open generic data source constrained to AbstractModel,
+      discovered via [Coalesce] attribute. Should be available for AbstractModel
+      itself and all derived types.
+    */
+    export class TopLevelAbstractModelDataSource implements DataSource<typeof metadata.AbstractImpl1.dataSources.topLevelAbstractModelDataSource> {
+      readonly $metadata = metadata.AbstractImpl1.dataSources.topLevelAbstractModelDataSource
+    }
+  }
+}
 
 
 export interface AbstractImpl2 extends Model<typeof metadata.AbstractImpl2> {
@@ -140,6 +198,35 @@ export class AbstractImpl2 {
   /** Instantiate a new AbstractImpl2, optionally basing it on the given data. */
   constructor(data?: Partial<AbstractImpl2> | {[k: string]: any}) {
     Object.assign(this, AbstractImpl2.map(data || {}));
+  }
+}
+export namespace AbstractImpl2 {
+  export namespace DataSources {
+    
+    /** 
+      An open generic data source constrained to AbstractModel.
+      Should be discovered for AbstractModel itself and all derived types (AbstractImpl1, AbstractImpl2).
+    */
+    export class AbstractModelDataSource implements DataSource<typeof metadata.AbstractImpl2.dataSources.abstractModelDataSource> {
+      readonly $metadata = metadata.AbstractImpl2.dataSources.abstractModelDataSource
+    }
+    
+    /** 
+      An open generic default data source constrained to AbstractModel.
+      Should be the default data source for AbstractModel and all derived types.
+    */
+    export class DefaultAbstractModelDataSource implements DataSource<typeof metadata.AbstractImpl2.dataSources.defaultAbstractModelDataSource> {
+      readonly $metadata = metadata.AbstractImpl2.dataSources.defaultAbstractModelDataSource
+    }
+    
+    /** 
+      A top-level open generic data source constrained to AbstractModel,
+      discovered via [Coalesce] attribute. Should be available for AbstractModel
+      itself and all derived types.
+    */
+    export class TopLevelAbstractModelDataSource implements DataSource<typeof metadata.AbstractImpl2.dataSources.topLevelAbstractModelDataSource> {
+      readonly $metadata = metadata.AbstractImpl2.dataSources.topLevelAbstractModelDataSource
+    }
   }
 }
 
@@ -247,6 +334,10 @@ export namespace Case {
         if (params) Object.assign(this, params);
         return reactiveDataSource(this);
       }
+    }
+    
+    export class GenericCaseDataSource implements DataSource<typeof metadata.Case.dataSources.genericCaseDataSource> {
+      readonly $metadata = metadata.Case.dataSources.genericCaseDataSource
     }
   }
 }
@@ -593,46 +684,6 @@ export class EnumPk {
   /** Instantiate a new EnumPk, optionally basing it on the given data. */
   constructor(data?: Partial<EnumPk> | {[k: string]: any}) {
     Object.assign(this, EnumPk.map(data || {}));
-  }
-}
-
-
-export interface GenericNestedDsTarget extends Model<typeof metadata.GenericNestedDsTarget> {
-  id: number | null
-  isActive: boolean | null
-}
-export class GenericNestedDsTarget {
-  
-  /** Mutates the input object and its descendants into a valid GenericNestedDsTarget implementation. */
-  static convert(data?: Partial<GenericNestedDsTarget>): GenericNestedDsTarget {
-    return convertToModel<GenericNestedDsTarget>(data || {}, metadata.GenericNestedDsTarget) 
-  }
-  
-  /** Maps the input object and its descendants to a new, valid GenericNestedDsTarget implementation. */
-  static map(data?: Partial<GenericNestedDsTarget>): GenericNestedDsTarget {
-    return mapToModel<GenericNestedDsTarget>(data || {}, metadata.GenericNestedDsTarget) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.GenericNestedDsTarget; }
-  
-  /** Instantiate a new GenericNestedDsTarget, optionally basing it on the given data. */
-  constructor(data?: Partial<GenericNestedDsTarget> | {[k: string]: any}) {
-    Object.assign(this, GenericNestedDsTarget.map(data || {}));
-  }
-}
-export namespace GenericNestedDsTarget {
-  export namespace DataSources {
-    
-    /** Concrete datasource - SHOULD be discovered. */
-    export class DefaultDs implements DataSource<typeof metadata.GenericNestedDsTarget.dataSources.defaultDs> {
-      readonly $metadata = metadata.GenericNestedDsTarget.dataSources.defaultDs
-      onlyActive: boolean | null = null
-      
-      constructor(params?: Omit<Partial<DefaultDs>, '$metadata'>) {
-        if (params) Object.assign(this, params);
-        return reactiveDataSource(this);
-      }
-    }
   }
 }
 
@@ -1977,7 +2028,6 @@ declare module "coalesce-vue/lib/model" {
     ExternalParentAsInputOnly: ExternalParentAsInputOnly
     ExternalParentAsOutputOnly: ExternalParentAsOutputOnly
     ExternalTypeWithDtoProp: ExternalTypeWithDtoProp
-    GenericNestedDsTarget: GenericNestedDsTarget
     InitRecordWithDefaultCtor: InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: Location

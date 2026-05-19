@@ -14,6 +14,7 @@ export interface AbstractImpl1ViewModel extends $models.AbstractImpl1 {
   set abstractModelPeople(value: (AbstractModelPersonViewModel | $models.AbstractModelPerson)[] | null);
 }
 export class AbstractImpl1ViewModel extends ViewModel<$models.AbstractImpl1, $apiClients.AbstractImpl1ApiClient, number> implements $models.AbstractImpl1  {
+  static DataSources = $models.AbstractImpl1.DataSources;
   
   
   public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
@@ -42,6 +43,7 @@ export class AbstractImpl1ViewModel extends ViewModel<$models.AbstractImpl1, $ap
 defineProps(AbstractImpl1ViewModel, $metadata.AbstractImpl1)
 
 export class AbstractImpl1ListViewModel extends ListViewModel<$models.AbstractImpl1, $apiClients.AbstractImpl1ApiClient, AbstractImpl1ViewModel> {
+  static DataSources = $models.AbstractImpl1.DataSources;
   
   public get getCount() {
     const getCount = this.$apiClient.$makeCaller(
@@ -79,6 +81,7 @@ export interface AbstractImpl2ViewModel extends $models.AbstractImpl2 {
   set abstractModelPeople(value: (AbstractModelPersonViewModel | $models.AbstractModelPerson)[] | null);
 }
 export class AbstractImpl2ViewModel extends ViewModel<$models.AbstractImpl2, $apiClients.AbstractImpl2ApiClient, number> implements $models.AbstractImpl2  {
+  static DataSources = $models.AbstractImpl2.DataSources;
   
   
   public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
@@ -107,6 +110,7 @@ export class AbstractImpl2ViewModel extends ViewModel<$models.AbstractImpl2, $ap
 defineProps(AbstractImpl2ViewModel, $metadata.AbstractImpl2)
 
 export class AbstractImpl2ListViewModel extends ListViewModel<$models.AbstractImpl2, $apiClients.AbstractImpl2ApiClient, AbstractImpl2ViewModel> {
+  static DataSources = $models.AbstractImpl2.DataSources;
   
   public get getCount() {
     const getCount = this.$apiClient.$makeCaller(
@@ -140,6 +144,7 @@ export type AbstractModelViewModel = AbstractImpl1ViewModel | AbstractImpl2ViewM
 export const AbstractModelViewModel = createAbstractProxyViewModelType<$models.AbstractModel, AbstractModelViewModel>($metadata.AbstractModel, $apiClients.AbstractModelApiClient)
 
 export class AbstractModelListViewModel extends ListViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, AbstractModelViewModel> {
+  static DataSources = $models.AbstractModel.DataSources;
   
   public get getCount() {
     const getCount = this.$apiClient.$makeCaller(
@@ -1051,28 +1056,6 @@ export class EnumPkListViewModel extends ListViewModel<$models.EnumPk, $apiClien
 }
 
 
-export interface GenericNestedDsTargetViewModel extends $models.GenericNestedDsTarget {
-  id: number | null;
-  isActive: boolean | null;
-}
-export class GenericNestedDsTargetViewModel extends ViewModel<$models.GenericNestedDsTarget, $apiClients.GenericNestedDsTargetApiClient, number> implements $models.GenericNestedDsTarget  {
-  static DataSources = $models.GenericNestedDsTarget.DataSources;
-  
-  constructor(initialData?: DeepPartial<$models.GenericNestedDsTarget> | null) {
-    super($metadata.GenericNestedDsTarget, new $apiClients.GenericNestedDsTargetApiClient(), initialData)
-  }
-}
-defineProps(GenericNestedDsTargetViewModel, $metadata.GenericNestedDsTarget)
-
-export class GenericNestedDsTargetListViewModel extends ListViewModel<$models.GenericNestedDsTarget, $apiClients.GenericNestedDsTargetApiClient, GenericNestedDsTargetViewModel> {
-  static DataSources = $models.GenericNestedDsTarget.DataSources;
-  
-  constructor() {
-    super($metadata.GenericNestedDsTarget, new $apiClients.GenericNestedDsTargetApiClient())
-  }
-}
-
-
 export interface MultipleParentsViewModel extends $models.MultipleParents {
   id: number | null;
   parent1Id: number | null;
@@ -1915,7 +1898,6 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   DateTimeOffsetPk: DateTimeOffsetPkViewModel,
   DateTimePk: DateTimePkViewModel,
   EnumPk: EnumPkViewModel,
-  GenericNestedDsTarget: GenericNestedDsTargetViewModel,
   MultipleParents: MultipleParentsViewModel,
   OneToOneManyChildren: OneToOneManyChildrenViewModel,
   OneToOneParent: OneToOneParentViewModel,
@@ -1959,7 +1941,6 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   DateTimeOffsetPk: DateTimeOffsetPkListViewModel,
   DateTimePk: DateTimePkListViewModel,
   EnumPk: EnumPkListViewModel,
-  GenericNestedDsTarget: GenericNestedDsTargetListViewModel,
   MultipleParents: MultipleParentsListViewModel,
   OneToOneManyChildren: OneToOneManyChildrenListViewModel,
   OneToOneParent: OneToOneParentListViewModel,

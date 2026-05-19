@@ -53,25 +53,32 @@ If you have a class hierarchy and want a single data source implementation to ap
 This works for both default data sources (via `[DefaultDataSource]`) and additional named data sources. The data source can be either nested in the base class, or declared as a top-level type with `[Coalesce]`.
 
 ```cs
-public abstract class AppEntity
+public abstract class Animal
 {
-    public int Id { get; set; }
-    public int TenantId { get; set; }
+    public int AnimalId { get; set; }
+    public int ShelterId { get; set; }
 
-    // This default data source is shared by AppEntity and all derived types.
-    // The closed T is automatically substituted (e.g. ProductDataSource for Product).
+    // This default data source is shared by Animal and all derived types (Dog, Cat, etc.).
+    // Coalesce closes the generic T for each entity in the hierarchy.
     [DefaultDataSource]
-    public class TenantScopedSource<T>(CrudContext<AppDbContext> context)
+    public class ShelterScopedSource<T>(CrudContext<AppDbContext> context)
         : StandardDataSource<T, AppDbContext>(context)
-        where T : AppEntity
+        where T : Animal
     {
         public override IQueryable<T> GetQuery(IDataSourceParameters parameters)
-            => base.GetQuery(parameters).Where(e => e.TenantId == User.GetTenantId());
+            => base.GetQuery(parameters).Where(a => a.ShelterId == User.GetShelterId());
     }
 }
 
-public class Product : AppEntity { /* ... */ }
-public class Order : AppEntity { /* ... */ }
+public class Dog : Animal
+{
+    public string Breed { get; set; }
+}
+
+public class Cat : Animal
+{
+    public bool IsIndoor { get; set; }
+}
 ```
 
 A derived type can still declare its own data source(s) to override or supplement what it inherits from the base class. A non-generic data source declared on the derived type takes precedence over the inherited open generic one when their names match (or when both are the default).

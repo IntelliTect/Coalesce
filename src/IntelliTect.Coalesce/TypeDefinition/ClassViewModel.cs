@@ -35,7 +35,7 @@ public abstract class ClassViewModel : IAttributeProvider
         Type = type;
     }
 
-    public abstract string Name { get; }
+    public virtual string Name => Type.Name;
     public abstract string? Comment { get; }
     public TypeViewModel Type { get; protected set; }
     public abstract bool IsStatic { get; }

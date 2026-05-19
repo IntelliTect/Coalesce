@@ -25,9 +25,6 @@ public class ReflectionClassViewModel : ClassViewModel
             ?? new ReflectionClassViewModel(type);
     }
 
-    // Strip generic arity suffix (e.g. `1) to match the behavior of ReflectionTypeViewModel.Name.
-    public override string Name => Info.Name.Replace("`1", "");
-
     public override string Comment => "";
 
     public override bool IsStatic => Info.IsAbstract && Info.IsSealed;

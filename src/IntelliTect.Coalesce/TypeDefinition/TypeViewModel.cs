@@ -123,6 +123,21 @@ public abstract class TypeViewModel : IAttributeProvider
     public bool IsA<T>() => IsA(typeof(T));
 
     /// <summary>
+    /// Returns true if this type is the same as, or is derived from, <paramref name="other"/>,
+    /// by walking the base type chain.
+    /// </summary>
+    public bool IsA(ClassViewModel other)
+    {
+        var current = (TypeViewModel?)this;
+        while (current is not null)
+        {
+            if (current.ClassViewModel?.Equals(other) == true) return true;
+            current = current.BaseType;
+        }
+        return false;
+    }
+
+    /// <summary>
     /// For open generic types with exactly one type parameter that has a single class constraint,
     /// returns the <see cref="TypeViewModel"/> representing that class constraint.
     /// Returns <see langword="null"/> for all other types.

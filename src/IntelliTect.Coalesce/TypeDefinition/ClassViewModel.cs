@@ -264,10 +264,16 @@ public abstract class ClassViewModel : IAttributeProvider
         var directNames = new HashSet<string>(direct.Select(d => d.ClientTypeName), StringComparer.OrdinalIgnoreCase);
         var hasDirectDefault = direct.Any(d => d.IsDefaultDataSource);
 
+        var inherited = GetInheritedOpenGenericDataSources(repo)
+            .Where(d => !directNames.Contains(d.ClientTypeName)
+                && !(hasDirectDefault && d.IsDefaultDataSource))
+            // Deduplicate inherited sources by name (e.g. if multiple base classes
+            // in the hierarchy each declare an open generic with the same name,
+            // take only the first match which is the most derived constraint).
+            .DistinctBy(d => d.ClientTypeName);
+
         return direct
-            .Concat(GetInheritedOpenGenericDataSources(repo)
-                .Where(d => !directNames.Contains(d.ClientTypeName)
-                    && !(hasDirectDefault && d.IsDefaultDataSource)))
+            .Concat(inherited)
             .OrderBy(d => d.ClientTypeName);
     }
 

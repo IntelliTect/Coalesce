@@ -232,6 +232,14 @@ export const AbstractClass = domain.types.AbstractClass = {
     },
   },
   dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
   },
 }
 export const AbstractClassImpl = domain.types.AbstractClassImpl = {
@@ -359,6 +367,14 @@ export const AbstractClassImpl = domain.types.AbstractClassImpl = {
     },
   },
   dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
   },
 }
 export const AbstractClassPerson = domain.types.AbstractClassPerson = {

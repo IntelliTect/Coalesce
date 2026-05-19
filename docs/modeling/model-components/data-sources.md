@@ -46,6 +46,36 @@ If you create a custom data source that has custom logic for securing your data,
 
 All data sources are instantiated using dependency injection and your application's `IServiceProvider`. As a result, you can add whatever constructor parameters you desire to your data sources as long as a value for them can be resolved from your application's services. The single parameter to the `StandardDataSource` is resolved in this way - the `CrudContext<TContext>` contains the common set of objects most commonly used, including the `DbContext` and the `ClaimsPrincipal` representing the current user.
 
+### Sharing Data Sources Across an Inheritance Hierarchy
+
+If you have a class hierarchy and want a single data source implementation to apply to a base class and all of its derived types, declare the data source with an open generic parameter that is constrained to the base class. Coalesce will automatically close the generic for each derived type and use the resulting data source for that type, just as if you had declared it directly on each derived class.
+
+This works for both default data sources (via `[DefaultDataSource]`) and additional named data sources. The data source can be either nested in the base class, or declared as a top-level type with `[Coalesce]`.
+
+```cs
+public abstract class AppEntity
+{
+    public int Id { get; set; }
+    public int TenantId { get; set; }
+
+    // This default data source is shared by AppEntity and all derived types.
+    // The closed T is automatically substituted (e.g. ProductDataSource for Product).
+    [DefaultDataSource]
+    public class TenantScopedSource<T>(CrudContext<AppDbContext> context)
+        : StandardDataSource<T, AppDbContext>(context)
+        where T : AppEntity
+    {
+        public override IQueryable<T> GetQuery(IDataSourceParameters parameters)
+            => base.GetQuery(parameters).Where(e => e.TenantId == User.GetTenantId());
+    }
+}
+
+public class Product : AppEntity { /* ... */ }
+public class Order : AppEntity { /* ... */ }
+```
+
+A derived type can still declare its own data source(s) to override or supplement what it inherits from the base class. A non-generic data source declared on the derived type takes precedence over the inherited open generic one when their names match (or when both are the default).
+
 
 ## Consuming Data Sources
 

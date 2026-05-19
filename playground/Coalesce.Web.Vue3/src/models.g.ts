@@ -62,6 +62,21 @@ export class AbstractClass {
     Object.assign(this, AbstractClass.map(data || {}));
   }
 }
+export namespace AbstractClass {
+  export namespace DataSources {
+    
+    /** 
+      A default data source declared with an open generic parameter constrained to AbstractClass.
+      Because  is constrained to AbstractClass,
+      this data source is automatically used as the default for AbstractClass
+      and every derived type (e.g. AbstractClassImpl) without needing to
+      declare a separate data source on each derived class.
+    */
+    export class DefaultSource implements DataSource<typeof metadata.AbstractClass.dataSources.defaultSource> {
+      readonly $metadata = metadata.AbstractClass.dataSources.defaultSource
+    }
+  }
+}
 
 
 export interface AbstractClassImpl extends Model<typeof metadata.AbstractClassImpl> {
@@ -87,6 +102,21 @@ export class AbstractClassImpl {
   /** Instantiate a new AbstractClassImpl, optionally basing it on the given data. */
   constructor(data?: Partial<AbstractClassImpl> | {[k: string]: any}) {
     Object.assign(this, AbstractClassImpl.map(data || {}));
+  }
+}
+export namespace AbstractClassImpl {
+  export namespace DataSources {
+    
+    /** 
+      A default data source declared with an open generic parameter constrained to AbstractClass.
+      Because  is constrained to AbstractClass,
+      this data source is automatically used as the default for AbstractClass
+      and every derived type (e.g. AbstractClassImpl) without needing to
+      declare a separate data source on each derived class.
+    */
+    export class DefaultSource implements DataSource<typeof metadata.AbstractClassImpl.dataSources.defaultSource> {
+      readonly $metadata = metadata.AbstractClassImpl.dataSources.defaultSource
+    }
   }
 }
 

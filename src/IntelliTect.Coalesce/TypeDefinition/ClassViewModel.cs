@@ -265,7 +265,7 @@ public abstract class ClassViewModel : IAttributeProvider
         foreach (var usage in repo.OpenGenericDataSources)
         {
             // Check if this type is the constraint type or is derived from it.
-            if (!Type.IsA(usage.ConstraintType)) continue;
+            if (!Type.IsA(usage.ConstraintType.Type)) continue;
 
             var closed = usage.StrategyClass.Type.CloseWithTypeArgument(Type);
             if (closed?.ClassViewModel is { } cvm) yield return cvm;

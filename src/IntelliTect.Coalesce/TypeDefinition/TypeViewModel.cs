@@ -126,12 +126,12 @@ public abstract class TypeViewModel : IAttributeProvider
     /// Returns true if this type is the same as, or is derived from, <paramref name="other"/>,
     /// by walking the base type chain.
     /// </summary>
-    public bool IsA(ClassViewModel other)
+    public bool IsA(TypeViewModel other)
     {
         var current = (TypeViewModel?)this;
         while (current is not null)
         {
-            if (current.ClassViewModel?.Equals(other) == true) return true;
+            if (current.Equals(other)) return true;
             current = current.BaseType;
         }
         return false;

@@ -30,9 +30,6 @@ public static class MultiTenancyConvention
 /// implementing <typeparamref name="TTenanted"/>. It runs after all entity types are registered,
 /// ensuring correct handling of TPH hierarchies regardless of entity discovery order.
 /// </para>
-/// <para>
-/// Register via <see cref="MultiTenancyDbContextOptionsBuilderExtensions.UseCoalesceMultiTenancy{TTenanted}"/>.
-/// </para>
 /// </summary>
 public class MultiTenancyConvention<TTenanted>(
     string entityTenantIdPropertyName,

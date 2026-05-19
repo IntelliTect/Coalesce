@@ -99,7 +99,7 @@ public class AppDbContext
         .UseStamping<TrackingBase>((entity, user) => entity.SetTracking(user))
 #endif
 #if Tenancy
-        .UseCoalesceMultiTenancy<ITenanted, string>(t => t.TenantId, () => TenantIdOrThrow)
+        .UseCoalesceMultiTenancy<ITenanted>(t => t.TenantId, () => TenantIdOrThrow)
 #endif
 #if AuditLogs
         .UseCoalesceAuditLogging<AuditLog>(x => x

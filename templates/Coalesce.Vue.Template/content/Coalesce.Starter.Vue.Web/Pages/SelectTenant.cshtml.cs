@@ -1,7 +1,6 @@
 using Coalesce.Starter.Vue.Data;
 using Coalesce.Starter.Vue.Data.Auth;
 using Coalesce.Starter.Vue.Data.Models;
-using Coalesce.Starter.Vue.Data.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +46,7 @@ public class SelectTenantModel(AppDbContext db) : PageModel
     {
         var userId = User.GetUserId();
         Tenants = await db.TenantMemberships
-            .IgnoreTenancy()
+            .IgnoreTenantFilter()
             .Where(tm => tm.UserId == userId)
             .Select(tm => tm.Tenant!)
             .OrderBy(t => t.Name)

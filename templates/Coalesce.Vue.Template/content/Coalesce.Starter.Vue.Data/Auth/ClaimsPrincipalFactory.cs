@@ -19,7 +19,7 @@ public class ClaimsPrincipalFactory(
         {
             // User doesn't have a selected tenant. Pick one for them.
             var membership = await db.TenantMemberships
-                .IgnoreTenancy()
+                .IgnoreTenantFilter()
 #if TrackingBase
                 .OrderBy(m => m.CreatedOn) // Prefer oldest membership
 #endif

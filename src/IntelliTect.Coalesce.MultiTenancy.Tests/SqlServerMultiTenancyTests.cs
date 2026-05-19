@@ -156,7 +156,7 @@ public class SqlServerMultiTenancyTests
             async () => await db.Database.ExecuteSqlRawAsync(
                 "INSERT INTO DogTags (DogTagId, TenantId, DogId) VALUES ({0}, {1}, {2})",
                 Guid.NewGuid().ToString("N"), "tenant-2", dog.AnimalId));
-        await Assert.That(ex.Message).Contains("FOREIGN KEY constraint");
+        await Assert.That(ex!.Message).Contains("FOREIGN KEY constraint");
     }
 
     // ── Self-referencing FK ───────────────────────────────────────────────────
@@ -193,6 +193,6 @@ public class SqlServerMultiTenancyTests
             async () => await db.Database.ExecuteSqlRawAsync(
                 "INSERT INTO Categories (CategoryId, TenantId, Name, ParentCategoryId) VALUES ({0}, {1}, {2}, {3})",
                 Guid.NewGuid().ToString("N"), "tenant-2", "Phones", parent.CategoryId));
-        await Assert.That(ex.Message).Contains("FOREIGN KEY");
+        await Assert.That(ex!.Message).Contains("FOREIGN KEY");
     }
 }

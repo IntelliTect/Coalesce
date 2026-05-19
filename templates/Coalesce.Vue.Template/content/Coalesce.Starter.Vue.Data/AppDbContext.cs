@@ -1,16 +1,10 @@
 using Coalesce.Starter.Vue.Data.Coalesce;
-using IntelliTect.Coalesce.TypeDefinition;
 #if AuditLogs
 using IntelliTect.Coalesce.AuditLogging;
 #endif
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
-using System.Linq.Expressions;
 using System.Security.Cryptography;
 
 namespace Coalesce.Starter.Vue.Data;
@@ -105,7 +99,7 @@ public class AppDbContext
         .UseStamping<TrackingBase>((entity, user) => entity.SetTracking(user))
 #endif
 #if Tenancy
-        .AddInterceptors(new TenantInterceptor())
+        .UseCoalesceMultiTenancy<ITenanted>(t => t.TenantId, () => TenantIdOrThrow)
 #endif
 #if AuditLogs
         .UseCoalesceAuditLogging<AuditLog>(x => x
@@ -201,142 +195,6 @@ public class AppDbContext
         });
 #endif
 
-#if Tenancy
-        // Configure multi-tenancy. This MUST BE LAST.
-        ConfigureTenancy(builder);
-#endif
     }
 
-#if Tenancy
-    private void ConfigureTenancy(ModelBuilder builder)
-    {
-        foreach (var model in builder.Model
-            .GetEntityTypes()
-            .Where(e => e.ClrType.GetInterface(nameof(ITenanted)) != null)
-            .ToList())
-        {
-            // Create the global query filter for the model that will restrict data to the current tenant.
-            // A non-null `BaseType` indicates a concrete type in a TPH or TPT setup, which aren't allowed their own query filters.
-            if (model.BaseType is null)
-            {
-                var param = Expression.Parameter(model.ClrType);
-                model.SetQueryFilter("TenancyFilter", Expression.Lambda(
-                    Expression.Equal(
-                        Expression.MakeMemberAccess(param, model.ClrType.GetProperty("TenantId")!),
-                        Expression.MakeMemberAccess(Expression.Constant(this), this.GetType().GetProperty("TenantIdOrThrow")!)
-                    ),
-                    param
-                ));
-            }
-
-            // Put the tenantID as the first part of each tenanted entity's PK.
-
-            // This is done in a way that is transparent to Coalesce so that Coalesce
-            // and its APIs are essentially unconcerned with tenancy - the tenant is always derived
-            // from the logged in user. Also because Coalesce doesn't support composite keys.
-
-            // Doing this lets us include tenantIDs as part of foreign keys,
-            // and also affords us slightly more performance when doing joins
-            // since data from each tenant will be clustered together.
-
-            var key = model.FindPrimaryKey();
-            var tenantIdProp = model.FindProperty(nameof(ITenanted.TenantId));
-            if (key is { Properties.Count: 1 } && tenantIdProp is not null && key.Properties.Single() != tenantIdProp)
-            {
-                // A value generator is added so that entities can be .Add()ed to the DbContext
-                // while their TenantID is still null (if EF can't figure out the TenantId through any other navigation prop).
-                tenantIdProp.SetValueGeneratorFactory((p, t) => new TenantIdValueGenerator());
-
-                var pkProp = key.Properties.Single();
-                var oldPkGenerated = pkProp.ValueGenerated;
-
-                if (
-                    Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite" &&
-                    new ReflectionTypeViewModel(pkProp.ClrType).PureType.IsNumber &&
-                    pkProp.ValueGenerated is ValueGenerated.OnAdd &&
-                    pkProp.GetValueGeneratorFactory() is null
-                )
-                {
-                    // Unfortunately for Sqlite and unit testing, we can't have composite keys where part of the key is auto-increment.
-                    // See https://stackoverflow.com/questions/49592274/how-to-create-autoincrement-column-in-sqlite-using-ef-core
-                    // So, do the next best thing and add a second FK that includes the tenantID.
-
-                    var tenantedAk = model.AddKey([tenantIdProp, pkProp])!;
-
-                    foreach (var fk in model.GetReferencingForeignKeys().ToList())
-                    {
-                        var dependentTenantId = fk.DeclaringEntityType.FindProperty(nameof(ITenanted.TenantId));
-                        if (dependentTenantId is null) continue;
-
-                        var newFk = fk.DeclaringEntityType.AddForeignKey(new[] {
-                            dependentTenantId,
-                            fk.Properties.Single()
-                        }, tenantedAk, model);
-
-                        newFk.DeleteBehavior = DeleteBehavior.NoAction;
-                    }
-                }
-                else
-                {
-                    // Ideal scenario: Add the TenantId as the first column in a composite PK for the table:
-
-                    var newPk = model.BaseType != null
-                        // A non-null `BaseType` indicates a concrete type in a TPH or TPT setup,
-                        // which can only inherit the PK from their base type.
-                        ? model.FindPrimaryKey()!
-                        : model.SetPrimaryKey([tenantIdProp, pkProp])!;
-
-                    foreach (var fk in model.GetReferencingForeignKeys().ToList())
-                    {
-                        fk.SetProperties([
-                            fk.DeclaringEntityType.FindProperty(nameof(ITenanted.TenantId))
-                                ?? throw new InvalidOperationException($"Foreign key from untenanted entity {fk.DeclaringEntityType} cannot reference tenanted principal {model}"),
-                            fk.Properties.Single()
-                        ], newPk);
-                    }
-
-                    // Keep the old PK prop as an identity column if it previously was before we changed the PK.
-                    pkProp.ValueGenerated = oldPkGenerated;
-                }
-            }
-        }
-    }
-
-    class TenantIdValueGenerator : ValueGenerator<string>
-    {
-        public override bool GeneratesTemporaryValues => false;
-        public override bool GeneratesStableValues => true;
-
-        public override string Next(EntityEntry entry) => ((AppDbContext)entry.Context).TenantIdOrThrow;
-    }
-
-    class TenantInterceptor : SaveChangesInterceptor
-    {
-        public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
-        {
-            var db = (AppDbContext)eventData.Context!;
-            foreach (var entry in db.ChangeTracker.Entries<ITenanted>())
-            {
-                if (entry.State == EntityState.Added)
-                {
-                    entry.Property(nameof(ITenanted.TenantId)).CurrentValue = db.TenantId;
-                }
-                else if (entry.State == EntityState.Modified && entry.Property(nameof(ITenanted.TenantId)).IsModified)
-                {
-                    throw new InvalidOperationException("Cannot change the TenantId of an existing entity.");
-                }
-            }
-
-            return result;
-        }
-
-        public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
-            DbContextEventData eventData,
-            InterceptionResult<int> result,
-            CancellationToken cancellationToken = default)
-        {
-            return new ValueTask<InterceptionResult<int>>(SavingChanges(eventData, result));
-        }
-    }
-#endif
 }

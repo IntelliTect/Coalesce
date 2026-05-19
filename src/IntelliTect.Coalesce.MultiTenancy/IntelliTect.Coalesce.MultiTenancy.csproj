@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../Common.props" />
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <Description>Multi-tenant data isolation for Entity Framework models. Configures query filters, composite primary keys, and FK rewiring. Learn more at https://coalesce.intellitect.com/topics/tenancy.html</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+    </ItemGroup>
+</Project>

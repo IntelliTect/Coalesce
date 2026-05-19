@@ -26,11 +26,25 @@ The `TenantId` property on `AppDbContext` serves as the single source of truth f
 
 `ClaimsPrincipalFactory` determines which tenant a user is signed into via the `TenantId` claim. By default, this will be the existing authenticated tenant when refreshing claims, or the user's oldest tenant membership when handling a new sign-in. It can also reject a user from accessing any real tenant by signing them into the `NullTenantId`.
 
-Creating new records in your database (via Entity Framework's `SaveChanges`/`SaveChangesAsync`) is handled by the `TenantInterceptor`. This interceptor attaches the current `TenantId` to all tenanted entities being created. Note that this only works through SaveChanges calls and does not intercept data created via raw SQL statements.
+All tenancy database mechanics are handled by the `IntelliTect.Coalesce.MultiTenancy` package, configured with a single call in `OnConfiguring`:
 
-Querying tenanted data is managed by a global query filter dynamically applied to all tenanted entities in the `ConfigureTenancy` method of your `AppDbContext`. This filter applies a simple `entity.TenantId == db.TenantIdOrThrow` predicate to all queries, eliminating the need to manually filter data in your application code.
+```cs
+optionsBuilder.UseCoalesceMultiTenancy<ITenanted>(t => t.TenantId, () => TenantIdOrThrow);
+```
 
-Referential integrity in the database is configured to ensure that data cannot "leak" between tenants. In the `ConfigureTenancy` method, the primary key of all tenanted tables is modified to include the `TenantId` as the first ordinal column of the PK. Foreign key constraints are updated accordingly. This approach clusters tenant data together in the database (improving performance) and prevents [foreign key injection](/topics/security.md#foreign-key-injection-vulnerabilities) from linking data between tenants.
+This call registers both a model-finalizing convention and a save interceptor that together provide:
+
+- **Query filters** — A global query filter (`entity.TenantId == db.TenantIdOrThrow`) is applied to all `ITenanted` entities, eliminating the need to manually filter data in your application code.
+- **Composite PK expansion** — The primary key of all tenanted tables is expanded to include `TenantId` as the first column. This clusters tenant data together (improving performance) and prevents [foreign key injection](/topics/security.md#foreign-key-injection-vulnerabilities) from linking data between tenants. Foreign key constraints are rewired accordingly.
+- **Save interceptor** — Creates new records with the current `TenantId` automatically attached, and throws if an existing entity's `TenantId` is modified. Note that this only works through `SaveChanges`/`SaveChangesAsync` calls and does not intercept data created via raw SQL statements.
+
+To perform queries without tenant filtering (e.g., for admin/system operations), use the `IgnoreTenantFilter` extension method (requires .NET 10+). This returns untracked results to prevent accidental cross-tenant modifications:
+
+```cs
+var allItems = await db.Widgets.IgnoreTenantFilter().ToListAsync();
+```
+
+If you need change tracking (e.g., to modify data across tenants intentionally), use `IgnoreTenantFilterTracked` instead.
 
 ### Identity & Users
 

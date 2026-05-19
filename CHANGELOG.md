@@ -1,5 +1,16 @@
 # 6.6.0
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
+- Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library.
+
+## Template Changes
+- Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project:
+  1. Add the package `IntelliTect.Coalesce.MultiTenancy`
+  2. In `OnConfiguring`, replace `.AddInterceptors(new TenantInterceptor())` with:
+     ```cs
+     .UseCoalesceMultiTenancy<ITenanted>(t => t.TenantId, () => TenantIdOrThrow)
+     ```
+  3. Delete the `ConfigureTenancy` method, the `TenantInterceptor` class, and the `TenantIdValueGenerator` class from your `AppDbContext`. The `ITenanted` interface and `TenantedBase` class remain in your project — they are not provided by the library.
+
 
 # 6.5.2
 - Fix `c-input` using numeric enum values instead of string values for string-serialized enums (`[JsonStringEnumConverter]`), causing the selected item to not be found in the dropdown.

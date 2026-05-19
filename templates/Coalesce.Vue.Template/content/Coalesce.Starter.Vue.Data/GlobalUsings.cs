@@ -9,7 +9,6 @@ global using static IntelliTect.Coalesce.DataAnnotations.SecurityPermissionLevel
 global using System.Security.Claims;
 global using Coalesce.Starter.Vue.Data.Auth;
 global using Coalesce.Starter.Vue.Data.Coalesce;
-global using Coalesce.Starter.Vue.Data.Utilities;
 #if (Identity || ExampleModel || TrackingBase)
 global using Coalesce.Starter.Vue.Data.Models;
 #endif

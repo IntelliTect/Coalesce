@@ -53,6 +53,19 @@ public class AbstractImpl1 : AbstractModel
 
     public int? ParentId { get; set; }
     public AbstractModel Parent { get; set; }
+
+    /// <summary>
+    /// Overrides the inherited open generic default data source for AbstractImpl1 only.
+    /// </summary>
+    [DefaultDataSource]
+    public class Impl1DefaultDataSource(CrudContext<AppDbContext> context)
+        : StandardDataSource<AbstractImpl1, AppDbContext>(context);
+
+    /// <summary>
+    /// Overrides the inherited open generic named "AbstractModelDataSource" for AbstractImpl1 only.
+    /// </summary>
+    public class AbstractModelDataSource(CrudContext<AppDbContext> context)
+        : StandardDataSource<AbstractImpl1, AppDbContext>(context);
 }
 
 [Edit(PermissionLevel = SecurityPermissionLevels.DenyAll)]

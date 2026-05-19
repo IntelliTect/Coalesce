@@ -147,20 +147,14 @@ export class AbstractImpl1 {
 export namespace AbstractImpl1 {
   export namespace DataSources {
     
-    /** 
-      An open generic data source constrained to AbstractModel.
-      Should be discovered for AbstractModel itself and all derived types (AbstractImpl1, AbstractImpl2).
-    */
+    /** Overrides the inherited open generic named "AbstractModelDataSource" for AbstractImpl1 only. */
     export class AbstractModelDataSource implements DataSource<typeof metadata.AbstractImpl1.dataSources.abstractModelDataSource> {
       readonly $metadata = metadata.AbstractImpl1.dataSources.abstractModelDataSource
     }
     
-    /** 
-      An open generic default data source constrained to AbstractModel.
-      Should be the default data source for AbstractModel and all derived types.
-    */
-    export class DefaultAbstractModelDataSource implements DataSource<typeof metadata.AbstractImpl1.dataSources.defaultAbstractModelDataSource> {
-      readonly $metadata = metadata.AbstractImpl1.dataSources.defaultAbstractModelDataSource
+    /** Overrides the inherited open generic default data source for AbstractImpl1 only. */
+    export class Impl1DefaultDataSource implements DataSource<typeof metadata.AbstractImpl1.dataSources.impl1DefaultDataSource> {
+      readonly $metadata = metadata.AbstractImpl1.dataSources.impl1DefaultDataSource
     }
     
     /** 

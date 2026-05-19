@@ -248,17 +248,28 @@ public abstract class ClassViewModel : IAttributeProvider
 
     /// <summary>
     /// Open generic nested types that could be inherited data sources.
-    /// Filtered to non-abstract and non-internal-use, but retaining generic types.
+    /// Filtered to non-abstract and non-internal-use, and only open (unconstructed) generics.
     /// </summary>
     internal IEnumerable<TypeViewModel> OpenGenericNestedTypes =>
-        RawNestedTypes.Where(t => !t.IsInternalUse && !t.IsAbstract && t.IsGeneric);
+        RawNestedTypes.Where(t => !t.IsInternalUse && !t.IsAbstract && t.IsGeneric && !t.IsConstructedGenericType);
 
-    public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo) => repo
-        .DataSources
-        .Where(d => d.DeclaredFor.Equals(this))
-        .Select(d => d.StrategyClass)
-        .Concat(GetInheritedOpenGenericDataSources(repo))
-        .OrderBy(d => d.ClientTypeName);
+    public IEnumerable<ClassViewModel> ClientDataSources(ReflectionRepository repo)
+    {
+        var direct = repo
+            .DataSources
+            .Where(d => d.DeclaredFor.Equals(this))
+            .Select(d => d.StrategyClass)
+            .ToList();
+
+        var directNames = new HashSet<string>(direct.Select(d => d.ClientTypeName), StringComparer.OrdinalIgnoreCase);
+        var hasDirectDefault = direct.Any(d => d.IsDefaultDataSource);
+
+        return direct
+            .Concat(GetInheritedOpenGenericDataSources(repo)
+                .Where(d => !directNames.Contains(d.ClientTypeName)
+                    && !(hasDirectDefault && d.IsDefaultDataSource)))
+            .OrderBy(d => d.ClientTypeName);
+    }
 
     private IEnumerable<ClassViewModel> GetInheritedOpenGenericDataSources(ReflectionRepository repo)
     {

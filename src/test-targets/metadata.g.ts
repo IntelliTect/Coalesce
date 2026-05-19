@@ -333,10 +333,10 @@ export const AbstractImpl1 = domain.types.AbstractImpl1 = {
       props: {
       },
     },
-    defaultAbstractModelDataSource: {
+    impl1DefaultDataSource: {
       type: "dataSource",
-      name: "DefaultAbstractModelDataSource" as const,
-      displayName: "Default Abstract Model Data Source",
+      name: "Impl1DefaultDataSource" as const,
+      displayName: "Impl 1 Default Data Source",
       isDefault: true,
       props: {
       },

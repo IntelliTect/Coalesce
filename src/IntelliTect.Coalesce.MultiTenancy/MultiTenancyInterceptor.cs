@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,10 +14,11 @@ namespace IntelliTect.Coalesce.MultiTenancy;
 ///   <item>Throws if <c>TenantId</c> is modified on an existing entity.</item>
 /// </list>
 /// </summary>
-internal class MultiTenancyInterceptor<TTenanted>(string tenantIdPropertyName, Func<DbContext, object?> getTenantId)
+internal class MultiTenancyInterceptor<TTenanted>(string entityTenantIdPropertyName, string contextTenantIdPropertyName)
     : SaveChangesInterceptor
     where TTenanted : class
 {
+    private PropertyInfo? _cachedPropInfo;
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
@@ -35,15 +37,19 @@ internal class MultiTenancyInterceptor<TTenanted>(string tenantIdPropertyName, F
 
     private void Apply(DbContext db)
     {
+        _cachedPropInfo ??= db.GetType().GetProperty(contextTenantIdPropertyName)
+            ?? throw new InvalidOperationException(
+                $"Property '{contextTenantIdPropertyName}' not found on {db.GetType().Name}.");
+
         foreach (var entry in db.ChangeTracker.Entries<TTenanted>())
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Property(tenantIdPropertyName).CurrentValue = getTenantId(db);
+                entry.Property(entityTenantIdPropertyName).CurrentValue = _cachedPropInfo.GetValue(db);
             }
-            else if (entry.State == EntityState.Modified && entry.Property(tenantIdPropertyName).IsModified)
+            else if (entry.State == EntityState.Modified && entry.Property(entityTenantIdPropertyName).IsModified)
             {
-                throw new InvalidOperationException($"Cannot change the {tenantIdPropertyName} of an existing entity.");
+                throw new InvalidOperationException($"Cannot change the {entityTenantIdPropertyName} of an existing entity.");
             }
         }
     }

@@ -8,8 +8,21 @@ using Microsoft.EntityFrameworkCore.ValueGeneration;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace IntelliTect.Coalesce.MultiTenancy;
+
+/// <summary>
+/// Constants for the multi-tenancy convention.
+/// </summary>
+public static class MultiTenancyConvention
+{
+    /// <summary>
+    /// The name used for global query filters added by the multi-tenancy convention.
+    /// Use this with <c>IgnoreQueryFilters</c> to selectively bypass tenancy filtering.
+    /// </summary>
+    public const string QueryFilterName = "TenancyFilter";
+}
 
 /// <summary>
 /// <para>
@@ -18,58 +31,36 @@ namespace IntelliTect.Coalesce.MultiTenancy;
 /// ensuring correct handling of TPH hierarchies regardless of entity discovery order.
 /// </para>
 /// <para>
-/// Register via <see cref="MultiTenancyDbContextOptionsBuilderExtensions.UseCoalesceMultiTenancy{TTenanted, TKey}"/>
-/// or directly in <c>ConfigureConventions</c>:
-/// <code>configurationBuilder.Conventions.Add(_ => new MultiTenancyConvention&lt;ITenanted&gt;(this, () => TenantIdOrThrow));</code>
+/// Register via <see cref="MultiTenancyDbContextOptionsBuilderExtensions.UseCoalesceMultiTenancy{TTenanted}"/>.
 /// </para>
 /// </summary>
 public class MultiTenancyConvention<TTenanted>(
-    string tenantIdPropertyName,
+    string entityTenantIdPropertyName,
     string? providerName,
-    LambdaExpression tenantIdExpression
+    Type dbContextType,
+    string contextTenantIdPropertyName
 ) : IModelFinalizingConvention
     where TTenanted : class
 {
-    /// <summary>
-    /// The name used for global query filters added by this convention.
-    /// Use this with <c>IgnoreQueryFilters</c> to selectively bypass tenancy filtering.
-    /// </summary>
-    public const string QueryFilterName = "TenancyFilter";
+    /// <inheritdoc cref="MultiTenancyConvention.QueryFilterName"/>
+    public const string QueryFilterName = MultiTenancyConvention.QueryFilterName;
 
-    internal string TenantIdPropName => tenantIdPropertyName;
-
-    /// <summary>
-    /// Applies the multi-tenancy configuration directly to a <see cref="ModelBuilder"/>.
-    /// This is used by the <c>ConfigureMultiTenancy</c> extension method for backward compatibility.
-    /// </summary>
-    public void Apply(ModelBuilder builder)
-    {
-        var tenantIdGetter = BuildTenantIdGetter(tenantIdExpression);
-        var tenantIdQueryExpr = tenantIdExpression.Body;
-
-        var tenantedTypes = builder.Model.GetEntityTypes()
-            .Where(e => typeof(TTenanted).IsAssignableFrom(e.ClrType))
-            .ToList();
-
-        // Process root types first to ensure PKs are expanded before derived types.
-        foreach (var entityType in tenantedTypes.Where(e => e.BaseType is null))
-        {
-            SetTenancyFilter(entityType, tenantIdQueryExpr);
-            ExpandPrimaryKey(entityType, tenantIdGetter);
-        }
-
-        // Then handle derived types — their PKs are already composite from the base;
-        // just rewire any FKs that reference them directly.
-        foreach (var entityType in tenantedTypes.Where(e => e.BaseType is not null))
-        {
-            RewireForeignKeys(entityType, entityType.FindPrimaryKey()!);
-        }
-    }
+    internal string TenantIdPropName => entityTenantIdPropertyName;
 
     public void ProcessModelFinalizing(IConventionModelBuilder modelBuilder, IConventionContext<IConventionModelBuilder> context)
     {
-        var tenantIdGetter = BuildTenantIdGetter(tenantIdExpression);
-        var tenantIdQueryExpr = tenantIdExpression.Body;
+        var tenantIdValuePropInfo = dbContextType.GetProperty(contextTenantIdPropertyName)
+            ?? throw new InvalidOperationException(
+                $"Property '{contextTenantIdPropertyName}' not found on {dbContextType.Name}. " +
+                $"Ensure the property exists and is public.");
+
+        // Build the query filter expression fragment: db.TenantIdOrThrow
+        // Uses null! constant of the DbContext type — EF recognizes the type and substitutes the real instance at query time.
+        var dbContextConstant = Expression.Constant(null, dbContextType);
+        var tenantIdQueryExpr = Expression.MakeMemberAccess(dbContextConstant, tenantIdValuePropInfo);
+
+        // Build runtime getter via reflection for value generator and interceptor
+        Func<DbContext, object?> tenantIdGetter = db => tenantIdValuePropInfo.GetValue(db);
 
         var tenantedTypes = modelBuilder.Metadata.GetEntityTypes()
             .Where(e => typeof(TTenanted).IsAssignableFrom(e.ClrType))
@@ -159,34 +150,6 @@ public class MultiTenancyConvention<TTenanted>(
                 fk.Properties.Single()
             ], principalKey);
         }
-    }
-
-    /// <summary>
-    /// Rewrites a zero-arg closure expression like <c>() => this.TenantIdOrThrow</c> into a delegate
-    /// <c>Func&lt;DbContext, object?&gt;</c> so the value generator can call it on any DbContext instance.
-    /// </summary>
-    internal static Func<DbContext, object?> BuildTenantIdGetter(LambdaExpression tenantIdExpression)
-    {
-        if (tenantIdExpression.Body is MemberExpression { Expression: ConstantExpression constExpr } memberExpr
-            && typeof(DbContext).IsAssignableFrom(constExpr.Type))
-        {
-            var param = Expression.Parameter(typeof(DbContext));
-            var rewritten = Expression.Lambda<Func<DbContext, object?>>(
-                Expression.Convert(
-                    Expression.MakeMemberAccess(
-                        Expression.Convert(param, constExpr.Type),
-                        memberExpr.Member
-                    ),
-                    typeof(object)
-                ),
-                param
-            );
-            return rewritten.Compile();
-        }
-
-        // Fallback for non-trivial expressions: compile and invoke.
-        var compiled = tenantIdExpression.Compile();
-        return _ => compiled.DynamicInvoke();
     }
 
     private sealed class TenantIdValueGenerator(Func<DbContext, object?> getTenantId) : ValueGenerator

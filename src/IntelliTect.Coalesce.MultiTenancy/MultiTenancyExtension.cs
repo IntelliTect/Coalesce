@@ -5,49 +5,33 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 
 namespace IntelliTect.Coalesce.MultiTenancy;
 
 internal class MultiTenancyExtension<TTenanted> : IDbContextOptionsExtension
     where TTenanted : class
 {
-    private readonly string _tenantIdPropertyName;
-    private readonly LambdaExpression _tenantIdExpression;
-    private readonly string? _providerName;
+    private readonly string _entityTenantIdPropertyName;
+    private readonly string _contextTenantIdPropertyName;
     private DbContextOptionsExtensionInfo? _info;
 
-    public MultiTenancyExtension(string tenantIdPropertyName, string? providerName, LambdaExpression tenantIdExpression)
+    public MultiTenancyExtension(string entityTenantIdPropertyName, string contextTenantIdPropertyName)
     {
-        _tenantIdPropertyName = tenantIdPropertyName;
-        _providerName = providerName;
-        _tenantIdExpression = tenantIdExpression;
+        _entityTenantIdPropertyName = entityTenantIdPropertyName;
+        _contextTenantIdPropertyName = contextTenantIdPropertyName;
     }
 
     public DbContextOptionsExtensionInfo Info => _info ??= new ExtensionInfo(this);
 
     public void ApplyServices(IServiceCollection services)
     {
-        services.AddSingleton<IConventionSetPlugin>(
-            new ConventionSetPlugin(_tenantIdPropertyName, _providerName, _tenantIdExpression));
+        services.AddSingleton(new MultiTenancyOptions(_entityTenantIdPropertyName, _contextTenantIdPropertyName));
+
+        new EntityFrameworkServicesBuilder(services)
+            .TryAdd<IConventionSetPlugin, ConventionSetPlugin<TTenanted>>();
     }
 
     public void Validate(IDbContextOptions options) { }
-
-    private class ConventionSetPlugin(
-        string tenantIdPropertyName,
-        string? providerName,
-        LambdaExpression tenantIdExpression
-    ) : IConventionSetPlugin
-    {
-        public ConventionSet ModifyConventions(ConventionSet conventionSet)
-        {
-            conventionSet.ModelFinalizingConventions.Add(
-                new MultiTenancyConvention<TTenanted>(tenantIdPropertyName, providerName, tenantIdExpression));
-            return conventionSet;
-        }
-    }
 
     private sealed class ExtensionInfo(IDbContextOptionsExtension extension) : DbContextOptionsExtensionInfo(extension)
     {
@@ -58,5 +42,30 @@ internal class MultiTenancyExtension<TTenanted> : IDbContextOptionsExtension
             => debugInfo["Coalesce:MultiTenancy"] = "1";
         public override bool ShouldUseSameServiceProvider(DbContextOptionsExtensionInfo other)
             => other is ExtensionInfo;
+    }
+}
+
+internal record MultiTenancyOptions(string EntityTenantIdPropertyName, string ContextTenantIdPropertyName);
+
+internal class ConventionSetPlugin<TTenanted>(
+    ICurrentDbContext currentDbContext,
+    MultiTenancyOptions options
+) : IConventionSetPlugin
+    where TTenanted : class
+{
+    public ConventionSet ModifyConventions(ConventionSet conventionSet)
+    {
+        var dbContext = currentDbContext.Context;
+        var dbContextType = dbContext.GetType();
+        var providerName = dbContext.Database.ProviderName;
+
+        conventionSet.ModelFinalizingConventions.Add(
+            new MultiTenancyConvention<TTenanted>(
+                options.EntityTenantIdPropertyName,
+                providerName,
+                dbContextType,
+                options.ContextTenantIdPropertyName));
+
+        return conventionSet;
     }
 }

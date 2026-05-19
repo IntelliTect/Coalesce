@@ -20,8 +20,8 @@
   "devDependencies": {
     "gray-matter": "^4.0.3",
     "oxc-minify": "^0.128.0",
-    "serve-handler": "^6.1.6",
+    "serve-handler": "^6.1.7",
     "vitepress": "2.0.0-alpha.17",
-    "wait-on": "^8.0.4"
+    "wait-on": "^8.0.5"
   }
 }

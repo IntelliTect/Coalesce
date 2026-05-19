@@ -20,7 +20,7 @@
     "@vitest/eslint-plugin": "1.6.16",
     "@vue/eslint-config-typescript": "14.7.0",
     "@vue/test-utils": "^2.4.10",
-    "cspell": "8.19.3",
+    "cspell": "10.0.0",
     "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",

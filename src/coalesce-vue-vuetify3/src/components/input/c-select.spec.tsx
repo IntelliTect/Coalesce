@@ -14,6 +14,7 @@ import {
   ForeignKeyProperty,
   Model,
   ModelReferenceNavigationProperty,
+  ViewModel,
 } from "coalesce-vue";
 import { Mock } from "vitest";
 import { FunctionalComponent } from "vue";
@@ -87,6 +88,8 @@ describe("CSelect", () => {
     function receivesComplexModel(model: ComplexModel | null) {}
     function receivesNumber(model: number | null) {}
     function receivesNumbers(model: number[] | null) {}
+    function receivesTestViewModel(model: TestViewModel | null) {}
+    function receivesTestViewModels(model: TestViewModel[] | null) {}
 
     // Binding to FK or ref nav on a ViewModel:
     () => <CSelect model={complexVm} for="singleTest" />;
@@ -279,6 +282,41 @@ describe("CSelect", () => {
     //@ts-expect-error invalid rule func (`v` is number, equality to string is invalid).
     () => <CSelect model={complexVm} for="singleTest" rules={[v => v === "foo" || 'Must be 7']} />;
     
+    // ********
+    // returnViewModel
+    // ********
+    // With returnViewModel, emitted values are typed as ViewModel instances
+    () => (<CSelect for="Test" returnViewModel onUpdate:modelValue={receivesTestViewModel} />);
+    () => (<CSelect for="Test" returnViewModel onUpdate:objectValue={receivesTestViewModel} />);
+    () => (<CSelect for="Test" returnViewModel multiple onUpdate:modelValue={receivesTestViewModels} />);
+    () => (<CSelect for="Test" returnViewModel onUpdate:keyValue={receivesNumber} />);
+    // Accepting the base model type is still valid for the handler (TestViewModel extends Test)
+    () => (<CSelect for="Test" returnViewModel onUpdate:modelValue={receivesTestModel} />);
+    // Plain model is accepted as modelValue input (not just ViewModels)
+    () => (<CSelect for="Test" returnViewModel modelValue={new Test()} />);
+    () => (<CSelect for="Test" returnViewModel modelValue={testVm} />);
+    () => (<CSelect for="Test" modelValue={new Test()} />);
+    // @ts-expect-error wrong ViewModel type in handler
+    () => (<CSelect for="Test" returnViewModel onUpdate:modelValue={receivesComplexModel} />);
+    // @ts-expect-error wrong ViewModel type in objectValue handler
+    () => (<CSelect for="Test" returnViewModel onUpdate:objectValue={receivesComplexModel} />);
+    // @ts-expect-error wrong keyValue handler type with returnViewModel
+    () => (<CSelect for="Test" returnViewModel onUpdate:keyValue={receivesTestModel} />);
+    // @ts-expect-error wrong modelValue type with returnViewModel
+    () => (<CSelect for="Test" returnViewModel modelValue={complexVm} />);
+    // @ts-expect-error wrong multiple handler type with returnViewModel (expects array)
+    () => (<CSelect for="Test" returnViewModel multiple onUpdate:modelValue={receivesTestViewModel} />);
+    // @ts-expect-error returnViewModel without for=TypeName (model+for binding) - returnViewModel requires for=string
+    () => (<CSelect model={complexVm} for="singleTest" returnViewModel onUpdate:modelValue={receivesTestViewModel} />);
+    // Without returnViewModel, handler expecting only TestViewModel should fail
+    // because the emit type is Test (a wider type)
+    // @ts-expect-error TestViewModel is narrower than the emitted Test type
+    () => (<CSelect for="Test" onUpdate:modelValue={receivesTestViewModel} />);
+    // @ts-expect-error TestViewModel is narrower than the emitted Test type (objectValue)
+    () => (<CSelect for="Test" onUpdate:objectValue={receivesTestViewModel} />);
+    // @ts-expect-error TestViewModels narrower than emitted Test[] (multiple without returnViewModel)
+    () => (<CSelect for="Test" multiple onUpdate:modelValue={receivesTestViewModels} />);
+
     // ********
     // Vuetify props
     // ********
@@ -661,6 +699,103 @@ describe("CSelect", () => {
       expect(onUpdate).toHaveBeenCalledWith(
         new Test({ testId: 101, testName: "foo 101" }),
       );
+    });
+  });
+
+  describe("returnViewModel", () => {
+    test("emits ViewModel instance when returnViewModel is true and bound with for=TypeName", async () => {
+      const onUpdateModel = vitest.fn();
+      const onUpdateObject = vitest.fn();
+
+      const wrapper = mountApp(() => (
+        <CSelect
+          for="Test"
+          returnViewModel
+          onUpdate:modelValue={onUpdateModel}
+          onUpdate:objectValue={onUpdateObject}
+        ></CSelect>
+      )).findComponent(CSelect);
+
+      // Act
+      await selectFirstResult(wrapper);
+
+      // Assert: emitted values are ViewModel instances
+      expect(onUpdateModel.mock.calls[0][0]).toBeInstanceOf(TestViewModel);
+      expect(onUpdateObject.mock.calls[0][0]).toBeInstanceOf(TestViewModel);
+      expect(onUpdateModel.mock.calls[0][0].testId).toBe(101);
+    });
+
+    test("emits plain model when returnViewModel is not set and bound with for=TypeName", async () => {
+      const onUpdateModel = vitest.fn();
+
+      const wrapper = mountApp(() => (
+        <CSelect for="Test" onUpdate:modelValue={onUpdateModel}></CSelect>
+      )).findComponent(CSelect);
+
+      // Act
+      await selectFirstResult(wrapper);
+
+      // Assert: emitted value is NOT a ViewModel instance
+      expect(onUpdateModel.mock.calls[0][0]).not.toBeInstanceOf(ViewModel);
+      expect(onUpdateModel.mock.calls[0][0].testId).toBe(101);
+    });
+
+    test("emits ViewModel in multiple mode when returnViewModel is true", async () => {
+      const onUpdateModel = vitest.fn();
+      const onSelectionChanged = vitest.fn();
+
+      const wrapper = mountApp(() => (
+        <CSelect
+          for="Test"
+          multiple
+          returnViewModel
+          onUpdate:modelValue={onUpdateModel}
+          onSelectionChanged={onSelectionChanged}
+        ></CSelect>
+      )).findComponent(CSelect);
+
+      // Act
+      await selectFirstResult(wrapper);
+
+      // Assert: emitted values are ViewModel instances
+      expect(onUpdateModel.mock.calls[0][0][0]).toBeInstanceOf(TestViewModel);
+      expect(onSelectionChanged.mock.calls[0][0][0]).toBeInstanceOf(
+        TestViewModel,
+      );
+      expect(onUpdateModel.mock.calls[0][0][0].testId).toBe(101);
+    });
+
+    test("does not double-wrap existing ViewModel instances", async () => {
+      const onUpdateModel = vitest.fn();
+
+      const existingVm = new TestViewModel({
+        testId: 101,
+        testName: "foo 101",
+      });
+
+      // Mock the list to return the existing ViewModel instance
+      listMock.mockImplementation(() => ({
+        wasSuccessful: true,
+        list: [existingVm],
+        page: 1,
+        pageCount: 1,
+        pageSize: 10,
+        totalCount: 1,
+      }));
+
+      const wrapper = mountApp(() => (
+        <CSelect
+          for="Test"
+          returnViewModel
+          onUpdate:modelValue={onUpdateModel}
+        ></CSelect>
+      )).findComponent(CSelect);
+
+      // Act
+      await selectFirstResult(wrapper);
+
+      // Assert: should return the same instance, not wrap it again
+      expect(onUpdateModel.mock.calls[0][0]).toBe(existingVm);
     });
   });
 

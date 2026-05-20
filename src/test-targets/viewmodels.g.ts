@@ -1882,7 +1882,7 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 }
 
 
-const viewModelTypeLookup = ViewModel.typeLookup = {
+const viewModelTypeLookup = {
   AbstractImpl1: AbstractImpl1ViewModel,
   AbstractImpl2: AbstractImpl2ViewModel,
   AbstractModelPerson: AbstractModelPersonViewModel,
@@ -1924,6 +1924,13 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   TimeOnlyPk: TimeOnlyPkViewModel,
   ZipCode: ZipCodeViewModel,
 }
+ViewModel.typeLookup = viewModelTypeLookup;
+
+type _VmLookup = typeof viewModelTypeLookup;
+declare module 'coalesce-vue/lib/viewmodel' {
+  interface ViewModelTypeLookup extends _VmLookup {}
+}
+
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
   AbstractImpl1: AbstractImpl1ListViewModel,
   AbstractImpl2: AbstractImpl2ListViewModel,
@@ -1970,4 +1977,3 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   WeatherService: WeatherServiceViewModel,
 }
-

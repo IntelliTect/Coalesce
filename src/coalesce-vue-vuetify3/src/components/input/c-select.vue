@@ -326,7 +326,8 @@ type InheritedSlots = {
   generic="
     TModel extends CSelectModelSpec,
     TFor extends CSelectForSpec<TModel> = any,
-    TMultiple extends boolean = false
+    TMultiple extends boolean = false,
+    TReturnViewModel extends boolean = false
   "
 >
 import {
@@ -371,6 +372,7 @@ import {
   ViewModelFactory,
   ViewModelCollection,
   ModelCollectionNavigationProperty,
+  ViewModelTypeLookup,
 } from "coalesce-vue";
 import { VList, VListItem, VMenu, VTextField } from "vuetify/components";
 import { Intersect } from "vuetify/directives";
@@ -401,6 +403,22 @@ type SelectedModelType = _SelectedModelType<TModel, TFor, TMultiple>;
 
 type SelectedModelTypeSingle = _Single<SelectedModelType>;
 
+/** When `returnViewModel` is true, resolves the single selected type to its ViewModel counterpart. */
+type SelectedOutputTypeSingle = TReturnViewModel extends true
+  ? TFor extends string & keyof ViewModelTypeLookup
+    ? InstanceType<ViewModelTypeLookup[TFor]>
+    : SelectedModelTypeSingle
+  : SelectedModelTypeSingle;
+
+/** The output type (used in emits) - respects `returnViewModel`. */
+type SelectedOutputType = TReturnViewModel extends true
+  ? TFor extends string & keyof ViewModelTypeLookup
+    ? TMultiple extends true
+      ? InstanceType<ViewModelTypeLookup[TFor]>[]
+      : InstanceType<ViewModelTypeLookup[TFor]>
+    : SelectedModelType
+  : SelectedModelType;
+
 type SelectedPkTypeSingle = ModelToPkType<SelectedModelTypeSingle>;
 
 type SelectedPkType = TMultiple extends true
@@ -416,6 +434,19 @@ type PrimaryBindType = TFor extends ForeignKeyProperty
         : SelectedModelType
       : SelectedModelType
     : SelectedModelType;
+
+/** Like PrimaryBindType but uses the output (ViewModel) types when `returnViewModel` is true. */
+type PrimaryOutputBindType = TReturnViewModel extends true
+  ? TFor extends ForeignKeyProperty
+    ? SelectedPkType
+    : TModel extends Model
+      ? TFor extends PropNames<TModel["$metadata"]>
+        ? TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
+          ? SelectedPkType
+          : SelectedOutputType
+        : SelectedOutputType
+      : SelectedOutputType
+  : PrimaryBindType;
 
 type SlotTypes = {
   ["item"]?(props: {
@@ -479,6 +510,9 @@ const props = withDefaults(
       preselectSingle?: boolean | null;
       openOnClear?: boolean | null;
       reloadOnOpen?: boolean | null;
+      /** When true, selected values will be converted to ViewModel instances
+       * even when not bound to a ViewModel owner or ViewModelCollection. */
+      returnViewModel?: TReturnViewModel & boolean; // `& boolean`: https://github.com/vuejs/core/issues/9877
       params?: Partial<ListParameters>;
 
       // DONT use defineModel for these. We don't want to capture local state if the parent isn't binding it
@@ -526,10 +560,10 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   "update:keyValue": [value: SelectedPkType | null];
-  "update:objectValue": [value: SelectedModelType | null];
-  "update:modelValue": [value: PrimaryBindType | null];
+  "update:objectValue": [value: SelectedOutputType | null];
+  "update:modelValue": [value: PrimaryOutputBindType | null];
   /** Fired when an item is selected or deselected in `multiple` mode. */
-  selectionChanged: [values: SelectedModelTypeSingle[], selected: boolean];
+  selectionChanged: [values: SelectedOutputTypeSingle[], selected: boolean];
 }>();
 
 const passthroughSlots = computed(() => {
@@ -955,7 +989,8 @@ function convertValue<T extends SelectedModelTypeSingle | null>(value: T): T {
 
   if (
     !((value as any) instanceof ViewModel) &&
-    ((valueOwner.value instanceof ViewModel && modelObjectProp.value) ||
+    (props.returnViewModel ||
+      (valueOwner.value instanceof ViewModel && modelObjectProp.value) ||
       internalModelValue.value instanceof ViewModelCollection)
   ) {
     return ViewModelFactory.get(
@@ -1010,7 +1045,7 @@ function selectionChanged(
     }
   }
 
-  emit("selectionChanged", values, selected);
+  emit("selectionChanged", values as SelectedOutputTypeSingle[], selected);
 }
 
 function onInput(

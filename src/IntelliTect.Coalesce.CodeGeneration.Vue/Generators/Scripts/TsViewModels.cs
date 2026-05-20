@@ -35,13 +35,23 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
             b.Line();
         }
 
-        using (b.Block("const viewModelTypeLookup = ViewModel.typeLookup ="))
+        using (b.Block("const viewModelTypeLookup ="))
         {
             foreach (var model in Model.CrudApiBackedClasses.Where(e => !e.Type.IsAbstract).OrderBy(e => e.ClientTypeName))
             {
                 b.Line($"{model.ViewModelClassName}: {model.ViewModelClassName}ViewModel,");
             }
         }
+        b.Line("ViewModel.typeLookup = viewModelTypeLookup;");
+
+        b.Line();
+        b.Line("type _VmLookup = typeof viewModelTypeLookup;");
+        using (b.Block("declare module 'coalesce-vue/lib/viewmodel'"))
+        {
+            b.Line("interface ViewModelTypeLookup extends _VmLookup {}");
+        }
+
+        b.Line();
         using (b.Block("const listViewModelTypeLookup = ListViewModel.typeLookup ="))
         {
             foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
@@ -56,8 +66,6 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
                 b.Line($"{model.ViewModelClassName}: {model.ViewModelClassName}ViewModel,");
             }
         }
-
-        b.Line();
 
         return Task.FromResult(b.ToString());
     }

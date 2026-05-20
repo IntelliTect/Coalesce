@@ -16,7 +16,6 @@ export interface AbstractImpl1ViewModel extends $models.AbstractImpl1 {
 export class AbstractImpl1ViewModel extends ViewModel<$models.AbstractImpl1, $apiClients.AbstractImpl1ApiClient, number> implements $models.AbstractImpl1  {
   static DataSources = $models.AbstractImpl1.DataSources;
   
-  
   public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
     return this.$addChild('abstractModelPeople', initialData) as AbstractModelPersonViewModel
   }
@@ -83,7 +82,6 @@ export interface AbstractImpl2ViewModel extends $models.AbstractImpl2 {
 export class AbstractImpl2ViewModel extends ViewModel<$models.AbstractImpl2, $apiClients.AbstractImpl2ApiClient, number> implements $models.AbstractImpl2  {
   static DataSources = $models.AbstractImpl2.DataSources;
   
-  
   public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
     return this.$addChild('abstractModelPeople', initialData) as AbstractModelPersonViewModel
   }
@@ -141,7 +139,27 @@ export class AbstractImpl2ListViewModel extends ListViewModel<$models.AbstractIm
 
 
 export type AbstractModelViewModel = AbstractImpl1ViewModel | AbstractImpl2ViewModel
-export const AbstractModelViewModel = createAbstractProxyViewModelType<$models.AbstractModel, AbstractModelViewModel>($metadata.AbstractModel, $apiClients.AbstractModelApiClient)
+export const AbstractModelViewModel = createAbstractProxyViewModelType<$models.AbstractModel, AbstractModelViewModel>($metadata.AbstractModel, $apiClients.AbstractModelApiClient, (class extends ViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, number> {
+  
+  public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
+    return this.$addChild('abstractModelPeople', initialData) as AbstractModelPersonViewModel
+  }
+  
+  public get getId() {
+    const getId = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getId,
+      (c) => c.getId(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.getId(this.$primaryKey))
+    
+    Object.defineProperty(this, 'getId', {value: getId});
+    return getId
+  }
+  
+  constructor() {
+    super($metadata.AbstractModel, new $apiClients.AbstractModelApiClient())
+  }
+}).prototype)
 
 export class AbstractModelListViewModel extends ListViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, AbstractModelViewModel> {
   static DataSources = $models.AbstractModel.DataSources;
@@ -214,7 +232,6 @@ export interface AdvisorViewModel extends $models.Advisor {
 }
 export class AdvisorViewModel extends ViewModel<$models.Advisor, $apiClients.AdvisorApiClient, number> implements $models.Advisor  {
   
-  
   public addToStudents(initialData?: DeepPartial<$models.Student> | null) {
     return this.$addChild('students', initialData) as StudentViewModel
   }
@@ -251,7 +268,6 @@ export interface CaseViewModel extends $models.Case {
 }
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
   static DataSources = $models.Case.DataSources;
-  
   
   public addToCaseProducts(initialData?: DeepPartial<$models.CaseProduct> | null) {
     return this.$addChild('caseProducts', initialData) as CaseProductViewModel
@@ -352,7 +368,6 @@ export interface CompanyViewModel extends $models.Company {
   altName: string | null;
 }
 export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
-  
   
   public addToEmployees(initialData?: DeepPartial<$models.Person> | null) {
     return this.$addChild('employees', initialData) as PersonViewModel
@@ -464,11 +479,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   static magicString = "42"
   static magicEnum = $models.EnumPkId.Value10
   
-  
   public addToTests(initialData?: DeepPartial<$models.Test> | null) {
     return this.$addChild('tests', initialData) as TestViewModel
   }
-  
   
   public addToChildrenWithoutRefNavProp(initialData?: DeepPartial<$models.ComplexModelDependent> | null) {
     return this.$addChild('childrenWithoutRefNavProp', initialData) as ComplexModelDependentViewModel
@@ -1118,7 +1131,6 @@ export interface OneToOneParentViewModel extends $models.OneToOneParent {
 }
 export class OneToOneParentViewModel extends ViewModel<$models.OneToOneParent, $apiClients.OneToOneParentApiClient, number> implements $models.OneToOneParent  {
   
-  
   public addToManyChildren(initialData?: DeepPartial<$models.OneToOneManyChildren> | null) {
     return this.$addChild('manyChildren', initialData) as OneToOneManyChildrenViewModel
   }
@@ -1208,7 +1220,6 @@ export interface Parent1ViewModel extends $models.Parent1 {
 }
 export class Parent1ViewModel extends ViewModel<$models.Parent1, $apiClients.Parent1ApiClient, number> implements $models.Parent1  {
   
-  
   public addToChildren(initialData?: DeepPartial<$models.MultipleParents> | null) {
     return this.$addChild('children', initialData) as MultipleParentsViewModel
   }
@@ -1233,7 +1244,6 @@ export interface Parent2ViewModel extends $models.Parent2 {
   set children(value: (MultipleParentsViewModel | $models.MultipleParents)[] | null);
 }
 export class Parent2ViewModel extends ViewModel<$models.Parent2, $apiClients.Parent2ApiClient, number> implements $models.Parent2  {
-  
   
   public addToChildren(initialData?: DeepPartial<$models.MultipleParents> | null) {
     return this.$addChild('children', initialData) as MultipleParentsViewModel
@@ -1301,16 +1311,13 @@ export interface PersonViewModel extends $models.Person {
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
   static DataSources = $models.Person.DataSources;
   
-  
   public addToCasesAssigned(initialData?: DeepPartial<$models.Case> | null) {
     return this.$addChild('casesAssigned', initialData) as CaseViewModel
   }
   
-  
   public addToCasesReported(initialData?: DeepPartial<$models.Case> | null) {
     return this.$addChild('casesReported', initialData) as CaseViewModel
   }
-  
   
   public addToSiblingRelationships(initialData?: DeepPartial<$models.Sibling> | null) {
     return this.$addChild('siblingRelationships', initialData) as SiblingViewModel
@@ -1497,7 +1504,6 @@ export interface RecursiveHierarchyViewModel extends $models.RecursiveHierarchy 
   set children(value: (RecursiveHierarchyViewModel | $models.RecursiveHierarchy)[] | null);
 }
 export class RecursiveHierarchyViewModel extends ViewModel<$models.RecursiveHierarchy, $apiClients.RecursiveHierarchyApiClient, number> implements $models.RecursiveHierarchy  {
-  
   
   public addToChildren(initialData?: DeepPartial<$models.RecursiveHierarchy> | null) {
     return this.$addChild('children', initialData) as RecursiveHierarchyViewModel
@@ -1712,7 +1718,6 @@ export interface StringIdentityViewModel extends $models.StringIdentity {
 }
 export class StringIdentityViewModel extends ViewModel<$models.StringIdentity, $apiClients.StringIdentityApiClient, string> implements $models.StringIdentity  {
   
-  
   public addToChildren(initialData?: DeepPartial<$models.StringIdentity> | null) {
     return this.$addChild('children', initialData) as StringIdentityViewModel
   }
@@ -1747,7 +1752,6 @@ export interface StudentViewModel extends $models.Student {
   studentAdvisorId: number | null;
 }
 export class StudentViewModel extends ViewModel<$models.Student, $apiClients.StudentApiClient, number> implements $models.Student  {
-  
   
   public addToCourses(initialData?: DeepPartial<$models.Course> | null) {
     return this.$addChild('courses', initialData) as CourseViewModel

@@ -80,7 +80,20 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
         if (model.Type.IsAbstract)
         {
             b.Line($"export type {viewModelName} = {string.Join(" | ", model.ClientDerivedTypes.Select(t => new VueType(t.Type).TsType(viewModel: true)))}");
-            b.Line($"export const {viewModelName} = createAbstractProxyViewModelType<{modelName}, {viewModelName}>({metadataName}, $apiClients.{name}ApiClient)");
+
+            var pkType = new VueType(model.PrimaryKey.Type).TsType(modelPrefix: "$models");
+            using (b.Block($"export const {viewModelName} = createAbstractProxyViewModelType<{modelName}, {viewModelName}>({metadataName}, $apiClients.{name}ApiClient, (class extends ViewModel<{modelName}, $apiClients.{name}ApiClient, {pkType}>", ").prototype)"))
+            {
+                WriteViewModelInstanceMembers(b, model, includeManyToMany: false);
+
+                b.Line();
+                // Unused constructor to satisfy TS.
+                using (b.Block($"constructor()"))
+                {
+                    b.Line($"super({metadataName}, new $apiClients.{name}ApiClient())");
+                }
+            }
+
             b.Line();
             return;
         }
@@ -124,42 +137,7 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
 
             WriteConsts(b, model);
 
-            foreach (var prop in model.ClientProperties)
-            {
-
-                // Eventually, this should support any collection of models.
-                // For now, though, `this.$addChild` only supports collection navigations.
-                // if (prop.Type.TsTypeKind == TypeDiscriminator.Collection && prop.PureType.TsTypeKind == TypeDiscriminator.Model)
-
-                if (prop.Role == PropertyRole.CollectionNavigation)
-                {
-                    b.Line();
-
-                    var vt = new VueType(prop.PureType);
-                    string propVmName = vt.TsType(viewModel: true);
-
-                    b.Line();
-                    using (b.Block($"public addTo{prop.Name}(initialData?: DeepPartial<$models.{vt.TsType()}> | null)"))
-                    {
-                        b.Line($"return this.$addChild('{prop.JsVariable}', initialData) as {propVmName}");
-                    }
-
-                    if (prop.IsManyToManyCollection)
-                    {
-                        b.Line();
-                        var manyToManyType = new VueType(prop.ManyToManyFarNavigationProperty.Type).TsType(viewModel: true);
-                        using (b.Block($"get {prop.ManyToManyCollectionName.ToCamelCase()}(): ReadonlyArray<{manyToManyType}>"))
-                        {
-                            b.Line($"return (this.{prop.JsVariable} || []).map($ => $.{prop.ManyToManyFarNavigationProperty.JsVariable}!).filter($ => $)");
-                        }
-                    }
-                }
-            }
-
-            foreach (var method in model.ClientMethods.Where(m => !m.IsStatic))
-            {
-                WriteMethodCaller(b, method);
-            }
+            WriteViewModelInstanceMembers(b, model);
 
             b.Line();
             using (b.Block($"constructor(initialData?: DeepPartial<{modelName}> | null)"))
@@ -305,6 +283,48 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
 
                 return prefix + p.JsVariable;
             }
+        }
+    }
+
+    private static void WriteViewModelInstanceMembers(TypeScriptCodeBuilder b, ClassViewModel model, bool includeManyToMany = true)
+    {
+        foreach (var prop in model.ClientProperties)
+        {
+            // Eventually, this should support any collection of models.
+            // For now, though, `this.$addChild` only supports collection navigations.
+            // if (prop.Type.TsTypeKind == TypeDiscriminator.Collection && prop.PureType.TsTypeKind == TypeDiscriminator.Model)
+
+            if (prop.Role == PropertyRole.CollectionNavigation)
+            {
+                WriteAddToMethod(b, prop);
+
+                if (includeManyToMany && prop.IsManyToManyCollection)
+                {
+                    b.Line();
+                    var manyToManyType = new VueType(prop.ManyToManyFarNavigationProperty.Type).TsType(viewModel: true);
+                    using (b.Block($"get {prop.ManyToManyCollectionName.ToCamelCase()}(): ReadonlyArray<{manyToManyType}>"))
+                    {
+                        b.Line($"return (this.{prop.JsVariable} || []).map($ => $.{prop.ManyToManyFarNavigationProperty.JsVariable}!).filter($ => $)");
+                    }
+                }
+            }
+        }
+
+        foreach (var method in model.ClientMethods.Where(m => !m.IsStatic))
+        {
+            WriteMethodCaller(b, method);
+        }
+    }
+
+    private static void WriteAddToMethod(TypeScriptCodeBuilder b, PropertyViewModel prop)
+    {
+        var vt = new VueType(prop.PureType);
+        string propVmName = vt.TsType(viewModel: true);
+
+        b.Line();
+        using (b.Block($"public addTo{prop.Name}(initialData?: DeepPartial<$models.{vt.TsType()}> | null)"))
+        {
+            b.Line($"return this.$addChild('{prop.JsVariable}', initialData) as {propVmName}");
         }
     }
 

@@ -1372,6 +1372,7 @@ export function createAbstractProxyViewModelType<
 >(
   metadata: ModelType,
   apiClientCtor: { new (): ModelApiClient<any> },
+  mixin?: object,
 ): {
   new (initialData?: DeepPartial<TModel> | null): TViewModel;
 } {
@@ -1486,6 +1487,12 @@ export function createAbstractProxyViewModelType<
       return metadata;
     },
   });
+
+  if (mixin) {
+    const { constructor: _, ...descriptors } =
+      Object.getOwnPropertyDescriptors(mixin);
+    Object.defineProperties(AbstractVmProxy.prototype, descriptors);
+  }
 
   return AbstractVmProxy as any;
 }

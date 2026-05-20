@@ -1453,6 +1453,9 @@ export function createAbstractProxyViewModelType<
           );
           vm.$apiClient.$metadata = $metadata;
 
+          // Update $data.$metadata so it reflects the concrete type.
+          (vm as any).$data.$metadata = $metadata;
+
           // Populate the properties of the $load caller on the real $load caller instance.
           //@ts-expect-error protected prop or fn
           vm.$load.setResponseProps($load.rawResponse.data);

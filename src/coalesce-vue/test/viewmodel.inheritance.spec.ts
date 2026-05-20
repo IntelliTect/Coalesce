@@ -185,6 +185,11 @@ describe("abstract proxy", () => {
       new AbstractImpl1().$metadata,
     );
 
+    // $data.$metadata must also reflect the concrete type
+    expect((vm as any).$data.$metadata).toStrictEqual(
+      new AbstractImpl1().$metadata,
+    );
+
     const impl1 = vm as AbstractImpl1ViewModel;
     expect(impl1.impl1OnlyField).toBe("foo");
   }

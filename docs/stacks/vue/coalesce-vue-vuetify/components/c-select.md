@@ -125,6 +125,16 @@ If true, then when the first list results for the component are received by the 
 
 If true, the list results will be reloaded when the dropdown menu is opened. By default, list results are loaded when the component is mounted and also when any of its parameters change (either search input or the `params` prop).
 
+<Prop def="returnViewModel?: boolean = false" lang="ts" />
+
+When true and the component is bound with `for="TypeName"` (not bound to a model's property), the emitted values will be converted to ViewModel instances. This is similar to the automatic behavior that occurs when the component is bound to a ViewModel's navigation property or a ViewModelCollection.
+
+``` vue-html
+<c-select for="Person" return-view-model v-model="selectedPerson" />
+```
+
+Without this prop, binding with `for="TypeName"` emits plain model objects. With it, the emitted values are instances of the corresponding ViewModel class (e.g. `PersonViewModel`), which provides access to `$save`, `$delete`, and other ViewModel functionality.
+
 <Prop def="params?: ListParameters" lang="ts" />
 
 An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.

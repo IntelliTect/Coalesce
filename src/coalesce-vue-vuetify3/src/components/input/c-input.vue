@@ -38,7 +38,7 @@ type _ValueType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>,
 > =
-  TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
+  TModel extends AnyArgCaller<any, infer TArgsObj>
     ? TFor extends keyof TArgsObj
       ? TArgsObj[TFor]
       : any
@@ -69,26 +69,25 @@ type _ValueType<
 type _MetadataType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>,
-> =
-  TModel extends ApiStateTypeWithArgs<infer TMethod, any, any, any>
-    ? TMethod extends Method
-      ? TFor extends keyof TMethod["params"]
-        ? TMethod["params"][TFor]
-        : never
-      : never
-    : TFor extends Value
-      ? TFor
-      : TFor extends string
-        ? TFor extends keyof EnumTypeLookup
-          ? // Wrap in synthetic EnumValue so stage 2's guard is uniform.
-            // MetadataToModelType resolves this via typeDef.name → EnumTypeLookup.
-            EnumValue & { readonly typeDef: { readonly name: TFor } }
-          : TModel extends Model
-            ? TFor extends PropNames<TModel["$metadata"]>
-              ? TModel["$metadata"]["props"][TFor]
-              : never
+> = TModel extends AnyArgCaller & {
+  $metadata?: infer TMethod extends Method;
+}
+  ? TFor extends keyof TMethod["params"]
+    ? TMethod["params"][TFor]
+    : never
+  : TFor extends Value
+    ? TFor
+    : TFor extends string
+      ? TFor extends keyof EnumTypeLookup
+        ? // Wrap in synthetic EnumValue so stage 2's guard is uniform.
+          // MetadataToModelType resolves this via typeDef.name → EnumTypeLookup.
+          EnumValue & { readonly typeDef: { readonly name: TFor } }
+        : TModel extends Model
+          ? TFor extends PropNames<TModel["$metadata"]>
+            ? TModel["$metadata"]["props"][TFor]
             : never
-        : never;
+          : never
+      : never;
 
 type SelectSlotItemType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
@@ -211,7 +210,6 @@ import {
   type AnyArgCaller,
   mapValueToModel,
   parseValue,
-  ApiStateTypeWithArgs,
   ModelTypeLookup,
   PropNames,
   Value,

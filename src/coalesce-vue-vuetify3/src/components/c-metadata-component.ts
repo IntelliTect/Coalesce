@@ -20,7 +20,6 @@ import type {
   BooleanValue,
   CollectionValue,
   ObjectValue,
-  ApiStateTypeWithArgs,
   ListViewModel,
   ServiceViewModel,
   ModelCollectionValue,
@@ -74,18 +73,10 @@ TModel extends Model ?
       }[keyof PropsOf<TModel>]
     
 // Handle binding of `:model` to an API caller (which binds values to the caller's args object):    
-: TModel extends ApiStateTypeWithArgs<
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer TMethod extends Method,
-  any,
-  infer TArgsObj,
-  any
-> ?
-  // HACK: Pulling types off of TArgsObj is a concession we make
-  // due to ApiStateTypeWithArgs's constituent types not actually capturing
-  // the type of their metadata. At some point this could be made better if
-  // we were able to pull metadata off of `TMethod. In other words, what we'd 
-  // really like to do here is do the same thing we do for props on a model.
+: TModel extends AnyArgCaller<any, infer TArgsObj> ?
+  // HACK: Pulling types off of TArgsObj is suboptimal. 
+  // Can we instead extract from `& { $metadata: infer TMethod extends Method }`,
+  // like we do for props on a model?
   | {
       [K in keyof TArgsObj]: TArgsObj[K] extends ((
         ValueKind extends ModelValue ? Model<ModelType> :

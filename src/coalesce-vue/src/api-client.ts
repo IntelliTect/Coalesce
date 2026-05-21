@@ -1918,7 +1918,8 @@ export abstract class ApiState<
 
       this.isLoading = false;
 
-      // NB: `this.result` will have been set non-null in `setResponseProps`.
+      // NB: `this.result` will have been set non-null in `setResponseProps`
+      // (or if it IS null, null should be in TResult as a valid result type).
       return this.result! as TResult;
     } catch (thrown) {
       if (axios.isCancel(thrown)) {
@@ -2344,7 +2345,9 @@ export class ListApiState<
   }
 
   override get rawResponse() {
-    return super.rawResponse as AxiosResponse<ListResult<any>>;
+    return super.rawResponse as AxiosResponse<
+      ListResult<Exclude<TResult, undefined> extends (infer R)[] ? R : never>
+    >;
   }
 
   constructor(
@@ -2367,7 +2370,11 @@ export class ListApiState<
     this.page = null;
   }
 
-  protected setResponseProps(data: ListResult<any>) {
+  protected setResponseProps(
+    data: ListResult<
+      Exclude<TResult, undefined> extends (infer R)[] ? R : never
+    >,
+  ) {
     this.wasSuccessful = data.wasSuccessful;
     this.message = data.message || null;
 

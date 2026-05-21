@@ -1503,6 +1503,15 @@ describe("$makeCaller with args object", () => {
     const _pageSize: number | null = caller.pageSize;
     const _totalCount: number | null = caller.totalCount;
 
+    () => {
+      //@ts-expect-error list should not allow `any[]`
+      caller.rawResponse.data.list = [Symbol()];
+      //@ts-expect-error list should not allow any
+      caller.rawResponse.data.list = Symbol();
+      // Should allow numbers
+      caller.rawResponse.data.list = [42, 67];
+    };
+
     const promiseResult: number[] = await caller(42);
     expect(promiseResult).toStrictEqual([42]);
     expect(caller.result).toStrictEqual([42]);

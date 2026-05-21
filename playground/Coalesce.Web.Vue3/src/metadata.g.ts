@@ -1,3 +1,5 @@
+// Generated code - do not edit directly. Generated with: pnpm coalesce
+
 import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'
 import type {
   Domain, ModelType, ObjectType, HiddenAreas, BehaviorFlags, 

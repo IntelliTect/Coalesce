@@ -1,3 +1,5 @@
+// Generated code - do not edit directly. Generated with: pnpm coalesce
+
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
@@ -1132,7 +1134,7 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 }
 
 
-const viewModelTypeLookup = ViewModel.typeLookup = {
+const viewModelTypeLookup = {
   AbstractClassImpl: AbstractClassImplViewModel,
   AbstractClassPerson: AbstractClassPersonViewModel,
   AuditLog: AuditLogViewModel,
@@ -1156,6 +1158,13 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   StandaloneReadWrite: StandaloneReadWriteViewModel,
   ZipCode: ZipCodeViewModel,
 }
+ViewModel.typeLookup = viewModelTypeLookup;
+
+type _VmLookup = typeof viewModelTypeLookup;
+declare module 'coalesce-vue/lib/viewmodel' {
+  interface ViewModelTypeLookup extends _VmLookup {}
+}
+
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
   AbstractClass: AbstractClassListViewModel,
   AbstractClassImpl: AbstractClassImplListViewModel,
@@ -1185,4 +1194,3 @@ const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   AIAgentService: AIAgentServiceViewModel,
   WeatherService: WeatherServiceViewModel,
 }
-

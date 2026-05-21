@@ -47,26 +47,8 @@ public abstract class StringBuilderFileGenerator<TModel> : FileGenerator, IFileG
         return commentedLines.ToString() + output;
     }
 
-    private string GetCommentPrefix()
-    {
-        var extension = Path.GetExtension(EffectiveOutputPath).ToLowerInvariant();
-        return extension switch
-        {
-            ".cs" => "// ",
-            ".ts" => "// ",
-            ".js" => "// ",
-            ".tsx" => "// ",
-            ".jsx" => "// ",
-            ".py" => "# ",
-            ".java" => "// ",
-            ".kt" => "// ",
-            ".go" => "// ",
-            ".rs" => "// ",
-            ".rb" => "# ",
-            ".php" => "// ",
-            _ => "// " // Default to C-style comments
-        };
-    }
+    private string GetCommentPrefix() => "// ";
+
 
     public override string ToString()
     {

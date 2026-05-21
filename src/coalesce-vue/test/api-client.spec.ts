@@ -727,15 +727,16 @@ describe("$makeCaller", () => {
     const arg = 42;
     const result = await caller(arg);
 
-    // The typings are actually wrong at the moment - `undefined` is not one of the types of `result`, but it should be.
+    // `result` can be undefined since `undefined` is part of the return signature of the invoker func.
+    const _resultAllowsNumber: typeof result = 24;
+    const _resultAllowsUndefined: typeof result = undefined;
+
     expect(result).toBeUndefined();
 
     expect(endpointMock.mock.calls.length).toBe(0);
     expect(caller.result).toBeNull();
 
     // Typescript typing tests - all of these are valid types of `result`.
-    // Note that Typescript intellisense in VS code seems to be really messed up
-    // right now and shows that `result` is only `string`.:
     caller.result = null;
     caller.result = 13;
 
@@ -759,15 +760,16 @@ describe("$makeCaller", () => {
     const arg = 42;
     const result = await caller(arg);
 
-    // The typings are actually wrong at the moment - `undefined` is not one of the types of `result`, but it should be.
+    // `result` can be undefined since `undefined` is part of the return signature of the invoker func.
+    const _resultAllowsNumber: typeof result = 24;
+    const _resultAllowsUndefined: typeof result = undefined;
+
     expect(result).toBeUndefined();
 
     expect(endpointMock.mock.calls.length).toBe(0);
     expect(caller.result).toBeNull();
 
     // Typescript typing tests - all of these are valid types of `result`.
-    // Note that Typescript intellisense in VS code seems to be really messed up
-    // right now and shows that `result` is only `string`.:
     caller.result = null;
     caller.result = 13;
 
@@ -1437,15 +1439,16 @@ describe("$makeCaller with args object", () => {
     const arg = 42;
     const result = await caller.invokeWithArgs({ num: arg });
 
-    // The typings are actually wrong at the moment - `undefined` is not one of the types of `result`, but it should be.
+    // `result` can be undefined since `undefined` is part of the return signature of the invoker func.
+    const _resultAllowsNumber: typeof result = 24;
+    const _resultAllowsUndefined: typeof result = undefined;
+
     expect(result).toBeUndefined();
 
     expect(endpointMock.mock.calls.length).toBe(0);
     expect(caller.result).toBeNull();
 
     // Typescript typing tests - all of these are valid types of `result`.
-    // Note that Typescript intellisense in VS code seems to be really messed up
-    // right now and shows that `result` is only `string`.:
     caller.result = null;
     caller.result = 13;
 

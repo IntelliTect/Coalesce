@@ -728,10 +728,21 @@ export type ApiStateType<
   T extends TransportTypeSpecifier,
   TArgs extends any[],
   TResult,
+  TCallVoid = never,
 > = T extends ItemTransportTypeSpecifier
-  ? ItemApiState<TArgs, TResult, T extends ItemMethod ? T : ItemMethod>
+  ? ItemApiState<
+      TArgs,
+      TResult,
+      T extends ItemMethod ? T : ItemMethod,
+      TCallVoid
+    >
   : T extends ListTransportTypeSpecifier
-    ? ListApiState<TArgs, TResult, T extends ListMethod ? T : ListMethod>
+    ? ListApiState<
+        TArgs,
+        TResult,
+        T extends ListMethod ? T : ListMethod,
+        TCallVoid
+      >
     : never;
 
 export type ApiStateTypeWithArgs<
@@ -739,19 +750,22 @@ export type ApiStateTypeWithArgs<
   TArgs extends any[],
   TArgsObj extends object,
   TResult,
+  TCallVoid = never,
 > = T extends ItemTransportTypeSpecifier
   ? ItemApiStateWithArgs<
       TArgs,
       TArgsObj,
       TResult,
-      T extends ItemMethod ? T : ItemMethod
+      T extends ItemMethod ? T : ItemMethod,
+      TCallVoid
     >
   : T extends ListTransportTypeSpecifier
     ? ListApiStateWithArgs<
         TArgs,
         TArgsObj,
         TResult,
-        T extends ListMethod ? T : ListMethod
+        T extends ListMethod ? T : ListMethod,
+        TCallVoid
       >
     : never;
 
@@ -826,8 +840,40 @@ export class ApiClient<T extends ApiRoutedType> {
     return clone;
   }
 
+  // There are two overloads for $makeCaller without argsFactory:
+  // 1. Strict (no void): invoker must always return a promise. Call signature is `Promise<TResult>`.
+  // 2. Void-able: invoker may return void/undefined. Call signature is `Promise<TResult | undefined>`.
+  //
+  // We need two overloads because `| undefined | void` in the invoker's expected return type
+  // acts as a "void sink" — TypeScript matches a void return against it rather than inferring
+  // undefined into TResult. Without the sink, void-returning invokers wouldn't compile
+  // (void isn't assignable to Promise<...>). But with it, TResult stays clean (just `number`,
+  // not `number | undefined`). The two-overload approach lets the strict overload reject
+  // void-returning invokers (falling through to the second), which then adds undefined
+  // only to the call signature return, not to `.result` (which remains `TResult | null`).
+
   /**
    * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
+   * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
+   * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
+   */
+  $makeCaller<
+    TArgs extends any[],
+    TResult,
+    TTransportType extends TransportTypeSpecifier<T>,
+  >(
+    resultType: TTransportType,
+    invoker: ApiCallerInvoker<
+      TArgs,
+      ResultPromiseType<TTransportType, TResult, never>,
+      this
+    >,
+  ): ApiStateType<TTransportType, TArgs, TResult>;
+
+  /**
+   * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
+   * The returned caller's invocation will resolve to `undefined` if the invoker function returns void/undefined
+   * (i.e. the invoker conditionally skips the API call).
    * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
    * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
    */
@@ -844,7 +890,33 @@ export class ApiClient<T extends ApiRoutedType> {
       | void,
       this
     >,
-  ): ApiStateType<TTransportType, TArgs, TResult>;
+  ): ApiStateType<TTransportType, TArgs, TResult, undefined>;
+
+  /**
+   * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
+   * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
+   * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
+   * @param invokerFactory method that will call the API with an args object as the only parameter. This may be called by using `.withArgs()` on the function that is returned from `$makeCaller`. The value of the args object will default to `.args` if not specified.
+   */
+  $makeCaller<
+    TArgs extends any[],
+    TArgsObj extends object,
+    TResult,
+    TTransportType extends TransportTypeSpecifier<T>,
+  >(
+    resultType: TTransportType,
+    invoker: ApiCallerInvoker<
+      TArgs,
+      ResultPromiseType<TTransportType, TResult, never>,
+      this
+    >,
+    argsFactory: () => TArgsObj,
+    argsInvoker: ApiCallerArgsInvoker<
+      TArgsObj,
+      ResultPromiseType<TTransportType, TResult, never>,
+      this
+    >,
+  ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
 
   /**
    * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
@@ -874,7 +946,7 @@ export class ApiClient<T extends ApiRoutedType> {
       | void,
       this
     >,
-  ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
+  ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult, undefined>;
 
   $makeCaller<
     TArgs extends any[],
@@ -1375,7 +1447,7 @@ export type ResponseCachingConfiguration = {
 // Base class for ApiState that contains nothing but the logic for
 // subclassing Function. Specifically, we do this to avoid a need to call
 // `super()`, which triggers CSP unsafe-eval.
-abstract class ApiStateBase<TArgs extends any[], TResult> {
+abstract class ApiStateBase<TArgs extends any[], TResult, TCallVoid = never> {
   /** Invokes a call to this API endpoint. */
   public readonly invoke!: this;
 
@@ -1390,9 +1462,9 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     invoker: Function,
     args: any[],
-  ): Promise<TResult>;
+  ): Promise<TResult | TCallVoid>;
 
-  protected _pendingPromise: Promise<TResult> | undefined;
+  protected _pendingPromise: Promise<TResult | TCallVoid> | undefined;
 
   constructor(
     apiClient: ApiClient<any>,
@@ -1437,7 +1509,8 @@ ApiStateBase.prototype.__proto__ = Function;
 export abstract class ApiState<
   TArgs extends any[],
   TResult,
-> extends ApiStateBase<TArgs, TResult> {
+  TCallVoid = never,
+> extends ApiStateBase<TArgs, TResult, TCallVoid> {
   /** See comments on ReactiveFlags_SKIP for explanation.
    * @internal
    */
@@ -1667,9 +1740,11 @@ export abstract class ApiState<
    * If a request is currently pending, awaits that request.
    * If no request is pending, resolves immediately with the current `result` value.
    */
-  then<TResult1 = TResult | null, TResult2 = never>(
+  then<TResult1 = TResult | TCallVoid | null, TResult2 = never>(
     onfulfilled?:
-      | ((value: TResult | null) => TResult1 | PromiseLike<TResult1>)
+      | ((
+          value: TResult | TCallVoid | null,
+        ) => TResult1 | PromiseLike<TResult1>)
       | null,
     onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
   ): Promise<TResult1 | TResult2> {
@@ -1692,7 +1767,7 @@ export abstract class ApiState<
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     invoker: Function,
     args: any[],
-  ): Promise<TResult> {
+  ): Promise<TResult | TCallVoid> {
     let apiClient = this.apiClient;
 
     if (this.isLoading) {
@@ -2037,16 +2112,18 @@ export interface ItemApiState<
   TResult,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TMethod extends ItemMethod | undefined = ItemMethod,
+  TCallVoid = never,
 > {
   // Do not put a doc comment on the call signature:
   // it'll hide the doc comment of the caller's definition.
-  (...args: TArgs): Promise<TResult>;
+  (...args: TArgs): Promise<TResult | TCallVoid>;
 }
 export class ItemApiState<
   TArgs extends any[],
   TResult,
   TMethod extends ItemMethod | undefined = ItemMethod,
-> extends ApiState<TArgs, TResult> {
+  TCallVoid = never,
+> extends ApiState<TArgs, TResult, TCallVoid> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: TMethod;
 
@@ -2179,7 +2256,8 @@ export class ItemApiStateWithArgs<
   TArgsObj,
   TResult,
   TMethod extends ItemMethod | undefined = ItemMethod,
-> extends ItemApiState<TArgs, TResult, TMethod> {
+  TCallVoid = never,
+> extends ItemApiState<TArgs, TResult, TMethod, TCallVoid> {
   private readonly __args = ref<TArgsObj>() as Ref<TArgsObj>;
   /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
   get args() {
@@ -2263,15 +2341,22 @@ export class ItemApiStateWithArgs<
   }
 }
 
-export interface ListApiState<TArgs extends any[], TResult> {
+export interface ListApiState<
+  TArgs extends any[],
+  TResult,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  TMethod extends ListMethod | undefined = ListMethod,
+  TCallVoid = never,
+> {
   /** Invokes a call to this API endpoint. */
-  (...args: TArgs): Promise<TResult[]>;
+  (...args: TArgs): Promise<TResult[] | TCallVoid>;
 }
 export class ListApiState<
   TArgs extends any[],
   TResult,
   TMethod extends ListMethod | undefined = ListMethod,
-> extends ApiState<TArgs, TResult[]> {
+  TCallVoid = never,
+> extends ApiState<TArgs, TResult[], TCallVoid> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: TMethod;
 
@@ -2369,7 +2454,8 @@ export class ListApiStateWithArgs<
   TArgsObj,
   TResult,
   TMethod extends ListMethod | undefined = ListMethod,
-> extends ListApiState<TArgs, TResult, TMethod> {
+  TCallVoid = never,
+> extends ListApiState<TArgs, TResult, TMethod, TCallVoid> {
   private readonly __args = ref<TArgsObj>() as Ref<TArgsObj>;
   /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
   get args() {

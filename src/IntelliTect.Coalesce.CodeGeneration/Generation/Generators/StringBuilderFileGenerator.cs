@@ -17,27 +17,7 @@ public abstract class StringBuilderFileGenerator<TModel> : FileGenerator, IFileG
     {
         var output = await BuildOutputAsync();
         output = PrependHeaderComment(output);
-        output = PrependLintingDirectives(output);
         return new MemoryStream(Encoding.UTF8.GetBytes(output));
-    }
-
-    private string PrependLintingDirectives(string output)
-    {
-        var extension = Path.GetExtension(EffectiveOutputPath).ToLowerInvariant();
-        var isTypeScript = extension is ".ts" or ".tsx";
-        
-        if (!isTypeScript || DisableLinting == false)
-        {
-            return output;
-        }
-
-        var directives = new StringBuilder();
-        directives.AppendLine("/* eslint-disable */");
-        directives.AppendLine("/* prettier-ignore */");
-        directives.AppendLine("// @ts-nocheck");
-        directives.AppendLine();
-        
-        return directives.ToString() + output;
     }
 
     private string PrependHeaderComment(string output)

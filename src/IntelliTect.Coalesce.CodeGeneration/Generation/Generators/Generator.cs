@@ -47,14 +47,6 @@ public abstract class Generator : IGenerator
     public string HeaderComment { get; set; }
 
     /// <summary>
-    /// Whether to add linting/formatting directives to generated TypeScript files.
-    /// When true, adds eslint-disable, prettier-ignore, and @ts-nocheck directives.
-    /// Defaults to true if not specified.
-    /// </summary>
-    [GeneratorConfig]
-    public bool? DisableLinting { get; set; } = true;
-
-    /// <summary>
     /// The desired destination path of generated files, including any user configuration through <see cref="TargetDirectory"/>
     /// </summary>
     public abstract string EffectiveOutputPath { get; }

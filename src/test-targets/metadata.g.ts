@@ -1,7 +1,3 @@
-/* eslint-disable */
-/* prettier-ignore */
-// @ts-nocheck
-
 // Generated code from CreateVitestTargets. Do not edit directly.
 
 import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'

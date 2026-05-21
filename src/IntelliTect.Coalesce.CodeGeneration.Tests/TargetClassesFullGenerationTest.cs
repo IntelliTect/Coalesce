@@ -74,18 +74,7 @@ public class TargetClassesFullGenerationTest(VueSuiteFixture fixture) : CodeGenT
                 "disabled": true
             },
             "Scripts": {
-                "targetDirectory": "../"
-            },
-            "TsMetadata": {
-                "headerComment": "Generated code from CreateVitestTargets. Do not edit directly."
-            },
-            "TsModels": {
-                "headerComment": "Generated code from CreateVitestTargets. Do not edit directly."
-            },
-            "TsViewModels": {
-                "headerComment": "Generated code from CreateVitestTargets. Do not edit directly."
-            },
-            "TsApiClients": {
+                "targetDirectory": "../",
                 "headerComment": "Generated code from CreateVitestTargets. Do not edit directly."
             }
         }

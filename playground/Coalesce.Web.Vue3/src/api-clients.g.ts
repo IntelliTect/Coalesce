@@ -1,3 +1,5 @@
+// Generated code - do not edit directly. Generated with: pnpm coalesce
+
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import { ModelApiClient, ServiceApiClient } from 'coalesce-vue/lib/api-client'

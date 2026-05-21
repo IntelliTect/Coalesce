@@ -33,6 +33,13 @@ public abstract class CompositeGenerator<TModel> : Generator, ICompositeGenerato
     {
         var generator = ActivatorUtilities.CreateInstance<TGenerator>(_services.ServiceProvider);
         generator.DefaultOutputPath = EffectiveOutputPath;
+        
+        // Cascade parent config to child generators if they don't have their own config
+        if (generator is Generator gen && !string.IsNullOrWhiteSpace(this.HeaderComment))
+        {
+            gen.HeaderComment = this.HeaderComment;
+        }
+        
         return generator;
     }
 

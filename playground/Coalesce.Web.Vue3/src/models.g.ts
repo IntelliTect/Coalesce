@@ -1,3 +1,5 @@
+// Generated code - do not edit directly. Generated with: pnpm coalesce
+
 import * as metadata from './metadata.g'
 import { convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
 import type { Model, DataSource } from 'coalesce-vue/lib/model'
@@ -67,7 +69,7 @@ export namespace AbstractClass {
     
     /** 
       A default data source declared with an open generic parameter constrained to AbstractClass.
-      Because  is constrained to AbstractClass,
+      Because T is constrained to AbstractClass,
       this data source is automatically used as the default for AbstractClass
       and every derived type (e.g. AbstractClassImpl) without needing to
       declare a separate data source on each derived class.
@@ -109,7 +111,7 @@ export namespace AbstractClassImpl {
     
     /** 
       A default data source declared with an open generic parameter constrained to AbstractClass.
-      Because  is constrained to AbstractClass,
+      Because T is constrained to AbstractClass,
       this data source is automatically used as the default for AbstractClass
       and every derived type (e.g. AbstractClassImpl) without needing to
       declare a separate data source on each derived class.

@@ -80,7 +80,14 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
         if (model.Type.IsAbstract)
         {
             b.Line($"export type {viewModelName} = {string.Join(" | ", model.ClientDerivedTypes.Select(t => new VueType(t.Type).TsType(viewModel: true)))}");
-            b.Line($"export const {viewModelName} = createAbstractLoader<{viewModelName}>($apiClients.{name}ApiClient)");
+            if (model.ClientDataSources(Model).Any())
+            {
+                b.Line($"export const {viewModelName} = createAbstractLoader<{viewModelName}>($apiClients.{name}ApiClient, {{ DataSources: {modelName}.DataSources }})");
+            }
+            else
+            {
+                b.Line($"export const {viewModelName} = createAbstractLoader<{viewModelName}>($apiClients.{name}ApiClient)");
+            }
             b.Line();
             return;
         }

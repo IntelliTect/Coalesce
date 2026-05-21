@@ -141,7 +141,7 @@ export class AbstractImpl2ListViewModel extends ListViewModel<$models.AbstractIm
 
 
 export type AbstractModelViewModel = AbstractImpl1ViewModel | AbstractImpl2ViewModel
-export const AbstractModelViewModel = createAbstractLoader<AbstractModelViewModel>($apiClients.AbstractModelApiClient)
+export const AbstractModelViewModel = createAbstractLoader<AbstractModelViewModel>($apiClients.AbstractModelApiClient, { DataSources: $models.AbstractModel.DataSources })
 
 export class AbstractModelListViewModel extends ListViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, AbstractModelViewModel> {
   static DataSources = $models.AbstractModel.DataSources;

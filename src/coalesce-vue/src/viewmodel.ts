@@ -1360,33 +1360,40 @@ export abstract class ViewModel<
   }
 }
 
-/** Create a loader for an abstract model type that produces concrete ViewModel instances. */
 export function createAbstractLoader<
   TViewModel extends ViewModel,
->(apiClientCtor: {
-  new (): ModelApiClient<any>;
-}): {
-  /** Load a concrete ViewModel instance by its primary key.
-   * Returns a new API caller each invocation. The caller's `result` will be the concrete ViewModel once loaded. */
-  load(id: any): ItemApiState<[id?: any], TViewModel>;
+  TMixin extends object = object,
+>(
+  apiClientCtor: { new (): ModelApiClient<any> },
+  mixin?: TMixin,
+): TMixin & {
+  readonly apiClient: ModelApiClient<any>;
+  load(
+    id: any,
+    parameters?: DataSourceParameters,
+  ): ItemApiState<[id?: any], TViewModel>;
 } {
+  const apiClient = new apiClientCtor();
   return {
-    load(id: any): ItemApiState<[id?: any], TViewModel> {
-      const apiClient = new apiClientCtor();
+    ...mixin,
+    apiClient,
+    load(
+      id: any,
+      parameters?: DataSourceParameters,
+    ): ItemApiState<[id?: any], TViewModel> {
       const caller = apiClient
-        .$makeCaller("item", (c, id?: any) => c.get(id))
-        .onFulfilled(() => {
-          const data = caller.result!;
-          const realCtor = ViewModel.typeLookup![(data as any).$metadata.name];
-          const vm = new realCtor() as TViewModel;
-          vm.$loadCleanData(data);
-          caller.result = vm;
+        .$makeCaller("item", (c, id?: any) => c.get(id, parameters))
+        .onFulfilled((state) => {
+          const data = state.result!;
+          const realCtor = ViewModel.typeLookup![data.$metadata.name];
+          const vm = (new realCtor() as TViewModel).$loadCleanData(data as any);
+          if (parameters) vm.$params = parameters;
+          state.result = vm as any;
         });
-
       caller(id);
-      return caller as any;
+      return caller as ItemApiState<[id?: any], TViewModel>;
     },
-  };
+  } as any;
 }
 
 export interface BulkSaveRequestRawItem {

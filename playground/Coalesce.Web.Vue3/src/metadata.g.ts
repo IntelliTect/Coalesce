@@ -1,3 +1,7 @@
+/* eslint-disable */
+/* prettier-ignore */
+// @ts-nocheck
+
 // Generated code - do not edit directly. Generated with: pnpm coalesce
 
 import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'

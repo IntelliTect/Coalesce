@@ -1,3 +1,5 @@
+// Generated code from CreateVitestTargets. Do not edit directly.
+
 import * as metadata from './metadata.g'
 import { convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
 import type { Model, DataSource } from 'coalesce-vue/lib/model'

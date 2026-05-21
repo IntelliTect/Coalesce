@@ -1,3 +1,5 @@
+// Generated code from CreateVitestTargets. Do not edit directly.
+
 import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'
 import type {
   Domain, ModelType, ObjectType, HiddenAreas, BehaviorFlags, 

@@ -10,5 +10,19 @@
   //"rootTypesWhitelist": [
   //  "CaseDto"
   //],
-  "rootGenerator": "Vue"
+  "rootGenerator": "Vue",
+  "generatorConfig": {
+    "TsMetadata": {
+      "headerComment": "Generated code - do not edit directly. Generated with: pnpm coalesce"
+    },
+    "TsModels": {
+      "headerComment": "Generated code - do not edit directly. Generated with: pnpm coalesce"
+    },
+    "TsViewModels": {
+      "headerComment": "Generated code - do not edit directly. Generated with: pnpm coalesce"
+    },
+    "TsApiClients": {
+      "headerComment": "Generated code - do not edit directly. Generated with: pnpm coalesce"
+    }
+  }
 }

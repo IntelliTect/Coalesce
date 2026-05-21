@@ -684,7 +684,7 @@ describe("$makeCaller", () => {
     );
 
     const arg = 42;
-    const result = await caller(arg);
+    const result: number = await caller(arg);
     expect(endpointMock.mock.calls[0][0]).toBe(arg);
     expect(caller.result).toBe(arg);
     expect(result).toBe(arg);
@@ -1516,11 +1516,28 @@ describe("$makeCaller with args object", () => {
   });
 
   describe.each(["item", "list"] as const)("for %s transport", (type) => {
-    const makeCaller = (
-      endpointMock: ReturnType<
-        typeof makeEndpointMock<number | null | undefined>
-      >,
-    ) =>
+    const makeTransportMock = () =>
+      vitest.fn((arg?: number | null | undefined) =>
+        Promise.resolve({
+          data:
+            type === "list"
+              ? {
+                  wasSuccessful: true,
+                  list: [arg],
+                  page: 1,
+                  pageCount: 1,
+                  pageSize: 10,
+                  totalCount: 1,
+                }
+              : { wasSuccessful: true, object: arg },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config: {} as any,
+        }),
+      );
+
+    const makeCaller = (endpointMock: ReturnType<typeof makeTransportMock>) =>
       new PersonApiClient().$makeCaller(
         type,
         (c, num: number) => endpointMock(num),
@@ -1529,7 +1546,7 @@ describe("$makeCaller with args object", () => {
       );
 
     test("uses own args if args not specified", () => {
-      const endpointMock = makeEndpointMock();
+      const endpointMock = makeTransportMock();
       const caller = makeCaller(endpointMock);
 
       caller.args.num = 42;
@@ -1538,7 +1555,7 @@ describe("$makeCaller with args object", () => {
     });
 
     test("own args are reactive", async () => {
-      const endpointMock = makeEndpointMock();
+      const endpointMock = makeTransportMock();
       const caller = makeCaller(endpointMock);
 
       const vue = mountData({ caller });
@@ -1558,7 +1575,7 @@ describe("$makeCaller with args object", () => {
     });
 
     test("uses custom args if specified", () => {
-      const endpointMock = makeEndpointMock();
+      const endpointMock = makeTransportMock();
       const caller = makeCaller(endpointMock);
 
       caller.args.num = 42;
@@ -1569,7 +1586,7 @@ describe("$makeCaller with args object", () => {
     });
 
     test("sets state properties appropriately", async () => {
-      const endpointMock = makeEndpointMock();
+      const endpointMock = makeTransportMock();
       const caller = makeCaller(endpointMock);
 
       caller.args.num = 42;
@@ -1581,7 +1598,7 @@ describe("$makeCaller with args object", () => {
     });
 
     test("debounce ignores redundant requests when resolving", async () => {
-      const endpointMock = makeEndpointMock();
+      const endpointMock = makeTransportMock();
       const caller = new PersonApiClient()
         .$makeCaller(
           type,
@@ -1613,7 +1630,7 @@ describe("$makeCaller with args object", () => {
       expect(endpointMock.mock.calls[1][0]).toBe(3);
 
       await expect(calls[0]).resolves.toBeTruthy();
-      await expect(calls[1]).resolves.toBeFalsy();
+      await expect(calls[1]).resolves.toBeUndefined();
       await expect(calls[2]).resolves.toBeTruthy();
     });
   });

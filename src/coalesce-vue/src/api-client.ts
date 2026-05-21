@@ -1390,9 +1390,9 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     invoker: Function,
     args: any[],
-  ): Promise<ItemResult<TResult> | ListResult<TResult>>;
+  ): Promise<TResult>;
 
-  protected _pendingPromise: Promise<any> | undefined;
+  protected _pendingPromise: Promise<TResult> | undefined;
 
   constructor(
     apiClient: ApiClient<any>,
@@ -1446,7 +1446,7 @@ export abstract class ApiState<
   /** The metadata of the method being called, if it was provided. */
   abstract $metadata?: Method;
 
-  abstract result: TResult | TResult[] | null;
+  abstract result: TResult | null;
 
   private readonly __isLoading = ref(false);
   /** True if a request is currently pending. */
@@ -1654,6 +1654,31 @@ export abstract class ApiState<
     return this;
   }
 
+  /**
+   * Returns the promise of the currently pending request,
+   * or `undefined` if no request is pending.
+   */
+  getPromise() {
+    return this._pendingPromise;
+  }
+
+  /**
+   * Implements the thenable protocol, allowing the caller to be used with `await`.
+   * If a request is currently pending, awaits that request.
+   * If no request is pending, resolves immediately with the current `result` value.
+   */
+  then<TResult1 = TResult | null, TResult2 = never>(
+    onfulfilled?:
+      | ((value: TResult | null) => TResult1 | PromiseLike<TResult1>)
+      | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
+  ): Promise<TResult1 | TResult2> {
+    return (this._pendingPromise ?? Promise.resolve(this.result)).then(
+      onfulfilled,
+      onrejected,
+    );
+  }
+
   protected abstract setResponseProps(data: ApiResult): void;
 
   private _debounceSignal: {
@@ -1667,7 +1692,7 @@ export abstract class ApiState<
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     invoker: Function,
     args: any[],
-  ) {
+  ): Promise<TResult> {
     let apiClient = this.apiClient;
 
     if (this.isLoading) {
@@ -1703,6 +1728,10 @@ export abstract class ApiState<
             // Similar to the "cancel" mode,
             // aborted requests are not thrown as rejected promises,
             // but instead as a fulfilled promise with a void resolved value.
+
+            // @ts-expect-error This is a deliberate and long-standing break from the
+            // type contract of ApiState objects that prematurely halted requests
+            // resolve to undefined (added in 7300ac92aaa9cd577fe461717fa78b98c73174ac).
             return undefined;
           }
       }
@@ -1843,6 +1872,11 @@ export abstract class ApiState<
 
       if (!promise) {
         this.isLoading = false;
+
+        // @ts-expect-error Added in 2833516271642f65a29e494cd4aa10a2861671be - it is deliberate
+        // that invoker funcs that return undefined are treated as a cancellation
+        // and return undefined (in violation of the type contract) like other cancellations.
+        // Note that this is exceedingly rare and would require the invoker func to not be async.
         return undefined;
       }
 
@@ -1850,6 +1884,9 @@ export abstract class ApiState<
 
       if (!resp) {
         this.isLoading = false;
+
+        // @ts-expect-error Added for https://github.com/IntelliTect/Coalesce/issues/416 -
+        // similar to just above, this allows async invoker funcs to return undefined.
         return undefined;
       }
 
@@ -1870,7 +1907,8 @@ export abstract class ApiState<
 
       this.isLoading = false;
 
-      return data?.object ?? data?.list;
+      // NB: `this.result` will have been set non-null in `setResponseProps`.
+      return this.result!;
     } catch (thrown) {
       if (axios.isCancel(thrown)) {
         // No handling of anything for cancellations.
@@ -1879,6 +1917,10 @@ export abstract class ApiState<
         // it should probably be implemented as a separate set of callbacks.
         // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
         // since the promise won't reject immediately after requesting cancellation. There could already be another request pending when this code is being executed.
+
+        // @ts-expect-error This is a deliberate and long-standing break from the
+        // type contract of ApiState objects that prematurely halted requests
+        // resolve to undefined (added in 7300ac92aaa9cd577fe461717fa78b98c73174ac).
         return;
       } else if (
         windowUnloading &&
@@ -1891,7 +1933,16 @@ export abstract class ApiState<
         // This seems to only happen on Firefox - Chrome doesn't abort requests
         // on unload in a way that ever propagates up to user code.
         // https://github.com/IntelliTect/Coalesce/issues/296
-        return;
+
+        // Wait 1s matching the windowUnloading reset timer. If the page truly unloads,
+        // nothing matters. If the unload was user-canceled, this gives the browser time
+        // to reset before we resolve, avoiding spurious downstream continuations.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // @ts-expect-error This is a deliberate and long-standing break from the
+        // type contract of ApiState objects that prematurely halted requests
+        // resolve to undefined (added in 7300ac92aaa9cd577fe461717fa78b98c73174ac).
+        return undefined;
       } else {
         // eslint-disable-next-line no-var
         var error = thrown as AxiosError | ApiResult | Error | string;
@@ -1998,14 +2049,6 @@ export class ItemApiState<
 > extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: TMethod;
-
-  /**
-   * Returns the promise of the currently pending request,
-   * or `undefined` if no request is pending.
-   */
-  getPromise(): Promise<TResult> | undefined {
-    return this._pendingPromise;
-  }
 
   private readonly __validationIssues = ref<ValidationIssue[] | null>(null);
   /** Validation issues returned by the previous request. */
@@ -2155,7 +2198,7 @@ export class ItemApiStateWithArgs<
 
   /** Invokes a call to this API endpoint.
    * If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
-  public invokeWithArgs(args: TArgsObj = this.args): Promise<TResult> {
+  public invokeWithArgs(args: TArgsObj = this.args) {
     // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
@@ -2228,17 +2271,9 @@ export class ListApiState<
   TArgs extends any[],
   TResult,
   TMethod extends ListMethod | undefined = ListMethod,
-> extends ApiState<TArgs, TResult> {
+> extends ApiState<TArgs, TResult[]> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: TMethod;
-
-  /**
-   * Returns the promise of the currently pending request,
-   * or `undefined` if no request is pending.
-   */
-  getPromise(): Promise<TResult[]> | undefined {
-    return this._pendingPromise;
-  }
 
   private readonly __page = ref<number | null>(null);
   /** Page number returned by the previous request. */
@@ -2361,7 +2396,7 @@ export class ListApiStateWithArgs<
       this,
       this.argsInvoker,
       [args],
-    ));
+    )) as Promise<TResult>;
   }
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */

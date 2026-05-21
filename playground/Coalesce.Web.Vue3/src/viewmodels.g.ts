@@ -1,10 +1,10 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps, createAbstractProxyViewModelType } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps, createAbstractLoader } from 'coalesce-vue/lib/viewmodel'
 
 export type AbstractClassViewModel = AbstractClassImplViewModel
-export const AbstractClassViewModel = createAbstractProxyViewModelType<$models.AbstractClass, AbstractClassViewModel>($metadata.AbstractClass, $apiClients.AbstractClassApiClient)
+export const AbstractClassViewModel = createAbstractLoader<AbstractClassViewModel>($apiClients.AbstractClassApiClient)
 
 export class AbstractClassListViewModel extends ListViewModel<$models.AbstractClass, $apiClients.AbstractClassApiClient, AbstractClassViewModel> {
   static DataSources = $models.AbstractClass.DataSources;
@@ -1132,7 +1132,7 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 }
 
 
-const viewModelTypeLookup = ViewModel.typeLookup = {
+const viewModelTypeLookup = {
   AbstractClassImpl: AbstractClassImplViewModel,
   AbstractClassPerson: AbstractClassPersonViewModel,
   AuditLog: AuditLogViewModel,
@@ -1156,6 +1156,13 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   StandaloneReadWrite: StandaloneReadWriteViewModel,
   ZipCode: ZipCodeViewModel,
 }
+ViewModel.typeLookup = viewModelTypeLookup;
+
+type _VmLookup = typeof viewModelTypeLookup;
+declare module 'coalesce-vue/lib/viewmodel' {
+  interface ViewModelTypeLookup extends _VmLookup {}
+}
+
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
   AbstractClass: AbstractClassListViewModel,
   AbstractClassImpl: AbstractClassImplListViewModel,
@@ -1185,4 +1192,3 @@ const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   AIAgentService: AIAgentServiceViewModel,
   WeatherService: WeatherServiceViewModel,
 }
-

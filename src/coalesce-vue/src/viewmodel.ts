@@ -1360,134 +1360,33 @@ export abstract class ViewModel<
   }
 }
 
-const $loadProxy = Symbol("$loadProxy");
-const $protoVersion = Symbol("$protoVersion");
-/** Create a class that represents an abstract model type
- * and will turn itself into the proper concrete ViewModel type
- * when loaded.
- */
-export function createAbstractProxyViewModelType<
-  TModel extends Model<ModelType>,
+/** Create a loader for an abstract model type that produces concrete ViewModel instances. */
+export function createAbstractLoader<
   TViewModel extends ViewModel,
->(
-  metadata: ModelType,
-  apiClientCtor: { new (): ModelApiClient<any> },
-): {
-  new (initialData?: DeepPartial<TModel> | null): TViewModel;
+>(apiClientCtor: {
+  new (): ModelApiClient<any>;
+}): {
+  /** Load a concrete ViewModel instance by its primary key.
+   * Returns a new API caller each invocation. The caller's `result` will be the concrete ViewModel once loaded. */
+  load(id: any): ItemApiState<[id?: any], TViewModel>;
 } {
-  function unsupportedError() {
-    return new Error(`"Operation not supported: This ViewModel instance is a proxy for an abstract type, with its concrete implementation not yet decided.
+  return {
+    load(id: any): ItemApiState<[id?: any], TViewModel> {
+      const apiClient = new apiClientCtor();
+      const caller = apiClient
+        .$makeCaller("item", (c, id?: any) => c.get(id))
+        .onFulfilled(() => {
+          const data = caller.result!;
+          const realCtor = ViewModel.typeLookup![(data as any).$metadata.name];
+          const vm = new realCtor() as TViewModel;
+          vm.$loadCleanData(data);
+          caller.result = vm;
+        });
 
-      Try one of the following to obtain a concrete implementation:
-        - $load(...) or $loadFromModel(...) data for a concrete implementation
-        - Instantiate a concrete implementation of this abstract type instead of this abstract proxy
-      `);
-  }
-
-  class AbstractVmProxy extends ViewModel<TModel, ModelApiClient<TModel>> {
-    [$loadProxy]?: ItemApiState<any, any, any>;
-    [$protoVersion]? = ref(0);
-
-    override get $load() {
-      return this[$loadProxy]!;
-    }
-    override get $save() {
-      return this.$apiClient.$makeCaller("item", (c) => {
-        throw unsupportedError();
-      }) as any;
-    }
-    override get $bulkSave() {
-      return this.$apiClient.$makeCaller("item", (c) => {
-        throw unsupportedError();
-      }) as any;
-    }
-    override get $delete() {
-      return this.$apiClient.$makeCaller("item", (c) => {
-        throw unsupportedError();
-      }) as any;
-    }
-
-    constructor(initialDirtyData?: any) {
-      if (
-        initialDirtyData &&
-        "$metadata" in initialDirtyData &&
-        ViewModel.typeLookup?.[initialDirtyData.$metadata.name]
-      ) {
-        // We know the real concrete type of this ViewModel from the metadata.
-        // Return the proper instance directly, bypassing the conversion process.
-        return ViewModelFactory.get(
-          initialDirtyData.$metadata.name,
-          initialDirtyData,
-          false,
-        ) as any;
-      }
-
-      super(metadata, new apiClientCtor(), initialDirtyData);
-
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      const vm = this;
-
-      let $load = (vm[$loadProxy] = vm.$apiClient
-        .$makeCaller("item", (c, id?: any) => {
-          return c.get(id != null ? id : vm.$primaryKey, vm.$params);
-        })
-        .onFulfilled((state) => {
-          const result = state.result!;
-
-          const realCtor = ViewModel.typeLookup![result.$metadata.name];
-
-          // Grab real metadata and API client instances of the concrete type.
-          const { $apiClient, $metadata } = new realCtor();
-
-          // Update the tracking ref for prototype version so that instanceof is reactive.
-          vm[$protoVersion]!.value++;
-          delete vm[$protoVersion];
-
-          // Convert the ViewModel instance to the target type:
-          Object.setPrototypeOf(vm, realCtor.prototype);
-
-          // Convert the ApiClient instance to the target type:
-          Object.setPrototypeOf(
-            vm.$apiClient,
-            Object.getPrototypeOf($apiClient),
-          );
-          vm.$apiClient.$metadata = $metadata;
-
-          // Update $data.$metadata so it reflects the concrete type.
-          (vm as any).$data.$metadata = $metadata;
-
-          // Populate the properties of the $load caller on the real $load caller instance.
-          //@ts-expect-error protected prop or fn
-          vm.$load.setResponseProps($load.rawResponse.data);
-          //@ts-expect-error protected prop or fn
-          vm.$load.__rawResponse.value = $load.rawResponse;
-          vm.$load.isLoading = false;
-          vm.$load.concurrencyMode = $load.concurrencyMode;
-
-          //@ts-expect-error cleaning up for GC
-          $load = undefined;
-          delete vm[$loadProxy];
-
-          vm.$loadCleanData(result);
-        }));
-    }
-  }
-
-  Object.defineProperty(AbstractVmProxy, "name", {
-    value: metadata.name + "ViewModelProxy",
-  });
-
-  defineProps(AbstractVmProxy, metadata);
-
-  // Make `$metadata` reactive so components depending on it update when it changes.
-  Object.defineProperty(AbstractVmProxy.prototype, "$metadata", {
-    get() {
-      this[$protoVersion]?.value.toString();
-      return metadata;
+      caller(id);
+      return caller as any;
     },
-  });
-
-  return AbstractVmProxy as any;
+  };
 }
 
 export interface BulkSaveRequestRawItem {
@@ -2294,18 +2193,6 @@ export function defineProps<T extends new () => ViewModel>(
 ) {
   const props = Object.values(metadata.props);
   const descriptors = {} as PropertyDescriptorMap;
-
-  if (metadata.baseTypes?.some((base) => base.abstract)) {
-    // Make the `instanceof` operator against this type reactive if the type
-    // has a known abstract base class such that an instance could change types via AbstractVmProxy
-    Object.defineProperty(ctor, Symbol.hasInstance, {
-      value(x: any) {
-        // Take a dependency, tracked per instance, that will update when the instance changes type.
-        x[$protoVersion]?.value.toString();
-        return Object[Symbol.hasInstance].call(this, x);
-      },
-    });
-  }
 
   descriptors["$metadata"] = {
     enumerable: true,

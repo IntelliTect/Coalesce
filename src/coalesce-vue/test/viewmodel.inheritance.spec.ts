@@ -77,7 +77,7 @@ describe("ViewModel", () => {
   });
 });
 
-describe("abstract proxy", () => {
+describe("abstract loader", () => {
   const expectedData = {
     id: 1,
     discriminator: "discrim1",
@@ -97,80 +97,41 @@ describe("abstract proxy", () => {
     );
   }
 
-  test("class name", async () => {
-    const vm = new AbstractModelViewModel();
-    expect(vm.constructor.name).toBe("AbstractModelViewModelProxy");
-  });
-
-  test("becomes concrete type when loaded with initial data", async () => {
-    const vm = new AbstractModelViewModel(new AbstractImpl1(expectedData));
-
-    expect(vm.$getPropDirty("id")).toBeTruthy();
-    assertIsImpl1(vm);
-  });
-
-  test("can load when ID is provided by initial data", async () => {
+  test("load produces concrete ViewModel in result", async () => {
     mockGet();
 
-    const vm = new AbstractModelViewModel({ id: 1 });
-    expect(vm.id).toBe(1);
-    await vm.$load();
-
-    assertIsImpl1(vm);
-    assertLoaded(vm);
+    const vm = await AbstractModelViewModel.load(1);
+    assertIsImpl1(vm!);
   });
 
-  test("becomes concrete type after $load", async () => {
+  test("load caller has standard reactive state", async () => {
     mockGet();
 
-    const vm = new AbstractModelViewModel();
-    await vm.$load(1);
+    const loader = AbstractModelViewModel.load(1);
+    expect(loader.isLoading).toBe(true);
+    expect(loader.wasSuccessful).toBeNull();
+    expect(loader.result).toBeNull();
 
-    assertIsImpl1(vm);
-    assertLoaded(vm);
+    await loader.getPromise();
+
+    expect(loader.isLoading).toBe(false);
+    expect(loader.wasSuccessful).toBe(true);
+    expect(loader.result).not.toBeNull();
+    assertIsImpl1(loader.result!);
   });
 
-  test("instanceof is reactive", async () => {
+  test("load result is reactive", async () => {
     mockGet();
 
-    const vm = new AbstractModelViewModel();
+    const loader = AbstractModelViewModel.load(1);
 
-    // Dummy ref because Vue will always recompute a computed on every access if the computed has no deps.
     const dummyRef = ref(1);
+    const isLoaded = computed(() => dummyRef.value && loader.result != null);
+    expect(isLoaded.value).toBe(false);
 
-    const isImpl1 = computed(
-      () => dummyRef.value && vm instanceof AbstractImpl1ViewModel,
-    );
-    expect(isImpl1.value).toBeFalsy();
-
-    await vm.$load(1);
-    expect(isImpl1.value).toBeTruthy();
+    await loader.getPromise();
+    expect(isLoaded.value).toBe(true);
   });
-
-  test("$metadata is reactive", async () => {
-    mockGet();
-
-    const vm = new AbstractModelViewModel();
-
-    // Dummy ref because Vue will always recompute a computed on every access if the computed has no deps.
-    const dummyRef = ref(1);
-
-    const isImpl1 = computed(
-      () => dummyRef.value && vm.$metadata.name == "AbstractImpl1",
-    );
-    expect(isImpl1.value).toBeFalsy();
-
-    await vm.$load(1);
-    expect(isImpl1.value).toBeTruthy();
-  });
-
-  function assertLoaded(vm: AbstractModelViewModel) {
-    expect(vm.$load.wasSuccessful).toBe(true);
-    expect(vm.$load.isLoading).toBe(false);
-    expect(vm.$load.result).toBeInstanceOf(AbstractImpl1);
-    expect(vm.$load.message).toBeFalsy();
-    expect(vm.$load.hasResult).toBeTruthy();
-  }
 
   function assertIsImpl1(vm: AbstractModelViewModel) {
     expect(vm.id).toBe(1);
@@ -192,5 +153,8 @@ describe("abstract proxy", () => {
 
     const impl1 = vm as AbstractImpl1ViewModel;
     expect(impl1.impl1OnlyField).toBe("foo");
+
+    // Data was loaded clean (not dirty)
+    expect(vm.$getPropDirty("id")).toBe(false);
   }
 });

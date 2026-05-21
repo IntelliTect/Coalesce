@@ -67,7 +67,7 @@ export namespace AbstractClass {
     
     /** 
       A default data source declared with an open generic parameter constrained to AbstractClass.
-      Because  is constrained to AbstractClass,
+      Because T is constrained to AbstractClass,
       this data source is automatically used as the default for AbstractClass
       and every derived type (e.g. AbstractClassImpl) without needing to
       declare a separate data source on each derived class.
@@ -109,7 +109,7 @@ export namespace AbstractClassImpl {
     
     /** 
       A default data source declared with an open generic parameter constrained to AbstractClass.
-      Because  is constrained to AbstractClass,
+      Because T is constrained to AbstractClass,
       this data source is automatically used as the default for AbstractClass
       and every derived type (e.g. AbstractClassImpl) without needing to
       declare a separate data source on each derived class.

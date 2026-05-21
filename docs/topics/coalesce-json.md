@@ -77,6 +77,8 @@ A full example of a `coalesce.json` file, along with an explanation of each prop
             // Optional: Indentation size
             "indentationSize": 2,
             // Optional: A comment to emit at the start of all generated files for this generator.
+            // Supports cascading configuration - define on a parent generator (e.g., Scripts)
+            // and child generators will inherit the value unless they specify their own.
             "headerComment": "Generated code. Do not edit directly."
         },
     }

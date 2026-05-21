@@ -3,7 +3,7 @@
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
 - Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library.
 - Open generic data sources whose single type parameter is constrained to a base class are now automatically available as data sources for that base class and all derived entity types. This works for both default and named data sources, and applies whether the data source is nested in the base class or declared as a top-level type with `[Coalesce]`.
-- Added `headerComment` generator configuration option to emit custom comments at the start of generated files. When configured on a parent generator like `Scripts`, child generators automatically inherit the value unless they define their own.
+- Added `headerComment` generator configuration option to emit custom comments at the start of all generated files. Supports cascading hierarchical configuration—define on a parent generator and child generators automatically inherit the value.
 
 ## Template Changes
 - Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project:

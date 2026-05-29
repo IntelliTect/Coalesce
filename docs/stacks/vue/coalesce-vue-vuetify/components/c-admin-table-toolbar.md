@@ -31,5 +31,22 @@ The [color](https://vuetifyjs.com/en/styles/colors/) of the toolbar.
 
 If provided, adds a button to toggle editing state. Should be two-way bound with v-model.
 
+## Slots
+
+<Prop def="#toolbar-actions" lang="ts" />
+
+Slot for injecting custom content after the built-in toolbar buttons (Create, Reload, Edit). Receives `{ list: ListViewModel }` as scoped slot props. When provided, this slot replaces any component configured via [`adminExtensions`](/stacks/vue/admin-pages.md#extending-admin-pages-per-type).
+
+``` vue-html
+<c-admin-table-toolbar :list="personList">
+  <template #toolbar-actions="{ list }">
+    <v-btn variant="text" @click="doSomething(list)">
+      <v-icon start>fa fa-download</v-icon>
+      Export
+    </v-btn>
+  </template>
+</c-admin-table-toolbar>
+```
+
 
 

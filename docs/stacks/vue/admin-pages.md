@@ -197,6 +197,74 @@ const statusConfig = computed(() => {
 </script>
 ```
 
+## Extending Admin Pages Per Type
+
+Beyond replacing individual input/display components, you can inject additional content into admin page components on a per-type basis using `adminExtensions`. This follows the same array-of-pairs pattern as `adminOverrides`, but is keyed by model type (or `"*"` for a global default) rather than by individual property.
+
+### Configuration
+
+Pass an `adminExtensions` option to `createCoalesceVuetify()`. It accepts an array of `[key, extension]` pairs, where the key is either a model type from your generated `$metadata` or the string `"*"` for a global default, and the extension is an object with optional component fields for different admin surfaces.
+
+```ts
+import { createCoalesceVuetify } from 'coalesce-vue-vuetify3';
+import $metadata from '@/metadata.g';
+import MyCaseToolbarActions from '@/components/MyCaseToolbarActions.vue';
+import MyGlobalToolbarActions from '@/components/MyGlobalToolbarActions.vue';
+
+const coalesceVuetify = createCoalesceVuetify({
+  metadata: $metadata,
+  adminExtensions: [
+    // Global default for all types without a specific override
+    ["*", {
+      tableToolbarActions: MyGlobalToolbarActions,
+    }],
+    // Type-specific override (takes precedence over "*")
+    [$metadata.types.Case, {
+      tableToolbarActions: MyCaseToolbarActions,
+    }],
+  ],
+});
+```
+
+### Extension fields
+
+| Field | Surface | Description |
+|---|---|---|
+| `tableToolbarActions` | [c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md) | Component rendered after the built-in buttons (Create, Reload, Edit) |
+
+### Extension component props
+
+A `tableToolbarActions` extension component receives a `list` prop containing the `ListViewModel` for the current admin table:
+
+```vue
+<template>
+  <v-btn variant="text" @click="exportData">
+    <v-icon start>fa fa-download</v-icon>
+    <span class="hidden-sm-and-down">Export</span>
+  </v-btn>
+</template>
+
+<script setup lang="ts">
+import { ListViewModel } from 'coalesce-vue';
+
+const props = defineProps<{
+  list: ListViewModel;
+}>();
+
+function exportData() {
+  // Use props.list.$params, props.list.$items, etc.
+}
+</script>
+```
+
+### Resolution order
+
+When resolving an extension for a model type, the lookup checks:
+1. An exact type match (e.g. `$metadata.types.Case`)
+2. The `"*"` global default
+
+If neither is found, nothing is rendered. A type-specific entry always takes precedence over `"*"`.
+
 ## Replacing Admin Pages Per Type
 
 The [Customizing Admin Components](#customizing-admin-components) section above lets you swap individual input/display components within the standard admin pages. If you need to go further — replacing an entire admin page with a fully custom view for a specific model type — you can do so via the router.

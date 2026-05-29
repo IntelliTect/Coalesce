@@ -45,6 +45,14 @@
       </template>
     </v-btn>
 
+    <slot name="toolbar-actions" :list="list">
+      <component
+        :is="toolbarActionsExtension"
+        v-if="toolbarActionsExtension"
+        :list="list"
+      />
+    </slot>
+
     <v-spacer></v-spacer>
 
     <span v-if="list" class="c-admin-table-toolbar--range hidden-sm-and-down">
@@ -83,9 +91,10 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, toRef } from "vue";
+import { computed, PropType, toRef } from "vue";
 import { ListViewModel, ModelType } from "coalesce-vue";
 import { useAdminTable } from "./useAdminTable";
+import { useAdminExtensions } from "../../composables/useAdminExtensions";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";
 import { useRouter } from "vue-router";
@@ -107,6 +116,11 @@ const selectedColumns = defineModel<string[] | null>("selectedColumns", {
 });
 
 const { metadata } = useAdminTable(toRef(props, "list"));
+const { resolveTableToolbarActions } = useAdminExtensions();
+
+const toolbarActionsExtension = computed(() =>
+  resolveTableToolbarActions(metadata.value),
+);
 
 const router = useRouter();
 function addItem(meta: ModelType, route: string) {

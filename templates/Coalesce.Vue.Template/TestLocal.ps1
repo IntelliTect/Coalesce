@@ -62,4 +62,5 @@ try {
 }
 finally {
     Pop-Location
+    Write-Host "Project created in $outDir"
 }

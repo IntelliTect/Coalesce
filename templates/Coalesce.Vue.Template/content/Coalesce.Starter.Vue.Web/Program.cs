@@ -256,24 +256,13 @@ app.MapFallbackToController("Index", "Home");
 #region Launch
 
 #if (!AzureTerraform)
-// Initialize/migrate database.
-using (var scope = app.Services.CreateScope())
-{
-    var serviceScope = scope.ServiceProvider;
-
-    // Run database migrations.
-    using var db = serviceScope.GetRequiredService<AppDbContext>();
-    db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
-    db.Database.Migrate();
-
-#if Hangfire
-    // Install Hangfire storage only after the database has definitely been created.
-    // https://github.com/HangfireIO/Hangfire/issues/2139
-    SqlServerObjectsInstaller.Install(db.Database.GetDbConnection(), null, true);
-
-#endif
-    ActivatorUtilities.GetServiceOrCreateInstance<DatabaseSeeder>(serviceScope).Seed();
-}
+// Note: This is redundant with .Migrations/Program.cs
+// when running through Aspire. It is here in case you have a deployment
+// or hosting process that does not execute the Migrations executable directly.
+// If you do have such a deployment process (e.g. init containers, or migration 
+// execution via deployment pipelines), this is redundant and the following call 
+// and the ProjectReference to the Migrations project can be removed.
+await app.MigrateDatabaseAsync();
 #endif
 
 app.Run();

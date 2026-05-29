@@ -710,21 +710,10 @@ type TransportTypeSpecifier<T extends ApiRoutedType = any> =
 type ResultType<
   T extends TransportTypeSpecifier,
   TResult,
-  TNonResult = never,
 > = T extends ItemTransportTypeSpecifier
-  ? AxiosResponse<ItemResult<TResult>> | TNonResult
+  ? AxiosResponse<ItemResult<TResult>>
   : T extends ListTransportTypeSpecifier
-    ? AxiosResponse<ListResult<TResult>> | TNonResult
-    : never;
-
-type ResultPromiseType<
-  T extends TransportTypeSpecifier,
-  TResult,
-  TNonResult = never,
-> = T extends ItemTransportTypeSpecifier
-  ? Promise<AxiosResponse<ItemResult<TResult>> | TNonResult>
-  : T extends ListTransportTypeSpecifier
-    ? Promise<AxiosResponse<ListResult<TResult>> | TNonResult>
+    ? AxiosResponse<ListResult<TResult>>
     : never;
 
 type ApiCallerInvoker<
@@ -739,17 +728,59 @@ type ApiCallerArgsInvoker<TArgs, TReturn, TClient extends ApiClient<any>> = (
   args: TArgs,
 ) => TReturn;
 
-export type ApiStateType<
-  T extends TransportTypeSpecifier,
-  TArgs extends any[],
-  TResult,
-> = T extends ItemTransportTypeSpecifier
-  ? ItemApiState<TArgs, TResult, T extends ItemMethod ? T : ItemMethod>
-  : T extends ListTransportTypeSpecifier
-    ? ListApiState<TArgs, TResult, T extends ListMethod ? T : ListMethod>
+/** Extracts the data type from an invoker's return type.
+ * For item endpoints: R from AxiosResponse<ItemResult<R>>.
+ * For list endpoints: R[] from AxiosResponse<ListResult<R>>. */
+type InferResultData<T extends TransportTypeSpecifier, TReturn> =
+  Extract<
+    Awaited<Extract<TReturn, Promise<any>>>,
+    AxiosResponse<any>
+  > extends AxiosResponse<infer TData>
+    ? T extends ItemTransportTypeSpecifier
+      ? TData extends ItemResult<infer R>
+        ? R
+        : never
+      : T extends ListTransportTypeSpecifier
+        ? TData extends ListResult<infer R>
+          ? R[]
+          : never
+        : never
     : never;
 
-export type ApiStateTypeWithArgs<
+/** Evaluates to `undefined` if the invoker's return type indicates
+ * the API call may be conditionally skipped (returns void/undefined). */
+type InferVoidable<TReturn> = void extends TReturn
+  ? undefined
+  : undefined extends TReturn
+    ? undefined
+    : undefined extends Awaited<Extract<TReturn, Promise<any>>>
+      ? undefined
+      : never;
+
+/** The full result type for an API caller, combining the data type with voidability. */
+type InferCallerResult<T extends TransportTypeSpecifier, TReturn> =
+  | InferResultData<T, TReturn>
+  | InferVoidable<TReturn>;
+
+type MakeCallerResult<
+  T extends TransportTypeSpecifier,
+  TArgs extends any[],
+  TReturn,
+> = T extends ItemTransportTypeSpecifier
+  ? ItemApiState<
+      TArgs,
+      InferCallerResult<T, TReturn>,
+      T extends ItemMethod ? T : ItemMethod
+    >
+  : T extends ListTransportTypeSpecifier
+    ? ListApiState<
+        TArgs,
+        InferCallerResult<T, TReturn>,
+        T extends ListMethod ? T : ListMethod
+      >
+    : never;
+
+type MakeArgsCallerResult<
   T extends TransportTypeSpecifier,
   TArgs extends any[],
   TArgsObj extends object,
@@ -841,79 +872,59 @@ export class ApiClient<T extends ApiRoutedType> {
     return clone;
   }
 
-  /**
-   * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
-   * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
-   * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
-   */
-  $makeCaller<
-    TArgs extends any[],
-    TResult,
-    TTransportType extends TransportTypeSpecifier<T>,
-  >(
-    resultType: TTransportType,
-    invoker: ApiCallerInvoker<
-      TArgs,
-      | ResultPromiseType<TTransportType, TResult, undefined | void>
-      | undefined
-      | void,
-      this
-    >,
-  ): ApiStateType<TTransportType, TArgs, TResult>;
+  // $makeCaller uses a single overload per variant (no-args and with-args).
+  // TReturn is captured from the invoker, and conditional types (InferResultData, InferVoidable)
+  // extract the data type and detect whether the invoker can return void/undefined.
 
   /**
    * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
    * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
-   * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
-   * @param invokerFactory method that will call the API with an args object as the only parameter. This may be called by using `.withArgs()` on the function that is returned from `$makeCaller`. The value of the args object will default to `.args` if not specified.
+   * @param invoker method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
+   */
+  $makeCaller<
+    TArgs extends any[],
+    TReturn extends Promise<any> | undefined | void,
+    TTransportType extends TransportTypeSpecifier<T>,
+  >(
+    resultType: TTransportType,
+    invoker: ApiCallerInvoker<TArgs, TReturn, this>,
+  ): MakeCallerResult<TTransportType, TArgs, TReturn>;
+
+  /**
+   * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
+   * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
+   * @param invoker method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
+   * @param argsFactory A factory function that will create the args object for the method.
+   * @param argsInvoker method that will call the API with an args object as the only parameter. This may be called by using `.withArgs()` on the function that is returned from `$makeCaller`. The value of the args object will default to `.args` if not specified.
    */
   $makeCaller<
     TArgs extends any[],
     TArgsObj extends object,
-    TResult,
+    TReturn extends Promise<any> | undefined | void,
     TTransportType extends TransportTypeSpecifier<T>,
   >(
     resultType: TTransportType,
-    invoker: ApiCallerInvoker<
-      TArgs,
-      | ResultPromiseType<TTransportType, TResult, undefined | void>
-      | undefined
-      | void,
-      this
-    >,
+    invoker: ApiCallerInvoker<TArgs, TReturn, this>,
     argsFactory: () => TArgsObj,
-    argsInvoker: ApiCallerArgsInvoker<
-      TArgsObj,
-      | ResultPromiseType<TTransportType, TResult, undefined | void>
-      | undefined
-      | void,
-      this
-    >,
-  ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
+    argsInvoker: ApiCallerArgsInvoker<TArgsObj, TReturn, this>,
+  ): MakeArgsCallerResult<
+    TTransportType,
+    TArgs,
+    TArgsObj,
+    InferCallerResult<TTransportType, TReturn>
+  >;
 
   $makeCaller<
     TArgs extends any[],
     TArgsObj extends object,
-    TResult,
+    TReturn extends Promise<any> | undefined | void,
     TTransportType extends TransportTypeSpecifier<T>,
   >(
     resultType: TTransportType,
-    invoker: ApiCallerInvoker<
-      TArgs,
-      | ResultPromiseType<TTransportType, TResult, undefined | void>
-      | undefined
-      | void,
-      this
-    >,
+    invoker: ApiCallerInvoker<TArgs, TReturn, this>,
     argsFactory?: () => TArgsObj,
-    argsInvoker?: ApiCallerArgsInvoker<
-      TArgsObj,
-      | ResultPromiseType<TTransportType, TResult, undefined | void>
-      | undefined
-      | void,
-      this
-    >,
-  ): any {
+    argsInvoker?: ApiCallerArgsInvoker<TArgsObj, TReturn, this>,
+  ) {
     let localResultType: TransportTypeSpecifier<T> = resultType;
     let meta: Method | undefined = undefined;
     if (typeof localResultType === "function") {
@@ -931,7 +942,7 @@ export class ApiClient<T extends ApiRoutedType> {
     if (argsFactory && argsInvoker) {
       switch (localResultType) {
         case "item":
-          instance = new ItemApiStateWithArgs<TArgs, TArgsObj, TResult>(
+          instance = new ItemApiStateWithArgs(
             this,
             invoker as any,
             argsFactory,
@@ -939,7 +950,7 @@ export class ApiClient<T extends ApiRoutedType> {
           );
           break;
         case "list":
-          instance = new ListApiStateWithArgs<TArgs, TArgsObj, TResult>(
+          instance = new ListApiStateWithArgs(
             this,
             invoker as any,
             argsFactory,
@@ -952,10 +963,10 @@ export class ApiClient<T extends ApiRoutedType> {
     } else {
       switch (localResultType) {
         case "item":
-          instance = new ItemApiState<TArgs, TResult>(this, invoker as any);
+          instance = new ItemApiState(this, invoker as any);
           break;
         case "list":
-          instance = new ListApiState<TArgs, TResult>(this, invoker as any);
+          instance = new ListApiState(this, invoker as any);
           break;
         default:
           throw `Unknown result type ${localResultType}`;
@@ -1405,9 +1416,9 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     invoker: Function,
     args: any[],
-  ): Promise<ItemResult<TResult> | ListResult<TResult>>;
+  ): Promise<TResult>;
 
-  protected _pendingPromise: Promise<any> | undefined;
+  protected _pendingPromise: Promise<TResult> | undefined;
 
   constructor(
     apiClient: ApiClient<any>,
@@ -1461,7 +1472,7 @@ export abstract class ApiState<
   /** The metadata of the method being called, if it was provided. */
   abstract $metadata?: Method;
 
-  abstract result: TResult | TResult[] | null;
+  abstract result: Exclude<TResult, undefined> | null;
 
   private readonly __isLoading = ref(false);
   /** True if a request is currently pending. */
@@ -1669,6 +1680,31 @@ export abstract class ApiState<
     return this;
   }
 
+  /**
+   * Returns the promise of the currently pending request,
+   * or `undefined` if no request is pending.
+   */
+  getPromise() {
+    return this._pendingPromise;
+  }
+
+  /**
+   * Implements the thenable protocol, allowing the caller to be used with `await`.
+   * If a request is currently pending, awaits that request.
+   * If no request is pending, resolves immediately with the current `result` value.
+   */
+  then<TResult1 = TResult | null, TResult2 = never>(
+    onfulfilled?:
+      | ((value: TResult | null) => TResult1 | PromiseLike<TResult1>)
+      | null,
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null,
+  ): Promise<TResult1 | TResult2> {
+    return (this._pendingPromise ?? Promise.resolve(this.result)).then(
+      onfulfilled,
+      onrejected,
+    );
+  }
+
   protected abstract setResponseProps(data: ApiResult): void;
 
   private _debounceSignal: {
@@ -1682,7 +1718,7 @@ export abstract class ApiState<
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     invoker: Function,
     args: any[],
-  ) {
+  ): Promise<TResult> {
     let apiClient = this.apiClient;
 
     if (this.isLoading) {
@@ -1718,6 +1754,10 @@ export abstract class ApiState<
             // Similar to the "cancel" mode,
             // aborted requests are not thrown as rejected promises,
             // but instead as a fulfilled promise with a void resolved value.
+
+            // @ts-expect-error This is a deliberate and long-standing break from the
+            // type contract of ApiState objects that prematurely halted requests
+            // resolve to undefined (added in 7300ac92aaa9cd577fe461717fa78b98c73174ac).
             return undefined;
           }
       }
@@ -1858,6 +1898,11 @@ export abstract class ApiState<
 
       if (!promise) {
         this.isLoading = false;
+
+        // @ts-expect-error Added in 2833516271642f65a29e494cd4aa10a2861671be - it is deliberate
+        // that invoker funcs that return undefined are treated as a cancellation
+        // and return undefined (in violation of the type contract) like other cancellations.
+        // Note that this is exceedingly rare and would require the invoker func to not be async.
         return undefined;
       }
 
@@ -1865,6 +1910,9 @@ export abstract class ApiState<
 
       if (!resp) {
         this.isLoading = false;
+
+        // @ts-expect-error Added for https://github.com/IntelliTect/Coalesce/issues/416 -
+        // similar to just above, this allows async invoker funcs to return undefined.
         return undefined;
       }
 
@@ -1885,7 +1933,9 @@ export abstract class ApiState<
 
       this.isLoading = false;
 
-      return data?.object ?? data?.list;
+      // NB: `this.result` will have been set non-null in `setResponseProps`
+      // (or if it IS null, null should be in TResult as a valid result type).
+      return this.result! as TResult;
     } catch (thrown) {
       if (axios.isCancel(thrown)) {
         // No handling of anything for cancellations.
@@ -1894,6 +1944,10 @@ export abstract class ApiState<
         // it should probably be implemented as a separate set of callbacks.
         // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
         // since the promise won't reject immediately after requesting cancellation. There could already be another request pending when this code is being executed.
+
+        // @ts-expect-error This is a deliberate and long-standing break from the
+        // type contract of ApiState objects that prematurely halted requests
+        // resolve to undefined (added in 7300ac92aaa9cd577fe461717fa78b98c73174ac).
         return;
       } else if (
         windowUnloading &&
@@ -1906,7 +1960,16 @@ export abstract class ApiState<
         // This seems to only happen on Firefox - Chrome doesn't abort requests
         // on unload in a way that ever propagates up to user code.
         // https://github.com/IntelliTect/Coalesce/issues/296
-        return;
+
+        // Wait 1s matching the windowUnloading reset timer. If the page truly unloads,
+        // nothing matters. If the unload was user-canceled, this gives the browser time
+        // to reset before we resolve, avoiding spurious downstream continuations.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // @ts-expect-error This is a deliberate and long-standing break from the
+        // type contract of ApiState objects that prematurely halted requests
+        // resolve to undefined (added in 7300ac92aaa9cd577fe461717fa78b98c73174ac).
+        return undefined;
       } else {
         // eslint-disable-next-line no-var
         var error = thrown as AxiosError | ApiResult | Error | string;
@@ -2014,14 +2077,6 @@ export class ItemApiState<
   /** The metadata of the method being called, if it was provided. */
   $metadata?: TMethod;
 
-  /**
-   * Returns the promise of the currently pending request,
-   * or `undefined` if no request is pending.
-   */
-  getPromise(): Promise<TResult> | undefined {
-    return this._pendingPromise;
-  }
-
   private readonly __validationIssues = ref<ValidationIssue[] | null>(null);
   /** Validation issues returned by the previous request. */
   get validationIssues() {
@@ -2031,12 +2086,14 @@ export class ItemApiState<
     this.__validationIssues.value = v;
   }
 
-  private readonly __result = ref<TResult | null>(null) as Ref<TResult | null>;
+  private readonly __result = ref<Exclude<TResult, undefined> | null>(
+    null,
+  ) as Ref<Exclude<TResult, undefined> | null>;
   /** Principal data returned by the previous request. */
-  get result() {
+  get result(): Exclude<TResult, undefined> | null {
     return this.__result.value;
   }
-  set result(v) {
+  set result(v: Exclude<TResult, undefined> | null) {
     this.__result.value = v;
     if (this.$metadata?.return.type == "void") {
       this.hasResult = !!this.wasSuccessful;
@@ -2046,7 +2103,9 @@ export class ItemApiState<
   }
 
   override get rawResponse() {
-    return super.rawResponse as AxiosResponse<ItemResult<TResult>>;
+    return super.rawResponse as AxiosResponse<
+      ItemResult<Exclude<TResult, undefined>>
+    >;
   }
 
   constructor(
@@ -2139,7 +2198,7 @@ export class ItemApiState<
       this.validationIssues = null;
     }
     if ("object" in data) {
-      this.result = data.object ?? null;
+      this.result = (data.object ?? null) as Exclude<TResult, undefined> | null;
     } else {
       this.result = null;
     }
@@ -2220,13 +2279,13 @@ export class ItemApiStateWithArgs<
     apiClient: ApiClient<any>,
     invoker: ApiCallerInvoker<
       TArgs,
-      ItemResultPromise<TResult>,
+      ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
     >,
     private argsFactory: () => TArgsObj,
     private argsInvoker: ApiCallerArgsInvoker<
       TArgsObj,
-      ItemResultPromise<TResult>,
+      ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
     >,
   ) {
@@ -2235,9 +2294,14 @@ export class ItemApiStateWithArgs<
   }
 }
 
-export interface ListApiState<TArgs extends any[], TResult> {
+export interface ListApiState<
+  TArgs extends any[],
+  TResult,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  TMethod extends ListMethod | undefined = ListMethod,
+> {
   /** Invokes a call to this API endpoint. */
-  (...args: TArgs): Promise<TResult[]>;
+  (...args: TArgs): Promise<TResult>;
 }
 export class ListApiState<
   TArgs extends any[],
@@ -2246,14 +2310,6 @@ export class ListApiState<
 > extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: TMethod;
-
-  /**
-   * Returns the promise of the currently pending request,
-   * or `undefined` if no request is pending.
-   */
-  getPromise(): Promise<TResult[]> | undefined {
-    return this._pendingPromise;
-  }
 
   private readonly __page = ref<number | null>(null);
   /** Page number returned by the previous request. */
@@ -2291,20 +2347,22 @@ export class ListApiState<
     this.__totalCount.value = v;
   }
 
-  private readonly __result = ref<TResult[] | null>(null) as Ref<
-    TResult[] | null
-  >;
+  private readonly __result = ref<Exclude<TResult, undefined> | null>(
+    null,
+  ) as Ref<Exclude<TResult, undefined> | null>;
   /** Principal data returned by the previous request. */
-  get result() {
+  get result(): Exclude<TResult, undefined> | null {
     return this.__result.value;
   }
-  set result(v) {
+  set result(v: Exclude<TResult, undefined> | null) {
     this.__result.value = v;
     this.hasResult = v != null;
   }
 
   override get rawResponse() {
-    return super.rawResponse as AxiosResponse<ListResult<TResult>>;
+    return super.rawResponse as AxiosResponse<
+      ListResult<Exclude<TResult, undefined> extends (infer R)[] ? R : never>
+    >;
   }
 
   constructor(
@@ -2327,7 +2385,11 @@ export class ListApiState<
     this.page = null;
   }
 
-  protected setResponseProps(data: ListResult<TResult>) {
+  protected setResponseProps(
+    data: ListResult<
+      Exclude<TResult, undefined> extends (infer R)[] ? R : never
+    >,
+  ) {
     this.wasSuccessful = data.wasSuccessful;
     this.message = data.message || null;
 
@@ -2337,7 +2399,7 @@ export class ListApiState<
     this.totalCount = data.totalCount ?? null;
 
     if ("list" in data) {
-      this.result = data.list || [];
+      this.result = (data.list || []) as Exclude<TResult, undefined> | null;
     } else {
       this.result = null;
     }
@@ -2397,13 +2459,13 @@ export class ListApiStateWithArgs<
     apiClient: ApiClient<any>,
     invoker: ApiCallerInvoker<
       TArgs,
-      ListResultPromise<TResult>,
+      ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
     >,
     private argsFactory: () => TArgsObj,
     private argsInvoker: ApiCallerArgsInvoker<
       TArgsObj,
-      ListResultPromise<TResult>,
+      ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
     >,
   ) {

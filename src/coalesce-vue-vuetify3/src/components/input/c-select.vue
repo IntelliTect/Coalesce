@@ -270,7 +270,7 @@ type _SelectedModelType<
         | ModelValue
         | ForeignKeyProperty
     ? ValueOrFkToModelType<TFor>
-    : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
+    : TModel extends AnyArgCaller<any, infer TArgsObj>
       ? TFor extends keyof TArgsObj
         ? TMultiple extends true
           ? TArgsObj[TFor] extends Array<any> | null | undefined
@@ -364,7 +364,6 @@ import {
   ModelTypeLookup,
   PrimaryKeyProperty,
   PropNames,
-  ApiStateTypeWithArgs,
   ModelCollectionValue,
   modelDisplay,
   MetadataToModelType,

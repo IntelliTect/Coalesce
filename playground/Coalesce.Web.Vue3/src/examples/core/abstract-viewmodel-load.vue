@@ -1,5 +1,5 @@
 <template>
-  <c-loader-status :loaders="{ '': [vm.$load] }" no-initial-content>
+  <c-loader-status :loaders="{ '': [loader] }" no-initial-content>
     {{ new Date().valueOf() }}
 
     {{ vm.id }}
@@ -16,7 +16,8 @@
 
 <script setup lang="ts">
 import { AbstractClassViewModel } from "@/viewmodels.g";
+import { computed } from "vue";
 
-const vm = new AbstractClassViewModel({});
-vm.$load(1);
+const loader = AbstractClassViewModel.load(1);
+const vm = computed(() => loader.result!);
 </script>

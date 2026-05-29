@@ -149,7 +149,6 @@ describe("CInput", () => {
     //@ts-expect-error bad prop value
     () => <CInput model={model} for="color" variant="bad-variant" />;
 
-
     // ******
     // Enum filter
     // ******

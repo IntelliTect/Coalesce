@@ -3,10 +3,10 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps, createAbstractProxyViewModelType } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps, createAbstractLoader } from 'coalesce-vue/lib/viewmodel'
 
 export type AbstractClassViewModel = AbstractClassImplViewModel
-export const AbstractClassViewModel = createAbstractProxyViewModelType<$models.AbstractClass, AbstractClassViewModel>($metadata.AbstractClass, $apiClients.AbstractClassApiClient)
+export const AbstractClassViewModel = createAbstractLoader<AbstractClassViewModel>($apiClients.AbstractClassApiClient, { DataSources: $models.AbstractClass.DataSources })
 
 export class AbstractClassListViewModel extends ListViewModel<$models.AbstractClass, $apiClients.AbstractClassApiClient, AbstractClassViewModel> {
   static DataSources = $models.AbstractClass.DataSources;

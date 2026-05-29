@@ -1,4 +1,8 @@
 # 7.0.0
+- Breaking: The generated ViewModel stubs for abstract model types have been replaced by static objects with a static `.load(id)` method that returns a standard `ItemApiState` caller. They are no longer exposed as instantiable proxy objects that mutate themselves into the correct implementation type after `$load`ing from the server - this approach did not fully satisfy the TypeScript contract of the derived types at runtime and otherwise attempted (and failed) to provide a concrete instance of a type that should not actually be instantiable.
+- API callers (`ItemApiState`, `ListApiState`) are now awaitable. `await caller` now resolves to `caller.result` after the current or previous operation is completed.
+  - `await vm.$load(1)` - performs a new load call and waits for completion
+  - `await vm.$load` - waits for completion of the pending load operation, or immediately resolves with the last result if no operation is pending.
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
 
 # 6.6.0

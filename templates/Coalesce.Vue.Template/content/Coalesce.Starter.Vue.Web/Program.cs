@@ -234,8 +234,10 @@ app.MapScalarApiReference(c => c.OpenApiRoutePattern = "/swagger/{documentName}/
 app.MapHangfireDashboard("/hangfire", new() { Authorization = [] }).RequireAuthorization(
 #if Tenancy
     new AuthorizeAttribute { Roles = builder.Environment.IsDevelopment() ? null : AppClaimValues.GlobalAdminRole }
-#else
+#elif Identity
     new AuthorizeAttribute { Roles = builder.Environment.IsDevelopment() ? null : nameof(Permission.Admin) }
+#else
+    new AuthorizeAttribute { Roles = null /* TODO: Restrict access for hangfire dashboard */ }
 #endif
 );
 

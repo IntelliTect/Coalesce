@@ -64,9 +64,17 @@
                 subtitle="View the Hangfire background job dashboard."
               />
               <!--#endif  -->
-              <!--#if (!Tenancy)
+              <!--#if (!Tenancy && Identity)
               <v-list-item
                 v-if="$can(Permission.Admin)"
+                href="/hangfire"
+                prepend-icon="fa fa-briefcase"
+                title="Hangfire"
+                subtitle="View the Hangfire background job dashboard."
+              />
+              #endif  -->
+              <!--#if (!Tenancy && !Identity)
+              <v-list-item
                 href="/hangfire"
                 prepend-icon="fa fa-briefcase"
                 title="Hangfire"

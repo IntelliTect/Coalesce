@@ -636,6 +636,10 @@ const APP_BUILD_HEADER = "x-app-build";
  * response header on API responses. When the header value changes from the initially
  * observed value, `isUpdateAvailable` becomes true.
  *
+ * Also listens for Vite's `vite:preloadError` event, which fires when dynamic imports
+ * fail due to stale chunks after a new deployment. When this occurs, a HEAD request is
+ * made to verify the build header has changed before signaling that an update is available.
+ *
  * On the server, call `app.UseAppVersionHeader()` to emit this header.
  *
  * @param axiosInstance The Axios instance to monitor. Defaults to the Coalesce `AxiosClient`.
@@ -658,10 +662,21 @@ export function useAppUpdateCheck(axiosInstance = AxiosClient): {
     },
   );
 
-  onScopeDispose(
-    () => axiosInstance.interceptors.response.eject(interceptorId),
-    true,
-  );
+  // Handle Vite's preload error event, which fires when dynamic imports fail
+  // (e.g. after a new deployment deletes old chunk files).
+  // Verifies by fetching the build header before flagging an update.
+  // https://vite.dev/guide/build.html#load-error-handling
+  function onPreloadError() {
+    fetch(window.location.href, { method: "HEAD" }).then((r) => {
+      checkBuild(r.headers.get(APP_BUILD_HEADER) || undefined);
+    });
+  }
+  window.addEventListener("vite:preloadError", onPreloadError);
+
+  onScopeDispose(() => {
+    axiosInstance.interceptors.response.eject(interceptorId);
+    window.removeEventListener("vite:preloadError", onPreloadError);
+  }, true);
 
   function checkBuild(build: string | undefined) {
     if (!build) return;

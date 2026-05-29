@@ -1943,4 +1943,87 @@ describe("useAppUpdateCheck", () => {
 
     expect(interceptorCountAfter).toBe(interceptorCountBefore - 1);
   });
+
+  test("vite:preloadError fetches build header and sets isUpdateAvailable if changed", async () => {
+    const fetchMock = vitest.fn().mockResolvedValue({
+      headers: new Headers({ "x-app-build": "build-2" }),
+    });
+    vitest.stubGlobal("fetch", fetchMock);
+
+    const instance = makeAxiosWithMockAdapter({
+      [APP_BUILD_HEADER]: "build-1",
+    });
+
+    const scope = effectScope();
+    let result!: ReturnType<typeof useAppUpdateCheck>;
+
+    scope.run(() => {
+      result = useAppUpdateCheck(instance);
+    });
+
+    // Make an initial request to set initialBuild
+    await instance.get("/test");
+    expect(result.isUpdateAvailable.value).toBe(false);
+
+    window.dispatchEvent(new Event("vite:preloadError"));
+
+    // Wait for the fetch promise to resolve
+    await new Promise((r) => setTimeout(r, 0));
+    expect(fetchMock).toHaveBeenCalledWith(window.location.href, {
+      method: "HEAD",
+    });
+    expect(result.isUpdateAvailable.value).toBe(true);
+
+    scope.stop();
+    vitest.unstubAllGlobals();
+  });
+
+  test("vite:preloadError does not set isUpdateAvailable if build header unchanged", async () => {
+    const fetchMock = vitest.fn().mockResolvedValue({
+      headers: new Headers({ "x-app-build": "build-1" }),
+    });
+    vitest.stubGlobal("fetch", fetchMock);
+
+    const instance = makeAxiosWithMockAdapter({
+      [APP_BUILD_HEADER]: "build-1",
+    });
+
+    const scope = effectScope();
+    let result!: ReturnType<typeof useAppUpdateCheck>;
+
+    scope.run(() => {
+      result = useAppUpdateCheck(instance);
+    });
+
+    await instance.get("/test");
+
+    window.dispatchEvent(new Event("vite:preloadError"));
+
+    await new Promise((r) => setTimeout(r, 0));
+    expect(result.isUpdateAvailable.value).toBe(false);
+
+    scope.stop();
+    vitest.unstubAllGlobals();
+  });
+
+  test("vite:preloadError listener is removed when scope is stopped", async () => {
+    const fetchMock = vitest.fn().mockResolvedValue({
+      headers: new Headers(),
+    });
+    vitest.stubGlobal("fetch", fetchMock);
+
+    const scope = effectScope();
+
+    scope.run(() => {
+      useAppUpdateCheck();
+    });
+
+    scope.stop();
+
+    window.dispatchEvent(new Event("vite:preloadError"));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    vitest.unstubAllGlobals();
+  });
 });

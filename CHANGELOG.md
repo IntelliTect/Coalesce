@@ -1,3 +1,6 @@
+# 7.0.0
+- `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
+
 # 6.6.0
 - Added `returnViewModel` prop to `c-select`, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.

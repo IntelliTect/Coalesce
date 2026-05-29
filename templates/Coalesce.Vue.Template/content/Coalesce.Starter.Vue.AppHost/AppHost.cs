@@ -6,7 +6,10 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // Add SQL Server
 var sqlDb = OperatingSystem.IsWindows() && OSArchitecture != Architecture.Arm64
-    // Assume that localdb is available on Windows (non-ARM)
+    // Assume that localdb is available on Windows (non-ARM).
+    // It is generally preferred for new projects to avoid excessive container proliferation
+    // and system resource consumption, as well as easier interaction with EF CLI tooling.
+    // If your project has advanced needs, feel free to switch to containerized SQL Server.
     ? builder.AddConnectionString("DefaultConnection")
     // Fall back to a container
     : builder.AddSqlServer("sql").WithLifetime(ContainerLifetime.Persistent).AddDatabase(nameof(Coalesce_Starter_Vue_Web));

@@ -1,3 +1,5 @@
+// Generated code - do not edit directly. Generated with: pnpm coalesce
+
 import * as metadata from './metadata.g'
 import { convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
 import type { Model, DataSource } from 'coalesce-vue/lib/model'

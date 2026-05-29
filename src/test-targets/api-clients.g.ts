@@ -1,3 +1,5 @@
+// Generated code from CreateVitestTargets. Do not edit directly.
+
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import { ModelApiClient, ServiceApiClient } from 'coalesce-vue/lib/api-client'

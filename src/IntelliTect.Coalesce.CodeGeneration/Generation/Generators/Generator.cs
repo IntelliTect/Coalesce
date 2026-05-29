@@ -41,6 +41,12 @@ public abstract class Generator : IGenerator
     public string TargetDirectory { get; set; }
 
     /// <summary>
+    /// A comment to be emitted at the start of all affected generated files.
+    /// </summary>
+    [GeneratorConfig]
+    public string HeaderComment { get; set; }
+
+    /// <summary>
     /// The desired destination path of generated files, including any user configuration through <see cref="TargetDirectory"/>
     /// </summary>
     public abstract string EffectiveOutputPath { get; }

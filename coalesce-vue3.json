@@ -10,5 +10,10 @@
   //"rootTypesWhitelist": [
   //  "CaseDto"
   //],
-  "rootGenerator": "Vue"
+  "rootGenerator": "Vue",
+  "generatorConfig": {
+    "Scripts": {
+      "headerComment": "Generated code - do not edit directly. Generated with: pnpm coalesce"
+    }
+  }
 }

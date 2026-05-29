@@ -8,6 +8,8 @@ A component that displays a notification when a new version of the application h
 
 This component monitors the `X-App-Build` response header on API responses (emitted by `app.UseAppVersionHeader()` on the server). When the header value changes from the initially observed value, a [v-snackbar](https://vuetifyjs.com/en/components/snackbars/) is displayed with a refresh button.
 
+It also listens for Vite's [`vite:preloadError`](https://vite.dev/guide/build.html#load-error-handling) event, which fires when dynamic imports fail (e.g. old chunk files deleted by a new deployment). When this occurs, a HEAD request is made to verify the build header has changed before showing the update notification.
+
 ## Examples
 
 Place in your root `App.vue`, inside the `<v-app>` element:

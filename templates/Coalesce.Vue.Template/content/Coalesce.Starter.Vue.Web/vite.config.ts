@@ -26,7 +26,7 @@ export default defineConfig({
               priority: 30,
             },
             //#if AppInsights
-            { name: "appI", test: /applicationinsights/, priority: 20 },
+            { name: "appI", test: /applicationinsights/, priority: 21 },
             //#endif
             {
               name(moduleId: string) {
@@ -37,6 +37,13 @@ export default defineConfig({
                   )?.[1] ?? null
                 );
               },
+              priority: 20,
+            },
+            {
+              // Chunk views together so they all preload, reducing the chance of
+              // a failed page navigation due to deployments wiping old assets
+              name: "views",
+              test: /src[/\\]views[/\\]/,
             },
           ],
         },

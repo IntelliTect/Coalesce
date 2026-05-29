@@ -74,7 +74,8 @@ public class TargetClassesFullGenerationTest(VueSuiteFixture fixture) : CodeGenT
                 "disabled": true
             },
             "Scripts": {
-                "targetDirectory": "../"
+                "targetDirectory": "../",
+                "headerComment": "Generated code from CreateVitestTargets. Do not edit directly."
             }
         }
         """);

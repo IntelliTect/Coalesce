@@ -73,9 +73,13 @@ A full example of a `coalesce.json` file, along with an explanation of each prop
             "disabled": true,
             // Optional: Configures a path relative to the default output path for the generator
             // where that generator's output should be placed instead.
-            "targetDirectory": "../DifferentFolder"
+            "targetDirectory": "../DifferentFolder",
             // Optional: Indentation size
-            "indentationSize": 2
+            "indentationSize": 2,
+            // Optional: A comment to emit at the start of all generated files for this generator.
+            // Supports cascading configuration - define on a parent generator (e.g., Scripts)
+            // and child generators will inherit the value unless they specify their own.
+            "headerComment": "Generated code. Do not edit directly."
         },
     }
 }

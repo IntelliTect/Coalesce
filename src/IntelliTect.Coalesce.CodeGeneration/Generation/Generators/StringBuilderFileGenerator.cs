@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Text;
+using System;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation;
 
@@ -14,8 +15,40 @@ public abstract class StringBuilderFileGenerator<TModel> : FileGenerator, IFileG
 
     public sealed override async Task<Stream> GetOutputAsync()
     {
-        return new MemoryStream(Encoding.UTF8.GetBytes(await BuildOutputAsync()));
+        var output = await BuildOutputAsync();
+        output = PrependHeaderComment(output);
+        return new MemoryStream(Encoding.UTF8.GetBytes(output));
     }
+
+    private string PrependHeaderComment(string output)
+    {
+        if (string.IsNullOrWhiteSpace(HeaderComment))
+        {
+            return output;
+        }
+
+        var commentPrefix = GetCommentPrefix();
+        var lines = HeaderComment.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+        var commentedLines = new StringBuilder();
+
+        foreach (var line in lines)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                commentedLines.AppendLine(commentPrefix.TrimEnd());
+            }
+            else
+            {
+                commentedLines.AppendLine(commentPrefix + line);
+            }
+        }
+
+        commentedLines.AppendLine();
+        return commentedLines.ToString() + output;
+    }
+
+    private string GetCommentPrefix() => "// ";
+
 
     public override string ToString()
     {

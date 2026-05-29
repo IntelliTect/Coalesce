@@ -338,7 +338,7 @@ After all changes are made, run these commands in order, fixing errors before pr
 
 1. \`npm install\` in the web project. If it fails due to a recently-published package being blocked by npm's minimum release age policy, offer to re-run with \`--min-release-age=0\` after explaining the risk. Always check for warnings in the install output.
 2. \`dotnet restore\` in the solution root
-3. Run Coalesce code generation (use the \`coalesce_generate\` tool, or run \`dotnet coalesce\` in the web project)
+3. Run Coalesce code generation with \`dotnet coalesce\` in the web project
 4. \`dotnet build\` to verify .NET compilation
 5. \`npm run build\` in the web project
 6. \`npm run lint\` in the web project — fix all warnings and errors

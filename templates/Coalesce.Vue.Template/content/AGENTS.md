@@ -13,7 +13,7 @@ An `IntelliTect Coalesce`–based project. Projects:
 - Web: ASP.NET Core server. Serves both API endpoints and frontend Vue assets. Automatically launches Vite dev server - don't do `pnpm dev` manually.
 - Web/src: Vite, Vue 3, Vuetify 4, and Coalesce for data binding and API access.
 
-- Coalesce generates DTOs, controllers, and TypeScript from your models. After making changes to your models, invoke code generation with the `coalesce_generate` tool. The `coalesce.json` file is in the workspace root.
+- Coalesce generates DTOs, controllers, and TypeScript from your models. After making changes to your models, run `dotnet coalesce` in the `.Web` project.
 - If you run tests with `pnpm test`, pass `--run` to avoid running in interactive mode. E.g. `pnpm test --run`.
 - In Vue files, you don't need to add import statements for components nor composables from `vue`, `vue-router`, or those defined by the project's source code - they will be auto-imported by Vite.
 - Do not run `pnpm build` to validate changes unless the user asks because this ruins HMR if the app is running. Instead, validate frontend changes by checking for problems with `read/problems`.

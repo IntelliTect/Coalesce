@@ -1,4 +1,5 @@
 # 7.0.0
+- Breaking: Removed the `coalesce_generate` MCP tool, which was created back when agents didn't support terminal auto-approvals. Update agent guidance to run `dotnet coalesce` directly from your `.Web` project.
 - Breaking: The generated ViewModel stubs for abstract model types have been replaced by static objects with a static `.load(id)` method that returns a standard `ItemApiState` caller. They are no longer exposed as instantiable proxy objects that mutate themselves into the correct implementation type after `$load`ing from the server - this approach did not fully satisfy the TypeScript contract of the derived types at runtime and otherwise attempted (and failed) to provide a concrete instance of a type that should not actually be instantiable.
 - API callers (`ItemApiState`, `ListApiState`) are now awaitable. `await caller` now resolves to `caller.result` after the current or previous operation is completed.
   - `await vm.$load(1)` - performs a new load call and waits for completion

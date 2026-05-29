@@ -5,6 +5,9 @@
   "engines": {
     "node": ">=22"
   },
+  "scripts": {
+    "coalesce": "pnpm -r coalesce"
+  },
   "devDependencies": {
     "eslint": "^10.3.0"
   }

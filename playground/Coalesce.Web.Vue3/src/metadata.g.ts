@@ -1,4 +1,4 @@
-// Generated code - do not edit directly. Generated with: pnpm coalesce
+// Generated code - do not edit directly. Generated with: dotnet coalesce
 
 import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'
 import type {

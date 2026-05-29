@@ -1,12 +1,11 @@
 # MCP Server
 
-The Coalesce MCP (Model Context Protocol) server enables AI assistants to interact with your Coalesce projects by providing code generation tools, template resources, and upgrade guidance. This allows AI assistants like Copilot to understand your project structure and generate appropriate code.
+The Coalesce MCP (Model Context Protocol) server enables AI assistants to interact with your Coalesce projects by providing template resources and upgrade guidance. This allows AI assistants like Copilot to understand your project structure and generate appropriate code.
 
 ## What is MCP?
 
 Model Context Protocol (MCP) is an open standard for connecting AI assistants to external data sources and tools. The Coalesce MCP server implements this protocol to provide AI assistants with:
 
-- **Code Generation**: Trigger Coalesce code generation from AI conversations
 - **Template Features**: Query available template features and access template files. For example, "Add the user photos feature from the Coalesce template to my project".
 - **Upgrade Assistance**: Guide an AI agent through upgrading your project's Coalesce dependencies, comparing against the latest template and changelog.
 
@@ -28,12 +27,6 @@ For projects created from the Coalesce template, MCP server configuration is inc
 This configuration will be used by both VS Code and Visual Studio.
 
 ## Available Tools
-
-### `coalesce_generate`
-
-Runs Coalesce code generation for your project. 
-
-**Usage**: This tool helps alleviate common agent confusion about exactly how to run code generation, or which directory to run it in. It also alleviates the need to grant permission to run a console command, since permanent consent can be granted to this tool.
 
 ### `get_template_features`
 

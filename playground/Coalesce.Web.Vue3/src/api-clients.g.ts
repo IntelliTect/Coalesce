@@ -1,4 +1,4 @@
-// Generated code - do not edit directly. Generated with: pnpm coalesce
+// Generated code - do not edit directly. Generated with: dotnet coalesce
 
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
@@ -513,5 +513,4 @@ export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.W
   }
   
 }
-
 

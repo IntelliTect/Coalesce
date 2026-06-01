@@ -688,8 +688,8 @@ describe("$makeCaller", () => {
     expect(endpointMock.mock.calls[0][0]).toBe(arg);
     expect(caller.result).toBe(arg);
     expect(result).toBe(arg);
-    expect(caller.rawResponse.data.object).toBe(arg);
-    expect(caller.rawResponse.status).toBe(200);
+    expect(caller.rawResponse?.data.object).toBe(arg);
+    expect(caller.rawResponse?.status).toBe(200);
 
     // Typescript typing tests - all of these are valid types of `result`.
     caller.result = null;
@@ -1399,8 +1399,8 @@ describe("$makeCaller with args object", () => {
     caller.args.num = 42;
     const result = await caller.invokeWithArgs();
     expect(result).toBe(42);
-    expect(caller.rawResponse.data.object).toBe(42);
-    expect(caller.rawResponse.status).toBe(200);
+    expect(caller.rawResponse?.data.object).toBe(42);
+    expect(caller.rawResponse?.status).toBe(200);
   });
 
   test("confirm is typed properly", async () => {
@@ -1417,8 +1417,8 @@ describe("$makeCaller with args object", () => {
       num: 10,
     });
     expect(result).toBe(10);
-    expect(caller.rawResponse.data.object).toBe(10);
-    expect(caller.rawResponse.status).toBe(200);
+    expect(caller.rawResponse?.data.object).toBe(10);
+    expect(caller.rawResponse?.status).toBe(200);
     expect(window.confirm).toBeCalledTimes(1);
   });
 
@@ -1508,15 +1508,17 @@ describe("$makeCaller with args object", () => {
       caller.rawResponse.data.list = [Symbol()];
       //@ts-expect-error list should not allow any
       caller.rawResponse.data.list = Symbol();
+      //@ts-expect-error might be undefined
+      caller.rawResponse.toString();
       // Should allow numbers
-      caller.rawResponse.data.list = [42, 67];
+      caller.rawResponse!.data.list = [42, 67];
     };
 
     const promiseResult: number[] = await caller(42);
     expect(promiseResult).toStrictEqual([42]);
     expect(caller.result).toStrictEqual([42]);
-    expect(caller.rawResponse.data.list?.[0]).toBe(42);
-    expect(caller.rawResponse.status).toBe(200);
+    expect(caller.rawResponse?.data.list?.[0]).toBe(42);
+    expect(caller.rawResponse?.status).toBe(200);
 
     await caller.invoke(42);
     await caller.confirmInvoke("Are you sure?", 42);

@@ -2103,9 +2103,9 @@ export class ItemApiState<
   }
 
   override get rawResponse() {
-    return super.rawResponse as AxiosResponse<
-      ItemResult<Exclude<TResult, undefined>>
-    >;
+    return super.rawResponse as
+      | AxiosResponse<ItemResult<Exclude<TResult, undefined>>>
+      | undefined;
   }
 
   constructor(
@@ -2360,9 +2360,13 @@ export class ListApiState<
   }
 
   override get rawResponse() {
-    return super.rawResponse as AxiosResponse<
-      ListResult<Exclude<TResult, undefined> extends (infer R)[] ? R : never>
-    >;
+    return super.rawResponse as
+      | AxiosResponse<
+          ListResult<
+            Exclude<TResult, undefined> extends (infer R)[] ? R : never
+          >
+        >
+      | undefined;
   }
 
   constructor(

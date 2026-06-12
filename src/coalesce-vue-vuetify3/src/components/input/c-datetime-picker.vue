@@ -734,7 +734,7 @@ $bottom-padding: 8px;
   > .v-card {
     @media screen and (max-width: 600px) {
       flex-wrap: wrap;
-      > * {
+      > *:not(.c-datetime-picker__close-btn) {
         width: 100%;
         flex-grow: 1;
       }

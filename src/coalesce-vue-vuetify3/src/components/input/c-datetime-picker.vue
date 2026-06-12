@@ -67,6 +67,7 @@
         content-class="c-datetime-picker__menu"
         :close-on-content-click="false"
         :open-on-click="false"
+        stick-to-target
         min-width="1px"
         @update:model-value="!$event ? closeMenu() : openMenu()"
       >
@@ -118,7 +119,7 @@
             :title="$vuetify.locale.t('$vuetify.close')"
             :aria-label="$vuetify.locale.t('$vuetify.close')"
             class="c-datetime-picker__close-btn"
-            @click="menu = false"
+            @click="closeMenu()"
           >
           </v-btn>
         </v-card>

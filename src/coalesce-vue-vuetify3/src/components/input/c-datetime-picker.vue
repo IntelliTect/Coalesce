@@ -45,6 +45,7 @@
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
     :validation-value="internalValue"
     :error-messages="error"
+    :inputmode="inputmode"
     :readonly="isReadonly"
     :disabled="isDisabled"
     autocomplete="off"
@@ -52,7 +53,7 @@
     @keydown.escape="acceptInput()"
     @keydown.tab="closeMenu()"
     @update:model-value="textInputChanged($event, false)"
-    @click="menu = !menu"
+    @click="onInputClick"
   >
     <template v-for="(_, slot) of $slots as {}" #[slot]="scope">
       <slot :name="slot" v-bind="scope as any" />
@@ -188,6 +189,7 @@ import {
   DateValue,
 } from "coalesce-vue";
 import { computed, ref, watch, useId, useTemplateRef } from "vue";
+import { useDisplay } from "vuetify";
 import {
   ForSpec,
   InheritExcludePropNames,
@@ -273,6 +275,15 @@ const focused = ref(false);
 const error = ref<string[]>([]);
 const menu = ref(false);
 const internalTextValue = ref<string>();
+
+const { mobile } = useDisplay();
+
+// On mobile, suppress the virtual keyboard on initial tap (opening the picker menu instead).
+// Only show the keyboard on a subsequent tap when the menu is already open.
+const isEditingInput = ref(false);
+const inputmode = computed(() =>
+  mobile.value && !isEditingInput.value ? "none" : undefined,
+);
 
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
@@ -616,12 +627,22 @@ function setToday() {
   dateChanged(new Date());
 }
 
+function onInputClick() {
+  if (menu.value) {
+    // Menu already open - switch to text editing mode (shows keyboard on mobile)
+    isEditingInput.value = true;
+  } else {
+    openMenu();
+  }
+}
+
 function openMenu() {
   menu.value = true;
 }
 
 function closeMenu() {
   menu.value = false;
+  isEditingInput.value = false;
   rootRef.value?.focus();
 }
 

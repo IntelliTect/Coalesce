@@ -5,6 +5,7 @@
   - `await vm.$load(1)` - performs a new load call and waits for completion
   - `await vm.$load` - waits for completion of the pending load operation, or immediately resolves with the last result if no operation is pending.
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
+- `c-datetime-picker`: On mobile devices, the virtual keyboard is now suppressed on the initial tap (opening the picker menu instead). A subsequent tap on the input switches to text editing mode, allowing the keyboard to appear.
 
 # 6.6.0
 - Added `returnViewModel` prop to `c-select`, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.

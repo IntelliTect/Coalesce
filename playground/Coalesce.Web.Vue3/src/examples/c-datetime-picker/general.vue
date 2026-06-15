@@ -69,6 +69,12 @@
         color="purple"
         show-today-button
       ></c-datetime-picker>
+      <c-datetime-picker
+        :model="vm"
+        for="lastBath"
+        label="No Today button"
+        color="purple"
+      ></c-datetime-picker>
     </v-col>
     <v-col>
       {{ vm.lastBath }}

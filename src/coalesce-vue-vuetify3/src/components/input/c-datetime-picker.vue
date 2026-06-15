@@ -68,6 +68,7 @@
         :close-on-content-click="false"
         :open-on-click="false"
         stick-to-target
+        :scroll-strategy="$vuetify.display.xs ? 'block' : undefined"
         min-width="1px"
         @update:model-value="!$event ? closeMenu() : openMenu()"
       >
@@ -77,13 +78,13 @@
             ref="datePickerRef"
             :color="color!"
             :modelValue="internalValueZoned"
-            density="comfortable"
             scrollable
             tabindex="0"
             :rounded="false"
             :allowedDates="allowedDates as any"
             :min="min ? startOfDay(min) : undefined"
             :max="max ? endOfDay(max) : undefined"
+            show-adjacent-months
             v-bind="datePickerProps"
             @update:model-value="dateChanged"
             @keydown="handleDateKeydown"
@@ -731,28 +732,43 @@ watch(focused, (focused) => {
 
 <style lang="scss">
 $bottom-padding: 8px;
-$breakpoint: 585px;
 .c-datetime-picker__menu {
+  --mobile-width: 300px;
+
+  --date-picker-height: 396px;
+  &:has(.v-picker__actions) {
+    --date-picker-height: 448px;
+  }
+
   > .v-card {
-    @media screen and (max-width: $breakpoint) {
+    position: relative;
+
+    /* Vuetify xs */
+    @media screen and (max-width: 600px) {
+      width: var(--mobile-width);
       flex-wrap: wrap;
       > * {
-        width: 100%;
-        flex-grow: 1;
+        width: var(--mobile-width);
+      }
+      > .v-divider {
+        display: none;
+      }
+
+      /* Size the time picker such that the whole picker isn't scrollable if we can avoid it. E.g. absorb scrolling into the time picker columns */
+      &:has(.v-date-picker) .c-time-picker__column {
+        max-height: clamp(
+          130px,
+          calc(100vh - 100px - var(--date-picker-height)),
+          300px
+        );
       }
     }
-
-    position: relative;
   }
 
   .c-datetime-picker__close-btn {
     position: absolute;
-    right: $bottom-padding;
-    bottom: $bottom-padding;
-    @media screen and (max-width: $breakpoint) {
-      /* Shift over for scrollbar */
-      right: $bottom-padding + 16px;
-    }
+    right: $bottom-padding + 6px;
+    bottom: $bottom-padding + 4px;
   }
 
   .v-date-picker-years__content {

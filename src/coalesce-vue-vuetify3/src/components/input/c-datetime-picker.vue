@@ -111,18 +111,18 @@
               {{ displayedTime || "&nbsp;" }}
             </template>
           </c-time-picker>
-          <v-btn
-            :color
-            size="x-small"
-            icon="$complete"
-            tabindex="-1"
-            :title="$vuetify.locale.t('$vuetify.close')"
-            :aria-label="$vuetify.locale.t('$vuetify.close')"
-            class="c-datetime-picker__close-btn"
-            @click="closeMenu()"
-          >
-          </v-btn>
         </v-card>
+        <v-btn
+          :color
+          size="x-small"
+          icon="$complete"
+          tabindex="-1"
+          :title="$vuetify.locale.t('$vuetify.close')"
+          :aria-label="$vuetify.locale.t('$vuetify.close')"
+          class="c-datetime-picker__close-btn"
+          @click="closeMenu()"
+        >
+        </v-btn>
       </v-menu>
     </template>
   </v-text-field>
@@ -731,22 +731,27 @@ watch(focused, (focused) => {
 
 <style lang="scss">
 $bottom-padding: 8px;
+$breakpoint: 585px;
 .c-datetime-picker__menu {
   > .v-card {
-    @media screen and (max-width: 600px) {
+    @media screen and (max-width: $breakpoint) {
       flex-wrap: wrap;
-      > *:not(.c-datetime-picker__close-btn) {
+      > * {
         width: 100%;
         flex-grow: 1;
       }
     }
 
     position: relative;
+  }
 
-    .c-datetime-picker__close-btn {
-      position: absolute;
-      right: $bottom-padding;
-      bottom: $bottom-padding;
+  .c-datetime-picker__close-btn {
+    position: absolute;
+    right: $bottom-padding;
+    bottom: $bottom-padding;
+    @media screen and (max-width: $breakpoint) {
+      /* Shift over for scrollbar */
+      right: $bottom-padding + 16px;
     }
   }
 

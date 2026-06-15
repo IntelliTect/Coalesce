@@ -76,9 +76,10 @@
           <v-date-picker
             v-if="showDate"
             ref="datePickerRef"
+            v-model:month="datePickerDisplayMonth"
+            v-model:year="datePickerDisplayYear"
             :color="color!"
             :modelValue="internalValueZoned"
-            scrollable
             tabindex="0"
             :rounded="false"
             :allowedDates="allowedDates as any"
@@ -88,6 +89,9 @@
             v-bind="datePickerProps"
             @update:model-value="dateChanged"
             @keydown="handleDateKeydown"
+            @wheel.prevent="handleDatePickerScroll"
+            @touchstart.passive="handleDatePickerTouchStart"
+            @touchmove.prevent="handleDatePickerTouchMove"
           >
             <template v-if="showTodayButton" #actions>
               <v-btn :color @click="setToday"> Today </v-btn>
@@ -661,6 +665,72 @@ function acceptInput() {
     ];
   } else {
     internalTextValue.value = undefined;
+  }
+}
+
+/** The displayed month/year in the date picker, controlled via v-model:month/year. */
+const datePickerDisplayMonth = ref(
+  (internalValueZoned.value || new Date()).getMonth(),
+);
+const datePickerDisplayYear = ref(
+  (internalValueZoned.value || new Date()).getFullYear(),
+);
+
+// Sync displayed month/year when the selected value changes
+watch(internalValueZoned, (val) => {
+  if (val) {
+    datePickerDisplayMonth.value = val.getMonth();
+    datePickerDisplayYear.value = val.getFullYear();
+  }
+});
+
+function changeDisplayMonth(direction: 1 | -1) {
+  let month = datePickerDisplayMonth.value + direction;
+  let year = datePickerDisplayYear.value;
+  if (month > 11) {
+    month = 0;
+    year++;
+  } else if (month < 0) {
+    month = 11;
+    year--;
+  }
+  datePickerDisplayMonth.value = month;
+  datePickerDisplayYear.value = year;
+}
+
+let lastScrollTime = 0;
+function handleDatePickerScroll(event: WheelEvent) {
+  const now = Date.now();
+  if (now - lastScrollTime < 250) return;
+  lastScrollTime = now;
+  changeDisplayMonth(event.deltaY > 0 ? 1 : -1);
+}
+
+let touchStartX: number | null = null;
+let touchStartY: number | null = null;
+function handleDatePickerTouchStart(event: TouchEvent) {
+  touchStartX = event.touches[0].clientX;
+  touchStartY = event.touches[0].clientY;
+}
+function handleDatePickerTouchMove(event: TouchEvent) {
+  if (touchStartX === null || touchStartY === null) return;
+  const deltaX = touchStartX - event.touches[0].clientX;
+  const deltaY = touchStartY - event.touches[0].clientY;
+
+  const absX = Math.abs(deltaX);
+  const absY = Math.abs(deltaY);
+  const threshold = 50;
+
+  if (absX > threshold || absY > threshold) {
+    if (absX >= absY) {
+      // Horizontal swipe: left = next month, right = previous month
+      changeDisplayMonth(deltaX > 0 ? 1 : -1);
+    } else {
+      // Vertical swipe: up = next month, down = previous month
+      changeDisplayMonth(deltaY > 0 ? 1 : -1);
+    }
+    touchStartX = null;
+    touchStartY = null;
   }
 }
 

@@ -78,8 +78,12 @@ declare module "vue" {
 export const createCoalesceVuetify = (options: CoalesceVuetifyOptions) => {
   return {
     install(app: App) {
-      const { metadata, components = {}, adminOverrides, adminExtensions } =
-        options;
+      const {
+        metadata,
+        components = {},
+        adminOverrides,
+        adminExtensions,
+      } = options;
       const instance: CoalesceVuetifyInstance = {
         metadata,
         adminOverrides: adminOverrides

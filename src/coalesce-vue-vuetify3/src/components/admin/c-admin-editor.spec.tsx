@@ -267,7 +267,10 @@ describe("CAdminEditor", () => {
         undefined,
         {
           adminExtensions: [
-            [$metadata.types.Person, { editorToolbarActions: ToolbarExtension }],
+            [
+              $metadata.types.Person,
+              { editorToolbarActions: ToolbarExtension },
+            ],
           ],
         },
       );
@@ -318,9 +321,7 @@ describe("CAdminEditor", () => {
         () => <CAdminEditor model={vm} />,
         undefined,
         {
-          adminExtensions: [
-            ["*", { editorToolbarActions: GlobalExtension }],
-          ],
+          adminExtensions: [["*", { editorToolbarActions: GlobalExtension }]],
         },
       );
 

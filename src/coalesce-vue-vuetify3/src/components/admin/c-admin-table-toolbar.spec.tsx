@@ -2,11 +2,7 @@ import { CAdminTableToolbar } from "..";
 import { PersonListViewModel } from "@test-targets/viewmodels.g";
 import $metadata from "@test-targets/metadata.g";
 import { defineComponent, h } from "vue";
-import {
-  mockEndpoint,
-  mount,
-  mountWithCoalesceOptions,
-} from "@test/util";
+import { mockEndpoint, mount, mountWithCoalesceOptions } from "@test/util";
 
 describe("CAdminTableToolbar", () => {
   beforeEach(() => {
@@ -39,14 +35,15 @@ describe("CAdminTableToolbar", () => {
         undefined,
         {
           adminExtensions: [
-            [$metadata.types.Person, { tableToolbarActions: ExtensionComponent }],
+            [
+              $metadata.types.Person,
+              { tableToolbarActions: ExtensionComponent },
+            ],
           ],
         },
       );
 
-      expect(
-        wrapper.find(".person-toolbar-extension").exists(),
-      ).toBeTruthy();
+      expect(wrapper.find(".person-toolbar-extension").exists()).toBeTruthy();
       expect(wrapper.find(".person-toolbar-extension").text()).toBe(
         "Person Actions",
       );
@@ -69,15 +66,11 @@ describe("CAdminTableToolbar", () => {
         () => <CAdminTableToolbar list={list} />,
         undefined,
         {
-          adminExtensions: [
-            ["*", { tableToolbarActions: GlobalExtension }],
-          ],
+          adminExtensions: [["*", { tableToolbarActions: GlobalExtension }]],
         },
       );
 
-      expect(
-        wrapper.find(".global-toolbar-extension").exists(),
-      ).toBeTruthy();
+      expect(wrapper.find(".global-toolbar-extension").exists()).toBeTruthy();
     });
 
     test("type-specific override takes precedence over global '*'", async () => {
@@ -122,9 +115,7 @@ describe("CAdminTableToolbar", () => {
       const wrapper = mount(() => <CAdminTableToolbar list={list} />);
 
       // Toolbar should still render normally without extensions
-      expect(
-        wrapper.find(".c-admin-table-toolbar").exists(),
-      ).toBeTruthy();
+      expect(wrapper.find(".c-admin-table-toolbar").exists()).toBeTruthy();
     });
 
     test("extension component receives list prop", async () => {
@@ -147,7 +138,10 @@ describe("CAdminTableToolbar", () => {
         undefined,
         {
           adminExtensions: [
-            [$metadata.types.Person, { tableToolbarActions: ExtensionComponent }],
+            [
+              $metadata.types.Person,
+              { tableToolbarActions: ExtensionComponent },
+            ],
           ],
         },
       );
@@ -181,7 +175,10 @@ describe("CAdminTableToolbar", () => {
         undefined,
         {
           adminExtensions: [
-            [$metadata.types.Person, { tableToolbarActions: ExtensionComponent }],
+            [
+              $metadata.types.Person,
+              { tableToolbarActions: ExtensionComponent },
+            ],
           ],
         },
       );

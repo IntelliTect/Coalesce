@@ -237,31 +237,6 @@ const coalesceVuetify = createCoalesceVuetify({
 | `tablePageHeader` | [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) | `list: ListViewModel` | Component rendered before the table |
 | `editorPageHeader` | [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) | `model: ViewModel` | Component rendered before the editor |
 
-### Extension component props
-
-A `tableToolbarActions` extension component receives a `list` prop containing the `ListViewModel` for the current admin table:
-
-```vue
-<template>
-  <v-btn variant="text" @click="exportData">
-    <v-icon start>fa fa-download</v-icon>
-    <span class="hidden-sm-and-down">Export</span>
-  </v-btn>
-</template>
-
-<script setup lang="ts">
-import { ListViewModel } from 'coalesce-vue';
-
-const props = defineProps<{
-  list: ListViewModel;
-}>();
-
-function exportData() {
-  // Use props.list.$params, props.list.$items, etc.
-}
-</script>
-```
-
 ### Resolution order
 
 When resolving an extension for a model type, the lookup checks:

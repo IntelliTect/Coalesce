@@ -233,7 +233,7 @@ const coalesceVuetify = createCoalesceVuetify({
 | `tableToolbarActions` | [c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md) | `list: ListViewModel` | Component rendered after the built-in buttons (Create, Reload, Edit) |
 | `editorToolbarActions` | [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) | `model: ViewModel` | Component rendered in the editor toolbar, before Save/Delete/Reload |
 | `editorActions` | [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) | `model: ViewModel` | Component rendered in the editor's footer actions area |
-| `tableRowActions` | [c-admin-table](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table.md) | `model: ViewModel`, `list: ListViewModel` | Component rendered in each row's actions column, after the built-in Edit/Delete buttons |
+| `tableRowActions` | [c-admin-table](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table.md) | `model: ViewModel`, `list: ListViewModel` | Component rendered in each row's actions column, before the built-in Edit/Delete buttons |
 | `tablePageHeader` | [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) | `list: ListViewModel` | Component rendered before the table |
 | `editorPageHeader` | [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) | `model: ViewModel` | Component rendered before the editor |
 

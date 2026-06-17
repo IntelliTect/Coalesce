@@ -49,6 +49,15 @@
             class="c-admin-table--actions"
           >
             <div class="d-flex flex-nowrap text-no-wrap ga-1" no-gutters>
+              <slot name="row-actions" :item="item" :list="viewModel">
+                <component
+                  :is="tableRowActionsExtension"
+                  v-if="tableRowActionsExtension"
+                  :model="item"
+                  :list="viewModel"
+                />
+              </slot>
+
               <v-btn
                 v-if="editable && !effectiveAutoSave"
                 title="Save"
@@ -90,15 +99,6 @@
                   class="v-icon notranslate fa fa-trash-alt"
                 ></i>
               </v-btn>
-
-              <slot name="row-actions" :item="item" :list="viewModel">
-                <component
-                  :is="tableRowActionsExtension"
-                  v-if="tableRowActionsExtension"
-                  :model="item"
-                  :list="viewModel"
-                />
-              </slot>
             </div>
           </td>
         </template>

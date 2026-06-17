@@ -10,6 +10,7 @@
   - `await vm.$load(1)` - performs a new load call and waits for completion
   - `await vm.$load` - waits for completion of the pending load operation, or immediately resolves with the last result if no operation is pending.
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
+- `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 
 # 6.6.0

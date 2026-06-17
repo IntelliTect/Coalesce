@@ -630,11 +630,35 @@ AxiosClient.interceptors.request.use((config) => {
 });
 
 const APP_BUILD_HEADER = "x-app-build";
+const APP_BUILD_STORAGE_PREFIX = "coalesce:appBuild:";
+
+/** Compute a fingerprint from the script[src] attributes in the document.
+ * Vite produces content-hashed filenames, so this changes on each new build. */
+function getScriptFingerprint(): string {
+  const scripts = Array.from(document.querySelectorAll("script[src]"))
+    .map((el) => el.getAttribute("src"))
+    .filter(Boolean)
+    .sort()
+    .join("|");
+
+  // Simple DJB2 hash to keep the storage key short
+  let hash = 5381;
+  for (let i = 0; i < scripts.length; i++) {
+    hash = ((hash << 5) + hash + scripts.charCodeAt(i)) | 0;
+  }
+  return (hash >>> 0).toString(36);
+}
 
 /**
  * Sets up detection of application version changes by monitoring the `X-App-Build`
  * response header on API responses. When the header value changes from the initially
  * observed value, `isUpdateAvailable` becomes true.
+ *
+ * To detect updates after a browser discards and restores a tab from cached HTML,
+ * the previously observed build value is persisted in `sessionStorage`, keyed by a
+ * fingerprint of the loaded script URLs. Since Vite produces content-hashed filenames,
+ * old code will have the same fingerprint (and thus read its stored build from a previous
+ * session), allowing detection when the server reports a newer build.
  *
  * Also listens for Vite's `vite:preloadError` event, which fires when dynamic imports
  * fail due to stale chunks after a new deployment. When this occurs, a HEAD request is
@@ -649,7 +673,22 @@ export function useAppUpdateCheck(axiosInstance = AxiosClient): {
   isUpdateAvailable: Ref<boolean>;
 } {
   const isUpdateAvailable = ref(false);
+
+  // Use the script fingerprint to scope sessionStorage. If we're running the same
+  // code as a previous page load in this tab, we can recover the build value we
+  // previously observed and detect if the server has since been updated.
+  let storageKey: string | null = null;
   let initialBuild: string | null = null;
+  try {
+    const fingerprint = getScriptFingerprint();
+    storageKey = APP_BUILD_STORAGE_PREFIX + fingerprint;
+    const stored = sessionStorage.getItem(storageKey);
+    if (stored) {
+      initialBuild = stored;
+    }
+  } catch {
+    // sessionStorage may be unavailable (e.g. private browsing, storage full).
+  }
 
   const interceptorId = axiosInstance.interceptors.response.use(
     (response) => {
@@ -680,6 +719,15 @@ export function useAppUpdateCheck(axiosInstance = AxiosClient): {
 
   function checkBuild(build: string | undefined) {
     if (!build) return;
+
+    // Persist the observed build so it survives tab discard/restore.
+    if (storageKey) {
+      try {
+        sessionStorage.setItem(storageKey, build);
+      } catch {
+        // Ignore storage errors.
+      }
+    }
 
     if (initialBuild === null) {
       initialBuild = build;

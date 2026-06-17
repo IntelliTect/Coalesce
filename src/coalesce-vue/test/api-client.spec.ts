@@ -2118,7 +2118,7 @@ describe("useAppUpdateCheck", () => {
 
       // Now simulate a tab restore: same scripts (same fingerprint),
       // but server returns a new build
-      let buildHeader = "build-2";
+      const buildHeader = "build-2";
       const instance2 = axios.create();
       instance2.defaults.adapter = vitest.fn().mockImplementation(() =>
         Promise.resolve(<AxiosResponse>{
@@ -2181,18 +2181,12 @@ describe("useAppUpdateCheck", () => {
       addScriptTag("/assets/index-abc123.js");
 
       // Make sessionStorage throw
-      const originalGetItem = sessionStorage.getItem;
-      const originalSetItem = sessionStorage.setItem;
-      vitest
-        .spyOn(Storage.prototype, "getItem")
-        .mockImplementation(() => {
-          throw new Error("SecurityError");
-        });
-      vitest
-        .spyOn(Storage.prototype, "setItem")
-        .mockImplementation(() => {
-          throw new Error("SecurityError");
-        });
+      vitest.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+        throw new Error("SecurityError");
+      });
+      vitest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+        throw new Error("SecurityError");
+      });
 
       const instance = makeAxiosWithMockAdapter({
         [APP_BUILD_HEADER]: "build-1",

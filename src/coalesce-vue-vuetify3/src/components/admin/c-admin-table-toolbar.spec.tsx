@@ -6,7 +6,6 @@ import {
   mockEndpoint,
   mount,
   mountWithCoalesceOptions,
-  flushPromises,
 } from "@test/util";
 
 describe("CAdminTableToolbar", () => {

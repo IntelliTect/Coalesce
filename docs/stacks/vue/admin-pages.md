@@ -115,8 +115,6 @@ const coalesceVuetify = createCoalesceVuetify({
 });
 ```
 
-### Where overrides apply
-
 | Surface | Input override | Display override |
 |---|---|---|
 | [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) — editable properties | ✅ Replaces `c-input` | ✅ Replaces `c-admin-display` (read-only mode) |

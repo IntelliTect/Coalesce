@@ -124,7 +124,7 @@ const coalesceVuetify = createCoalesceVuetify({
 | [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md) — method return value | — | ✅ Replaces `c-admin-display` |
 | [c-table](/stacks/vue/coalesce-vue-vuetify/components/c-table.md) with `admin` prop — columns | ✅ Replaces `c-input` (editable mode) | ✅ Replaces `c-admin-display` |
 
-### Custom input component
+### Input overrides
 
 A custom input component is rendered in place of `c-input`. It receives `model` and `for` props, plus any extra props that the admin surface passes (e.g. `density`, `variant`). The `for` prop is the resolved metadata value for the overridden surface: for editable model fields this is a `Property`, and for method parameters it is a `Value` metadata object, not a string:
 
@@ -153,7 +153,7 @@ const props = defineProps<{
 </script>
 ```
 
-### Custom display component
+### Display overrides
 
 A custom display component is rendered in place of `c-admin-display` or `c-display`. It always receives a `modelValue` prop containing the property's current value, plus `model` and `for` props when rendering a model property (in `c-admin-editor` and `c-table`).
 

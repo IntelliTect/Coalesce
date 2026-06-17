@@ -89,9 +89,9 @@ const metadata = computed((): ModelType => {
   throw `No metadata available - no list provided, and couldn't create one.`;
 });
 
-const { resolveTablePageHeader } = useAdminExtensions();
+const { resolve } = useAdminExtensions();
 const tablePageHeaderExtension = computed(() =>
-  resolveTablePageHeader(metadata.value),
+  resolve(metadata.value, "tablePageHeader"),
 );
 
 /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */

@@ -270,8 +270,7 @@ const emit = defineEmits<{
 const form = useTemplateRef("form");
 const { resolveAdminInputComponent, resolveAdminDisplayComponent } =
   useAdminOverrides();
-const { resolveEditorToolbarActions, resolveEditorActions } =
-  useAdminExtensions();
+const { resolve } = useAdminExtensions();
 
 // Validate the form when it is rendered to trigger all validation messages.
 // This will either be immediate for a create scenario, or delayed until load for an edit.
@@ -329,10 +328,10 @@ const metadata = computed((): ModelType => {
 });
 
 const editorToolbarActionsExtension = computed(() =>
-  resolveEditorToolbarActions(metadata.value),
+  resolve(metadata.value, "editorToolbarActions"),
 );
 const editorActionsExtension = computed(() =>
-  resolveEditorActions(metadata.value),
+  resolve(metadata.value, "editorActions"),
 );
 
 const showContent = computed(() => {

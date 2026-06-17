@@ -116,10 +116,10 @@ const selectedColumns = defineModel<string[] | null>("selectedColumns", {
 });
 
 const { metadata } = useAdminTable(toRef(props, "list"));
-const { resolveTableToolbarActions } = useAdminExtensions();
+const { resolve } = useAdminExtensions();
 
 const toolbarActionsExtension = computed(() =>
-  resolveTableToolbarActions(metadata.value),
+  resolve(metadata.value, "tableToolbarActions"),
 );
 
 const router = useRouter();

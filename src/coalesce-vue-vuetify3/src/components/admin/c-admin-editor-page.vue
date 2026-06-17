@@ -117,9 +117,9 @@ const metadata = computed((): ModelType => {
   throw `No metadata available.`;
 });
 
-const { resolveEditorPageHeader } = useAdminExtensions();
+const { resolve } = useAdminExtensions();
 const editorPageHeaderExtension = computed(() =>
-  resolveEditorPageHeader(metadata.value),
+  resolve(metadata.value, "editorPageHeader"),
 );
 
 const isCreate = computed(() => {

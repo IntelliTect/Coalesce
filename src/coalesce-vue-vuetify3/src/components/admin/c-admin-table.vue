@@ -171,12 +171,12 @@ const route = useRoute();
 const instance = getCurrentInstance()!;
 const { metadata, canEdit, canDelete, hasInstanceMethods, getItemRoute } =
   useAdminTable(toRef(props, "list"));
-const { resolveTableRowActions } = useAdminExtensions();
+const { resolve } = useAdminExtensions();
 
 const editable = ref(false);
 
 const tableRowActionsExtension = computed(() =>
-  resolveTableRowActions(metadata.value),
+  resolve(metadata.value, "tableRowActions"),
 );
 
 const viewModel = computed((): ListViewModel => {

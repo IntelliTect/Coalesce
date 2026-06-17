@@ -1,5 +1,13 @@
 <template>
   <v-container class="c-admin-editor-page" :class="'type-' + metadata.name">
+    <slot name="page-header" :model="viewModel">
+      <component
+        :is="editorPageHeaderExtension"
+        v-if="editorPageHeaderExtension"
+        :model="viewModel"
+      />
+    </slot>
+
     <c-admin-editor
       class="c-admin-editor-page--editor"
       tag="section"
@@ -34,6 +42,7 @@ import { computed, watch, getCurrentInstance } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { isPropReadOnly } from "../../util";
 import { copyParamsToNewViewModel } from "./util";
+import { useAdminExtensions } from "../../composables/useAdminExtensions";
 
 defineOptions({
   name: "c-admin-editor-page",
@@ -107,6 +116,11 @@ const metadata = computed((): ModelType => {
   }
   throw `No metadata available.`;
 });
+
+const { resolveEditorPageHeader } = useAdminExtensions();
+const editorPageHeaderExtension = computed(() =>
+  resolveEditorPageHeader(metadata.value),
+);
 
 const isCreate = computed(() => {
   return !viewModel!.$primaryKey;

@@ -90,6 +90,15 @@
                   class="v-icon notranslate fa fa-trash-alt"
                 ></i>
               </v-btn>
+
+              <slot name="row-actions" :item="item" :list="viewModel">
+                <component
+                  :is="tableRowActionsExtension"
+                  v-if="tableRowActionsExtension"
+                  :model="item"
+                  :list="viewModel"
+                />
+              </slot>
             </div>
           </td>
         </template>
@@ -134,6 +143,7 @@ import {
 } from "vue";
 import { useRoute } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
+import { useAdminExtensions } from "../../composables/useAdminExtensions";
 import { copyParamsToNewViewModel } from "./util";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";
@@ -161,8 +171,13 @@ const route = useRoute();
 const instance = getCurrentInstance()!;
 const { metadata, canEdit, canDelete, hasInstanceMethods, getItemRoute } =
   useAdminTable(toRef(props, "list"));
+const { resolveTableRowActions } = useAdminExtensions();
 
 const editable = ref(false);
+
+const tableRowActionsExtension = computed(() =>
+  resolveTableRowActions(metadata.value),
+);
 
 const viewModel = computed((): ListViewModel => {
   if (props.list instanceof ListViewModel) return props.list;

@@ -4,6 +4,14 @@
     class="c-admin-table-page"
     :class="'type-' + metadata.name"
   >
+    <slot name="page-header" :list="listVM">
+      <component
+        :is="tablePageHeaderExtension"
+        v-if="tablePageHeaderExtension"
+        :list="listVM"
+      />
+    </slot>
+
     <c-admin-table
       class="c-admin-table-page--table"
       tag="section"
@@ -29,6 +37,7 @@
 <script lang="ts" setup>
 import { computed, PropType, Ref, ref, watch } from "vue";
 import { HiddenAreas, ListViewModel, ModelType } from "coalesce-vue";
+import { useAdminExtensions } from "../../composables/useAdminExtensions";
 
 const props = defineProps({
   type: { required: false, type: String, default: null },
@@ -79,6 +88,11 @@ const metadata = computed((): ModelType => {
 
   throw `No metadata available - no list provided, and couldn't create one.`;
 });
+
+const { resolveTablePageHeader } = useAdminExtensions();
+const tablePageHeaderExtension = computed(() =>
+  resolveTablePageHeader(metadata.value),
+);
 
 /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */
 const pageTitle = computed(() => {

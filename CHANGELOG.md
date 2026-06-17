@@ -12,7 +12,7 @@
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
 - `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
-- Added `adminExtensions` option to `createCoalesceVuetify()`, allowing per-type (or global `"*"`) extension components to be injected into admin pages. The first supported extension point is `tableToolbarActions`, which renders a custom component after the built-in buttons in `c-admin-table-toolbar`. Also added a `toolbar-actions` slot to `c-admin-table-toolbar` for conventional per-instance customization.
+- Added `adminExtensions` option to `createCoalesceVuetify()`, allowing per-type (or global `"*"`) extension components to be injected into admin pages. Supported extension points: `tableToolbarActions`, `editorToolbarActions`, `editorActions`, `tableRowActions`, `tablePageHeader`, and `editorPageHeader`. Each corresponding component also exposes a slot for conventional per-instance customization.
 
 - Added `returnViewModel` prop to `c-select`, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.

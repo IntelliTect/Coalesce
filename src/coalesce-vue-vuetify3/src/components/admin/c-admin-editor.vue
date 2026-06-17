@@ -22,6 +22,13 @@
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
+      <slot name="toolbar-actions" :model="model">
+        <component
+          :is="editorToolbarActionsExtension"
+          v-if="editorToolbarActionsExtension"
+          :model="model"
+        />
+      </slot>
       <v-btn
         v-if="!model.$isAutoSaveEnabled && showContent && canEdit"
         title="Save"
@@ -173,6 +180,13 @@
     </v-card-text>
 
     <v-card-actions v-if="canEdit && showContent">
+      <slot name="editor-actions" :model="model">
+        <component
+          :is="editorActionsExtension"
+          v-if="editorActionsExtension"
+          :model="model"
+        />
+      </slot>
       <v-spacer></v-spacer>
       <v-btn
         v-if="!model.$isAutoSaveEnabled"
@@ -228,6 +242,7 @@ import {
 import { getRefNavRoute } from "./util";
 import { isPropReadOnly } from "../../util";
 import { useAdminOverrides } from "../../composables/useAdminOverrides";
+import { useAdminExtensions } from "../../composables/useAdminExtensions";
 import { watch, computed, useTemplateRef, ref, onUnmounted } from "vue";
 
 defineOptions({
@@ -255,6 +270,8 @@ const emit = defineEmits<{
 const form = useTemplateRef("form");
 const { resolveAdminInputComponent, resolveAdminDisplayComponent } =
   useAdminOverrides();
+const { resolveEditorToolbarActions, resolveEditorActions } =
+  useAdminExtensions();
 
 // Validate the form when it is rendered to trigger all validation messages.
 // This will either be immediate for a create scenario, or delayed until load for an edit.
@@ -310,6 +327,13 @@ const metadata = computed((): ModelType => {
   }
   throw `No metadata available.`;
 });
+
+const editorToolbarActionsExtension = computed(() =>
+  resolveEditorToolbarActions(metadata.value),
+);
+const editorActionsExtension = computed(() =>
+  resolveEditorActions(metadata.value),
+);
 
 const showContent = computed(() => {
   const model = props.model;

@@ -16,6 +16,27 @@ export interface AdminExtension {
   /** Component rendered after the built-in buttons in c-admin-table-toolbar.
    * Receives `list: ListViewModel` as a prop. */
   tableToolbarActions?: Component;
+
+  /** Component rendered in the c-admin-editor toolbar, before the Save/Delete/Reload buttons.
+   * Receives `model: ViewModel` as a prop. */
+  editorToolbarActions?: Component;
+
+  /** Component rendered in the c-admin-editor card-actions area, before the Save button.
+   * Receives `model: ViewModel` as a prop. */
+  editorActions?: Component;
+
+  /** Component rendered in each row's actions column in c-admin-table,
+   * alongside the Edit/Delete buttons.
+   * Receives `model: ViewModel` (the row item) and `list: ListViewModel` as props. */
+  tableRowActions?: Component;
+
+  /** Component rendered before the table in c-admin-table-page.
+   * Receives `list: ListViewModel` as a prop. */
+  tablePageHeader?: Component;
+
+  /** Component rendered before the editor in c-admin-editor-page.
+   * Receives `model: ViewModel` as a prop. */
+  editorPageHeader?: Component;
 }
 
 export interface CoalesceVuetifyOptions {

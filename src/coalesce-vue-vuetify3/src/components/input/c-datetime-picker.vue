@@ -45,6 +45,7 @@
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
     :validation-value="internalValue"
     :error-messages="error"
+    :inputmode="inputmode"
     :readonly="isReadonly"
     :disabled="isDisabled"
     autocomplete="off"
@@ -52,7 +53,7 @@
     @keydown.escape="acceptInput()"
     @keydown.tab="closeMenu()"
     @update:model-value="textInputChanged($event, false)"
-    @click="menu = !menu"
+    @click="onInputClick"
   >
     <template v-for="(_, slot) of $slots as {}" #[slot]="scope">
       <slot :name="slot" v-bind="scope as any" />
@@ -66,6 +67,8 @@
         content-class="c-datetime-picker__menu"
         :close-on-content-click="false"
         :open-on-click="false"
+        stick-to-target
+        :scroll-strategy="$vuetify.display.xs ? 'block' : undefined"
         min-width="1px"
         @update:model-value="!$event ? closeMenu() : openMenu()"
       >
@@ -73,18 +76,22 @@
           <v-date-picker
             v-if="showDate"
             ref="datePickerRef"
+            v-model:month="datePickerDisplayMonth"
+            v-model:year="datePickerDisplayYear"
             :color="color!"
             :modelValue="internalValueZoned"
-            density="comfortable"
-            scrollable
             tabindex="0"
             :rounded="false"
             :allowedDates="allowedDates as any"
             :min="min ? startOfDay(min) : undefined"
             :max="max ? endOfDay(max) : undefined"
+            show-adjacent-months
             v-bind="datePickerProps"
             @update:model-value="dateChanged"
             @keydown="handleDateKeydown"
+            @wheel.prevent="handleDatePickerScroll"
+            @touchstart.passive="handleDatePickerTouchStart"
+            @touchmove.prevent="handleDatePickerTouchMove"
           >
             <template v-if="showTodayButton" #actions>
               <v-btn :color @click="setToday"> Today </v-btn>
@@ -109,18 +116,18 @@
               {{ displayedTime || "&nbsp;" }}
             </template>
           </c-time-picker>
-          <v-btn
-            :color
-            size="x-small"
-            icon="$complete"
-            tabindex="-1"
-            :title="$vuetify.locale.t('$vuetify.close')"
-            :aria-label="$vuetify.locale.t('$vuetify.close')"
-            class="c-datetime-picker__close-btn"
-            @click="menu = false"
-          >
-          </v-btn>
         </v-card>
+        <v-btn
+          :color
+          size="x-small"
+          icon="$complete"
+          tabindex="-1"
+          :title="$vuetify.locale.t('$vuetify.close')"
+          :aria-label="$vuetify.locale.t('$vuetify.close')"
+          class="c-datetime-picker__close-btn"
+          @click="closeMenu()"
+        >
+        </v-btn>
       </v-menu>
     </template>
   </v-text-field>
@@ -188,6 +195,7 @@ import {
   DateValue,
 } from "coalesce-vue";
 import { computed, ref, watch, useId, useTemplateRef } from "vue";
+import { useDisplay } from "vuetify";
 import {
   ForSpec,
   InheritExcludePropNames,
@@ -273,6 +281,15 @@ const focused = ref(false);
 const error = ref<string[]>([]);
 const menu = ref(false);
 const internalTextValue = ref<string>();
+
+const { mobile } = useDisplay();
+
+// On mobile, suppress the virtual keyboard on initial tap (opening the picker menu instead).
+// Only show the keyboard on a subsequent tap when the menu is already open.
+const isEditingInput = ref(false);
+const inputmode = computed(() =>
+  mobile.value && !isEditingInput.value ? "none" : undefined,
+);
 
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
@@ -616,12 +633,22 @@ function setToday() {
   dateChanged(new Date());
 }
 
+function onInputClick() {
+  if (menu.value) {
+    // Menu already open - switch to text editing mode (shows keyboard on mobile)
+    isEditingInput.value = true;
+  } else {
+    openMenu();
+  }
+}
+
 function openMenu() {
   menu.value = true;
 }
 
 function closeMenu() {
   menu.value = false;
+  isEditingInput.value = false;
   rootRef.value?.focus();
 }
 
@@ -638,6 +665,72 @@ function acceptInput() {
     ];
   } else {
     internalTextValue.value = undefined;
+  }
+}
+
+/** The displayed month/year in the date picker, controlled via v-model:month/year. */
+const datePickerDisplayMonth = ref(
+  (internalValueZoned.value || new Date()).getMonth(),
+);
+const datePickerDisplayYear = ref(
+  (internalValueZoned.value || new Date()).getFullYear(),
+);
+
+// Sync displayed month/year when the selected value changes
+watch(internalValueZoned, (val) => {
+  if (val) {
+    datePickerDisplayMonth.value = val.getMonth();
+    datePickerDisplayYear.value = val.getFullYear();
+  }
+});
+
+function changeDisplayMonth(direction: 1 | -1) {
+  let month = datePickerDisplayMonth.value + direction;
+  let year = datePickerDisplayYear.value;
+  if (month > 11) {
+    month = 0;
+    year++;
+  } else if (month < 0) {
+    month = 11;
+    year--;
+  }
+  datePickerDisplayMonth.value = month;
+  datePickerDisplayYear.value = year;
+}
+
+let lastScrollTime = 0;
+function handleDatePickerScroll(event: WheelEvent) {
+  const now = Date.now();
+  if (now - lastScrollTime < 250) return;
+  lastScrollTime = now;
+  changeDisplayMonth(event.deltaY > 0 ? 1 : -1);
+}
+
+let touchStartX: number | null = null;
+let touchStartY: number | null = null;
+function handleDatePickerTouchStart(event: TouchEvent) {
+  touchStartX = event.touches[0].clientX;
+  touchStartY = event.touches[0].clientY;
+}
+function handleDatePickerTouchMove(event: TouchEvent) {
+  if (touchStartX === null || touchStartY === null) return;
+  const deltaX = touchStartX - event.touches[0].clientX;
+  const deltaY = touchStartY - event.touches[0].clientY;
+
+  const absX = Math.abs(deltaX);
+  const absY = Math.abs(deltaY);
+  const threshold = 50;
+
+  if (absX > threshold || absY > threshold) {
+    if (absX >= absY) {
+      // Horizontal swipe: left = next month, right = previous month
+      changeDisplayMonth(deltaX > 0 ? 1 : -1);
+    } else {
+      // Vertical swipe: up = next month, down = previous month
+      changeDisplayMonth(deltaY > 0 ? 1 : -1);
+    }
+    touchStartX = null;
+    touchStartY = null;
   }
 }
 
@@ -710,22 +803,42 @@ watch(focused, (focused) => {
 <style lang="scss">
 $bottom-padding: 8px;
 .c-datetime-picker__menu {
-  > .v-card {
-    @media screen and (max-width: 600px) {
-      flex-wrap: wrap;
-      > * {
-        width: 100%;
-        flex-grow: 1;
-      }
-    }
+  --mobile-width: 300px;
 
+  --date-picker-height: 396px;
+  &:has(.v-picker__actions) {
+    --date-picker-height: 448px;
+  }
+
+  > .v-card {
     position: relative;
 
-    .c-datetime-picker__close-btn {
-      position: absolute;
-      right: $bottom-padding;
-      bottom: $bottom-padding;
+    /* Vuetify xs */
+    @media screen and (max-width: 600px) {
+      width: var(--mobile-width);
+      flex-wrap: wrap;
+      > * {
+        width: var(--mobile-width);
+      }
+      > .v-divider {
+        display: none;
+      }
+
+      /* Size the time picker such that the whole picker isn't scrollable if we can avoid it. E.g. absorb scrolling into the time picker columns */
+      &:has(.v-date-picker) .c-time-picker__column {
+        max-height: clamp(
+          130px,
+          calc(100vh - 100px - var(--date-picker-height)),
+          300px
+        );
+      }
     }
+  }
+
+  .c-datetime-picker__close-btn {
+    position: absolute;
+    right: $bottom-padding + 6px;
+    bottom: $bottom-padding + 4px;
   }
 
   .v-date-picker-years__content {

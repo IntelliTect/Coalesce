@@ -18,7 +18,7 @@
     </v-col>
   </v-row>
 
-  <h1>Date Only (plain)</h1>
+  <h1>Date Only (plain left/right)</h1>
   <v-row>
     <v-col>
       <c-datetime-picker
@@ -31,6 +31,14 @@
       ></c-datetime-picker>
     </v-col>
     <v-col>
+      <c-datetime-picker
+        :model="vm"
+        for="nextUpgrade"
+        date-kind="date"
+        clearable
+        :step="15"
+        color="pink"
+      ></c-datetime-picker>
       {{ vm.nextUpgrade }}
     </v-col>
   </v-row>
@@ -60,6 +68,12 @@
         for="lastBath"
         color="purple"
         show-today-button
+      ></c-datetime-picker>
+      <c-datetime-picker
+        :model="vm"
+        for="lastBath"
+        label="No Today button"
+        color="purple"
       ></c-datetime-picker>
     </v-col>
     <v-col>

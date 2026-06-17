@@ -688,8 +688,8 @@ describe("$makeCaller", () => {
     expect(endpointMock.mock.calls[0][0]).toBe(arg);
     expect(caller.result).toBe(arg);
     expect(result).toBe(arg);
-    expect(caller.rawResponse.data.object).toBe(arg);
-    expect(caller.rawResponse.status).toBe(200);
+    expect(caller.rawResponse?.data.object).toBe(arg);
+    expect(caller.rawResponse?.status).toBe(200);
 
     // Typescript typing tests - all of these are valid types of `result`.
     caller.result = null;
@@ -1399,8 +1399,8 @@ describe("$makeCaller with args object", () => {
     caller.args.num = 42;
     const result = await caller.invokeWithArgs();
     expect(result).toBe(42);
-    expect(caller.rawResponse.data.object).toBe(42);
-    expect(caller.rawResponse.status).toBe(200);
+    expect(caller.rawResponse?.data.object).toBe(42);
+    expect(caller.rawResponse?.status).toBe(200);
   });
 
   test("confirm is typed properly", async () => {
@@ -1417,8 +1417,8 @@ describe("$makeCaller with args object", () => {
       num: 10,
     });
     expect(result).toBe(10);
-    expect(caller.rawResponse.data.object).toBe(10);
-    expect(caller.rawResponse.status).toBe(200);
+    expect(caller.rawResponse?.data.object).toBe(10);
+    expect(caller.rawResponse?.status).toBe(200);
     expect(window.confirm).toBeCalledTimes(1);
   });
 
@@ -1508,15 +1508,17 @@ describe("$makeCaller with args object", () => {
       caller.rawResponse.data.list = [Symbol()];
       //@ts-expect-error list should not allow any
       caller.rawResponse.data.list = Symbol();
+      //@ts-expect-error might be undefined
+      caller.rawResponse.toString();
       // Should allow numbers
-      caller.rawResponse.data.list = [42, 67];
+      caller.rawResponse!.data.list = [42, 67];
     };
 
     const promiseResult: number[] = await caller(42);
     expect(promiseResult).toStrictEqual([42]);
     expect(caller.result).toStrictEqual([42]);
-    expect(caller.rawResponse.data.list?.[0]).toBe(42);
-    expect(caller.rawResponse.status).toBe(200);
+    expect(caller.rawResponse?.data.list?.[0]).toBe(42);
+    expect(caller.rawResponse?.status).toBe(200);
 
     await caller.invoke(42);
     await caller.confirmInvoke("Are you sure?", 42);
@@ -1841,6 +1843,10 @@ describe("ModelApiClient", () => {
 describe("useAppUpdateCheck", () => {
   const APP_BUILD_HEADER = "x-app-build";
 
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
   function makeAxiosWithMockAdapter(headers: Record<string, string> = {}) {
     const instance = axios.create();
     instance.defaults.adapter = vitest.fn().mockResolvedValue(<AxiosResponse>{
@@ -2054,5 +2060,149 @@ describe("useAppUpdateCheck", () => {
     expect(fetchMock).not.toHaveBeenCalled();
 
     vitest.unstubAllGlobals();
+  });
+
+  describe("sessionStorage fingerprint detection", () => {
+    function addScriptTag(src: string) {
+      const script = document.createElement("script");
+      script.src = src;
+      document.head.appendChild(script);
+      return script;
+    }
+
+    function clearScriptTags() {
+      document.querySelectorAll("script[src]").forEach((el) => el.remove());
+    }
+
+    afterEach(() => {
+      sessionStorage.clear();
+      clearScriptTags();
+    });
+
+    test("stores observed build in sessionStorage keyed by script fingerprint", async () => {
+      addScriptTag("/assets/index-abc123.js");
+      const instance = makeAxiosWithMockAdapter({
+        [APP_BUILD_HEADER]: "build-1",
+      });
+
+      const scope = effectScope();
+      scope.run(() => {
+        useAppUpdateCheck(instance);
+      });
+
+      await instance.get("/test");
+
+      // Should have stored the build in sessionStorage
+      const keys = Object.keys(sessionStorage);
+      const buildKey = keys.find((k) => k.startsWith("coalesce:appBuild:"));
+      expect(buildKey).toBeDefined();
+      expect(sessionStorage.getItem(buildKey!)).toBe("build-1");
+
+      scope.stop();
+    });
+
+    test("detects update when sessionStorage has old build for same script fingerprint", async () => {
+      addScriptTag("/assets/index-abc123.js");
+
+      // Simulate a previous page load that stored a build value
+      // First, run useAppUpdateCheck to determine the storage key
+      const instance1 = makeAxiosWithMockAdapter({
+        [APP_BUILD_HEADER]: "build-1",
+      });
+      const scope1 = effectScope();
+      scope1.run(() => {
+        useAppUpdateCheck(instance1);
+      });
+      await instance1.get("/test");
+      scope1.stop();
+
+      // Now simulate a tab restore: same scripts (same fingerprint),
+      // but server returns a new build
+      const buildHeader = "build-2";
+      const instance2 = axios.create();
+      instance2.defaults.adapter = vitest.fn().mockImplementation(() =>
+        Promise.resolve(<AxiosResponse>{
+          data: { wasSuccessful: true },
+          status: 200,
+          statusText: "OK",
+          headers: { [APP_BUILD_HEADER]: buildHeader },
+          config: {} as any,
+        }),
+      );
+
+      const scope2 = effectScope();
+      let result!: ReturnType<typeof useAppUpdateCheck>;
+      scope2.run(() => {
+        result = useAppUpdateCheck(instance2);
+      });
+
+      // Before any API call, the stored build is used as baseline
+      // First API call returns new build → mismatch detected
+      await instance2.get("/test");
+      expect(result.isUpdateAvailable.value).toBe(true);
+
+      scope2.stop();
+    });
+
+    test("does not false-positive when scripts change (new fingerprint after deploy)", async () => {
+      // Old page load stored a build with old script fingerprint
+      addScriptTag("/assets/index-abc123.js");
+      const instance1 = makeAxiosWithMockAdapter({
+        [APP_BUILD_HEADER]: "build-1",
+      });
+      const scope1 = effectScope();
+      scope1.run(() => {
+        useAppUpdateCheck(instance1);
+      });
+      await instance1.get("/test");
+      scope1.stop();
+
+      // After deploy: different scripts (different fingerprint)
+      clearScriptTags();
+      addScriptTag("/assets/index-xyz789.js");
+
+      const instance2 = makeAxiosWithMockAdapter({
+        [APP_BUILD_HEADER]: "build-2",
+      });
+      const scope2 = effectScope();
+      let result!: ReturnType<typeof useAppUpdateCheck>;
+      scope2.run(() => {
+        result = useAppUpdateCheck(instance2);
+      });
+
+      // New fingerprint → no stored build → normal behavior (no false positive)
+      await instance2.get("/test");
+      expect(result.isUpdateAvailable.value).toBe(false);
+
+      scope2.stop();
+    });
+
+    test("handles sessionStorage being unavailable gracefully", async () => {
+      addScriptTag("/assets/index-abc123.js");
+
+      // Make sessionStorage throw
+      vitest.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+        throw new Error("SecurityError");
+      });
+      vitest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+        throw new Error("SecurityError");
+      });
+
+      const instance = makeAxiosWithMockAdapter({
+        [APP_BUILD_HEADER]: "build-1",
+      });
+      const scope = effectScope();
+      let result!: ReturnType<typeof useAppUpdateCheck>;
+      scope.run(() => {
+        result = useAppUpdateCheck(instance);
+      });
+
+      // Should not throw, just fall back to normal behavior
+      await instance.get("/test");
+      expect(result.isUpdateAvailable.value).toBe(false);
+
+      scope.stop();
+      vitest.restoreAllMocks();
+    });
   });
 });

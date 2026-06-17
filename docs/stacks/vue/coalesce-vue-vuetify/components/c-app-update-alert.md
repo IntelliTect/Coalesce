@@ -10,6 +10,8 @@ This component monitors the `X-App-Build` response header on API responses (emit
 
 It also listens for Vite's [`vite:preloadError`](https://vite.dev/guide/build.html#load-error-handling) event, which fires when dynamic imports fail (e.g. old chunk files deleted by a new deployment). When this occurs, a HEAD request is made to verify the build header has changed before showing the update notification.
 
+To detect updates after a browser discards and restores a tab from cached HTML (e.g. after the browser "sleeps" an inactive tab), the observed build value is persisted in `sessionStorage` keyed by a fingerprint of the loaded script URLs. This allows the component to detect that the server's build has changed even when the running code was loaded from cached assets.
+
 ## Examples
 
 Place in your root `App.vue`, inside the `<v-app>` element:

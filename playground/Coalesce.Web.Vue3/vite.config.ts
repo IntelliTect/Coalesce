@@ -63,6 +63,7 @@ export default defineConfig({
 
     // Integrations with UseViteDevelopmentServer from IntelliTect.Coalesce.Vue
     createAspNetCoreHmrPlugin(),
+    //createAspNetCoreHmrPlugin({ assetBypass: false }),
   ],
 
   resolve: {

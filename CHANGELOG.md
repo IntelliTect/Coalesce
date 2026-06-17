@@ -1,13 +1,19 @@
 # 7.0.0
-- Breaking: Removed the `coalesce_generate` MCP tool, which was created back when agents didn't support terminal auto-approvals. Update agent guidance to run `dotnet coalesce` directly from your `.Web` project.
-- Breaking: The generated ViewModel stubs for abstract model types have been replaced by static objects with a static `.load(id)` method that returns a standard `ItemApiState` caller. They are no longer exposed as instantiable proxy objects that mutate themselves into the correct implementation type after `$load`ing from the server - this approach did not fully satisfy the TypeScript contract of the derived types at runtime and otherwise attempted (and failed) to provide a concrete instance of a type that should not actually be instantiable.
+
+## Breaking Changes
+- Removed the `coalesce_generate` MCP tool, which was created back when agents didn't support terminal auto-approvals. Update your projects' agent guidance to instead run `dotnet coalesce` in your `.Web` project.
+- The generated ViewModel stubs for abstract model types have been replaced by static objects with a static `.load(id)` method that returns a standard `ItemApiState` caller. They are no longer exposed as instantiable proxy objects that mutate themselves into the correct implementation type after `$load`ing from the server - this approach did not fully satisfy the TypeScript contract of the derived types at runtime and otherwise attempted (and failed) to provide a concrete instance of a type that should not actually be instantiable.
+
+## Features
+
 - API callers (`ItemApiState`, `ListApiState`) are now awaitable. `await caller` now resolves to `caller.result` after the current or previous operation is completed.
-  - `await vm.$load(1)` - performs a new load call and waits for completion
+  - `await vm.$load(1)` - performs a new load call and waits for completion.
   - `await vm.$load` - waits for completion of the pending load operation, or immediately resolves with the last result if no operation is pending.
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
+- `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
+- `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 - Added `adminExtensions` option to `createCoalesceVuetify()`, allowing per-type (or global `"*"`) extension components to be injected into admin pages. The first supported extension point is `tableToolbarActions`, which renders a custom component after the built-in buttons in `c-admin-table-toolbar`. Also added a `toolbar-actions` slot to `c-admin-table-toolbar` for conventional per-instance customization.
 
-# 6.6.0
 - Added `returnViewModel` prop to `c-select`, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
 - Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library.

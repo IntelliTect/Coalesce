@@ -197,7 +197,7 @@ const statusConfig = computed(() => {
 </script>
 ```
 
-## Extending Admin Pages Per Type
+## Extending Admin Pages
 
 Beyond replacing individual input/display components, you can inject additional content into admin page components on a per-type basis using `adminExtensions`. This follows the same array-of-pairs pattern as `adminOverrides`, but is keyed by model type (or `"*"` for a global default) rather than by individual property.
 
@@ -245,7 +245,7 @@ When resolving an extension for a model type, the lookup checks:
 
 If neither is found, nothing is rendered. A type-specific entry always takes precedence over `"*"`.
 
-## Replacing Admin Pages Per Type
+## Replacing Admin Pages
 
 The [Customizing Admin Components](#customizing-admin-components) section above lets you swap individual input/display components within the standard admin pages. If you need to go further — replacing an entire admin page with a fully custom view for a specific model type — you can do so via the router.
 

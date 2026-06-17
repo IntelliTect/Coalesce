@@ -197,11 +197,9 @@ const statusConfig = computed(() => {
 
 ## Extending Admin Pages
 
-Beyond replacing individual input/display components, you can inject additional content into admin page components on a per-type basis using `adminExtensions`. This follows the same array-of-pairs pattern as `adminOverrides`, but is keyed by model type (or `"*"` for a global default) rather than by individual property.
+You can inject additional content into admin page components on a per-type basis using `adminExtensions`. Pass an array of `[key, extension]` pairs to `createCoalesceVuetify()`, where the key is either a model type from `$metadata` or `"*"` for a global default.
 
 ### Configuration
-
-Pass an `adminExtensions` option to `createCoalesceVuetify()`. It accepts an array of `[key, extension]` pairs, where the key is either a model type from your generated `$metadata` or the string `"*"` for a global default, and the extension is an object with optional component fields for different admin surfaces.
 
 ```ts
 import { createCoalesceVuetify } from 'coalesce-vue-vuetify3';
@@ -237,15 +235,11 @@ const coalesceVuetify = createCoalesceVuetify({
 
 ### Resolution order
 
-When resolving an extension for a model type, the lookup checks:
-1. An exact type match (e.g. `$metadata.types.Case`)
-2. The `"*"` global default
-
-If neither is found, nothing is rendered. A type-specific entry always takes precedence over `"*"`.
+When resolving an extension, a type-specific entry (e.g. `$metadata.types.Case`) takes precedence over `"*"`. If neither is found, nothing is rendered.
 
 ## Replacing Admin Pages
 
-The [Customizing Admin Components](#customizing-admin-components) section above lets you swap individual input/display components within the standard admin pages. If you need to go further — replacing an entire admin page with a fully custom view for a specific model type — you can do so via the router.
+If the above customization and extension options aren't enough, you can replace an entire admin page with a fully custom view for a specific model type via the router.
 
 Because vue-router matches routes in order, placing type-specific routes before the generic `coalesce-admin-list` / `coalesce-admin-item` catch-all routes causes them to be used for that type while all others continue using the default admin pages. You can also use this technique to attach route-level metadata, such as required permissions, to specific types.
 

@@ -66,8 +66,18 @@ public class Person
 
     [Search(RootWhitelist = nameof(Person))]
     public ICollection<Address> Addresses { get; set; }
+
+    [Search(Includes = "details")]
+    public string Biography { get; set; }
+
+    [Search(Excludes = "preview")]
+    public string Notes { get; set; }
 }
 ```
+
+In the above example:
+- `Biography` will only be searched when the request includes `?contentView=details`
+- `Notes` will not be searched when the request includes `?contentView=preview`
 
 ## Properties
 
@@ -94,3 +104,21 @@ A comma-delimited list of model class names that, if set, will prevent the targe
 <Prop def="public string RootBlacklist { get; set; } = null;" />
 
 A comma-delimited list of model class names that, if set, will prevent the targeted property from being searched if the root object of the API call was one of the specified class names.
+
+<Prop def="public string Includes { get; set; } = null;" />
+
+A comma-delimited list of content views that, if set, will restrict the targeted property from being searched unless the request includes one of the specified content views.
+
+When this property is set, the property will only be searched if the API request includes a matching content view in the `ContentView` parameter. If this is empty or null, the property is searched regardless of the content view.
+
+For example, if a property has `[Search(Includes = "details")]`, it will only be searched when the request includes `?contentView=details`. Multiple content views can be specified as a comma-delimited list: `Includes = "details, admin"`.
+
+<Prop def="public string Excludes { get; set; } = null;" />
+
+A comma-delimited list of content views that, if set, will restrict the targeted property from being searched if the request includes one of the specified content views.
+
+When this property is set, the property will not be searched if the API request includes a matching content view in the `ContentView` parameter. If this is empty or null, the property is searched regardless of the content view.
+
+For example, if a property has `[Search(Excludes = "preview")]`, it will not be searched when the request includes `?contentView=preview`. Multiple content views can be specified as a comma-delimited list: `Excludes = "preview, summary"`.
+
+If both `Includes` and `Excludes` are specified, `Includes` takes precedence.

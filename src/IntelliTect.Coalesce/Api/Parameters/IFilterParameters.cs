@@ -11,6 +11,12 @@ public interface IFilterParameters : IDataSourceParameters
     string? Search { get; }
 
     /// <summary>
+    /// The content view for which to search. Used to filter which properties are searched
+    /// based on SearchAttribute.Includes and SearchAttribute.Excludes.
+    /// </summary>
+    string? ContentView { get; }
+
+    /// <summary>
     /// A mapping of values, keyed by field name, on which to filter.
     /// It is the responsibility of the consumer to decide how to interpret these values.
     /// </summary>

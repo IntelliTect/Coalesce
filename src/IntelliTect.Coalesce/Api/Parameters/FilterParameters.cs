@@ -8,6 +8,9 @@ public class FilterParameters : DataSourceParameters, IFilterParameters
     /// <inheritdoc />
     public string? Search { get; set; }
 
+    /// <inheritdoc />
+    public string? ContentView { get; set; }
+
     /// <inheritdoc cref="IFilterParameters.Filter" />
     public Dictionary<string, string> Filter { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     

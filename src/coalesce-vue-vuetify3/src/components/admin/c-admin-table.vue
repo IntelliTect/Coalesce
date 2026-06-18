@@ -49,12 +49,18 @@
             class="c-admin-table--actions"
           >
             <div class="d-flex flex-nowrap text-no-wrap ga-1" no-gutters>
-              <slot name="row-actions" :item="item" :list="viewModel">
+              <slot
+                name="row-actions"
+                :item="item"
+                :list="viewModel"
+                :editable="editable"
+              >
                 <component
                   :is="tableRowActionsExtension"
                   v-if="tableRowActionsExtension"
                   :model="item"
                   :list="viewModel"
+                  :editable="editable"
                 />
               </slot>
 

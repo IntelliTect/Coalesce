@@ -1,16 +1,15 @@
 <template>
-  <v-btn variant="tonal" color="info" @click="onClick">
-    <v-icon start>fa fa-envelope</v-icon>
-    Send Email
+  <v-btn variant="text" prepend-icon="fa fa-envelope" @click="onClick">
+    <span class="hidden-sm-and-down">Send Email</span>
   </v-btn>
 </template>
 
 <script setup lang="ts">
 import { ViewModel } from "coalesce-vue";
 
-const props = defineProps<{ model: ViewModel }>();
+const props = defineProps<{ model: ViewModel; editable: boolean }>();
 
 function onClick() {
-  alert(`Send email to ${props.model.$display}`);
+  alert(`Send email to ${props.model.$display()}`);
 }
 </script>

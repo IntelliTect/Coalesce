@@ -226,16 +226,33 @@ const coalesceVuetify = createCoalesceVuetify({
 
 | Field | Surface | Props | Description |
 |---|---|---|---|
-| `tableToolbarActions` | [c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md) | `list: ListViewModel` | Component rendered after the built-in buttons (Create, Reload, Edit) |
-| `editorToolbarActions` | [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) | `model: ViewModel` | Component rendered in the editor toolbar, before Save/Delete/Reload |
-| `editorActions` | [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) | `model: ViewModel` | Component rendered in the editor's footer actions area |
-| `tableRowActions` | [c-admin-table](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table.md) | `model: ViewModel`, `list: ListViewModel` | Component rendered in each row's actions column, before the built-in Edit/Delete buttons |
+| `tableToolbarActions` | [c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md) | `list: ListViewModel`, `editable: boolean \| null` | Component rendered after the built-in buttons (Create, Reload, Edit) |
+| `editorToolbarActions` | [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) | `model: ViewModel`, `editable: boolean` | Component rendered in the editor toolbar, before Save/Delete/Reload |
+| `editorActions` | [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) | `model: ViewModel`, `editable: boolean` | Component rendered in the editor's footer actions area |
+| `tableRowActions` | [c-admin-table](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table.md) | `model: ViewModel`, `list: ListViewModel`, `editable: boolean` | Component rendered in each row's actions column, before the built-in Edit/Delete buttons |
 | `tablePageHeader` | [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) | `list: ListViewModel` | Component rendered before the table |
 | `editorPageHeader` | [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) | `model: ViewModel` | Component rendered before the editor |
 
 ### Resolution order
 
 When resolving an extension, a type-specific entry (e.g. `$metadata.types.Case`) takes precedence over `"*"`. If neither is found, nothing is rendered.
+
+Extension components can be lazy-loaded with `defineAsyncComponent` to keep the main bundle small:
+
+```ts
+import { defineAsyncComponent } from "vue";
+
+const coalesceVuetify = createCoalesceVuetify({
+  metadata: $metadata,
+  adminExtensions: [
+    [$metadata.types.Case, {
+      tableToolbarActions: defineAsyncComponent(
+        () => import("@/components/CaseToolbarActions.vue")
+      ),
+    }],
+  ],
+});
+```
 
 ## Replacing Admin Pages
 

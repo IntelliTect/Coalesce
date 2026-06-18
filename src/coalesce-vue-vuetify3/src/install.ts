@@ -14,20 +14,20 @@ export interface AdminOverride {
 
 export interface AdminExtension {
   /** Component rendered after the built-in buttons in c-admin-table-toolbar.
-   * Receives `list: ListViewModel` as a prop. */
+   * Receives `list: ListViewModel` and `editable: boolean | null` as props. */
   tableToolbarActions?: Component;
 
   /** Component rendered in the c-admin-editor toolbar, before the Save/Delete/Reload buttons.
-   * Receives `model: ViewModel` as a prop. */
+   * Receives `model: ViewModel` and `editable: boolean` as props. */
   editorToolbarActions?: Component;
 
   /** Component rendered in the c-admin-editor card-actions area, before the Save button.
-   * Receives `model: ViewModel` as a prop. */
+   * Receives `model: ViewModel` and `editable: boolean` as props. */
   editorActions?: Component;
 
   /** Component rendered in each row's actions column in c-admin-table,
    * alongside the Edit/Delete buttons.
-   * Receives `model: ViewModel` (the row item) and `list: ListViewModel` as props. */
+   * Receives `model: ViewModel`, `list: ListViewModel`, and `editable: boolean` as props. */
   tableRowActions?: Component;
 
   /** Component rendered before the table in c-admin-table-page.

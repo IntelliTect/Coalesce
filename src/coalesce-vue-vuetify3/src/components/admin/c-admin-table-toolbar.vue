@@ -45,11 +45,12 @@
       </template>
     </v-btn>
 
-    <slot name="toolbar-actions" :list="list">
+    <slot name="toolbar-actions" :list="list" :editable="editable">
       <component
         :is="toolbarActionsExtension"
         v-if="toolbarActionsExtension"
         :list="list"
+        :editable="editable"
       />
     </slot>
 

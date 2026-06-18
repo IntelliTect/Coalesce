@@ -7,7 +7,7 @@ import "@fortawesome/fontawesome-free/css/all.css";
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 
-import { createApp } from "vue";
+import { createApp, defineAsyncComponent } from "vue";
 import { createVuetify } from "vuetify";
 import { aliases, fa } from "vuetify/iconsets/fa";
 
@@ -122,12 +122,14 @@ const coalesceVuetify = createCoalesceVuetify({
     [
       $metadata.types.Person,
       {
-        tableToolbarActions: PersonTableToolbarActions,
         editorToolbarActions: PersonEditorToolbarActions,
         editorActions: PersonEditorActions,
+        editorPageHeader: defineAsyncComponent(
+          () => import("@/admin-extensions/PersonEditorPageHeader.vue"),
+        ),
+        tableToolbarActions: PersonTableToolbarActions,
         tableRowActions: PersonTableRowActions,
         tablePageHeader: PersonTablePageHeader,
-        editorPageHeader: PersonEditorPageHeader,
       },
     ],
   ],

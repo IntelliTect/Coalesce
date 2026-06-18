@@ -120,12 +120,17 @@ describe("CAdminTableToolbar", () => {
 
     test("extension component receives list prop", async () => {
       let receivedList: any = null;
+      let receivedEditable: any = undefined;
 
       const ExtensionComponent = defineComponent({
         name: "ListInspector",
-        props: { list: { type: Object, required: true } },
+        props: {
+          list: { type: Object, required: true },
+          editable: { default: null },
+        },
         setup(props) {
           receivedList = props.list;
+          receivedEditable = props.editable;
           return () => h("div", { class: "list-inspector" });
         },
       });
@@ -147,6 +152,7 @@ describe("CAdminTableToolbar", () => {
       );
 
       expect(receivedList).toBe(list);
+      expect(receivedEditable).toBeNull();
     });
   });
 

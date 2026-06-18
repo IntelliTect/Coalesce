@@ -1,6 +1,6 @@
 <template>
   <v-alert type="info" variant="tonal" density="compact" class="mb-4">
-    Manage all people in the system. Use the toolbar actions to export or filter.
+    Manage all people in the system. Use the toolbar to export or filter.
   </v-alert>
 </template>
 

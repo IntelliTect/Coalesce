@@ -22,11 +22,12 @@
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
-      <slot name="toolbar-actions" :model="model">
+      <slot name="toolbar-actions" :model="model" :editable="canEdit">
         <component
           :is="editorToolbarActionsExtension"
           v-if="editorToolbarActionsExtension"
           :model="model"
+          :editable="canEdit"
         />
       </slot>
       <v-btn
@@ -180,14 +181,15 @@
     </v-card-text>
 
     <v-card-actions v-if="canEdit && showContent">
-      <slot name="editor-actions" :model="model">
+      <v-spacer></v-spacer>
+      <slot name="editor-actions" :model="model" :editable="canEdit">
         <component
           :is="editorActionsExtension"
           v-if="editorActionsExtension"
           :model="model"
+          :editable="canEdit"
         />
       </slot>
-      <v-spacer></v-spacer>
       <v-btn
         v-if="!model.$isAutoSaveEnabled"
         title="Save"

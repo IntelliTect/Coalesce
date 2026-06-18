@@ -126,7 +126,7 @@ describe("CAdminTableToolbar", () => {
         name: "ListInspector",
         props: {
           list: { type: Object, required: true },
-          editable: { default: null },
+          editable: { type: Boolean, default: null },
         },
         setup(props) {
           receivedList = props.list;
@@ -211,6 +211,26 @@ describe("CAdminTableToolbar", () => {
       ));
 
       expect(slotList).toBe(list);
+    });
+
+    test("slot receives editable as scoped slot prop", async () => {
+      let slotEditable: any = undefined;
+
+      const list = new PersonListViewModel();
+      await list.$load();
+
+      mount(() => (
+        <CAdminTableToolbar list={list}>
+          {{
+            "toolbar-actions": (props: any) => {
+              slotEditable = props.editable;
+              return h("div", { class: "slot-content" });
+            },
+          }}
+        </CAdminTableToolbar>
+      ));
+
+      expect(slotEditable).toBeNull();
     });
   });
 });

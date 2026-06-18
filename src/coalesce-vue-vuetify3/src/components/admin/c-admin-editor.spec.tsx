@@ -12,6 +12,17 @@ import { defineComponent, h } from "vue";
 import { mockEndpoint, mount, mountWithCoalesceOptions } from "@test/util";
 
 describe("CAdminEditor", () => {
+  beforeEach(() => {
+    mockEndpoint("/Person/list", () => ({
+      wasSuccessful: true,
+      list: [],
+    }));
+    mockEndpoint("/Company/list", () => ({
+      wasSuccessful: true,
+      list: [],
+    }));
+  });
+
   test("types", () => {
     const model = new Person();
     const vm = new PersonViewModel();
@@ -326,6 +337,68 @@ describe("CAdminEditor", () => {
       );
 
       expect(wrapper.find(".global-editor-ext").exists()).toBeTruthy();
+    });
+
+    test("editorToolbarActions extension receives model and editable props", () => {
+      const vm = new PersonViewModel();
+      vm.$loadCleanData({ personId: 1, firstName: "Bob" });
+      vm.$load.wasSuccessful = true;
+
+      let receivedModel: any = null;
+      let receivedEditable: any = undefined;
+
+      const ToolbarExtension = defineComponent({
+        name: "ToolbarPropsInspector",
+        props: {
+          model: { type: Object, required: true },
+          editable: { type: Boolean, required: true },
+        },
+        setup(props) {
+          receivedModel = props.model;
+          receivedEditable = props.editable;
+          return () => h("div", { class: "toolbar-props-ext" });
+        },
+      });
+
+      mountWithCoalesceOptions(() => <CAdminEditor model={vm} />, undefined, {
+        adminExtensions: [
+          [$metadata.types.Person, { editorToolbarActions: ToolbarExtension }],
+        ],
+      });
+
+      expect(receivedModel).toBe(vm);
+      expect(typeof receivedEditable).toBe("boolean");
+    });
+
+    test("editorActions extension receives model and editable props", () => {
+      const vm = new PersonViewModel();
+      vm.$loadCleanData({ personId: 1, firstName: "Bob" });
+      vm.$load.wasSuccessful = true;
+
+      let receivedModel: any = null;
+      let receivedEditable: any = undefined;
+
+      const ActionsExtension = defineComponent({
+        name: "ActionsPropsInspector",
+        props: {
+          model: { type: Object, required: true },
+          editable: { type: Boolean, required: true },
+        },
+        setup(props) {
+          receivedModel = props.model;
+          receivedEditable = props.editable;
+          return () => h("div", { class: "actions-props-ext" });
+        },
+      });
+
+      mountWithCoalesceOptions(() => <CAdminEditor model={vm} />, undefined, {
+        adminExtensions: [
+          [$metadata.types.Person, { editorActions: ActionsExtension }],
+        ],
+      });
+
+      expect(receivedModel).toBe(vm);
+      expect(typeof receivedEditable).toBe("boolean");
     });
   });
 });

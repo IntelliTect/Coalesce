@@ -51,7 +51,7 @@
             <div class="d-flex flex-nowrap text-no-wrap ga-1" no-gutters>
               <slot
                 name="row-actions"
-                :item="item"
+                :model="item"
                 :list="viewModel"
                 :editable="editable"
               >

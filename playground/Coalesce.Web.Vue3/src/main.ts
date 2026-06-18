@@ -34,7 +34,6 @@ import PersonEditorToolbarActions from "@/admin-extensions/PersonEditorToolbarAc
 import PersonEditorActions from "@/admin-extensions/PersonEditorActions.vue";
 import PersonTableRowActions from "@/admin-extensions/PersonTableRowActions.vue";
 import PersonTablePageHeader from "@/admin-extensions/PersonTablePageHeader.vue";
-import PersonEditorPageHeader from "@/admin-extensions/PersonEditorPageHeader.vue";
 
 import testWorker from "./worker.ts?worker";
 import Examples from "./components/Examples.vue";

@@ -29,6 +29,13 @@ import $metadata from "@/metadata.g";
 import CaseStatusInput from "@/admin-overrides/CaseStatusInput.vue";
 import CaseStatusDisplay from "@/admin-overrides/CaseStatusDisplay.vue";
 
+import PersonTableToolbarActions from "@/admin-extensions/PersonTableToolbarActions.vue";
+import PersonEditorToolbarActions from "@/admin-extensions/PersonEditorToolbarActions.vue";
+import PersonEditorActions from "@/admin-extensions/PersonEditorActions.vue";
+import PersonTableRowActions from "@/admin-extensions/PersonTableRowActions.vue";
+import PersonTablePageHeader from "@/admin-extensions/PersonTablePageHeader.vue";
+import PersonEditorPageHeader from "@/admin-extensions/PersonEditorPageHeader.vue";
+
 import testWorker from "./worker.ts?worker";
 import Examples from "./components/Examples.vue";
 new testWorker();
@@ -109,6 +116,19 @@ const coalesceVuetify = createCoalesceVuetify({
     [
       $metadata.types.Case.props.status,
       { input: CaseStatusInput, display: CaseStatusDisplay },
+    ],
+  ],
+  adminExtensions: [
+    [
+      $metadata.types.Person,
+      {
+        tableToolbarActions: PersonTableToolbarActions,
+        editorToolbarActions: PersonEditorToolbarActions,
+        editorActions: PersonEditorActions,
+        tableRowActions: PersonTableRowActions,
+        tablePageHeader: PersonTablePageHeader,
+        editorPageHeader: PersonEditorPageHeader,
+      },
     ],
   ],
 });

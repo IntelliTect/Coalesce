@@ -16,6 +16,7 @@
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 - Added `headerComment` generator configuration option to emit custom comments at the start of all generated files. Supports cascading hierarchical configuration—define on a parent generator and child generators automatically inherit the value.
+- Fixed generated ETag vary-value hashing for non-string values to use invariant culture formatting.
 
 ## Template Changes
 - Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project that doesn't diverge significantly from the previous out-of-the-box Coalesce template tenancy behavior:

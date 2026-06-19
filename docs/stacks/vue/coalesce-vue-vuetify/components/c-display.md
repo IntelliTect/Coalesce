@@ -36,6 +36,12 @@ Displaying a standalone date value without a model or other source of metadata:
 <c-display :value="dateProp" format="M/d/yyyy" />
 ```
 
+Displaying relative time that updates automatically as time passes:
+
+``` vue-html
+<c-display :value="dateProp" :format="{ distance: true, addSuffix: true }" />
+```
+
 For comprehensive information about working with and displaying dates in Coalesce, see [Working with Dates](/topics/working-with-dates.md).
 
 ## Props
@@ -80,4 +86,3 @@ For properties and other values annotated with [DataTypeAttribute], the followin
 * `DataType.PhoneNumber`: Renders as a clickable `tel` link.
 * `DataType.ImageUrl`: Renders as an `img` element.
 * `"Color"`: Renders a colored dot next to the value, interpreting the field value as a 7-character HTML hex color code.
-

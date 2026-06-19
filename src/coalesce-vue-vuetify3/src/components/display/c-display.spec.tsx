@@ -109,6 +109,29 @@ describe("CDisplay", () => {
     expect(wrapper.text()).toContain("1990-01-02 03:04:05 AM");
   });
 
+  test(":modelValue date distance format auto-updates", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
+      const value = new Date("2023-12-31T23:59:50.000Z");
+
+      const wrapper = mount(() => (
+        <CDisplay
+          modelValue={value}
+          format={{ distance: true, addSuffix: true, includeSeconds: true }}
+        />
+      ));
+
+      const initialText = wrapper.text();
+      await vi.advanceTimersByTimeAsync(11000);
+      const updatedText = wrapper.text();
+
+      expect(updatedText).not.toEqual(initialText);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   test("password", async () => {
     const model = new PersonViewModel({ secretPhrase: "Hunter2" });
     const wrapper = mount(() => <CDisplay model={model} for="secretPhrase" />);

@@ -74,17 +74,23 @@ export type CDisplayProps<TModel extends Model | AnyArgCaller | undefined> = {
   setup
   generic="TModel extends Model | AnyArgCaller | undefined"
 >
-import { defineComponent, h, mergeProps } from "vue";
+import {
+  defineComponent,
+  h,
+  mergeProps,
+  useAttrs,
+  useSlots,
+  ref,
+  watchEffect,
+} from "vue";
+import { formatDistance } from "date-fns";
 import { type ForSpec, useMetadataProps } from "../c-metadata-component";
 import { valueDisplay } from "coalesce-vue";
 import type {
-  DisplayOptions,
   DateValue,
   Model,
   AnyArgCaller,
 } from "coalesce-vue";
-import { useAttrs } from "vue";
-import { useSlots } from "vue";
 
 const props = withDefaults(defineProps<CDisplayProps<TModel>>(), {
   element: "span",
@@ -104,16 +110,14 @@ const attrs = useAttrs();
 
 defineSlots(); // Empty defineSlots() prevents TS errors for passthrough slots.
 const slots = useSlots();
+const refreshTick = ref(0);
 
-function render() {
+function resolveDisplayValue() {
   const model = props.model;
   let valueProp = props.modelValue ?? props.value;
 
   if (model == null && valueProp == null) {
-    // If no model and no value were provided, just display nothing.
-    // This isn't an error case - it just means the thing we're trying to display
-    // is `null`-ish, and should be treated the same way that vue would treat {{null}}
-    return h(props.element);
+    return null;
   }
 
   const modelMeta = modelMetaRef.value;
@@ -143,6 +147,81 @@ function render() {
   }
 
   valueProp ??= (valueOwner.value as any)[meta.name];
+
+  return { meta, options, valueProp };
+}
+
+function getRefreshDelayMs(): number | null {
+  const resolved = resolveDisplayValue();
+  if (!resolved || resolved.meta.type !== "date") return null;
+
+  const formatOption = resolved.options?.format;
+  if (
+    !formatOption ||
+    typeof formatOption != "object" ||
+    !("distance" in formatOption)
+  ) {
+    return null;
+  }
+
+  const parsed = resolved.valueProp;
+  if (!(parsed instanceof Date) || isNaN(parsed.getTime())) return null;
+
+  const addSuffix = formatOption.addSuffix ?? true;
+  const includeSeconds = formatOption.includeSeconds ?? false;
+  const now = new Date();
+  const currentDistance = formatDistance(parsed, now, {
+    addSuffix,
+    includeSeconds,
+  });
+
+  const candidateDelaysMs = includeSeconds
+    ? [
+        1000, 2000, 5000, 10000, 15000, 30000, 60000, 300000, 900000, 1800000,
+        3600000, 21600000, 43200000, 86400000,
+      ]
+    : [30000, 60000, 300000, 900000, 1800000, 3600000, 21600000, 86400000];
+
+  for (const delayMs of candidateDelaysMs) {
+    const nextDistance = formatDistance(
+      parsed,
+      new Date(now.getTime() + delayMs),
+      {
+        addSuffix,
+        includeSeconds,
+      },
+    );
+    if (nextDistance !== currentDistance) {
+      return delayMs;
+    }
+  }
+
+  return 86400000;
+}
+
+watchEffect((onCleanup) => {
+  refreshTick.value;
+  const refreshDelayMs = getRefreshDelayMs();
+  if (refreshDelayMs == null) return;
+
+  const timeout = setTimeout(() => {
+    refreshTick.value += 1;
+  }, refreshDelayMs);
+
+  onCleanup(() => clearTimeout(timeout));
+});
+
+function render() {
+  const resolved = resolveDisplayValue();
+  if (resolved == null) {
+    // If no model and no value were provided, just display nothing.
+    // This isn't an error case - it just means the thing we're trying to display
+    // is `null`-ish, and should be treated the same way that vue would treat {{null}}
+    return h(props.element);
+  }
+
+  void refreshTick.value;
+  const { meta, valueProp, options } = resolved;
   let valueString = valueDisplay(valueProp, meta, options);
 
   if (meta.type === "string" && valueString) {

@@ -446,4 +446,32 @@ public class PropertyViewModelTests
         await Assert.That(prop.Role).IsEqualTo(PropertyRole.Value);
     }
 
+    [Test, ClassViewModelData(typeof(Dictionaries))]
+    public async Task IsDictionary_CorrectForDictionaryProperties(ClassViewModelData data)
+    {
+        ClassViewModel vm = data;
+
+        foreach (var prop in new[]
+        {
+            vm.PropertyByName(nameof(Dictionaries.StringIntDict)),
+            vm.PropertyByName(nameof(Dictionaries.StringStringDict)),
+            vm.PropertyByName(nameof(Dictionaries.StringDoubleDict)),
+            vm.PropertyByName(nameof(Dictionaries.StringObjectDict)),
+        })
+        {
+            await Assert.That(prop.Type.IsDictionary).IsTrue();
+            await Assert.That(prop.Type.IsCollection).IsFalse();
+        }
+    }
+
+    [Test]
+    [PropertyViewModelData<Dictionaries>(nameof(Dictionaries.NullableDict))]
+    public async Task IsDictionary_CorrectForNullableDictionary(PropertyViewModelData data)
+    {
+        PropertyViewModel prop = data;
+
+        await Assert.That(prop.Type.IsDictionary).IsTrue();
+        await Assert.That(prop.Type.IsReferenceOrNullableValue).IsTrue();
+    }
+
 }

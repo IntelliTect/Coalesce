@@ -23,6 +23,7 @@ public class VueType
     private string TsType(TypeViewModel type, string modelPrefix, bool viewModel)
     {
         if (type.IsByteArray) return flags.HasFlag(Flags.RawBinary) ? "string | Uint8Array" : "string";
+        if (type.IsDictionary) return "Record<string, unknown>";
         if (type.IsCollection) return TsTypePlain(type.PureType, modelPrefix, viewModel) + "[]";
         return TsTypePlain(type, modelPrefix, viewModel);
     }

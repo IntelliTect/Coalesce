@@ -652,6 +652,17 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return methodWithMultiFileParameterListConcreteParam
   }
   
+  public get methodWithDictionariesType() {
+    const methodWithDictionariesType = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithDictionariesType,
+      (c, values?: $models.Dictionaries | null) => c.methodWithDictionariesType(this.$primaryKey, values),
+      () => ({values: null as $models.Dictionaries | null, }),
+      (c, args) => c.methodWithDictionariesType(this.$primaryKey, args.values))
+    
+    Object.defineProperty(this, 'methodWithDictionariesType', {value: methodWithDictionariesType});
+    return methodWithDictionariesType
+  }
+  
   public get downloadAttachment() {
     const downloadAttachment = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment,

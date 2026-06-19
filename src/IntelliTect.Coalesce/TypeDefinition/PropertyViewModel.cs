@@ -901,26 +901,6 @@ public abstract class PropertyViewModel : ValueViewModel
         .Where(s => !string.IsNullOrEmpty(s));
 
     /// <summary>
-    /// Returns a list of content views from the Search Includes attribute
-    /// </summary>
-    public IEnumerable<string> SearchIncludes =>
-        (this.GetAttributeValue<SearchAttribute>(a => a.Includes) ?? "")
-        .Trim()
-        .Split(',')
-        .Select(s => s.Trim())
-        .Where(s => !string.IsNullOrEmpty(s));
-
-    /// <summary>
-    /// Returns a list of content views from the Search Excludes attribute
-    /// </summary>
-    public IEnumerable<string> SearchExcludes =>
-        (this.GetAttributeValue<SearchAttribute>(a => a.Excludes) ?? "")
-        .Trim()
-        .Split(',')
-        .Select(s => s.Trim())
-        .Where(s => !string.IsNullOrEmpty(s));
-
-    /// <summary>
     /// Returns the role the property plays in a relational model.
     /// </summary>
     public PropertyRole Role

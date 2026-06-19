@@ -61,22 +61,43 @@ public abstract class QueryableDataSourceBase<T>
     /// <returns>True if the property should be searched, false otherwise.</returns>
     protected virtual bool ShouldSearchProperty(PropertyViewModel property, string? contentView)
     {
-        var searchIncludes = property.SearchIncludes.ToList();
-        var searchExcludes = property.SearchExcludes.ToList();
+        var includes = property.GetAttributeValue<SearchAttribute>(a => a.Includes);
+        // No incoming content view (`includes` query string is empty):
+        // 1. If this property has Search.Includes, we can't satisfy that requirement, so don't search it.
+        // 2. Otherwise, search it. Search.Excludes has nothing to match against in this scenario.
+        if (string.IsNullOrWhiteSpace(contentView))
+        {
+            return string.IsNullOrWhiteSpace(includes);
+        }
 
-        // If neither includes nor excludes are specified, search the property
+        var searchIncludes = (includes ?? "")
+            .Trim()
+            .Split(',')
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToList();
+        var searchExcludes = (property.GetAttributeValue<SearchAttribute>(a => a.Excludes) ?? "")
+            .Trim()
+            .Split(',')
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToList();
+
+        // Incoming content view is present.
+        // 1. No search include/exclude constraints -> search the property.
         if (searchIncludes.Count == 0 && searchExcludes.Count == 0)
         {
             return true;
         }
 
-        // If includes are specified, only search if the content view matches
+        // 2. Search.Includes is specified -> require an explicit include match.
+        // Includes wins over excludes when both are set.
         if (searchIncludes.Count > 0)
         {
             return !string.IsNullOrWhiteSpace(contentView) && searchIncludes.Contains(contentView, StringComparer.OrdinalIgnoreCase);
         }
 
-        // If excludes are specified, search unless the content view matches
+        // 3. Search.Excludes is specified (and Search.Includes is not) -> block only on exclude match.
         if (searchExcludes.Count > 0)
         {
             return string.IsNullOrWhiteSpace(contentView) || !searchExcludes.Contains(contentView, StringComparer.OrdinalIgnoreCase);
@@ -364,7 +385,7 @@ public abstract class QueryableDataSourceBase<T>
     public virtual IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)
     {
         var searchTerm = parameters.Search;
-        var contentView = parameters.ContentView;
+        var contentView = parameters.Includes;
 
         // Add general search filters.
         // These search specified fields in the class
@@ -388,7 +409,7 @@ public abstract class QueryableDataSourceBase<T>
                 string.Equals(f.Name, field, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(f.DisplayName, field, StringComparison.OrdinalIgnoreCase));
 
-            if (prop != null && !string.IsNullOrWhiteSpace(value) && ShouldSearchProperty(prop, contentView))
+            if (prop != null && !string.IsNullOrWhiteSpace(value))
             {
                 var expressions = prop
                     .SearchProperties(ClassViewModel, maxDepth: 1, force: true)

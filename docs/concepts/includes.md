@@ -23,6 +23,22 @@ personList.$includes = "details";
 
 The default value (i.e. no action) is the empty string.
 
+## SearchAttribute Includes/Excludes
+
+`includes` is also used by [`[Search]`](/modeling/model-components/attributes/search.md) when you set `SearchAttribute.Includes` or `SearchAttribute.Excludes`.
+
+- `Search(Includes = "...")`: property is searchable only when the request `includes` string matches.
+- `Search(Excludes = "...")`: property is not searchable when the request `includes` string matches.
+
+Example:
+
+```cs
+[Search(Includes = "details")]
+public string Biography { get; set; }
+```
+
+With the above, `Biography` participates in list searching only when the request has `?includes=details`.
+
 ### Special Values
 
 There are a few values of `includes` that are either set by default in the auto-generated views, or otherwise have special meaning:

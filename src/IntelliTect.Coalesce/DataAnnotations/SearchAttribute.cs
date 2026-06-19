@@ -84,13 +84,13 @@ public class SearchAttribute : System.Attribute
     /// 
     /// <para>
     /// When this property is set, the property will only be searched if the API request 
-    /// includes a matching content view in the <c>ContentView</c> parameter. 
+    /// includes a matching value in the <c>includes</c> parameter.
     /// If this is empty or null, the property is searched regardless of the content view.
     /// </para>
     /// 
     /// <para>
     /// For example, if a property has <c>[Search(Includes = "details")]</c>, 
-    /// it will only be searched when the request includes <c>?contentView=details</c>.
+    /// it will only be searched when the request includes <c>?includes=details</c>.
     /// Multiple content views can be specified as a comma-delimited list: <c>Includes = "details, admin"</c>.
     /// </para>
     /// </summary>
@@ -103,13 +103,13 @@ public class SearchAttribute : System.Attribute
     /// 
     /// <para>
     /// When this property is set, the property will not be searched if the API request 
-    /// includes a matching content view in the <c>ContentView</c> parameter.
+    /// includes a matching value in the <c>includes</c> parameter.
     /// If this is empty or null, the property is searched regardless of the content view.
     /// </para>
     /// 
     /// <para>
     /// For example, if a property has <c>[Search(Excludes = "preview")]</c>, 
-    /// it will not be searched when the request includes <c>?contentView=preview</c>.
+    /// it will not be searched when the request includes <c>?includes=preview</c>.
     /// Multiple content views can be specified as a comma-delimited list: <c>Excludes = "preview, summary"</c>.
     /// </para>
     /// 

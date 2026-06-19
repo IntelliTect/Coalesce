@@ -11,6 +11,8 @@ By default, the system will search any field with the name 'Name'. If this doesn
 
 Searching will not search on properties that are hidden from the user by [Security Attributes](./security-attribute.md).
 
+`[Search(Includes = ...)]` and `[Search(Excludes = ...)]` use the request's `includes` value. For background on `includes`, see [Includes String](/concepts/includes.md).
+
 ## Searchable Property Types
 
 #### Strings
@@ -76,8 +78,8 @@ public class Person
 ```
 
 In the above example:
-- `Biography` will only be searched when the request includes `?contentView=details`
-- `Notes` will not be searched when the request includes `?contentView=preview`
+- `Biography` will only be searched when the request includes `?includes=details`
+- `Notes` will not be searched when the request includes `?includes=preview`
 
 ## Properties
 
@@ -109,16 +111,16 @@ A comma-delimited list of model class names that, if set, will prevent the targe
 
 A comma-delimited list of content views that, if set, will restrict the targeted property from being searched unless the request includes one of the specified content views.
 
-When this property is set, the property will only be searched if the API request includes a matching content view in the `ContentView` parameter. If this is empty or null, the property is searched regardless of the content view.
+When this property is set, the property will only be searched if the API request includes a matching value in the `includes` parameter. If this is empty or null, the property is searched regardless of content view.
 
-For example, if a property has `[Search(Includes = "details")]`, it will only be searched when the request includes `?contentView=details`. Multiple content views can be specified as a comma-delimited list: `Includes = "details, admin"`.
+For example, if a property has `[Search(Includes = "details")]`, it will only be searched when the request includes `?includes=details`. Multiple values can be specified as a comma-delimited list: `Includes = "details, admin"`.
 
 <Prop def="public string Excludes { get; set; } = null;" />
 
 A comma-delimited list of content views that, if set, will restrict the targeted property from being searched if the request includes one of the specified content views.
 
-When this property is set, the property will not be searched if the API request includes a matching content view in the `ContentView` parameter. If this is empty or null, the property is searched regardless of the content view.
+When this property is set, the property will not be searched if the API request includes a matching value in the `includes` parameter. If this is empty or null, the property is searched regardless of content view.
 
-For example, if a property has `[Search(Excludes = "preview")]`, it will not be searched when the request includes `?contentView=preview`. Multiple content views can be specified as a comma-delimited list: `Excludes = "preview, summary"`.
+For example, if a property has `[Search(Excludes = "preview")]`, it will not be searched when the request includes `?includes=preview`. Multiple values can be specified as a comma-delimited list: `Excludes = "preview, summary"`.
 
 If both `Includes` and `Excludes` are specified, `Includes` takes precedence.

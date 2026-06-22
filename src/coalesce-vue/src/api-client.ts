@@ -97,10 +97,11 @@ export interface DataSourceParameters {
   refResponse?: boolean;
 }
 export class DataSourceParameters {
-  constructor() {
+  constructor(data?: Partial<DataSourceParameters>) {
     this.includes = null;
     this.dataSource = null;
     this.refResponse = false;
+    Object.assign(this, data);
   }
 }
 
@@ -118,9 +119,10 @@ export class SaveParameters<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   T extends Model<ModelType>,
 > extends DataSourceParameters {
-  constructor() {
-    super();
+  constructor(data?: Partial<SaveParameters<T>>) {
+    super(data);
     this.fields = null;
+    Object.assign(this, data);
   }
 }
 
@@ -147,10 +149,11 @@ export interface FilterParameters extends DataSourceParameters {
   };
 }
 export class FilterParameters extends DataSourceParameters {
-  constructor() {
-    super();
+  constructor(data?: Partial<FilterParameters>) {
+    super(data);
     this.search = null;
     this.filter = {};
+    Object.assign(this, data);
   }
 }
 
@@ -182,14 +185,15 @@ export interface ListParameters extends FilterParameters {
   fields?: string[] | null;
 }
 export class ListParameters extends FilterParameters {
-  constructor() {
-    super();
+  constructor(data?: Partial<ListParameters>) {
+    super(data);
     this.page = 1;
     this.pageSize = 10;
     this.noCount = null;
     this.orderBy = null;
     this.orderByDescending = null;
     this.fields = null;
+    Object.assign(this, data);
   }
 }
 

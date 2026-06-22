@@ -1,3 +1,9 @@
+# Unreleased
+
+## Features
+
+- TypeScript `DataSourceParameters`, `FilterParameters`, `ListParameters`, and `SaveParameters` classes now accept a partial object as constructor parameter to allow convenient initialization with custom values (e.g., `new ListParameters({ page: 2, pageSize: 20, search: "test" })`).
+
 # 7.0.0
 
 ## Breaking Changes

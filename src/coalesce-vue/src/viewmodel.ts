@@ -884,6 +884,19 @@ export abstract class ViewModel<
       });
     }
 
+    if (options?.orderBy) {
+      // Sort items by the user-provided comparator.
+      // Build paired tuples so both arrays stay in sync.
+      const paired = dataToSend.map(
+        (raw, i) => [raw, itemsToSend[i]] as const,
+      );
+      paired.sort((a, b) => options.orderBy!(a[0], b[0]));
+      for (let i = 0; i < paired.length; i++) {
+        dataToSend[i] = paired[i][0];
+        itemsToSend[i] = paired[i][1];
+      }
+    }
+
     return {
       /** True if there are any models with a pending save or delete. */
       isDirty,
@@ -2187,6 +2200,20 @@ export interface BulkSaveOptions {
    * but are still desired to be saved during the same operation.
    */
   additionalRoots?: ViewModel[];
+
+  /** A comparator function that controls the order in which items are sent
+   * to the server. Works like `Array.prototype.sort` - return a negative number
+   * to sort `a` before `b`, a positive number to sort `b` before `a`, or zero
+   * to preserve their relative order.
+   *
+   * The server will respect client ordering when possible, but may reorder items
+   * when necessary to satisfy foreign key dependencies (e.g. a parent entity
+   * must be created before its children).
+   */
+  orderBy?: (
+    a: BulkSaveRequestRawItem,
+    b: BulkSaveRequestRawItem,
+  ) => number;
 }
 
 /**

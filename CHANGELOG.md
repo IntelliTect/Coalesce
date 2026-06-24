@@ -6,6 +6,8 @@
 
 ## Features
 
+- Added `orderBy` option to `BulkSaveOptions`, allowing customization of the order in which items are sent to the server during a bulk save. The server respects client ordering when possible, but may reorder items to satisfy foreign key dependencies.
+
 - Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library to reduce boilerplate duplication in projects.
 - Added `adminExtensions` option to `createCoalesceVuetify()`, allowing per-type or global extension components to be injected into admin pages. Supported extension points: `tableToolbarActions`, `editorToolbarActions`, `editorActions`, `tableRowActions`, `tablePageHeader`, and `editorPageHeader`. Each corresponding component also exposes a slot for conventional per-instance customization.
 - Open generic data sources whose single type parameter is constrained to a base class are now automatically available as data sources for that base class and all derived entity types.

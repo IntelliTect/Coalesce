@@ -1,4 +1,5 @@
 using IntelliTect.Coalesce.DataAnnotations;
+using System.Collections.Generic;
 
 namespace IntelliTect.Coalesce.Testing.TargetClasses;
 
@@ -54,4 +55,14 @@ public class SuppressedDefaultOrdering
 
     [DefaultOrderBy(Suppress = true)]
     public string Name { get; set; }
+}
+
+public class SuppressedCollectionOrdering
+{
+    public int Id { get; set; }
+
+    [DefaultOrderBy(Suppress = true)]
+    public ICollection<OrderingChild> Children { get; set; }
+
+    public ICollection<OrderingChild> UnsuppressedChildren { get; set; }
 }

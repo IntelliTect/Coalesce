@@ -1383,6 +1383,147 @@ describe("$makeCaller", () => {
       await delay(1);
       expect(caller2.result).toBe("response2");
     });
+
+    describe("limit", () => {
+      test("maxEntries evicts oldest entries", async () => {
+        let callNum = 0;
+        AxiosClient.defaults.adapter = () =>
+          makeEndpointMock("result" + ++callNum)();
+
+        const makeCaller = (id: number) => {
+          const caller = new PersonApiClient().$makeCaller("item", (c) =>
+            c.fullNameAndAge(id),
+          );
+          caller.useResponseCaching({
+            limit: { maxEntries: 2 },
+          });
+          return caller;
+        };
+
+        // Populate three entries with different ids (different cache keys)
+        await makeCaller(1)();
+        await makeCaller(2)();
+        await makeCaller(3)();
+
+        // The group should have evicted the oldest (id=1) entry.
+        // Make a new caller for id=1 - it should NOT get a cached result.
+        const check1 = makeCaller(1);
+        check1();
+        expect(check1.result).toBe(null);
+
+        // Make a new caller for id=2 - it SHOULD get a cached result.
+        const check2 = makeCaller(2);
+        check2();
+        expect(check2.result).toBe("result2");
+
+        // Make a new caller for id=3 - it SHOULD get a cached result.
+        const check3 = makeCaller(3);
+        check3();
+        expect(check3.result).toBe("result3");
+      });
+
+      test("maxBytes evicts oldest entries", async () => {
+        let callNum = 0;
+        AxiosClient.defaults.adapter = () =>
+          makeEndpointMock("result" + ++callNum)();
+
+        const makeCaller = (id: number) => {
+          const caller = new PersonApiClient().$makeCaller("item", (c) =>
+            c.fullNameAndAge(id),
+          );
+          caller.useResponseCaching({
+            // Set maxBytes very small so that only one entry fits
+            limit: { maxBytes: 1 },
+          });
+          return caller;
+        };
+
+        await makeCaller(1)();
+        await makeCaller(2)();
+
+        // id=1 should have been evicted because maxBytes is too small for two entries
+        const check1 = makeCaller(1);
+        check1();
+        expect(check1.result).toBe(null);
+
+        // id=2 should still be cached (most recent, always kept)
+        const check2 = makeCaller(2);
+        check2();
+        expect(check2.result).toBe("result2");
+      });
+
+      test("custom group key groups entries independently", async () => {
+        let callNum = 0;
+        AxiosClient.defaults.adapter = () =>
+          makeEndpointMock("result" + ++callNum)();
+
+        const makeCaller = (id: number, groupKey: string) => {
+          const caller = new PersonApiClient().$makeCaller("item", (c) =>
+            c.fullNameAndAge(id),
+          );
+          caller.useResponseCaching({
+            limit: { key: groupKey, maxEntries: 1 },
+          });
+          return caller;
+        };
+
+        // Populate two separate groups
+        await makeCaller(1, "groupA")();
+        await makeCaller(2, "groupB")();
+
+        // Add another entry to groupA, evicting id=1
+        await makeCaller(3, "groupA")();
+
+        // id=1 should be evicted from groupA
+        const check1 = makeCaller(1, "groupA");
+        check1();
+        expect(check1.result).toBe(null);
+
+        // id=3 should be in groupA
+        const check3 = makeCaller(3, "groupA");
+        check3();
+        expect(check3.result).toBe("result3");
+
+        // id=2 in groupB should be unaffected
+        const check2 = makeCaller(2, "groupB");
+        check2();
+        expect(check2.result).toBe("result2");
+      });
+
+      test("group metadata cleans up stale references", async () => {
+        let callNum = 0;
+        AxiosClient.defaults.adapter = () =>
+          makeEndpointMock("result" + ++callNum)();
+
+        const makeCaller = (id: number) => {
+          const caller = new PersonApiClient().$makeCaller("item", (c) =>
+            c.fullNameAndAge(id),
+          );
+          caller.useResponseCaching({
+            maxAgeSeconds: 0.3,
+            limit: { maxEntries: 5 },
+          });
+          return caller;
+        };
+
+        await makeCaller(1)();
+        await makeCaller(2)();
+
+        // Wait for entries to expire
+        await delay(400);
+
+        // Add a new entry - the stale references should be cleaned up
+        await makeCaller(3)();
+
+        // Verify the group metadata only has the new entry
+        const groupMeta = Object.entries(sessionStorage)
+          .find(([k]) => k.startsWith("coalesce:group:"));
+        expect(groupMeta).toBeTruthy();
+        const parsed = JSON.parse(groupMeta![1]);
+        // Only the non-expired entry (id=3) should remain in metadata
+        expect(Object.keys(parsed.entries)).toHaveLength(1);
+      });
+    });
   });
 });
 

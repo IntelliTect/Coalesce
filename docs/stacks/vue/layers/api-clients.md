@@ -334,6 +334,8 @@ Enables response caching on the API Caller.
 
   Only [HTTP GET methods](/modeling/model-components/attributes/controller-action.md) are supported, and [file-returning methods](/modeling/model-components/methods.md#file-downloads) are not supported. Call with `false` to disable caching after it was previously enabled.
 
+  The `limit` option can be used to cap the number or total size of cached responses in a group. When limits are exceeded, the oldest entries are evicted first. By default, entries are grouped by endpoint URL path (without query parameters), but a custom `key` can be provided to group entries differently. Group metadata is stored alongside cache entries in the same `Storage`.
+
 - **Example**
 
   ```ts
@@ -341,6 +343,14 @@ Enables response caching on the API Caller.
   caller.useResponseCaching({
     storage: 'localStorage',
     duration: 3600000 // 1 hour
+  });
+  ```
+
+  ```ts
+  // Limit cached responses to 10 entries per endpoint
+  const caller = client.$makeCaller("item", (c, id: number) => c.getItem(id));
+  caller.useResponseCaching({
+    limit: { maxEntries: 10 },
   });
   ```
 

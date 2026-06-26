@@ -6,6 +6,7 @@
 
 ## Features
 
+- Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
 - Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library to reduce boilerplate duplication in projects.
 - Added `adminExtensions` option to `createCoalesceVuetify()`, allowing per-type or global extension components to be injected into admin pages. Supported extension points: `tableToolbarActions`, `editorToolbarActions`, `editorActions`, `tableRowActions`, `tablePageHeader`, and `editorPageHeader`. Each corresponding component also exposes a slot for conventional per-instance customization.
 - Open generic data sources whose single type parameter is constrained to a base class are now automatically available as data sources for that base class and all derived entity types.

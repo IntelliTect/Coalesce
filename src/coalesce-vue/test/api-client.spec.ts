@@ -1490,6 +1490,44 @@ describe("$makeCaller", () => {
         expect(check2.result).toBe("result2");
       });
 
+      test("group key as function", async () => {
+        let callNum = 0;
+        AxiosClient.defaults.adapter = () =>
+          makeEndpointMock("result" + ++callNum)();
+
+        const makeCaller = (id: number) => {
+          const caller = new PersonApiClient().$makeCaller("item", (c) =>
+            c.fullNameAndAge(id),
+          );
+          caller.useResponseCaching({
+            limit: {
+              key: (_req, defaultKey) => "fn-" + defaultKey.split("?")[0],
+              maxEntries: 1,
+            },
+          });
+          return caller;
+        };
+
+        await makeCaller(1)();
+        await makeCaller(2)();
+
+        // id=1 should be evicted (maxEntries=1)
+        const check1 = makeCaller(1);
+        check1();
+        expect(check1.result).toBe(null);
+
+        // id=2 should still be cached
+        const check2 = makeCaller(2);
+        check2();
+        expect(check2.result).toBe("result2");
+
+        // Verify the group metadata key uses the function result
+        const groupMeta = Object.entries(sessionStorage).find(([k]) =>
+          k.startsWith("coalesce:group:fn-"),
+        );
+        expect(groupMeta).toBeTruthy();
+      });
+
       test("group metadata cleans up stale references", async () => {
         let callNum = 0;
         AxiosClient.defaults.adapter = () =>

@@ -26,6 +26,9 @@
      ```
   3. Delete the `ConfigureTenancy` method, the `TenantInterceptor` class, and the `TenantIdValueGenerator` class from your `AppDbContext`. The `ITenanted` interface and `TenantedBase` class remain in your project — they are not provided by the library.
 
+## Fixes
+- Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
+
 
 # 6.5.2
 - Fix `c-input` using numeric enum values instead of string values for string-serialized enums (`[JsonStringEnumConverter]`), causing the selected item to not be found in the dropdown.

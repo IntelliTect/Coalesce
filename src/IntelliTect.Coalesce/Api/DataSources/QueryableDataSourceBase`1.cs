@@ -53,6 +53,54 @@ public abstract class QueryableDataSourceBase<T>
     }
 
     /// <summary>
+    /// Determines if a property should be searched based on its SearchAttribute.Includes and SearchAttribute.Excludes
+    /// relative to the current request's content view (the request's <see cref="IDataSourceParameters.Includes"/> value).
+    /// </summary>
+    /// <param name="property">The property to check.</param>
+    /// <param name="contentView">The content view from the current request, if any.</param>
+    /// <returns>True if the property should be searched, false otherwise.</returns>
+    protected virtual bool ShouldSearchProperty(PropertyViewModel property, string? contentView)
+    {
+        var includes = property.GetAttributeValue<SearchAttribute>(a => a.Includes);
+        var excludes = property.GetAttributeValue<SearchAttribute>(a => a.Excludes);
+
+        var hasIncludes = !string.IsNullOrWhiteSpace(includes);
+        var hasExcludes = !string.IsNullOrWhiteSpace(excludes);
+
+        // Fast path: the vast majority of searchable properties have no content view
+        // constraints. Return before doing any string splitting/allocation. This matters
+        // because ApplyListSearchTerm can call this once per search statement per request.
+        if (!hasIncludes && !hasExcludes)
+        {
+            return true;
+        }
+
+        var trimmedContentView = contentView?.Trim();
+
+        // Scenario 1: Search.Includes is specified -> require an explicit include match.
+        // Includes wins over excludes when both are set.
+        // A property opted in to specific content views can never match a request that
+        // didn't specify a content view, so short-circuit that case.
+        if (hasIncludes)
+        {
+            return !string.IsNullOrEmpty(trimmedContentView)
+                && includes!
+                    .Split(',')
+                    .Select(s => s.Trim())
+                    .Contains(trimmedContentView, StringComparer.OrdinalIgnoreCase);
+        }
+
+        // Scenario 2: Search.Excludes is specified (and Search.Includes is not) -> search
+        // unless the incoming content view matches one of the excluded views. With no
+        // incoming content view there is nothing to exclude, so the property is searched.
+        return string.IsNullOrEmpty(trimmedContentView)
+            || !excludes!
+                .Split(',')
+                .Select(s => s.Trim())
+                .Contains(trimmedContentView, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Applies the "filter.propertyName=exactValue" filters to a query.
     /// These filters may be set when making a list request, and are found in ListParameters.Filters.
     /// This is called by ApplyListFiltering when constructing a list result.
@@ -331,6 +379,7 @@ public abstract class QueryableDataSourceBase<T>
     public virtual IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)
     {
         var searchTerm = parameters.Search;
+        var contentView = parameters.Includes;
 
         // Add general search filters.
         // These search specified fields in the class
@@ -359,6 +408,7 @@ public abstract class QueryableDataSourceBase<T>
                 var expressions = prop
                     .SearchProperties(ClassViewModel, maxDepth: 1, force: true)
                     .SelectMany(p => p.GetLinqSearchStatements(Context, param, value))
+                    .Where(f => ShouldSearchProperty(f.property, contentView))
                     .Select(t => t.statement)
                     .ToList();
 
@@ -391,7 +441,7 @@ public abstract class QueryableDataSourceBase<T>
             var splitOnStringClauses = ClassViewModel
                 .SearchProperties(ClassViewModel)
                 .SelectMany(p => p.GetLinqSearchStatements(Context, param, termWord))
-                .Where(f => f.property.SearchIsSplitOnSpaces)
+                .Where(f => f.property.SearchIsSplitOnSpaces && ShouldSearchProperty(f.property, contentView))
                 .Select(t => t.statement)
                 .ToList();
 
@@ -416,7 +466,7 @@ public abstract class QueryableDataSourceBase<T>
         var searchClauses = ClassViewModel
             .SearchProperties(ClassViewModel)
             .SelectMany(p => p.GetLinqSearchStatements(Context, param, searchTerm))
-            .Where(f => !f.property.SearchIsSplitOnSpaces)
+            .Where(f => !f.property.SearchIsSplitOnSpaces && ShouldSearchProperty(f.property, contentView))
             .Select(t => t.statement)
             .ToList();
         completeSearchClauses.AddRange(searchClauses);

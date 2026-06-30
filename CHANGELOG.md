@@ -17,6 +17,7 @@
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 - `c-display` now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
 - Added `headerComment` generator configuration option to emit custom comments at the start of all generated files. Supports cascading hierarchical configuration—define on a parent generator and child generators automatically inherit the value.
+- Added `SearchAttribute.Includes` and `SearchAttribute.Excludes` to scope search participation by the request `includes` value in `ApplyListSearchTerm`.
 - `[DefaultOrderBy(Suppress = true)]` can now be placed on a collection navigation property to suppress the default sorting of that collection in the generated response DTO.
 
 ## Template Changes

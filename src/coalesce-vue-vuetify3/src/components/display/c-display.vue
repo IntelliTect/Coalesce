@@ -87,6 +87,7 @@ import { formatDistance } from "date-fns";
 import { type ForSpec, useMetadataProps } from "../c-metadata-component";
 import { valueDisplay } from "coalesce-vue";
 import type {
+  DisplayOptions,
   DateValue,
   Model,
   AnyArgCaller,

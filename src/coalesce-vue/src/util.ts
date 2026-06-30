@@ -90,11 +90,19 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
 
   const partTzOffset = parts[8] == "Z" ? 0 : parts[10]; // TZ offset
 
+  // The JS Date constructor (and Date.UTC) interpret a year in the range 0-99
+  // as 1900+year. We detect that case and shift the result back by exactly 1900
+  // years. A relative shift (rather than setting an absolute year) is required so
+  // that any normalization from the constructor - e.g. a timezone offset that
+  // pushes the instant across a year boundary - is preserved.
+  const year = +parts[1];
+  const needsYearFixup = year >= 0 && year < 100;
+
   if (partTzOffset !== undefined) {
     // Date+Time, with offset specifier
-    return new Date(
+    const d = new Date(
       Date.UTC(
-        +parts[1],
+        year,
         +parts[2] - 1,
         +parts[3],
         +parts[4] - (+partTzOffset || 0) * (parts[9] == "-" ? -1 : 1),
@@ -103,10 +111,12 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
         +((parts[7] || "0") + "00").substring(0, 3),
       ),
     );
+    if (needsYearFixup) d.setUTCFullYear(d.getUTCFullYear() - 1900);
+    return d;
   } else if (parts[4] !== undefined) {
     // Date+Time, without offset specifier
-    return new Date(
-      +parts[1],
+    const d = new Date(
+      year,
       +parts[2] - 1,
       +parts[3],
       +parts[4],
@@ -114,9 +124,13 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
       +parts[6],
       +((parts[7] || "0") + "00").substring(0, 3),
     );
+    if (needsYearFixup) d.setFullYear(d.getFullYear() - 1900);
+    return d;
   } else {
     // Date only, without a time portion:
-    return new Date(+parts[1], +parts[2] - 1, +parts[3]);
+    const d = new Date(year, +parts[2] - 1, +parts[3]);
+    if (needsYearFixup) d.setFullYear(d.getFullYear() - 1900);
+    return d;
   }
 }
 

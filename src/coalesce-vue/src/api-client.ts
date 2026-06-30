@@ -1451,9 +1451,7 @@ export type ResponseCachingConfiguration = {
   limit?: {
     /** The group key for this set of cached responses. Entries sharing the same group key share a limit.
      * Defaults to the endpoint URL path without query parameters. */
-    key?:
-      | string
-      | ((req: AxiosRequestConfig, defaultKey: string) => string);
+    key?: string | ((req: AxiosRequestConfig, defaultKey: string) => string);
     /** Maximum total size in bytes of serialized cached responses in this group. */
     maxBytes?: number;
     /** Maximum number of cached entries in this group. */

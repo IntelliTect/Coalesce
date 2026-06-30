@@ -1554,8 +1554,9 @@ describe("$makeCaller", () => {
         await makeCaller(3)();
 
         // Verify the group metadata only has the new entry
-        const groupMeta = Object.entries(sessionStorage)
-          .find(([k]) => k.startsWith("coalesce:group:"));
+        const groupMeta = Object.entries(sessionStorage).find(([k]) =>
+          k.startsWith("coalesce:group:"),
+        );
         expect(groupMeta).toBeTruthy();
         const parsed = JSON.parse(groupMeta![1]);
         // Only the non-expired entry (id=3) should remain in metadata

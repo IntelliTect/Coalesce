@@ -61,41 +61,47 @@ function isDistanceFormat(
 
 /** Determine how long until the rendered distance string (e.g. "5 minutes ago")
  * would next change, so we can schedule a refresh exactly when it's needed
- * rather than on a fixed interval. */
+ * rather than on a fixed interval.
+ *
+ * Binary-searches the change boundary using `formatDistance` as a black box,
+ * which keeps us decoupled from date-fns' internal thresholds and lands the
+ * refresh exactly on the boundary (down to 1s) instead of overshooting.
+ *
+ * Capped at one hour: in the minutes/hours range, distance buckets change at
+ * most once per hour (e.g. "about 3 hours" -> "about 4 hours" boundaries are
+ * an hour apart), so an hourly cap still catches those right on time. For
+ * day/month/year distances the cap just means a far-off date re-renders hourly
+ * and usually produces the same string - a negligible cost that's well worth
+ * the much smaller search range. */
 function getDistanceRefreshDelayMs(
   parsed: Date,
   formatOption: DistanceFormatOption,
 ): number {
-  const addSuffix = formatOption.addSuffix ?? true;
-  const includeSeconds = formatOption.includeSeconds ?? false;
-  const now = new Date();
-  const currentDistance = formatDistance(parsed, now, {
-    addSuffix,
-    includeSeconds,
-  });
+  const opts = {
+    addSuffix: formatOption.addSuffix ?? true,
+    includeSeconds: formatOption.includeSeconds ?? false,
+  };
 
-  const candidateDelaysMs = includeSeconds
-    ? [
-        1000, 2000, 5000, 10000, 15000, 30000, 60000, 300000, 900000, 1800000,
-        3600000, 21600000, 43200000, 86400000,
-      ]
-    : [30000, 60000, 300000, 900000, 1800000, 3600000, 21600000, 86400000];
+  const now = Date.now();
+  const current = formatDistance(parsed, new Date(now), opts);
 
-  for (const delayMs of candidateDelaysMs) {
-    const nextDistance = formatDistance(
-      parsed,
-      new Date(now.getTime() + delayMs),
-      {
-        addSuffix,
-        includeSeconds,
-      },
-    );
-    if (nextDistance !== currentDistance) {
-      return delayMs;
-    }
+  const maxMs = 3_600_000; // 1 hour
+  if (formatDistance(parsed, new Date(now + maxMs), opts) === current) {
+    return maxMs;
   }
 
-  return 86400000;
+  // Smallest delay (>= 1s) at which the formatted string changes.
+  let lo = 1000;
+  let hi = maxMs;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (formatDistance(parsed, new Date(now + mid), opts) !== current) {
+      hi = mid;
+    } else {
+      lo = mid + 1;
+    }
+  }
+  return lo;
 }
 
 /** Wrapper that re-renders a date distance display on an adaptive schedule so

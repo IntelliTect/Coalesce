@@ -43,6 +43,99 @@ const passwordWrapper = defineComponent({
   },
 });
 
+type DistanceFormatOption = {
+  distance: true;
+  addSuffix?: boolean;
+  includeSeconds?: boolean;
+};
+
+function isDistanceFormat(
+  formatOption: DisplayOptions["format"] | undefined,
+): formatOption is DistanceFormatOption {
+  return (
+    !!formatOption &&
+    typeof formatOption == "object" &&
+    "distance" in formatOption
+  );
+}
+
+/** Determine how long until the rendered distance string (e.g. "5 minutes ago")
+ * would next change, so we can schedule a refresh exactly when it's needed
+ * rather than on a fixed interval. */
+function getDistanceRefreshDelayMs(
+  parsed: Date,
+  formatOption: DistanceFormatOption,
+): number {
+  const addSuffix = formatOption.addSuffix ?? true;
+  const includeSeconds = formatOption.includeSeconds ?? false;
+  const now = new Date();
+  const currentDistance = formatDistance(parsed, now, {
+    addSuffix,
+    includeSeconds,
+  });
+
+  const candidateDelaysMs = includeSeconds
+    ? [
+        1000, 2000, 5000, 10000, 15000, 30000, 60000, 300000, 900000, 1800000,
+        3600000, 21600000, 43200000, 86400000,
+      ]
+    : [30000, 60000, 300000, 900000, 1800000, 3600000, 21600000, 86400000];
+
+  for (const delayMs of candidateDelaysMs) {
+    const nextDistance = formatDistance(
+      parsed,
+      new Date(now.getTime() + delayMs),
+      {
+        addSuffix,
+        includeSeconds,
+      },
+    );
+    if (nextDistance !== currentDistance) {
+      return delayMs;
+    }
+  }
+
+  return 86400000;
+}
+
+/** Wrapper that re-renders a date distance display on an adaptive schedule so
+ * that relative time text stays current without requiring callers to manually
+ * force re-renders. Only instantiated for date values formatted with
+ * `{ distance: true }`, so non-distance displays incur no timer overhead. */
+const distanceWrapper = defineComponent({
+  name: "CDistanceDisplay",
+  props: {
+    element: { type: String, default: "span" },
+    value: { type: Date, required: true },
+    meta: { type: Object as PropType<DateValue>, required: true },
+    options: { type: Object as PropType<DisplayOptions>, default: undefined },
+  },
+  setup(props, { attrs, slots }) {
+    const refreshTick = ref(0);
+
+    watchEffect((onCleanup) => {
+      // Re-arm the timer whenever a tick fires or the inputs change.
+      void refreshTick.value;
+      const formatOption = props.options?.format;
+      if (!isDistanceFormat(formatOption) || isNaN(props.value.getTime())) {
+        return;
+      }
+
+      const delayMs = getDistanceRefreshDelayMs(props.value, formatOption);
+      const timeout = setTimeout(() => {
+        refreshTick.value += 1;
+      }, delayMs);
+      onCleanup(() => clearTimeout(timeout));
+    });
+
+    return () => {
+      void refreshTick.value;
+      const valueString = valueDisplay(props.value, props.meta, props.options);
+      return h(props.element, attrs, valueString || slots);
+    };
+  },
+});
+
 export type CDisplayProps<TModel extends Model | AnyArgCaller | undefined> = {
   /** An object owning the value to be edited that is specified by the `for` prop. */
   model?: TModel | null;
@@ -85,6 +178,7 @@ import {
 } from "vue";
 import { formatDistance } from "date-fns";
 import { type ForSpec, useMetadataProps } from "../c-metadata-component";
+import type { PropType } from "vue";
 import { valueDisplay } from "coalesce-vue";
 import type {
   DisplayOptions,
@@ -111,7 +205,6 @@ const attrs = useAttrs();
 
 defineSlots(); // Empty defineSlots() prevents TS errors for passthrough slots.
 const slots = useSlots();
-const refreshTick = ref(0);
 
 function resolveDisplayValue() {
   const model = props.model;
@@ -152,66 +245,6 @@ function resolveDisplayValue() {
   return { meta, options, valueProp };
 }
 
-function getRefreshDelayMs(): number | null {
-  const resolved = resolveDisplayValue();
-  if (!resolved || resolved.meta.type !== "date") return null;
-
-  const formatOption = resolved.options?.format;
-  if (
-    !formatOption ||
-    typeof formatOption != "object" ||
-    !("distance" in formatOption)
-  ) {
-    return null;
-  }
-
-  const parsed = resolved.valueProp;
-  if (!(parsed instanceof Date) || isNaN(parsed.getTime())) return null;
-
-  const addSuffix = formatOption.addSuffix ?? true;
-  const includeSeconds = formatOption.includeSeconds ?? false;
-  const now = new Date();
-  const currentDistance = formatDistance(parsed, now, {
-    addSuffix,
-    includeSeconds,
-  });
-
-  const candidateDelaysMs = includeSeconds
-    ? [
-        1000, 2000, 5000, 10000, 15000, 30000, 60000, 300000, 900000, 1800000,
-        3600000, 21600000, 43200000, 86400000,
-      ]
-    : [30000, 60000, 300000, 900000, 1800000, 3600000, 21600000, 86400000];
-
-  for (const delayMs of candidateDelaysMs) {
-    const nextDistance = formatDistance(
-      parsed,
-      new Date(now.getTime() + delayMs),
-      {
-        addSuffix,
-        includeSeconds,
-      },
-    );
-    if (nextDistance !== currentDistance) {
-      return delayMs;
-    }
-  }
-
-  return 86400000;
-}
-
-watchEffect((onCleanup) => {
-  refreshTick.value;
-  const refreshDelayMs = getRefreshDelayMs();
-  if (refreshDelayMs == null) return;
-
-  const timeout = setTimeout(() => {
-    refreshTick.value += 1;
-  }, refreshDelayMs);
-
-  onCleanup(() => clearTimeout(timeout));
-});
-
 function render() {
   const resolved = resolveDisplayValue();
   if (resolved == null) {
@@ -221,8 +254,24 @@ function render() {
     return h(props.element);
   }
 
-  void refreshTick.value;
   const { meta, valueProp, options } = resolved;
+
+  if (
+    meta.type === "date" &&
+    isDistanceFormat(options?.format) &&
+    valueProp instanceof Date &&
+    !isNaN(valueProp.getTime())
+  ) {
+    // Delegate to a wrapper that keeps the relative time text up to date.
+    return h(distanceWrapper, {
+      ...attrs,
+      element: props.element,
+      value: valueProp,
+      meta,
+      options,
+    });
+  }
+
   let valueString = valueDisplay(valueProp, meta, options);
 
   if (meta.type === "string" && valueString) {

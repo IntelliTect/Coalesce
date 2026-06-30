@@ -2524,6 +2524,38 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    methodWithDictionariesType: {
+      name: "methodWithDictionariesType",
+      displayName: "Method With Dictionaries Type",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        values: {
+          name: "values",
+          displayName: "Values",
+          type: "object",
+          get typeDef() { return (domain.types.Dictionaries as ObjectType & { name: "Dictionaries" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.Dictionaries as ObjectType & { name: "Dictionaries" }) },
+        role: "value",
+      },
+    },
     downloadAttachment: {
       name: "downloadAttachment",
       displayName: "Download Attachment",
@@ -5264,6 +5296,55 @@ export const ZipCode = domain.types.ZipCode = {
   dataSources: {
   },
 }
+export const Dictionaries = domain.types.Dictionaries = {
+  name: "Dictionaries" as const,
+  displayName: "Dictionaries",
+  type: "object",
+  props: {
+    stringIntDict: {
+      name: "stringIntDict",
+      displayName: "String Int Dict",
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
+      role: "value",
+    },
+    stringStringDict: {
+      name: "stringStringDict",
+      displayName: "String String Dict",
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
+      role: "value",
+    },
+    stringDoubleDict: {
+      name: "stringDoubleDict",
+      displayName: "String Double Dict",
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
+      role: "value",
+    },
+    stringObjectDict: {
+      name: "stringObjectDict",
+      displayName: "String Object Dict",
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
+      role: "value",
+    },
+    nullableDict: {
+      name: "nullableDict",
+      displayName: "Nullable Dict",
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
+      role: "value",
+    },
+    intStringDict: {
+      name: "intStringDict",
+      displayName: "Int String Dict",
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
+      role: "value",
+    },
+  },
+}
 export const ExternalChild = domain.types.ExternalChild = {
   name: "ExternalChild" as const,
   displayName: "External Child",
@@ -6123,6 +6204,7 @@ interface AppDomain extends Domain {
     DateOnlyPk: typeof DateOnlyPk
     DateTimeOffsetPk: typeof DateTimeOffsetPk
     DateTimePk: typeof DateTimePk
+    Dictionaries: typeof Dictionaries
     EnumPk: typeof EnumPk
     ExternalChild: typeof ExternalChild
     ExternalChildAsInputOnly: typeof ExternalChildAsInputOnly

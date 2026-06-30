@@ -1394,6 +1394,35 @@ export class ZipCode {
 }
 
 
+export interface Dictionaries extends Model<typeof metadata.Dictionaries> {
+  stringIntDict: Record<string, unknown> | null
+  stringStringDict: Record<string, unknown> | null
+  stringDoubleDict: Record<string, unknown> | null
+  stringObjectDict: Record<string, unknown> | null
+  nullableDict: Record<string, unknown> | null
+  intStringDict: unknown | null
+}
+export class Dictionaries {
+  
+  /** Mutates the input object and its descendants into a valid Dictionaries implementation. */
+  static convert(data?: Partial<Dictionaries>): Dictionaries {
+    return convertToModel<Dictionaries>(data || {}, metadata.Dictionaries) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid Dictionaries implementation. */
+  static map(data?: Partial<Dictionaries>): Dictionaries {
+    return mapToModel<Dictionaries>(data || {}, metadata.Dictionaries) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Dictionaries; }
+  
+  /** Instantiate a new Dictionaries, optionally basing it on the given data. */
+  constructor(data?: Partial<Dictionaries> | {[k: string]: any}) {
+    Object.assign(this, Dictionaries.map(data || {}));
+  }
+}
+
+
 export interface ExternalChild extends Model<typeof metadata.ExternalChild> {
   value: string | null
 }
@@ -2016,6 +2045,7 @@ declare module "coalesce-vue/lib/model" {
     DateOnlyPk: DateOnlyPk
     DateTimeOffsetPk: DateTimeOffsetPk
     DateTimePk: DateTimePk
+    Dictionaries: Dictionaries
     EnumPk: EnumPk
     ExternalChild: ExternalChild
     ExternalChildAsInputOnly: ExternalChildAsInputOnly

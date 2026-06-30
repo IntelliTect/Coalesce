@@ -1522,10 +1522,10 @@ describe("$makeCaller", () => {
         expect(check2.result).toBe("result2");
 
         // Verify the group metadata key uses the function result
-        const groupMeta = Object.entries(sessionStorage).find(([k]) =>
+        const groupMetaKey = Object.keys(sessionStorage).find((k) =>
           k.startsWith("coalesce:group:fn-"),
         );
-        expect(groupMeta).toBeTruthy();
+        expect(groupMetaKey).toBeTruthy();
       });
 
       test("group metadata cleans up stale references", async () => {
@@ -1554,12 +1554,11 @@ describe("$makeCaller", () => {
         await makeCaller(3)();
 
         // Verify the group metadata only has the new entry
-        const groupMeta = Object.entries(sessionStorage).find(([k]) =>
+        const groupMetaKey = Object.keys(sessionStorage).find((k) =>
           k.startsWith("coalesce:group:"),
         );
-        expect(groupMeta).toBeTruthy();
-        const parsed = JSON.parse(groupMeta![1]);
-        // Only the non-expired entry (id=3) should remain in metadata
+        expect(groupMetaKey).toBeTruthy();
+        const parsed = JSON.parse(sessionStorage.getItem(groupMetaKey!)!);
         expect(Object.keys(parsed.entries)).toHaveLength(1);
       });
     });

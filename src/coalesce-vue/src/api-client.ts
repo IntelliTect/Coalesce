@@ -1945,6 +1945,11 @@ export abstract class ApiState<
             storage.setItem(key, serialized);
 
             if (limit) {
+              const entrySizeBytes =
+                typeof TextEncoder !== "undefined"
+                  ? new TextEncoder().encode(serialized).length
+                  : serialized.length;
+
               enforceGroupLimits(
                 storage,
                 limit.key
@@ -1953,7 +1958,7 @@ export abstract class ApiState<
                     : limit.key
                   : defaultKey.split("?")[0],
                 key,
-                serialized.length,
+                entrySizeBytes,
                 nowSeconds,
                 limit.maxEntries,
                 limit.maxBytes,
@@ -2156,7 +2161,16 @@ function enforceGroupLimits(
 
   try {
     const raw = storage.getItem(groupStorageKey);
-    metadata = raw ? JSON.parse(raw) : { entries: {} };
+    const parsed = raw ? (JSON.parse(raw) as unknown) : null;
+
+    metadata =
+      parsed &&
+      typeof parsed === "object" &&
+      "entries" in parsed &&
+      (parsed as any).entries &&
+      typeof (parsed as any).entries === "object"
+        ? (parsed as CacheGroupMetadata)
+        : { entries: {} };
   } catch {
     metadata = { entries: {} };
   }
@@ -2166,7 +2180,7 @@ function enforceGroupLimits(
 
   // Remove references to entries that no longer exist in storage
   for (const key of Object.keys(metadata.entries)) {
-    if (key !== cacheKey && !storage.getItem(key)) {
+    if (key !== cacheKey && storage.getItem(key) === null) {
       delete metadata.entries[key];
     }
   }

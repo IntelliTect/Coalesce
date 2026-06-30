@@ -54,7 +54,7 @@ public abstract class QueryableDataSourceBase<T>
 
     /// <summary>
     /// Determines if a property should be searched based on its SearchAttribute.Includes and SearchAttribute.Excludes
-    /// relative to the current request's content view.
+    /// relative to the current request's content view (the request's <see cref="IDataSourceParameters.Includes"/> value).
     /// </summary>
     /// <param name="property">The property to check.</param>
     /// <param name="contentView">The content view from the current request, if any.</param>
@@ -62,48 +62,42 @@ public abstract class QueryableDataSourceBase<T>
     protected virtual bool ShouldSearchProperty(PropertyViewModel property, string? contentView)
     {
         var includes = property.GetAttributeValue<SearchAttribute>(a => a.Includes);
-        // No incoming content view (`includes` query string is empty):
-        // 1. If this property has Search.Includes, we can't satisfy that requirement, so don't search it.
-        // 2. Otherwise, search it. Search.Excludes has nothing to match against in this scenario.
-        if (string.IsNullOrWhiteSpace(contentView))
-        {
-            return string.IsNullOrWhiteSpace(includes);
-        }
+        var excludes = property.GetAttributeValue<SearchAttribute>(a => a.Excludes);
 
-        var searchIncludes = (includes ?? "")
-            .Trim()
-            .Split(',')
-            .Select(s => s.Trim())
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToList();
-        var searchExcludes = (property.GetAttributeValue<SearchAttribute>(a => a.Excludes) ?? "")
-            .Trim()
-            .Split(',')
-            .Select(s => s.Trim())
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToList();
+        var hasIncludes = !string.IsNullOrWhiteSpace(includes);
+        var hasExcludes = !string.IsNullOrWhiteSpace(excludes);
 
-        // Incoming content view is present.
-        // 1. No search include/exclude constraints -> search the property.
-        if (searchIncludes.Count == 0 && searchExcludes.Count == 0)
+        // Fast path: the vast majority of searchable properties have no content view
+        // constraints. Return before doing any string splitting/allocation. This matters
+        // because ApplyListSearchTerm can call this once per search statement per request.
+        if (!hasIncludes && !hasExcludes)
         {
             return true;
         }
 
-        // 2. Search.Includes is specified -> require an explicit include match.
+        var trimmedContentView = contentView?.Trim();
+
+        // Scenario 1: Search.Includes is specified -> require an explicit include match.
         // Includes wins over excludes when both are set.
-        if (searchIncludes.Count > 0)
+        // A property opted in to specific content views can never match a request that
+        // didn't specify a content view, so short-circuit that case.
+        if (hasIncludes)
         {
-            return !string.IsNullOrWhiteSpace(contentView) && searchIncludes.Contains(contentView, StringComparer.OrdinalIgnoreCase);
+            return !string.IsNullOrEmpty(trimmedContentView)
+                && includes!
+                    .Split(',')
+                    .Select(s => s.Trim())
+                    .Contains(trimmedContentView, StringComparer.OrdinalIgnoreCase);
         }
 
-        // 3. Search.Excludes is specified (and Search.Includes is not) -> block only on exclude match.
-        if (searchExcludes.Count > 0)
-        {
-            return string.IsNullOrWhiteSpace(contentView) || !searchExcludes.Contains(contentView, StringComparer.OrdinalIgnoreCase);
-        }
-
-        return true;
+        // Scenario 2: Search.Excludes is specified (and Search.Includes is not) -> search
+        // unless the incoming content view matches one of the excluded views. With no
+        // incoming content view there is nothing to exclude, so the property is searched.
+        return string.IsNullOrEmpty(trimmedContentView)
+            || !excludes!
+                .Split(',')
+                .Select(s => s.Trim())
+                .Contains(trimmedContentView, StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>

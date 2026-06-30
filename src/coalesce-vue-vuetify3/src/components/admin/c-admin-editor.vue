@@ -245,7 +245,7 @@ import { getRefNavRoute } from "./util";
 import { isPropReadOnly } from "../../util";
 import { useAdminOverrides } from "../../composables/useAdminOverrides";
 import { useAdminExtensions } from "../../composables/useAdminExtensions";
-import { watch, computed, useTemplateRef, ref, onUnmounted } from "vue";
+import { watch, computed, useTemplateRef, ref } from "vue";
 
 defineOptions({
   name: "c-admin-editor",
@@ -290,16 +290,6 @@ watch(
     }
   },
 );
-
-// Update the display every 10 seconds to keep the "ago" text fresh
-const updateInterval = setInterval(() => {
-  if (lastSavedAt.value) {
-    // Force a re-render by reassigning the same value
-    lastSavedAt.value = new Date(lastSavedAt.value);
-  }
-}, 10000);
-
-onUnmounted(() => clearInterval(updateInterval));
 
 function propInputBinds(p: Property) {
   const readonly = isPropReadOnly(p, props.model);

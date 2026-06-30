@@ -15,6 +15,7 @@
 - Added `returnViewModel` prop to `c-select`, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
+- `c-display` now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
 - Added `headerComment` generator configuration option to emit custom comments at the start of all generated files. Supports cascading hierarchical configuration—define on a parent generator and child generators automatically inherit the value.
 - `[DefaultOrderBy(Suppress = true)]` can now be placed on a collection navigation property to suppress the default sorting of that collection in the generated response DTO.
 

@@ -1590,8 +1590,8 @@ describe("ViewModel", () => {
       });
 
       // rawItems and items should have matching order
-      expect(preview.rawItems.map((r) => r.model)).toEqual(
-        preview.items.map((_, i) => preview.rawItems[i].model),
+      expect(preview.rawItems.map((r) => [r.metadata.name, r.action])).toEqual(
+        preview.items.map((i) => [i.type, i.action]),
       );
 
       const models = preview.rawItems.map((r) => r.model);

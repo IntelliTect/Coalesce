@@ -1,4 +1,4 @@
-// Generated code - do not edit directly. Generated with: dotnet coalesce
+// Generated code - do not edit directly. Generated with: pnpm coalesce
 
 import * as metadata from './metadata.g'
 import { convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
@@ -782,7 +782,7 @@ export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   caseCount: number | null
   closeCases: number | null
   description: string | null
-  testDict: unknown[] | null
+  testDict: Record<string, unknown> | null
 }
 export class CaseSummary {
   

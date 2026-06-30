@@ -172,6 +172,12 @@ API Callers (typed with the name `ApiState` in `coalesce-vue`, sometimes also re
 
   Each API Caller is itself a function, so it can be invoked to trigger an API request to the server.
   
+- **Error Handling**
+
+  When a request fails (4xx, 5xx, network errors, or any other error), the API Caller will **throw** the error. This applies to all built-in callers (`$load`, `$save`, `$bulkSave`, `$delete`, etc.) as well as any custom callers created with `$makeCaller`. Use standard promise handling (`await` with `try/catch`, or `.then()/.catch()`) to handle errors.
+
+  Before the error is thrown, the caller's state properties (`wasSuccessful`, `message`, `validationIssues`, etc.) are updated with information from the error response, making them available for reactive display in your UI without needing explicit error handling code in most cases. Use [`c-loader-status`](/stacks/vue/coalesce-vue-vuetify/components/c-loader-status.md) to display these states, and read the caller's `message` property for error messages rather than trying to extract a message from any caught error object.
+
 - **State management**
 
   API Callers contain properties about the last request made, including things like ``wasSuccessful``, ``isLoading``, ``result``, and more. [Read More](#isloading).
@@ -454,6 +460,10 @@ Adds a callback to be invoked when a success response is received.
 
   Add a callback to the caller to be invoked when a success response is received from the server. If a promise is returned, this promise will be awaited and will delay the setting of the `isLoading` prop to `false` until it completes.
 
+  ::: tip Prefer standard promise handling
+  For most use cases, prefer `await` with `try/catch` or `.then()/.catch()` to handle success and failure. The `onFulfilled` hook is intended for advanced scenarios such as framework-level integrations, reusable abstractions, or complex logic that must be tightly coupled to the caller's lifecycle (e.g. delaying `isLoading` until follow-up async work completes).
+  :::
+
 - **Example**
 
   ```ts
@@ -476,6 +486,10 @@ Adds a callback to be invoked when a failure response is received.
 - **Details**
 
   Add a callback to the caller to be invoked when a failure response is received from the server. If a promise is returned, this promise will be awaited and will delay the setting of the `isLoading` prop to `false` until it completes.
+
+  ::: tip Prefer standard promise handling
+  For most use cases, prefer `await` with `try/catch` or `.then()/.catch()` to handle errors. The `onRejected` hook is intended for advanced scenarios such as framework-level integrations, reusable abstractions, or complex logic that must be tightly coupled to the caller's lifecycle (e.g. delaying `isLoading` until follow-up async work completes).
+  :::
 
 - **Example**
 

@@ -1,4 +1,5 @@
 using IntelliTect.Coalesce.TypeDefinition;
+using System.Collections.Generic;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 
@@ -23,6 +24,20 @@ public class VueType
     private string TsType(TypeViewModel type, string modelPrefix, bool viewModel)
     {
         if (type.IsByteArray) return flags.HasFlag(Flags.RawBinary) ? "string | Uint8Array" : "string";
+        if (type.IsDictionary)
+        {
+            var genericArgs = type.GenericArgumentsFor(typeof(IDictionary<,>))
+                ?? type.GenericArgumentsFor(typeof(IReadOnlyDictionary<,>));
+
+            // Temporary workaround while Coalesce doesn't fully support dictionary semantics on the frontend:
+            // string-keyed dictionaries are emitted as Record<string, unknown>, all other key types degrade to unknown.
+            if (genericArgs?[0].NullableValueUnderlyingType.TsTypeKind == TypeDiscriminator.String)
+            {
+                return "Record<string, unknown>";
+            }
+
+            return "unknown";
+        }
         if (type.IsCollection) return TsTypePlain(type.PureType, modelPrefix, viewModel) + "[]";
         return TsTypePlain(type, modelPrefix, viewModel);
     }

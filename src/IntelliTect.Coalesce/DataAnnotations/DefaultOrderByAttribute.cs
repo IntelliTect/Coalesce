@@ -29,8 +29,10 @@ public class DefaultOrderByAttribute : System.Attribute
     public string? FieldName { get; set; }
 
     /// <summary>
-    /// When true, suppresses using this property as a fallback ordering.
+    /// When placed on a scalar property, suppresses using this property as a fallback ordering.
     /// Useful for preventing automatic ordering by Name or primary key properties.
+    /// When placed on a collection navigation property, suppresses the default ordering
+    /// of that collection in the generated response DTO.
     /// </summary>
     public bool Suppress { get; set; }
 

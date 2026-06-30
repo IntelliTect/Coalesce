@@ -337,6 +337,16 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
   }
   
   
+  public methodWithDictionariesType(id: number | null, values?: $models.Dictionaries | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Dictionaries>> {
+    const $method = this.$metadata.methods.methodWithDictionariesType
+    const $params =  {
+      id,
+      values,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
   public downloadAttachment(id: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
     const $method = this.$metadata.methods.downloadAttachment
     const $params =  {

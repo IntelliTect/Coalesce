@@ -887,9 +887,7 @@ export abstract class ViewModel<
     if (options?.orderBy) {
       // Sort items by the user-provided comparator.
       // Build paired tuples so both arrays stay in sync.
-      const paired = dataToSend.map(
-        (raw, i) => [raw, itemsToSend[i]] as const,
-      );
+      const paired = dataToSend.map((raw, i) => [raw, itemsToSend[i]] as const);
       paired.sort((a, b) => options.orderBy!(a[0], b[0]));
       for (let i = 0; i < paired.length; i++) {
         dataToSend[i] = paired[i][0];
@@ -2210,10 +2208,7 @@ export interface BulkSaveOptions {
    * when necessary to satisfy foreign key dependencies (e.g. a parent entity
    * must be created before its children).
    */
-  orderBy?: (
-    a: BulkSaveRequestRawItem,
-    b: BulkSaveRequestRawItem,
-  ) => number;
+  orderBy?: (a: BulkSaveRequestRawItem, b: BulkSaveRequestRawItem) => number;
 }
 
 /**

@@ -1561,9 +1561,7 @@ describe("ViewModel", () => {
       });
 
       const parsed = JSON.parse(endpoint.mock.calls[0][0].data);
-      const names = parsed.items.map(
-        (i: any) => i.data.firstName ?? "(root)",
-      );
+      const names = parsed.items.map((i: any) => i.data.firstName ?? "(root)");
       // Root company first (stable sort preserves position),
       // then employees sorted reverse alphabetically
       expect(names).toEqual(["(root)", "charlie", "bob", "alice"]);

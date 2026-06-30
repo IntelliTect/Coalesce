@@ -214,7 +214,7 @@ public class ModelApiController : ApiController
             {
                 { IsByteArray: true } => "_currentVaryValue",
                 { IsString: true } => "System.Text.Encoding.UTF8.GetBytes(_currentVaryValue)",
-                _ => "System.Text.Encoding.UTF8.GetBytes(_currentVaryValue.ToString())",
+                _ => "System.Text.Encoding.UTF8.GetBytes(System.Convert.ToString(_currentVaryValue, System.Globalization.CultureInfo.InvariantCulture)!)",
             };
 
             // Always base64 the etag because otherwise its just too hard to prevent invalid characters leaking in.

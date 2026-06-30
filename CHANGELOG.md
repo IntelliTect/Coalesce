@@ -12,6 +12,7 @@
 - API callers (`ItemApiState`, `ListApiState`) are now awaitable. `await caller` now resolves to `caller.result` after the current operation is complete, or resolves immediately to the previous result if no operation is in progress.
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
 - `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
+- Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
 - Added `returnViewModel` prop to `c-select`, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.

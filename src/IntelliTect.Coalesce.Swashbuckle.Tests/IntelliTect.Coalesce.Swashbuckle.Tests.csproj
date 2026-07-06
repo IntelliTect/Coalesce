@@ -15,9 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.OpenApi.Readers" />
     <PackageReference Include="TUnit" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net10.0'">
+    <PackageReference Include="Microsoft.OpenApi.Readers" />
   </ItemGroup>
 
 </Project>

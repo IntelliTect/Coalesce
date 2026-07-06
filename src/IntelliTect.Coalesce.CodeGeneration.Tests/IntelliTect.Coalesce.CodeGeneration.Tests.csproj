@@ -18,9 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.OpenApi.Readers" />
     <PackageReference Include="Moq" />
     <PackageReference Include="TUnit" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net10.0'">
+    <PackageReference Include="Microsoft.OpenApi.Readers" />
   </ItemGroup>
 
 </Project>

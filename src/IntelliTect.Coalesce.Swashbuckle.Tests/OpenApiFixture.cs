@@ -9,8 +9,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi;
 #else
 using Microsoft.OpenApi.Models;
-#endif
 using Microsoft.OpenApi.Readers;
+#endif
 using System.Net;
 using System.Reflection;
 

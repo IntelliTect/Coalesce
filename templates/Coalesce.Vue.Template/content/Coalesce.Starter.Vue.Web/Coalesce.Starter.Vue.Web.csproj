@@ -46,7 +46,7 @@
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
     <!--#endif -->
     <!--#if(AIChat) -->
-    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="13.1.0-preview.1.25616.3" />
+    <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="13.4.6-preview.1.26319.6" />
     <!--#endif -->
   </ItemGroup>
 

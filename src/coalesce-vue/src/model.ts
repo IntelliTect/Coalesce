@@ -594,7 +594,12 @@ class MapToDtoVisitor extends Visitor<
     const output: any = {};
 
     if ("derivedTypes" in meta || "baseTypes" in meta) {
-      meta = value.$metadata ?? meta;
+      meta =
+        value.$metadata ??
+        // Fall back to checking the object's $type, in case its getting double-mapped.
+        ("derivedTypes" in meta &&
+          meta.derivedTypes?.find((t) => t.name == value.$type)) ??
+        meta;
       output.$type = meta.name;
     }
 

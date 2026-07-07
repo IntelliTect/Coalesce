@@ -7,6 +7,8 @@ import {
   AbstractModelViewModel,
 } from "../../test-targets/viewmodels.g";
 import { AbstractImpl1 } from "@test-targets/models.g";
+import { mapToDto } from "../src/model";
+import * as $metadata from "@test-targets/metadata.g";
 import { ViewModelFactory } from "../src";
 import { AbstractImpl1ApiClient } from "@test-targets/api-clients.g";
 import { computed, ref } from "vue";
@@ -74,6 +76,43 @@ describe("ViewModel", () => {
 
     expect(vm.abstractModel).toBeInstanceOf(AbstractImpl1ViewModel);
     expect(vm.abstractModelId).toBe(42);
+  });
+
+  test("preserves derived type of a polymorphic object nested in a request body", async () => {
+    // When a polymorphic object is carried as a child of a request payload (e.g.
+    // a save/bulkSave), the payload is mapped to a DTO once by the caller and then
+    // run through mapToDto a *second* time by getRequestBody. That second pass sees
+    // a plain POJO whose type is described by a `$type` string (not `$metadata`),
+    // and must not downgrade it to the base type or drop derived-only props.
+    const echoEndpoint = mockEndpoint(
+      "/AbstractImpl1/echoAbstractModel",
+      vitest.fn((req) => ({ wasSuccessful: true, object: null })),
+    );
+
+    // Mimic the pre-mapped child object that `mapToDtoFiltered`/`mapToDto` produces
+    // for a nested polymorphic value before it reaches the request pipeline.
+    const dtoChild = mapToDto(
+      new AbstractImpl1({ id: 1, impl1OnlyField: "hello" }),
+      {
+        name: "model",
+        displayName: "Model",
+        type: "model",
+        role: "value",
+        typeDef: $metadata.AbstractModel,
+      } as any,
+    );
+
+    await new AbstractImpl1ApiClient().echoAbstractModel(dtoChild as any);
+
+    expect(JSON.parse(echoEndpoint.mock.calls[0][0].data)).toMatchObject({
+      model: {
+        $type: "AbstractImpl1",
+        id: 1,
+        impl1OnlyField: "hello",
+      },
+    });
+
+    echoEndpoint.destroy();
   });
 });
 

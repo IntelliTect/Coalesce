@@ -1,5 +1,6 @@
 import * as model from "../src/model";
 import * as $metadata from "@test-targets/metadata.g";
+import { AbstractImpl1 } from "@test-targets/models.g";
 import type { Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import {
@@ -208,5 +209,41 @@ describe("mapToDto", () => {
 
     // Output is shifted from UTC+2 to UTC-9, a total of 11 hours (1300 hours to 0200 hours).
     expect(mapped.dateTimeOffset).toBe("2014-10-25T02:46:20.000-09:00");
+  });
+
+  test("is idempotent for polymorphic objects", () => {
+    // When a polymorphic object is serialized to a DTO and then that DTO is
+    // serialized again (e.g. because a save/method payload gets run through
+    // mapToDto a second time by getRequestBody), the derived type discriminator
+    // and derived-only props must be preserved.
+    //
+    // A DTO carries its type as a `$type` *string* rather than a `$metadata`
+    // reference, so re-mapping must resolve the derived type from `$type`.
+    const abstractModelValue = {
+      name: "model",
+      displayName: "Model",
+      type: "model",
+      role: "value",
+      typeDef: $metadata.AbstractModel,
+    } as any;
+
+    const impl = new AbstractImpl1({ id: 1, impl1OnlyField: "hello" });
+
+    // First mapping: real model -> DTO. This correctly emits the derived type.
+    const once = model.mapToDto(impl, abstractModelValue) as any;
+    expect(once).toMatchObject({
+      $type: "AbstractImpl1",
+      id: 1,
+      impl1OnlyField: "hello",
+    });
+
+    // Second mapping: DTO -> DTO. This currently downgrades the object to its
+    // base type ($type: "AbstractModel") and drops `impl1OnlyField`.
+    const twice = model.mapToDto(once, abstractModelValue) as any;
+    expect(twice).toMatchObject({
+      $type: "AbstractImpl1",
+      id: 1,
+      impl1OnlyField: "hello",
+    });
   });
 });

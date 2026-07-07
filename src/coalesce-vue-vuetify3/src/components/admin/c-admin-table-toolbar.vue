@@ -107,7 +107,6 @@ const props = defineProps({
 });
 
 const editable = defineModel<boolean>("editable", {
-  default: null,
   required: false,
 });
 

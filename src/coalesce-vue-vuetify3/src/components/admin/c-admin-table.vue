@@ -6,7 +6,7 @@
       :editable="canEdit ? editable : undefined"
       :color="color"
       :selected-columns="effectiveColumns"
-      @update:editable="editable = $event"
+      @update:editable="editable = !!$event"
       @update:selected-columns="onColumnsUpdated"
     />
 

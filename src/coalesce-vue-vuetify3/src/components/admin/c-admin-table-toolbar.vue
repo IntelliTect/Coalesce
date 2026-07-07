@@ -106,7 +106,8 @@ const props = defineProps({
   color: { required: false, type: String, default: null },
 });
 
-const editable = defineModel<boolean>("editable", {
+const editable = defineModel<boolean | null>("editable", {
+  default: null,
   required: false,
 });
 

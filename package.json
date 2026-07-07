@@ -12,7 +12,8 @@
     "play": "dotnet run --project playground/Coalesce.Web.Vue3",
     "template": "pwsh templates/Coalesce.Vue.Template/TestLocal.ps1",
     "template:run": "dotnet run --project templates/Coalesce.Vue.Template/content/Coalesce.Starter.Vue.AppHost",
-    "test": "pnpm -r --filter=./src/* run test run"
+    "test": "pnpm -r --filter=./src/* run test run",
+    "check": "pnpm -r --filter=./src/* run \"/build|test/\""
   },
   "devDependencies": {
     "@types/node": "^24.13.2",

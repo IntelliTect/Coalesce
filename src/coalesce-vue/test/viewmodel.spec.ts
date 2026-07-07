@@ -1531,6 +1531,74 @@ describe("ViewModel", () => {
 
       bulkSaveEndpoint.destroy();
     });
+
+    test("options.orderBy sorts items in the payload", async () => {
+      const endpoint = mockEndpoint(
+        "/Company/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+        })),
+      );
+
+      const company = new CompanyViewModel();
+      company.$loadCleanData({ companyId: 1, name: "existing company" });
+
+      const alice = new PersonViewModel({ firstName: "alice" });
+      const bob = new PersonViewModel({ firstName: "bob" });
+      const charlie = new PersonViewModel({ firstName: "charlie" });
+      company.employees?.push(alice, bob, charlie);
+
+      await company.$bulkSave({
+        orderBy(a, b) {
+          // Sort employees in reverse alphabetical order by firstName.
+          // Non-Person items (the root Company) come first.
+          if (a.metadata.name !== "Person" || b.metadata.name !== "Person")
+            return 0;
+          const aName = (a.model as PersonViewModel).firstName ?? "";
+          const bName = (b.model as PersonViewModel).firstName ?? "";
+          return bName.localeCompare(aName);
+        },
+      });
+
+      const parsed = JSON.parse(endpoint.mock.calls[0][0].data);
+      const names = parsed.items.map((i: any) => i.data.firstName ?? "(root)");
+      // Root company first (stable sort preserves position),
+      // then employees sorted reverse alphabetically
+      expect(names).toEqual(["(root)", "charlie", "bob", "alice"]);
+
+      endpoint.destroy();
+    });
+
+    test("options.orderBy is reflected in $bulkSavePreview", () => {
+      const company = new CompanyViewModel();
+      company.$loadCleanData({ companyId: 1, name: "existing company" });
+
+      const alice = new PersonViewModel({ firstName: "alice" });
+      const bob = new PersonViewModel({ firstName: "bob" });
+      company.employees?.push(alice, bob);
+
+      const preview = company.$bulkSavePreview({
+        orderBy(a, b) {
+          // Sort Person items by firstName descending.
+          // Non-Person items keep original position.
+          if (a.metadata.name !== "Person" || b.metadata.name !== "Person")
+            return 0;
+          const aName = (a.model as PersonViewModel).firstName ?? "";
+          const bName = (b.model as PersonViewModel).firstName ?? "";
+          return bName.localeCompare(aName);
+        },
+      });
+
+      // rawItems and items should have matching order
+      expect(preview.rawItems.map((r) => [r.metadata.name, r.action])).toEqual(
+        preview.items.map((i) => [i.type, i.action]),
+      );
+
+      const models = preview.rawItems.map((r) => r.model);
+      expect(models[0]).toBe(company);
+      expect(models[1]).toBe(bob);
+      expect(models[2]).toBe(alice);
+    });
   });
 
   describe("autoSave", () => {

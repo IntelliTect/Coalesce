@@ -266,13 +266,14 @@ Bulk saves save all changes to an object graph in one API call and one database 
 
 To use bulk saves, you can work with your ViewModel instances on the client much in the same way you would on the server with Entity Framework. Assign objects to reference navigation properties and modify scalar values to perform creates and updates. To perform deletions, you must call `model.$remove()` on the ViewModel you want to remove, similar how you would call `DbSet<>.Remove(model)` on the server.
 
-When `$bulkSave()` is called, Coalesce will recursively traverse through all reachable navigation properties (and all models that were `$remove()`d) to determine which models will be saved. You can filter this by providing a `predicate` to the `options` parameter.
+When `$bulkSave()` is called, Coalesce will recursively traverse through all reachable navigation properties (and all models that were `$remove()`d) to determine which models will be saved. You can filter this by providing a `predicate` to the `options` parameter, and control the order of operations with `orderBy`.
 
 If the client-side [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors for any of the models being saved in the operation, an error will be thrown.
 
 On the server, each affected entity is handled through the same standard mechanisms as are used by individual saves or deletes ([Behaviors](/modeling/model-components/behaviors.md), [Data Sources](/modeling/model-components/data-sources.md), and [Security Attributes](/modeling/model-components/attributes/security-attribute.md)), but with a bit of sugar on top:
 * All operations are wrapped in a single database transaction that is rolled back if any individual operation fails.
 * Foreign keys will be fixed up as new items are created, allowing a parent and child record to be created at the same time even when the client has no foreign key to link the two together.
+* The server will respect client-specified ordering when possible, but may reorder items when necessary to satisfy foreign key dependencies (e.g. a parent entity must be created before its children).
 
 For the response to a bulk save, the server will load and return the root ViewModel that `$bulkSave` was called upon, using the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 

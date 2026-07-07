@@ -1,4 +1,5 @@
 name: Release
+run-name: Release${{ inputs.prereleaseSlug && format(' ({0})', inputs.prereleaseSlug) || '' }}
 
 on:
   workflow_dispatch:

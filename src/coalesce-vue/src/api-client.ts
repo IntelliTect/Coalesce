@@ -19,6 +19,7 @@ import type {
   CollectionValue,
   ItemMethod,
   ListMethod,
+  MethodParameter,
   TypeDiscriminatorToType,
   PropNames,
 } from "./metadata.js";
@@ -1326,20 +1327,28 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   ): ItemResultPromise<TModel> {
     const { fields, ...params } = parameters ?? new SaveParameters<TModel>();
 
-    const paramsMeta = Object.fromEntries([
-      [
-        "$type",
-        {
-          type: "string",
-          name: "$type",
-          displayName: "$type",
+    // The item is fully serialized to a DTO here (respecting `fields` for
+    // surgical saves). Declare the resulting fields as passthrough `unknown`
+    // params so that `getRequestBody` does not serialize them a *second* time.
+    // A double serialization is not idempotent for polymorphic child objects
+    // (their type discriminator is a `$type` string once serialized, not a
+    // `$metadata` reference), which would downgrade them to their base type.
+    const dto = mapToDtoFiltered(item, fields)!;
+
+    // Order the params by `$type` (if present) followed by metadata declaration
+    // order so that the serialized request body's field order is stable and
+    // matches what it was when each field was individually re-serialized.
+    const paramsMeta: { [name: string]: MethodParameter } = {};
+    for (const name of ["$type", ...Object.keys(this.$metadata.props)]) {
+      if (name in dto) {
+        paramsMeta[name] = {
+          type: "unknown",
+          name,
+          displayName: name,
           role: "value",
-        },
-      ],
-      ...Object.entries(this.$metadata.props).filter(
-        (p) => !p[1].dontSerialize,
-      ),
-    ]);
+        };
+      }
+    }
 
     return this.$invoke(
       {
@@ -1350,7 +1359,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
         params: paramsMeta,
         return: this.$itemValueMeta,
       },
-      mapToDtoFiltered(item, fields)!,
+      dto,
       config,
       params,
     );

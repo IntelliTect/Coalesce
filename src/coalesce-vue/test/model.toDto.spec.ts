@@ -246,4 +246,32 @@ describe("mapToDto", () => {
       impl1OnlyField: "hello",
     });
   });
+
+  test("is idempotent for a leaf type mapped against its own (concrete) metadata", () => {
+    // The concrete leaf metadata has `baseTypes` but no `derivedTypes`. The type
+    // resolution fallback must handle this without corrupting `meta` when the
+    // value has no `$metadata` reference (i.e. it's already a DTO).
+    const implValue = {
+      name: "model",
+      displayName: "Model",
+      type: "model",
+      role: "value",
+      typeDef: $metadata.AbstractImpl1,
+    } as any;
+
+    const once = model.mapToDto(
+      new AbstractImpl1({ id: 1, impl1OnlyField: "hello" }),
+      implValue,
+    ) as any;
+    expect(once).toMatchObject({
+      $type: "AbstractImpl1",
+      impl1OnlyField: "hello",
+    });
+
+    const twice = model.mapToDto(once, implValue) as any;
+    expect(twice).toMatchObject({
+      $type: "AbstractImpl1",
+      impl1OnlyField: "hello",
+    });
+  });
 });

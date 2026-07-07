@@ -114,6 +114,28 @@ describe("ViewModel", () => {
 
     echoEndpoint.destroy();
   });
+
+  test("$save of a derived type sends its discriminator and derived props", async () => {
+    // The save pipeline serializes the model to a DTO once (mapToDtoFiltered) and
+    // must not serialize it a second time in getRequestBody, which would downgrade
+    // a polymorphic model to its base type and drop derived-only props.
+    const saveEndpoint = mockEndpoint(
+      "/AbstractImpl1/save",
+      vitest.fn((req) => ({ wasSuccessful: true, object: null })),
+    );
+
+    const vm = new AbstractImpl1ViewModel({ id: 1, impl1OnlyField: "hello" });
+    vm.$setPropDirty("impl1OnlyField");
+    await vm.$save();
+
+    expect(JSON.parse(saveEndpoint.mock.calls[0][0].data)).toMatchObject({
+      $type: "AbstractImpl1",
+      id: 1,
+      impl1OnlyField: "hello",
+    });
+
+    saveEndpoint.destroy();
+  });
 });
 
 describe("abstract loader", () => {

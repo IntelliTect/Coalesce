@@ -226,7 +226,7 @@ The standard data source contains 19 different methods which can be overridden i
 
 These methods often call one another, so overriding one method may cause some other method to no longer be called. The hierarchy of method calls, ignoring any logic or conditions contained within, is as follows:
 
-```:no-line-numbers
+```text:no-line-numbers
 GetMappedItemAsync
     GetItemAsync
         GetQueryAsync

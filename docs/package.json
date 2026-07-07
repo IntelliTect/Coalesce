@@ -15,13 +15,13 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "shiki": "1.4.0"
+    "shiki": "^4.3.0"
   },
   "devDependencies": {
     "gray-matter": "^4.0.3",
     "oxc-minify": "^0.128.0",
     "serve-handler": "^6.1.7",
-    "vitepress": "2.0.0-alpha.17",
+    "vitepress": "2.0.0-alpha.18",
     "wait-on": "^8.0.5"
   }
 }

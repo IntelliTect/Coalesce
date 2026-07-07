@@ -11,6 +11,7 @@ allowBuilds:
 overrides:
   js-beautify>glob: "13.0.6"
   vite: "^8.0.10"
+  "@ungap/structured-clone": "1.3.2"
 
 packageExtensions:
   "@vue/compiler-core":

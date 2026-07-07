@@ -21,7 +21,7 @@ const highlighters = new Map<string, ReturnType<typeof highlighterFactory>>();
 async function highlighterFactory(lang) {
   // Dynamic import to avoid dependency in production builds
   const shiki = await import("shiki");
-  const highlighter = await shiki.getHighlighter({
+  const highlighter = await shiki.createHighlighter({
     themes: ["dark-plus"],
     langs: [lang],
   });

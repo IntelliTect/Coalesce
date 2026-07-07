@@ -65,7 +65,7 @@ To map these objects to DTOs, we start with the root (employee #1) and expand ou
 
 The root DTO object (employee #1) then eventually is passed to the JSON serializer by ASP.NET Core to formulate the response to the request. As the object is serialized to JSON, the only objects that are not serialized are those that were already serialized as an ancestor of itself. What this ultimately means is that the structure of the serialized JSON with our example scenario ends up following a pattern like this (the vast majority of items have been omitted):
 
-``` :no-line-numbers
+```text:no-line-numbers
 Employee#1
     EmployeeProject#1
         Project#1
@@ -89,7 +89,7 @@ This is where `IncludeTree` comes in. When you use a custom data source like we 
 
 With an `IncludeTree` in place, our new serialized structure looks like this:
 
-``` :no-line-numbers
+```text:no-line-numbers
 Employee#1
     EmployeeProject#1
         Project#1

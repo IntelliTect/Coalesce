@@ -15,7 +15,7 @@
     "test": "pnpm -r --filter=./src/* run test run"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@types/node": "^24.13.2",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vitest/coverage-v8": "^4.1.10",
     "@vitest/eslint-plugin": "1.6.21",

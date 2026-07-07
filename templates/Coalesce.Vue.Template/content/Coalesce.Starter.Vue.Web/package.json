@@ -16,7 +16,7 @@
   "dependencies": {
     "@fontsource/roboto": "^5.2.6",
     "@fortawesome/fontawesome-free": "^7.3.0",
-    "@microsoft/applicationinsights-web": "^3.4.2",
+    "@microsoft/applicationinsights-web": "^3.4.3",
     "@vueuse/core": "^14.3.0",
     "coalesce-vue": "6.5.1",
     "coalesce-vue-vuetify3": "6.5.1",
@@ -24,12 +24,12 @@
     "date-fns-tz": "^3.0.0",
     "vue": "^3.5.39",
     "vue-router": "^5.1.0",
-    "vuetify": "^4.1.2"
+    "vuetify": "^4.1.3"
   },
   "devDependencies": {
     "@types/node": "^26.1.0",
     "@vitejs/plugin-vue": "^6.0.7",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/coverage-v8": "^4.1.10",
     "@vitest/eslint-plugin": "1.6.20",
     "@vue/eslint-config-typescript": "14.9.0",
     "@vue/test-utils": "^2.4.11",
@@ -44,9 +44,9 @@
     "typescript": "6.0.3",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-vue-components": "^32.1.0",
-    "vite": "^8.1.2",
+    "vite": "^8.1.3",
     "vite-plugin-vuetify": "^2.1.3",
-    "vitest": "^4.1.9",
+    "vitest": "^4.1.10",
     "vue-tsc": "^3.3.6"
   }
 }

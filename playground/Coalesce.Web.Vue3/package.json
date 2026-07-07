@@ -14,15 +14,15 @@
     "coalesce": "dotnet run --project ../../src/IntelliTect.Coalesce.DotnetTool --framework net10.0 -- ../../coalesce-vue3.json"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.6.0",
+    "@fontsource/roboto": "^5.2.10",
+    "@fontsource/roboto-mono": "^5.2.8",
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "@mdi/font": "7.1.96",
     "coalesce-vue": "workspace:*",
     "coalesce-vue-vuetify3": "workspace:*",
-    "@fontsource/roboto": "^5.2.6",
-    "@fontsource/roboto-mono": "^5.2.6",
-    "vue-router": "^4.4.4",
-    "vuetify": "4.0.5",
-    "vue": "^3.5.4"
+    "vue": "^3.5.39",
+    "vue-router": "^4.6.4",
+    "vuetify": "4.0.5"
   },
   "devDependencies": {
     "vite-plugin-vuetify": "^2.1.3"

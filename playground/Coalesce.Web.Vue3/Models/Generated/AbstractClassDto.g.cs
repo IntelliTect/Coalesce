@@ -62,7 +62,12 @@ namespace Coalesce.Web.Vue3.Models
 
         public Coalesce.Domain.AbstractClass MapToModelOrNew(Coalesce.Domain.AbstractClass obj, IMappingContext context)
         {
-            if (obj is null) return MapToNew(context);
+            switch (this)
+            {
+                case AbstractClassImplParameter _AbstractClassImpl:
+                    return _AbstractClassImpl.MapToModelOrNew(obj as Coalesce.Domain.AbstractClassImpl, context);
+            }
+            if (obj is null || obj is Coalesce.Domain.AbstractClassImpl) return MapToNew(context);
             MapTo(obj, context);
             return obj;
         }

@@ -38,6 +38,31 @@ public class ExternalChild
     public string Value { get; set; }
 }
 
+// An external (non-entity) polymorphic hierarchy, used to exercise mapping of a
+// polymorphic value that is a serializable child property of another type.
+[Coalesce, SimpleModel]
+public class ExternalPolyHolder
+{
+    public ExternalPolyBase PolyChild { get; set; }
+}
+
+public abstract class ExternalPolyBase
+{
+    public string BaseField { get; set; }
+}
+
+[Coalesce, SimpleModel]
+public class ExternalPolyImplA : ExternalPolyBase
+{
+    public string AField { get; set; }
+}
+
+[Coalesce, SimpleModel]
+public class ExternalPolyImplB : ExternalPolyBase
+{
+    public string BField { get; set; }
+}
+
 public class ExternalParentAsInputOnly
 {
     public ExternalChildAsInputOnly Child { get; set; }
@@ -52,8 +77,8 @@ public class ExternalParentAsOutputOnly
 {
     public ExternalChildAsOutputOnly Child { get; set; }
 }
-public class ExternalChildAsOutputOnly 
-{ 
+public class ExternalChildAsOutputOnly
+{
     public string Value { get; set; }
     public ExternalParentAsOutputOnly Recursive { get; set; }
 }

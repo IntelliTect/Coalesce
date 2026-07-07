@@ -5667,6 +5667,97 @@ export const ExternalParentAsOutputOnly = domain.types.ExternalParentAsOutputOnl
     },
   },
 }
+export const ExternalPolyBase = domain.types.ExternalPolyBase = {
+  name: "ExternalPolyBase" as const,
+  displayName: "External Poly Base",
+  abstract: true,
+  get derivedTypes() { return [
+    (domain.types.ExternalPolyImplA as ObjectType & { name: "ExternalPolyImplA" }),
+    (domain.types.ExternalPolyImplB as ObjectType & { name: "ExternalPolyImplB" }),
+  ]},
+  type: "object",
+  props: {
+    baseField: {
+      name: "baseField",
+      displayName: "Base Field",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Base Field is required.",
+      }
+    },
+  },
+}
+export const ExternalPolyHolder = domain.types.ExternalPolyHolder = {
+  name: "ExternalPolyHolder" as const,
+  displayName: "External Poly Holder",
+  type: "object",
+  props: {
+    polyChild: {
+      name: "polyChild",
+      displayName: "Poly Child",
+      type: "object",
+      get typeDef() { return (domain.types.ExternalPolyBase as ObjectType & { name: "ExternalPolyBase" }) },
+      role: "value",
+    },
+  },
+}
+export const ExternalPolyImplA = domain.types.ExternalPolyImplA = {
+  name: "ExternalPolyImplA" as const,
+  displayName: "External Poly ImplA",
+  get baseTypes() { return [
+    (domain.types.ExternalPolyBase as ObjectType & { name: "ExternalPolyBase" }),
+  ]},
+  type: "object",
+  props: {
+    aField: {
+      name: "aField",
+      displayName: "A Field",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "A Field is required.",
+      }
+    },
+    baseField: {
+      name: "baseField",
+      displayName: "Base Field",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Base Field is required.",
+      }
+    },
+  },
+}
+export const ExternalPolyImplB = domain.types.ExternalPolyImplB = {
+  name: "ExternalPolyImplB" as const,
+  displayName: "External Poly ImplB",
+  get baseTypes() { return [
+    (domain.types.ExternalPolyBase as ObjectType & { name: "ExternalPolyBase" }),
+  ]},
+  type: "object",
+  props: {
+    bField: {
+      name: "bField",
+      displayName: "B Field",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "B Field is required.",
+      }
+    },
+    baseField: {
+      name: "baseField",
+      displayName: "Base Field",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Base Field is required.",
+      }
+    },
+  },
+}
 export const ExternalTypeWithDtoProp = domain.types.ExternalTypeWithDtoProp = {
   name: "ExternalTypeWithDtoProp" as const,
   displayName: "External Type With Dto Prop",
@@ -6212,6 +6303,10 @@ interface AppDomain extends Domain {
     ExternalParent: typeof ExternalParent
     ExternalParentAsInputOnly: typeof ExternalParentAsInputOnly
     ExternalParentAsOutputOnly: typeof ExternalParentAsOutputOnly
+    ExternalPolyBase: typeof ExternalPolyBase
+    ExternalPolyHolder: typeof ExternalPolyHolder
+    ExternalPolyImplA: typeof ExternalPolyImplA
+    ExternalPolyImplB: typeof ExternalPolyImplB
     ExternalTypeWithDtoProp: typeof ExternalTypeWithDtoProp
     InitRecordWithDefaultCtor: typeof InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: typeof InputOutputOnlyExternalTypeWithRequiredNonscalarProp

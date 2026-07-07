@@ -275,14 +275,38 @@ public class ClassDto : StringBuilderCSharpGenerator<ClassViewModel>
             }
 
             b.Line();
-            b.Line($$"""
-                public {{Model.FullyQualifiedName}} MapToModelOrNew({{Model.FullyQualifiedName}} obj, IMappingContext context)
+            using (b.Block($"public {Model.FullyQualifiedName} MapToModelOrNew({Model.FullyQualifiedName} obj, IMappingContext context)"))
+            {
+                var derivedTypes = Model.ClientDerivedTypes.ToList();
+                if (derivedTypes.Any())
                 {
-                    if (obj is null) return MapToNew(context);
-                    MapTo(obj, context);
-                    return obj;
+                    // Dispatch to derived types, since usages of this DTO in other generated code will
+                    // dispatch calls to the base type version of this method rather than the derived types.
+                    using (b.Block("switch (this)"))
+                    {
+                        foreach (var derived in derivedTypes)
+                        {
+                            b.Line($"case {derived.ParameterDtoTypeName} _{derived.Name}:");
+                            // Pass `obj as DerivedType` so that if the existing instance is not
+                            // actually the derived type, the derived MapToModelOrNew sees null and
+                            // constructs a fresh instance of the correct type.
+                            b.Indented($"return _{derived.Name}.MapToModelOrNew(obj as {derived.FullyQualifiedName}, context);");
+                        }
+                    }
+                }
+
+                // Don't map in place if the existing instance is one of our derived types
+                // (i.e. a polymorphic property is being changed to a less-derived type).
+                // Mapping in place would leave stale properties from the old type and produce
+                // a value whose runtime type doesn't match the requested type.
+                // We use `is` (rather than an exact GetType() comparison) so that EF Core proxy
+                // subclasses of the mapped type are still updated in place.
+                var mismatchConditions = new List<string> { "obj is null" };
+                mismatchConditions.AddRange(derivedTypes.Select(d => $"obj is {d.FullyQualifiedName}"));
+                b.Line($"if ({string.Join(" || ", mismatchConditions)}) return MapToNew(context);");
+                b.Line("MapTo(obj, context);");
+                b.Line("return obj;");
             }
-            """);
         }
     }
 

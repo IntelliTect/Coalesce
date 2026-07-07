@@ -1586,6 +1586,104 @@ export class ExternalParentAsOutputOnly {
 }
 
 
+export interface ExternalPolyBase<TMeta extends ClassType = typeof metadata.ExternalPolyBase | typeof metadata.ExternalPolyImplA | typeof metadata.ExternalPolyImplB> extends Model<TMeta> {
+  baseField: string | null
+}
+export class ExternalPolyBase {
+  
+  /** Mutates the input object and its descendants into a valid ExternalPolyBase implementation. */
+  static convert(data?: Partial<ExternalPolyBase>): ExternalPolyBase {
+    return convertToModel<ExternalPolyBase>(data || {}, metadata.ExternalPolyBase) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid ExternalPolyBase implementation. */
+  static map(data?: Partial<ExternalPolyBase>): ExternalPolyBase {
+    return mapToModel<ExternalPolyBase>(data || {}, metadata.ExternalPolyBase) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalPolyBase || x?.$metadata.baseTypes?.includes(metadata.ExternalPolyBase); }
+  
+  /** Instantiate a new ExternalPolyBase, optionally basing it on the given data. */
+  constructor(data?: Partial<ExternalPolyBase> | {[k: string]: any}) {
+    Object.assign(this, ExternalPolyBase.map(data || {}));
+  }
+}
+
+
+export interface ExternalPolyHolder extends Model<typeof metadata.ExternalPolyHolder> {
+  polyChild: ExternalPolyBase | null
+}
+export class ExternalPolyHolder {
+  
+  /** Mutates the input object and its descendants into a valid ExternalPolyHolder implementation. */
+  static convert(data?: Partial<ExternalPolyHolder>): ExternalPolyHolder {
+    return convertToModel<ExternalPolyHolder>(data || {}, metadata.ExternalPolyHolder) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid ExternalPolyHolder implementation. */
+  static map(data?: Partial<ExternalPolyHolder>): ExternalPolyHolder {
+    return mapToModel<ExternalPolyHolder>(data || {}, metadata.ExternalPolyHolder) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalPolyHolder; }
+  
+  /** Instantiate a new ExternalPolyHolder, optionally basing it on the given data. */
+  constructor(data?: Partial<ExternalPolyHolder> | {[k: string]: any}) {
+    Object.assign(this, ExternalPolyHolder.map(data || {}));
+  }
+}
+
+
+export interface ExternalPolyImplA extends Model<typeof metadata.ExternalPolyImplA> {
+  aField: string | null
+  baseField: string | null
+}
+export class ExternalPolyImplA {
+  
+  /** Mutates the input object and its descendants into a valid ExternalPolyImplA implementation. */
+  static convert(data?: Partial<ExternalPolyImplA>): ExternalPolyImplA {
+    return convertToModel<ExternalPolyImplA>(data || {}, metadata.ExternalPolyImplA) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid ExternalPolyImplA implementation. */
+  static map(data?: Partial<ExternalPolyImplA>): ExternalPolyImplA {
+    return mapToModel<ExternalPolyImplA>(data || {}, metadata.ExternalPolyImplA) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalPolyImplA; }
+  
+  /** Instantiate a new ExternalPolyImplA, optionally basing it on the given data. */
+  constructor(data?: Partial<ExternalPolyImplA> | {[k: string]: any}) {
+    Object.assign(this, ExternalPolyImplA.map(data || {}));
+  }
+}
+
+
+export interface ExternalPolyImplB extends Model<typeof metadata.ExternalPolyImplB> {
+  bField: string | null
+  baseField: string | null
+}
+export class ExternalPolyImplB {
+  
+  /** Mutates the input object and its descendants into a valid ExternalPolyImplB implementation. */
+  static convert(data?: Partial<ExternalPolyImplB>): ExternalPolyImplB {
+    return convertToModel<ExternalPolyImplB>(data || {}, metadata.ExternalPolyImplB) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid ExternalPolyImplB implementation. */
+  static map(data?: Partial<ExternalPolyImplB>): ExternalPolyImplB {
+    return mapToModel<ExternalPolyImplB>(data || {}, metadata.ExternalPolyImplB) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalPolyImplB; }
+  
+  /** Instantiate a new ExternalPolyImplB, optionally basing it on the given data. */
+  constructor(data?: Partial<ExternalPolyImplB> | {[k: string]: any}) {
+    Object.assign(this, ExternalPolyImplB.map(data || {}));
+  }
+}
+
+
 export interface ExternalTypeWithDtoProp extends Model<typeof metadata.ExternalTypeWithDtoProp> {
   case: CaseDtoStandalone | null
   cases: CaseDtoStandalone[] | null
@@ -2053,6 +2151,10 @@ declare module "coalesce-vue/lib/model" {
     ExternalParent: ExternalParent
     ExternalParentAsInputOnly: ExternalParentAsInputOnly
     ExternalParentAsOutputOnly: ExternalParentAsOutputOnly
+    ExternalPolyBase: ExternalPolyBase
+    ExternalPolyHolder: ExternalPolyHolder
+    ExternalPolyImplA: ExternalPolyImplA
+    ExternalPolyImplB: ExternalPolyImplB
     ExternalTypeWithDtoProp: ExternalTypeWithDtoProp
     InitRecordWithDefaultCtor: InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: InputOutputOnlyExternalTypeWithRequiredNonscalarProp

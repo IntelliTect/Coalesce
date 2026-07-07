@@ -63,7 +63,12 @@ namespace Coalesce.Web.Vue3.Models
 
         public Coalesce.Domain.BaseClass MapToModelOrNew(Coalesce.Domain.BaseClass obj, IMappingContext context)
         {
-            if (obj is null) return MapToNew(context);
+            switch (this)
+            {
+                case BaseClassDerivedParameter _BaseClassDerived:
+                    return _BaseClassDerived.MapToModelOrNew(obj as Coalesce.Domain.BaseClassDerived, context);
+            }
+            if (obj is null || obj is Coalesce.Domain.BaseClassDerived) return MapToNew(context);
             MapTo(obj, context);
             return obj;
         }

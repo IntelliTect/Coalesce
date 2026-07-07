@@ -1,22 +1,24 @@
 # 7.0.0
 
 ## Breaking Changes
-- Removed the `coalesce_generate` MCP tool, which was created back when agents didn't support terminal auto-approvals. Update your projects' agent guidance to instead run `dotnet coalesce` in your `.Web` project.
 - The generated ViewModel stubs for abstract model types have been replaced by static objects with a static `.load(id)` method that returns a standard `ItemApiState` caller. They are no longer exposed as instantiable proxy objects that mutate themselves into the correct implementation type after `$load`ing from the server - this approach did not fully satisfy the TypeScript contract of the derived types at runtime and otherwise attempted (and failed) to provide a concrete instance of a type that should not actually be instantiable.
+- Removed the `coalesce_generate` MCP tool, which was created back when agents didn't support terminal auto-approvals. Update your projects' agent guidance to instead run `dotnet coalesce` in your `.Web` project.
 
-## Features
-
-- Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library to reduce boilerplate duplication in projects.
+## Frontend
 - Added `adminExtensions` option to `createCoalesceVuetify()`, allowing per-type or global extension components to be injected into admin pages. Supported extension points: `tableToolbarActions`, `editorToolbarActions`, `editorActions`, `tableRowActions`, `tablePageHeader`, and `editorPageHeader`. Each corresponding component also exposes a slot for conventional per-instance customization.
-- Open generic data sources whose single type parameter is constrained to a base class are now automatically available as data sources for that base class and all derived entity types.
+- Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
 - API callers (`ItemApiState`, `ListApiState`) are now awaitable. `await caller` now resolves to `caller.result` after the current operation is complete, or resolves immediately to the previous result if no operation is in progress.
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
 - `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
 - Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
-- Added `returnViewModel` prop to `c-select`, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
-- Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
+- `c-select`: Added `returnViewModel` prop, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
-- `c-display` now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
+- `c-display`: now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
+- Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
+
+## Backend
+- Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library to reduce boilerplate duplication in projects.
+- Open generic data sources whose single type parameter is constrained to a base class are now automatically available as data sources for that base class and all derived entity types.
 - Added `headerComment` generator configuration option to emit custom comments at the start of all generated files. Supports cascading hierarchical configuration—define on a parent generator and child generators automatically inherit the value.
 - Added `SearchAttribute.Includes` and `SearchAttribute.Excludes` to scope search participation by the request `includes` value in `ApplyListSearchTerm`.
 - `[DefaultOrderBy(Suppress = true)]` can now be placed on a collection navigation property to suppress the default sorting of that collection in the generated response DTO.
@@ -29,10 +31,6 @@
      .UseCoalesceMultiTenancy<ITenanted>(t => t.TenantId, () => TenantIdOrThrow)
      ```
   3. Delete the `ConfigureTenancy` method, the `TenantInterceptor` class, and the `TenantIdValueGenerator` class from your `AppDbContext`. The `ITenanted` interface and `TenantedBase` class remain in your project — they are not provided by the library.
-
-## Fixes
-- Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
-
 
 # 6.5.2
 - Fix `c-input` using numeric enum values instead of string values for string-serialized enums (`[JsonStringEnumConverter]`), causing the selected item to not be found in the dropdown.

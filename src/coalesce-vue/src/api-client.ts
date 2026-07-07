@@ -97,10 +97,11 @@ export interface DataSourceParameters {
   refResponse?: boolean;
 }
 export class DataSourceParameters {
-  constructor() {
+  constructor(data?: Partial<DataSourceParameters>) {
     this.includes = null;
     this.dataSource = null;
     this.refResponse = false;
+    Object.assign(this, data);
   }
 }
 
@@ -118,9 +119,10 @@ export class SaveParameters<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   T extends Model<ModelType>,
 > extends DataSourceParameters {
-  constructor() {
-    super();
+  constructor(data?: Partial<SaveParameters<T>>) {
+    super(data);
     this.fields = null;
+    Object.assign(this, data);
   }
 }
 
@@ -147,10 +149,11 @@ export interface FilterParameters extends DataSourceParameters {
   };
 }
 export class FilterParameters extends DataSourceParameters {
-  constructor() {
-    super();
+  constructor(data?: Partial<FilterParameters>) {
+    super(data);
     this.search = null;
     this.filter = {};
+    Object.assign(this, data);
   }
 }
 
@@ -182,14 +185,15 @@ export interface ListParameters extends FilterParameters {
   fields?: string[] | null;
 }
 export class ListParameters extends FilterParameters {
-  constructor() {
-    super();
+  constructor(data?: Partial<ListParameters>) {
+    super(data);
     this.page = 1;
     this.pageSize = 10;
     this.noCount = null;
     this.orderBy = null;
     this.orderByDescending = null;
     this.fields = null;
+    Object.assign(this, data);
   }
 }
 
@@ -1444,6 +1448,19 @@ export type ResponseCachingConfiguration = {
 
   /** The Storage (default `sessionStorage`) that will hold cached responses. */
   storage?: Storage;
+
+  /** Limits for the number or total size of cached responses in a group.
+   * When limits are exceeded, the oldest entries are evicted first.
+   */
+  limit?: {
+    /** The group key for this set of cached responses. Entries sharing the same group key share a limit.
+     * Defaults to the endpoint URL path without query parameters. */
+    key?: string | ((req: AxiosRequestConfig, defaultKey: string) => string);
+    /** Maximum total size in bytes of serialized cached responses in this group. */
+    maxBytes?: number;
+    /** Maximum number of cached entries in this group. */
+    maxEntries?: number;
+  };
 };
 
 // Base class for ApiState that contains nothing but the logic for
@@ -1845,6 +1862,7 @@ export abstract class ApiState<
             key: keyFunc,
             storage = sessionStorage,
             maxAgeSeconds: configuredMaxAge = 3600,
+            limit,
           } = responseCacheConfig!;
 
           if (request.method?.toUpperCase() != "GET") {
@@ -1918,18 +1936,38 @@ export abstract class ApiState<
           const data = resp.data;
           try {
             purgeStaleCacheEntries(storage);
-            storage.setItem(
-              key,
-              JSON.stringify(
-                {
-                  time: Date.now() / 1000,
-                  maxAge: configuredMaxAge,
-                  result: data,
-                },
-                (key, value) =>
-                  key == "$metadata" || value === null ? undefined : value,
-              ),
+            const nowSeconds = Date.now() / 1000;
+            const serialized = JSON.stringify(
+              {
+                time: nowSeconds,
+                maxAge: configuredMaxAge,
+                result: data,
+              },
+              (key, value) =>
+                key == "$metadata" || value === null ? undefined : value,
             );
+            storage.setItem(key, serialized);
+
+            if (limit) {
+              const entrySizeBytes =
+                typeof TextEncoder !== "undefined"
+                  ? new TextEncoder().encode(serialized).length
+                  : serialized.length;
+
+              enforceGroupLimits(
+                storage,
+                limit.key
+                  ? typeof limit.key === "function"
+                    ? limit.key(request, defaultKey)
+                    : limit.key
+                  : defaultKey.split("?")[0],
+                key,
+                entrySizeBytes,
+                nowSeconds,
+                limit.maxEntries,
+                limit.maxBytes,
+              );
+            }
           } catch (e) {
             console.warn(
               "coalesce: useResponseCaching: Unable to store response",
@@ -2102,6 +2140,79 @@ function purgeStaleCacheEntries(storage: Storage) {
       // Do nothing - entry probably wasn't valid json and isn't a valid coalesce api response cache entry.
     }
   }
+}
+
+interface CacheGroupEntry {
+  time: number;
+  size: number;
+}
+
+interface CacheGroupMetadata {
+  entries: Record<string, CacheGroupEntry>;
+}
+
+function enforceGroupLimits(
+  storage: Storage,
+  groupKey: string,
+  cacheKey: string,
+  entrySize: number,
+  entryTime: number,
+  maxEntries?: number,
+  maxBytes?: number,
+) {
+  const groupStorageKey = `coalesce:group:${groupKey}`;
+  let metadata: CacheGroupMetadata;
+
+  try {
+    const raw = storage.getItem(groupStorageKey);
+    const parsed = raw ? (JSON.parse(raw) as unknown) : null;
+
+    metadata =
+      parsed &&
+      typeof parsed === "object" &&
+      "entries" in parsed &&
+      (parsed as any).entries &&
+      typeof (parsed as any).entries === "object"
+        ? (parsed as CacheGroupMetadata)
+        : { entries: {} };
+  } catch {
+    metadata = { entries: {} };
+  }
+
+  // Add/update current entry
+  metadata.entries[cacheKey] = { time: entryTime, size: entrySize };
+
+  // Remove references to entries that no longer exist in storage
+  for (const key of Object.keys(metadata.entries)) {
+    if (key !== cacheKey && storage.getItem(key) === null) {
+      delete metadata.entries[key];
+    }
+  }
+
+  // Sort entries by time (oldest first) for eviction
+  const sortedEntries = Object.entries(metadata.entries).sort(
+    ([, a], [, b]) => a.time - b.time,
+  );
+
+  // Evict oldest entries to satisfy maxEntries
+  while (maxEntries != null && sortedEntries.length > maxEntries) {
+    const [evictKey] = sortedEntries.shift()!;
+    storage.removeItem(evictKey);
+    delete metadata.entries[evictKey];
+  }
+
+  // Evict oldest entries to satisfy maxBytes (always keep at least the newest entry)
+  if (maxBytes != null) {
+    let totalSize = sortedEntries.reduce((sum, [, e]) => sum + e.size, 0);
+    while (totalSize > maxBytes && sortedEntries.length > 1) {
+      const [evictKey, evictEntry] = sortedEntries.shift()!;
+      totalSize -= evictEntry.size;
+      storage.removeItem(evictKey);
+      delete metadata.entries[evictKey];
+    }
+  }
+
+  storage.setItem(groupStorageKey, JSON.stringify(metadata));
 }
 
 purgeStaleCacheEntries(localStorage);

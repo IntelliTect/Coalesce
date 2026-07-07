@@ -32,9 +32,9 @@ export default defineConfig({
               name(moduleId: string) {
                 // Suggest that top level node_modules folders should have their own chunk.
                 return (
-                  /node_modules[/\\](?:\.pnpm[/\\])?(@?[^@/\\]+)/i.exec(
-                    moduleId,
-                  )?.[1] ?? null
+                  /node_modules[/\\](?:\.pnpm[/\\])?(@?[^@/\\]+)/i
+                    .exec(moduleId)?.[1]
+                    ?.replace(/^\.+/, "") ?? null
                 );
               },
               priority: 20,

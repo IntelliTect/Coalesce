@@ -535,7 +535,9 @@ public class ClassDto : StringBuilderCSharpGenerator<ClassViewModel>
                 {
                     sb.Line($"{dtoVar}.{name} = propVal{name}");
 
-                    var defaultOrderBy = property.Object.DefaultOrderBy;
+                    var defaultOrderBy = property.IsDefaultOrderBySuppressed
+                        ? []
+                        : property.Object.DefaultOrderBy;
                     if (defaultOrderBy.Count > 0)
                     {
                         var orderByStatements = defaultOrderBy

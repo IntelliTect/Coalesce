@@ -81,6 +81,19 @@ public class ClassViewModelTests
     }
 
     [Test]
+    [ClassViewModelData(typeof(Testing.TargetClasses.SuppressedCollectionOrdering))]
+    public async Task DefaultOrderBy_SuppressOnCollectionProperty(ClassViewModelData data)
+    {
+        var vm = data.ClassViewModel;
+
+        var suppressedProp = vm.PropertyByName("Children")!;
+        await Assert.That(suppressedProp.IsDefaultOrderBySuppressed).IsTrue();
+
+        var unsuppressedProp = vm.PropertyByName("UnsuppressedChildren")!;
+        await Assert.That(unsuppressedProp.IsDefaultOrderBySuppressed).IsFalse();
+    }
+
+    [Test]
     public async Task ClientDataSources_ExcludesAbstractNestedDataSources()
     {
         var repo = ReflectionRepositoryFactory.Reflection;

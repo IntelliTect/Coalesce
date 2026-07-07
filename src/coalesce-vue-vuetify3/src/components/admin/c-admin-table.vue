@@ -49,6 +49,21 @@
             class="c-admin-table--actions"
           >
             <div class="d-flex flex-nowrap text-no-wrap ga-1" no-gutters>
+              <slot
+                name="row-actions"
+                :model="item"
+                :list="viewModel"
+                :editable="editable"
+              >
+                <component
+                  :is="tableRowActionsExtension"
+                  v-if="tableRowActionsExtension"
+                  :model="item"
+                  :list="viewModel"
+                  :editable="editable"
+                />
+              </slot>
+
               <v-btn
                 v-if="editable && !effectiveAutoSave"
                 title="Save"
@@ -134,6 +149,7 @@ import {
 } from "vue";
 import { useRoute } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
+import { useAdminExtensions } from "../../composables/useAdminExtensions";
 import { copyParamsToNewViewModel } from "./util";
 
 import CAdminCreateBtn from "./c-admin-create-btn.vue";
@@ -161,8 +177,13 @@ const route = useRoute();
 const instance = getCurrentInstance()!;
 const { metadata, canEdit, canDelete, hasInstanceMethods, getItemRoute } =
   useAdminTable(toRef(props, "list"));
+const { resolve } = useAdminExtensions();
 
 const editable = ref(false);
+
+const tableRowActionsExtension = computed(() =>
+  resolve(metadata.value, "tableRowActions"),
+);
 
 const viewModel = computed((): ListViewModel => {
   if (props.list instanceof ListViewModel) return props.list;

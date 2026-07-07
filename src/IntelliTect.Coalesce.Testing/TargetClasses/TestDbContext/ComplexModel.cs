@@ -310,6 +310,12 @@ public class ComplexModel
         return strings;
     }
 
+    [Coalesce, Execute]
+    public Dictionaries MethodWithDictionariesType(Dictionaries values)
+    {
+        return values;
+    }
+
     [Coalesce]
     public IFile DownloadAttachment() => new File(ByteArrayProp) { Name = Name };
 

@@ -33,6 +33,21 @@ function unparsable(meta: Value, ...values: any[]) {
   });
 }
 
+/** Build a Date with a year between 0-99 without the JS Date ctor's
+ * legacy behavior of adding 1900 to two-digit years. */
+function dateWithYear(year: number, ...rest: any[]) {
+  const d = new Date(year, ...(rest as [any]));
+  d.setFullYear(year);
+  return d;
+}
+
+/** Build a UTC Date with a year between 0-99 without the legacy 1900 offset. */
+function utcDateWithYear(year: number, ...rest: any[]) {
+  const d = new Date(Date.UTC(year, ...(rest as [any])));
+  d.setUTCFullYear(year);
+  return d;
+}
+
 /** Set of data to run simple mapping tests on.
  * Will be ran against both mapToModel and convertToModel variants.
  */
@@ -106,6 +121,57 @@ const dtoToModelMappings = <MappingData[]>[
     meta: { ...cmProps.dateTimeOffset, dateKind: "date" },
     dto: "2020-06-10T14:00:00Z",
     model: new Date(1591797600000),
+  },
+  {
+    // Years 0-99 must not have 1900 added to them (JS Date ctor legacy behavior).
+    meta: { ...cmProps.dateTimeOffset, dateKind: "date" },
+    dto: "0001-01-01",
+    model: dateWithYear(1, 0, 1),
+  },
+  {
+    meta: { ...cmProps.dateTimeOffset, dateKind: "date" },
+    dto: "0099-06-15",
+    model: dateWithYear(99, 5, 15),
+  },
+  {
+    // Datetime without offset, year < 100.
+    meta: cmProps.dateTimeOffset,
+    dto: "0001-01-01T14:00:00",
+    model: dateWithYear(1, 0, 1, 14, 0, 0, 0),
+  },
+  {
+    // Year < 100 with an explicit offset.
+    meta: cmProps.dateTimeOffset,
+    dto: "0001-06-15T12:00:00Z",
+    model: utcDateWithYear(1, 5, 15, 12, 0, 0, 0),
+  },
+  {
+    // Leap day in a year < 100 (year 4 is a leap year) must be preserved.
+    meta: { ...cmProps.dateTimeOffset, dateKind: "date" },
+    dto: "0004-02-29",
+    model: dateWithYear(4, 1, 29),
+  },
+  {
+    // A positive offset that pushes the UTC instant back into the previous year
+    // must NOT have its year clobbered by the small-year fixup.
+    meta: cmProps.dateTimeOffset,
+    dto: "2020-01-01T00:30:00+01:00",
+    model: new Date(Date.UTC(2019, 11, 31, 23, 30, 0, 0)),
+  },
+  {
+    // Small year (< 100) where the offset pushes the UTC instant into the prior
+    // year. The fixup must be a relative -1900 shift (yielding year 0 here), not
+    // an absolute set of the parsed year.
+    meta: cmProps.dateTimeOffset,
+    dto: "0001-01-01T00:30:00+01:00",
+    model: utcDateWithYear(0, 11, 31, 23, 30, 0, 0),
+  },
+  {
+    // Boundary: year 100 is the first year the JS ctor does NOT offset, so it
+    // must be left untouched by the fixup.
+    meta: { ...cmProps.dateTimeOffset, dateKind: "date" },
+    dto: "0100-01-01",
+    model: dateWithYear(100, 0, 1),
   },
   {
     meta: { ...cmProps.dateTimeOffset, dateKind: "time" },

@@ -62,9 +62,9 @@ When using the `DefaultOrderByAttribute` on an object property, specifies the fi
 
 <Prop def="public bool Suppress { get; set; } = false;" />
 
-When set to `true`, prevents this property from being used as a fallback ordering.
+When placed on a scalar property and set to `true`, prevents that property from being used as a fallback ordering. If no properties are decorated with `[DefaultOrderBy]`, Coalesce will automatically sort by a property named `Name` if one exists, otherwise by the primary key. Setting `Suppress = true` on the `Name` or primary key property prevents them from being used for this fallback behavior.
 
-If no properties are decorated with `[DefaultOrderBy]`, Coalesce will automatically sort by a property named `Name` if one exists, otherwise by the primary key. Setting `Suppress = true` on the `Name` or primary key property prevents them from being used for this fallback behavior.
+When placed on a collection navigation property and set to `true`, suppresses the default ordering of that collection in the generated response DTO. Normally, child collections are sorted by the child type's `[DefaultOrderBy]` rules (or by `Name`/primary key as a fallback). This allows you to preserve the original database ordering or the order produced by custom data sources.
 
 ``` cs
 public class RandomOrder
@@ -73,5 +73,17 @@ public class RandomOrder
     
     [DefaultOrderBy(Suppress = true)]
     public string Name { get; set; }
+}
+```
+
+``` cs
+public class Parent
+{
+    public int Id { get; set; }
+
+    // Children will not be re-sorted in the response DTO,
+    // preserving their original order from the database or data source.
+    [DefaultOrderBy(Suppress = true)]
+    public ICollection<Child> Children { get; set; }
 }
 ```

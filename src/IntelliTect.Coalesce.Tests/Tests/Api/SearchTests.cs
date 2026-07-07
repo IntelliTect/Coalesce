@@ -511,11 +511,74 @@ public class SearchTests
         public string NonSearchableField { get; set; }
     }
 
+    class ContentView_Includes { [Search(Includes = "details")] public string Name { get; set; } }
+
+    [Test]
+    [Arguments(true, "details")]   // incoming content view matches Includes -> property is searched
+    [Arguments(false, "summary")]  // incoming content view doesn't match Includes -> property is not searched
+    [Arguments(false, null)]       // no incoming content view -> property opted in to specific views, so not searched
+    [Arguments(false, "")]         // empty incoming content view -> not searched
+    public async Task Search_ContentView_Includes_RestrictsSearchedProperties(
+        bool shouldMatch, string includes)
+    {
+        await SearchHelper<ContentView_Includes>(
+            "John",
+            model => model.Name = "John",
+            shouldMatch,
+            includes: includes);
+    }
+
+    class ContentView_Excludes { [Search(Excludes = "preview")] public string Name { get; set; } }
+
+    [Test]
+    [Arguments(false, "preview")]  // incoming content view matches Excludes -> property is not searched
+    [Arguments(true, "details")]   // incoming content view doesn't match Excludes -> property is searched
+    [Arguments(true, null)]        // no incoming content view -> nothing to exclude, so searched
+    public async Task Search_ContentView_Excludes_RestrictsSearchedProperties(
+        bool shouldMatch, string includes)
+    {
+        await SearchHelper<ContentView_Excludes>(
+            "John",
+            model => model.Name = "John",
+            shouldMatch,
+            includes: includes);
+    }
+
+    class ContentView_IncludesAndExcludes { [Search(Includes = "details", Excludes = "details")] public string Name { get; set; } }
+
+    [Test]
+    [Arguments(true, "details")]   // Includes match wins over Excludes when both are specified -> searched
+    [Arguments(false, "summary")]  // doesn't match Includes -> not searched
+    public async Task Search_ContentView_IncludesTakesPrecedenceOverExcludes(
+        bool shouldMatch, string includes)
+    {
+        await SearchHelper<ContentView_IncludesAndExcludes>(
+            "John",
+            model => model.Name = "John",
+            shouldMatch,
+            includes: includes);
+    }
+
+    class ContentView_MultipleIncludes { [Search(Includes = "details, full")] public string Name { get; set; } }
+
+    [Test]
+    [Arguments(true, "details")]   // matches first entry in the comma-separated list
+    [Arguments(true, "FULL")]      // matches second entry, case-insensitively
+    [Arguments(false, "summary")]  // matches no entry -> not searched
+    public async Task Search_ContentView_Includes_SupportsCommaSeparatedList(
+        bool shouldMatch, string includes)
+    {
+        await SearchHelper<ContentView_MultipleIncludes>(
+            "John",
+            model => model.Name = "John",
+            shouldMatch,
+            includes: includes);
+    }
+
     public class SearchTestDataSource<T>(CrudContext context) : QueryableDataSourceBase<T>(context)
         where T : class
     {
     }
-
     private async Task SearchHelper<T, TProp>(
         Expression<Func<T, TProp>> propSelector,
         string searchTerm,
@@ -548,7 +611,8 @@ public class SearchTests
         string searchTerm,
         Action<T> configureModel,
         bool expectedMatch,
-        TimeZoneInfo timeZoneInfo = null
+        TimeZoneInfo timeZoneInfo = null,
+        string includes = null
     )
         where T : class, new()
     {
@@ -559,7 +623,7 @@ public class SearchTests
 
         var ds = new SearchTestDataSource<T>(context);
         var query = new List<T> { model }.AsQueryable();
-        query = ds.ApplyListSearchTerm(query, new FilterParameters { Search = searchTerm });
+        query = ds.ApplyListSearchTerm(query, new FilterParameters { Search = searchTerm, Includes = includes });
 
         var matchedItems = query.ToArray();
 

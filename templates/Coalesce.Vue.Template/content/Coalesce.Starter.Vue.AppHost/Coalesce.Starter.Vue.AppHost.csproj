@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.2.2">
+<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -7,13 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Azure.Sql" Version="13.2.4" />
-    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.Azure.Sql" Version="13.4.6" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.4.6" />
     <!--#if (BlobStorage) -->
-    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="13.4.6" />
     <!--#endif -->
     <!--#if (AIChat) -->
-    <PackageReference Include="Aspire.Hosting.Azure.CognitiveServices" Version="13.2.4" />
+    <PackageReference Include="Aspire.Hosting.Azure.CognitiveServices" Version="13.4.6" />
     <!--#endif -->
   </ItemGroup>
 

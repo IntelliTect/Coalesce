@@ -3,9 +3,7 @@ using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.Testing;
 using IntelliTect.Coalesce.Testing.TargetClasses;
 using IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests;
 
@@ -112,5 +110,55 @@ public class DtoMappingTests
         // Same concrete type => the existing instance is updated in place.
         await Assert.That(child).IsSameReferenceAs(original);
         await Assert.That(((ExternalPolyImplA)child).AField).IsEqualTo("new");
+    }
+
+    // ----- MapToNew: the polymorphic type switch when constructing new instances -----
+
+    [Test]
+    public async Task MapToNew_ForPolymorphicRoot_CreatesCorrectDerivedType()
+    {
+        // The root of a Create maps the incoming DTO via the *base* MapToNew overload
+        // (StandardBehaviors.MapIncomingDto), which must dispatch to the concrete derived
+        // type rather than trying to instantiate the abstract base.
+        dynamic dto = NewDto("AbstractImpl1Parameter");
+        dto.Impl1OnlyField = "created";
+
+        var baseMapToNew = CodeGenTestBase.WebAssembly.Value
+            .GetType("MyProject.Models.AbstractModelParameter", throwOnError: true)!
+            .GetMethod("MapToNew", new[] { typeof(IMappingContext) })!;
+
+        var result = (AbstractModel)baseMapToNew.Invoke(
+            dto, new object[] { new MappingContext(new ClaimsPrincipal(), null) })!;
+
+        await Assert.That(result.GetType()).IsEqualTo(typeof(AbstractImpl1));
+        await Assert.That(((AbstractImpl1)result).Impl1OnlyField).IsEqualTo("created");
+    }
+
+    [Test]
+    public async Task MapToNew_ForPolymorphicCollectionItems_CreatesCorrectDerivedTypes()
+    {
+        // A collection of polymorphic children is created via `X?.Select(f => f.MapToNew(context))`,
+        // where `f` is typed as the base DTO - each item must construct its correct derived type.
+        dynamic implA = NewDto("ExternalPolyImplAParameter");
+        implA.AField = "a";
+        dynamic implB = NewDto("ExternalPolyImplBParameter");
+        implB.BField = "b";
+
+        var baseParamType = CodeGenTestBase.WebAssembly.Value
+            .GetType("MyProject.Models.ExternalPolyBaseParameter", throwOnError: true)!;
+        dynamic children = Activator.CreateInstance(typeof(List<>).MakeGenericType(baseParamType))!;
+        children.Add(implA);
+        children.Add(implB);
+
+        dynamic holder = NewDto("ExternalPolyHolderParameter");
+        holder.PolyChildren = children;
+
+        var entity = (ExternalPolyHolder)holder.MapToNew(new MappingContext(new ClaimsPrincipal(), null));
+
+        await Assert.That(entity.PolyChildren.Count).IsEqualTo(2);
+        await Assert.That(entity.PolyChildren[0].GetType()).IsEqualTo(typeof(ExternalPolyImplA));
+        await Assert.That(entity.PolyChildren[1].GetType()).IsEqualTo(typeof(ExternalPolyImplB));
+        await Assert.That(((ExternalPolyImplA)entity.PolyChildren[0]).AField).IsEqualTo("a");
+        await Assert.That(((ExternalPolyImplB)entity.PolyChildren[1]).BField).IsEqualTo("b");
     }
 }

@@ -5700,6 +5700,19 @@ export const ExternalPolyHolder = domain.types.ExternalPolyHolder = {
       get typeDef() { return (domain.types.ExternalPolyBase as ObjectType & { name: "ExternalPolyBase" }) },
       role: "value",
     },
+    polyChildren: {
+      name: "polyChildren",
+      displayName: "Poly Children",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "object",
+        get typeDef() { return (domain.types.ExternalPolyBase as ObjectType & { name: "ExternalPolyBase" }) },
+      },
+      role: "value",
+    },
   },
 }
 export const ExternalPolyImplA = domain.types.ExternalPolyImplA = {

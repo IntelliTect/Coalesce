@@ -1612,6 +1612,7 @@ export class ExternalPolyBase {
 
 export interface ExternalPolyHolder extends Model<typeof metadata.ExternalPolyHolder> {
   polyChild: ExternalPolyBase | null
+  polyChildren: ExternalPolyBase[] | null
 }
 export class ExternalPolyHolder {
   

@@ -44,6 +44,7 @@ public class ExternalChild
 public class ExternalPolyHolder
 {
     public ExternalPolyBase PolyChild { get; set; }
+    public List<ExternalPolyBase> PolyChildren { get; set; }
 }
 
 public abstract class ExternalPolyBase

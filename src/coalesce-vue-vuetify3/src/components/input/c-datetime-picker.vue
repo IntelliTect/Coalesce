@@ -633,7 +633,12 @@ function setToday() {
   dateChanged(new Date());
 }
 
-function onInputClick() {
+function onInputClick(e: MouseEvent) {
+  // Only trigger the menu when clicking the field itself, not the hint/error
+  // text or other parts of the v-input (e.g. `.v-input__details`).
+  if (!(e.target as HTMLElement)?.closest?.(".v-field")) {
+    return;
+  }
   if (menu.value) {
     // Menu already open - switch to text editing mode (shows keyboard on mobile)
     isEditingInput.value = true;

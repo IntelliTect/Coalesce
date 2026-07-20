@@ -12,6 +12,7 @@
 - `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
 - Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
 - `c-select`: Added `returnViewModel` prop, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
+- Added `onStart`, `onStop`, `onSaved`, and `onError` callbacks to `AutoSaveOptions` (`$startAutoSave`/`$useAutoSave`). Each callback receives the affected view model, making it practical to observe the save lifecycle of individual entities when using deep auto-saves.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 - `c-display`: now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
 - Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).

@@ -2183,6 +2183,166 @@ describe("ViewModel", () => {
         expect(parent.currentCourse?.name).toBe("Math");
       });
     });
+
+    describe("callbacks", () => {
+      test("onStart is called on start, onStop on stop", async () => {
+        const student = new StudentViewModel({ studentId: 1, name: "bob" });
+        student.$isDirty = false;
+        const vue = mountData({ student });
+
+        const onStart = vitest.fn();
+        const onStop = vitest.fn();
+        student.$startAutoSave(vue, { wait: 0, onStart, onStop });
+
+        expect(onStart).toBeCalledTimes(1);
+        expect(onStart).toBeCalledWith(student);
+        expect(onStop).toBeCalledTimes(0);
+
+        student.$stopAutoSave();
+        expect(onStop).toBeCalledTimes(1);
+        expect(onStop).toBeCalledWith(student);
+
+        // Stopping again should not re-invoke onStop.
+        student.$stopAutoSave();
+        expect(onStop).toBeCalledTimes(1);
+      });
+
+      test("onSaved is called after a successful save", async () => {
+        const student = new StudentViewModel({ studentId: 1, name: "bob" });
+        student.$isDirty = false;
+        student.$apiClient.save = vitest.fn().mockResolvedValue(<
+          AxiosItemResult<any>
+        >{
+          data: { wasSuccessful: true },
+        });
+        const vue = mountData({ student });
+
+        const onSaved = vitest.fn();
+        const onError = vitest.fn();
+        student.$startAutoSave(vue, { wait: 0, onSaved, onError });
+
+        student.name = "changed";
+        await delay(10);
+
+        expect(onSaved).toBeCalledTimes(1);
+        expect(onSaved).toBeCalledWith(student);
+        expect(onError).toBeCalledTimes(0);
+      });
+
+      test("onError is called when a save fails", async () => {
+        const student = new StudentViewModel({ studentId: 1, name: "bob" });
+        student.$isDirty = false;
+        const error = new Error("save failed");
+        student.$apiClient.save = vitest.fn().mockRejectedValue(error);
+        const vue = mountData({ student });
+
+        const onSaved = vitest.fn();
+        const onError = vitest.fn();
+        student.$startAutoSave(vue, { wait: 0, onSaved, onError });
+
+        student.name = "changed";
+        await delay(100);
+
+        expect(onError).toBeCalledTimes(1);
+        expect(onError).toBeCalledWith(student, error);
+        expect(onSaved).toBeCalledTimes(0);
+      });
+
+      test("deep: onStart is called for each entity, including newly attached", async () => {
+        const student = new StudentViewModel(
+          new Student({
+            studentId: 1,
+            studentAdvisorId: 3,
+            advisor: { advisorId: 3, name: "Bob" },
+          }),
+        );
+        student.$isDirty = false;
+        const vue = mountData({ student });
+
+        const started: ViewModel[] = [];
+        student.$startAutoSave(vue, {
+          wait: 0,
+          deep: true,
+          onStart: (vm) => started.push(vm),
+        });
+
+        // Root + existing advisor should have been reported.
+        expect(started).toContain(student);
+        expect(started).toContain(student.advisor);
+        const countAfterStart = started.length;
+
+        // Attaching a new entity to the graph reports it too.
+        const newCourse = student.$addChild("courses") as CourseViewModel;
+        expect(started).toContain(newCourse);
+        expect(started.length).toBe(countAfterStart + 1);
+      });
+
+      test("deep: onSaved reports the specific entity that was saved", async () => {
+        const student = new StudentViewModel(
+          new Student({
+            studentId: 1,
+            studentAdvisorId: 3,
+            advisor: { advisorId: 3, name: "Bob" },
+          }),
+        );
+        student.$isDirty = false;
+        student.advisor!.$isDirty = false;
+        student.advisor!.$apiClient.save = vitest
+          .fn()
+          .mockResolvedValue(<AxiosItemResult<any>>{
+            data: { wasSuccessful: true },
+          });
+        student.$apiClient.save = vitest
+          .fn()
+          .mockResolvedValue(<AxiosItemResult<any>>{
+            data: { wasSuccessful: true },
+          });
+        const vue = mountData({ student });
+
+        const saved: ViewModel[] = [];
+        student.$startAutoSave(vue, {
+          wait: 0,
+          deep: true,
+          onSaved: (vm) => saved.push(vm),
+        });
+
+        student.advisor!.name = "changed";
+        await delay(10);
+
+        expect(saved).toContain(student.advisor);
+        expect(saved).not.toContain(student);
+      });
+
+      test("deep: onStop is called for each entity on unmount", async () => {
+        const student = new StudentViewModel(
+          new Student({
+            studentId: 1,
+            studentAdvisorId: 3,
+            advisor: { advisorId: 3, name: "Bob" },
+          }),
+        );
+        student.$isDirty = false;
+
+        const stopped: ViewModel[] = [];
+        const wrapper = mount(
+          defineComponent({
+            setup() {
+              student.$startAutoSave(getCurrentInstance()!.proxy!, {
+                wait: 0,
+                deep: true,
+                onStop: (vm) => stopped.push(vm),
+              });
+            },
+            template: "<div></div>",
+          }),
+        );
+
+        destroy(wrapper);
+
+        expect(stopped).toContain(student);
+        expect(stopped).toContain(student.advisor);
+      });
+    });
   });
 
   describe("$addChild", () => {

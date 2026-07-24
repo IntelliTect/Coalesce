@@ -1298,7 +1298,7 @@ export interface PersonViewModel extends $models.Person {
   
   /** 
     Calculated name of the person. eg., Mr. Michael Stokesbary.
-    A concatenation of Title, FirstName, and LastName.
+    A concatenation of IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.Title, IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.FirstName, and IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.LastName.
   */
   name: string | null;
   

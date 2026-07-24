@@ -155,10 +155,21 @@ public static class SymbolExtensions
             foreach (var see in xmlDocumentation.SelectNodes("//see")!.OfType<XmlNode>())
             {
                 string value = see.Attributes?["cref"]?.Value ?? "";
-                var idx = value.LastIndexOf('.');
-                if (idx < 0) continue;
-
-                value = value.Substring(idx + 1);
+                
+                // Remove the leading documentation comment prefix (e.g., "T:", "M:", "P:", "F:")
+                // See https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/#id-strings
+                if (value.Length > 2 && value[1] == ':')
+                {
+                    value = value.Substring(2);
+                }
+                
+                // For method references, strip parameter list to keep just the method signature
+                var parenIdx = value.IndexOf('(');
+                if (parenIdx >= 0)
+                {
+                    value = value.Substring(0, parenIdx);
+                }
+                
                 see.ParentNode!.ReplaceChild(xmlDocumentation.CreateTextNode(value), see);
             }
             foreach (var typeParamRef in xmlDocumentation.SelectNodes("//typeparamref")!.OfType<XmlNode>())

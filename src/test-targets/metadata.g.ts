@@ -6281,6 +6281,54 @@ export const WeatherService = domain.services.WeatherService = {
     },
   },
 }
+export const XmlDocTestService = domain.services.XmlDocTestService = {
+  name: "XmlDocTestService",
+  displayName: "Xml Doc Test Service",
+  type: "service",
+  controllerRoute: "XmlDocTestService",
+  methods: {
+    deleteUser: {
+      name: "deleteUser",
+      displayName: "Delete User",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        userId: {
+          name: "userId",
+          displayName: "User Id",
+          type: "number",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    delete: {
+      name: "delete",
+      displayName: "Delete",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        orgId: {
+          name: "orgId",
+          displayName: "Org Id",
+          type: "number",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+  },
+}
 
 interface AppDomain extends Domain {
   enums: {
@@ -6362,6 +6410,7 @@ interface AppDomain extends Domain {
   }
   services: {
     WeatherService: typeof WeatherService
+    XmlDocTestService: typeof XmlDocTestService
   }
 }
 

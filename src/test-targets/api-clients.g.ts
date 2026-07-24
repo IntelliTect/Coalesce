@@ -863,3 +863,35 @@ export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.W
 }
 
 
+export class XmlDocTestServiceApiClient extends ServiceApiClient<typeof $metadata.XmlDocTestService> {
+  constructor() { super($metadata.XmlDocTestService) }
+  
+  /** 
+    This mirrors DeleteAsync, but for a single user
+    rather than a whole org. See AGENTS.md ("Database changes - required updates"): when a
+    new entity gains a direct FK to IntelliTect.Coalesce.Testing.TargetClasses.SimpleModelTarget, it must be handled here.
+  */
+  public deleteUser(userId?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.deleteUser
+    const $params =  {
+      userId,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  /** 
+    Deletes an organization. This method references GetWeather.
+    Also references Now.
+  */
+  public delete(orgId?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.delete
+    const $params =  {
+      orgId,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+

@@ -1298,7 +1298,7 @@ export interface PersonViewModel extends $models.Person {
   
   /** 
     Calculated name of the person. eg., Mr. Michael Stokesbary.
-    A concatenation of IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.Title, IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.FirstName, and IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.LastName.
+    A concatenation of Title, FirstName, and LastName.
   */
   name: string | null;
   
@@ -1895,6 +1895,45 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 }
 
 
+export class XmlDocTestServiceViewModel extends ServiceViewModel<typeof $metadata.XmlDocTestService, $apiClients.XmlDocTestServiceApiClient> {
+  
+  /** 
+    This mirrors DeleteAsync, but for a single user
+    rather than a whole org. See AGENTS.md ("Database changes - required updates"): when a
+    new entity gains a direct FK to IntelliTect.Coalesce.Testing.TargetClasses.SimpleModelTarget, it must be handled here.
+  */
+  public get deleteUser() {
+    const deleteUser = this.$apiClient.$makeCaller(
+      this.$metadata.methods.deleteUser,
+      (c, userId?: number | null) => c.deleteUser(userId),
+      () => ({userId: null as number | null, }),
+      (c, args) => c.deleteUser(args.userId))
+    
+    Object.defineProperty(this, 'deleteUser', {value: deleteUser});
+    return deleteUser
+  }
+  
+  /** 
+    Deletes an organization. This method references GetWeather.
+    Also references Now.
+  */
+  public get delete() {
+    const delete = this.$apiClient.$makeCaller(
+      this.$metadata.methods.delete,
+      (c, orgId?: number | null) => c.delete(orgId),
+      () => ({orgId: null as number | null, }),
+      (c, args) => c.delete(args.orgId))
+    
+    Object.defineProperty(this, 'delete', {value: delete});
+    return delete
+  }
+  
+  constructor() {
+    super($metadata.XmlDocTestService, new $apiClients.XmlDocTestServiceApiClient())
+  }
+}
+
+
 const viewModelTypeLookup = {
   AbstractImpl1: AbstractImpl1ViewModel,
   AbstractImpl2: AbstractImpl2ViewModel,
@@ -1989,4 +2028,5 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   WeatherService: WeatherServiceViewModel,
+  XmlDocTestService: XmlDocTestServiceViewModel,
 }

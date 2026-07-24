@@ -923,7 +923,7 @@ export interface Person extends Model<typeof metadata.Person> {
   
   /** 
     Calculated name of the person. eg., Mr. Michael Stokesbary.
-    A concatenation of IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.Title, IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.FirstName, and IntelliTect.Coalesce.Testing.TargetClasses.TestDbContext.Person.LastName.
+    A concatenation of Title, FirstName, and LastName.
   */
   name: string | null
   
@@ -1920,6 +1920,8 @@ export class PositionalRecord {
 
 export interface SimpleModelTarget extends Model<typeof metadata.SimpleModelTarget> {
   id: number | null
+  
+  /** The name property. Similar to Description. */
   name: string | null
   createdDate: Date | null
 }

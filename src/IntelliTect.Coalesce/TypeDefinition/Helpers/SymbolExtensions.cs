@@ -158,8 +158,10 @@ public static class SymbolExtensions
                 
                 // Remove the leading documentation comment prefix (e.g., "T:", "M:", "P:", "F:")
                 // See https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/#id-strings
+                string prefix = "";
                 if (value.Length > 2 && value[1] == ':')
                 {
+                    prefix = value.Substring(0, 2);
                     value = value.Substring(2);
                 }
                 
@@ -168,6 +170,17 @@ public static class SymbolExtensions
                 if (parenIdx >= 0)
                 {
                     value = value.Substring(0, parenIdx);
+                }
+                
+                // For members (properties, methods, fields), extract just the member name
+                // For types, keep the full type name for clarity
+                if (prefix == "P:" || prefix == "M:" || prefix == "F:")
+                {
+                    var idx = value.LastIndexOf('.');
+                    if (idx >= 0)
+                    {
+                        value = value.Substring(idx + 1);
+                    }
                 }
                 
                 see.ParentNode!.ReplaceChild(xmlDocumentation.CreateTextNode(value), see);

@@ -18,6 +18,7 @@
 - Fixed `$save` invocations downgrading type discriminators to their base types on nested polymorphic objects.
 
 ## Backend
+- Improved XML documentation comment processing in generated TypeScript: `<see cref>` tags now preserve full type names for clarity while extracting only member names for properties and methods, preventing confusing or incomplete references in generated client code.
 - Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library to reduce boilerplate duplication in projects.
 - Open generic data sources whose single type parameter is constrained to a base class are now automatically available as data sources for that base class and all derived entity types.
 - Added `headerComment` generator configuration option to emit custom comments at the start of all generated files. Supports cascading hierarchical configuration—define on a parent generator and child generators automatically inherit the value.

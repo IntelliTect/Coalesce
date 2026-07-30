@@ -16,6 +16,7 @@
 - `c-display`: now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
 - Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
 - Fixed `$save` invocations downgrading type discriminators to their base types on nested polymorphic objects.
+- Fixed `purgeStaleCacheEntries` crashing at module import when `localStorage`/`sessionStorage` are `undefined` (e.g. Node 26 without `--localstorage-file`, Vitest with jsdom on Node 26).
 
 ## Backend
 - Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library to reduce boilerplate duplication in projects.

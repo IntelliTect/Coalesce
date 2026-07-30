@@ -2131,7 +2131,8 @@ window.addEventListener("beforeunload", (e) => {
   setTimeout(() => (windowUnloading = false), 1000);
 });
 
-function purgeStaleCacheEntries(storage: Storage) {
+function purgeStaleCacheEntries(storage: Storage | undefined | null) {
+  if (!storage || typeof storage.length !== "number") return;
   for (let i = 0; i < storage.length; i++) {
     const key = storage.key(i)!;
     if (!key.startsWith("coalesce:")) continue;

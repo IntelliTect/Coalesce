@@ -3,6 +3,7 @@ import { CDatetimePicker } from "..";
 import { Case, ComplexModel } from "@test-targets/models.g";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 import { AnyArgCaller } from "coalesce-vue";
+import { ref } from "vue";
 import { VForm } from "vuetify/components";
 
 describe("CDatetimePicker", () => {
@@ -542,6 +543,166 @@ describe("CDatetimePicker", () => {
       await minuteColumn.trigger("keydown", { key: "ArrowUp" });
       await delay(1);
       expect(model.dateTime?.getMinutes()).toBe(15);
+    });
+  });
+
+  describe("lazy", () => {
+    test("publishes each parseable keystroke when not lazy", async () => {
+      const wrapper = mount(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" />
+      ));
+
+      // A partially typed year still parses, so it reaches the bound value.
+      await wrapper.find("input").setValue("6/6/202");
+      await delay(1);
+      expect(model.systemDateOnly).toBeTruthy();
+      expect(model.systemDateOnly!.getFullYear()).not.toBe(2026);
+    });
+
+    test("defers text input until blur", async () => {
+      const wrapper = mount(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" lazy />
+      ));
+
+      const input = wrapper.find("input");
+
+      await input.setValue("6/6/202");
+      await delay(1);
+      expect(model.systemDateOnly).toBeFalsy();
+
+      await input.setValue("6/6/2026");
+      await delay(1);
+      expect(model.systemDateOnly).toBeFalsy();
+      // The text field keeps showing exactly what was typed.
+      expect(input.element.value).toBe("6/6/2026");
+
+      await input.trigger("blur");
+      await delay(1);
+      expect(model.systemDateOnly?.getFullYear()).toBe(2026);
+      expect(model.systemDateOnly?.getMonth()).toBe(5);
+      expect(model.systemDateOnly?.getDate()).toBe(6);
+    });
+
+    test("commits on enter", async () => {
+      const wrapper = mount(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" lazy />
+      ));
+
+      const input = wrapper.find("input");
+      await input.setValue("1/3/2017");
+      await delay(1);
+      expect(model.systemDateOnly).toBeFalsy();
+
+      await input.trigger("keydown.enter");
+      await delay(1);
+      expect(model.systemDateOnly?.getFullYear()).toBe(2017);
+    });
+
+    test("commits on tab", async () => {
+      const wrapper = mount(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" lazy />
+      ));
+
+      const input = wrapper.find("input");
+      await input.setValue("1/3/2017");
+      await delay(1);
+      expect(model.systemDateOnly).toBeFalsy();
+
+      await input.trigger("keydown.tab");
+      await delay(1);
+      expect(model.systemDateOnly?.getFullYear()).toBe(2017);
+    });
+
+    test("defers clearing the text until blur", async () => {
+      model.systemDateOnly = new Date("2024-01-15T00:00:00");
+      const wrapper = mount(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" lazy />
+      ));
+
+      const input = wrapper.find("input");
+      await input.setValue("");
+      await delay(1);
+      expect(model.systemDateOnly).toBeTruthy();
+
+      await input.trigger("blur");
+      await delay(1);
+      expect(model.systemDateOnly).toBeNull();
+    });
+
+    test("commits immediately when the clear icon is clicked", async () => {
+      model.systemDateOnly = new Date("2024-01-15T00:00:00");
+      const wrapper = mount(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" lazy clearable />
+      ));
+
+      await wrapper.find(".v-field__clearable .v-icon").trigger("click");
+      await delay(1);
+      expect(model.systemDateOnly).toBeNull();
+    });
+
+    test("publishes date picker selections immediately", async () => {
+      model.dateTime = new Date("2024-01-15T12:00:00Z");
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="dateTime" lazy />
+      )).findComponent(CDatetimePicker);
+
+      const overlay = await openMenu(wrapper);
+      await overlay.find(".v-date-picker").trigger("keydown", {
+        key: "ArrowRight",
+      });
+      await delay(1);
+      expect(model.dateTime?.getDate()).toBe(16);
+    });
+
+    test("does not publish unparseable text on blur", async () => {
+      const wrapper = mount(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" lazy />
+      ));
+
+      const input = wrapper.find("input");
+      await input.setValue("not a date");
+      await input.trigger("blur");
+      await delay(1);
+
+      expect(model.systemDateOnly).toBeFalsy();
+      expect(wrapper.text()).toContain("Invalid value");
+      // The invalid text is retained so it can be corrected.
+      expect(input.element.value).toBe("not a date");
+    });
+
+    test("honors the lazy modifier on v-model", async () => {
+      const value = ref<Date | null>(null);
+      const wrapper = mount(() => (
+        <CDatetimePicker
+          modelValue={value.value}
+          onUpdate:modelValue={(v: Date | null | undefined) =>
+            (value.value = v ?? null)
+          }
+          {...({ modelModifiers: { lazy: true } } as any)}
+        />
+      ));
+
+      const input = wrapper.find("input");
+      await input.setValue("1/3/2017 5:00 PM");
+      await delay(1);
+      expect(value.value).toBeNull();
+
+      await input.trigger("blur");
+      await delay(1);
+      expect(value.value?.getFullYear()).toBe(2017);
+    });
+
+    test("native inputs are unaffected", async () => {
+      const wrapper = mount(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" lazy native />
+      ));
+
+      const input = wrapper.find("input");
+      input.element.value = "2017-01-03";
+      await input.trigger("change");
+      await delay(1);
+
+      expect(model.systemDateOnly?.getFullYear()).toBe(2017);
     });
   });
 });

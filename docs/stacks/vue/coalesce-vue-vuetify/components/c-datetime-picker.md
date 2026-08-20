@@ -92,6 +92,22 @@ Defaults to the value configured with [`setDefaultTimeZone`](/stacks/vue/layers/
 
 True if a native HTML5 input should be used instead of a popup menu with date/time pickers inside of it.
 
+<Prop def="lazy?: boolean" lang="ts" />
+
+True if text typed into the field should not be published to the bound value until the input is committed. Committing happens when the user presses ``Enter``, ``Tab``, or ``Escape``, moves focus out of the field, or clicks the `clearable` clear icon. Selections made in the date/time picker popup are always published immediately.
+
+By default, every keystroke that parses into a valid date is published, so retyping the year of ``6/6/2026`` also publishes ``6/6/2`` and ``6/6/202`` along the way. Use `lazy` when a partially-typed date reaching the bound value is undesirable, e.g. when it drives an expensive computation.
+
+The `lazy` modifier on `v-model` has the same effect:
+
+``` vue-html
+<c-datetime-picker :model="person" for="birthDate" lazy />
+
+<c-datetime-picker v-model.lazy="standaloneDate" />
+```
+
+`native` inputs are unaffected by this prop, since a native HTML5 date input only raises a change event once a whole date has been entered.
+
 <Prop def="readonly?: boolean" lang="ts" />
 
 True if the component should be read-only. This state is also inherited from any wrapping `v-form`.

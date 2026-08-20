@@ -51,8 +51,9 @@
     autocomplete="off"
     @keydown.enter="acceptInput()"
     @keydown.escape="acceptInput()"
-    @keydown.tab="closeMenu()"
+    @keydown.tab="acceptInput(); closeMenu()"
     @update:model-value="textInputChanged($event, false)"
+    @click:clear="acceptInput()"
     @click="onInputClick"
   >
     <template v-for="(_, slot) of $slots as {}" #[slot]="scope">
@@ -235,6 +236,11 @@ const props = withDefaults(
       disabled?: boolean | null;
       /** Use native HTML5 date picker rather than Vuetify. */
       native?: boolean | null;
+      /** Defer publishing text typed into the field until the input is committed
+       * with Enter, Tab, or Escape, or by moving focus out of the field.
+       * Selections made in the date/time picker are always published immediately.
+       * Also enabled by the `lazy` modifier on `v-model`. */
+      lazy?: boolean | null;
       color?: string | null;
       closeOnDatePicked?: boolean | null;
 
@@ -272,7 +278,7 @@ const rootRef = useTemplateRef("rootRef");
 const datePickerRef = useTemplateRef("datePickerRef");
 const timePickerRef = useTemplateRef("timePickerRef");
 
-const modelValue = defineModel<Date | null | undefined>();
+const [modelValue, modelModifiers] = defineModel<Date | null | undefined>();
 const popupId = useId();
 
 const { inputBindAttrs, valueMeta, valueOwner } = useMetadataProps(props);
@@ -292,6 +298,12 @@ const inputmode = computed(() =>
 );
 
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
+
+// A native input's change event is only raised once a whole date has been entered,
+// so `lazy` has nothing to defer there.
+const isLazy = computed(
+  () => !props.native && !!(props.lazy ?? modelModifiers.lazy),
+);
 
 const dateMeta = computed(() => {
   const meta = valueMeta.value;
@@ -508,7 +520,7 @@ function textInputChanged(val: string | Event, isNative: boolean) {
     // Emptystring is emitted when the user clicks "clear" in the date picker popup,
     // or if they delete all characters from the input.
     internalTextValue.value = "";
-    emitInput(null);
+    if (!isLazy.value) emitInput(null);
     return;
   }
 
@@ -525,7 +537,7 @@ function textInputChanged(val: string | Event, isNative: boolean) {
 
   // Only emit an event if the input isn't invalid.
   // If we don't emit an input event, it gives the user a chance to correct their text.
-  if (isValid(value)) emitInput(value);
+  if (isValid(value) && !isLazy.value) emitInput(value);
 }
 
 function timeChanged(input: Date) {
@@ -653,19 +665,26 @@ function closeMenu() {
 }
 
 function acceptInput() {
-  if (
-    internalTextValue.value &&
-    !isValid(parseUserInput(internalTextValue.value))
-  ) {
+  const text = internalTextValue.value;
+  const value = text ? parseUserInput(text) : null;
+
+  if (text && !isValid(value)) {
     // TODO: i18n
     error.value = [
       'Invalid value. Try formatting like "' +
         format(new Date(), internalFormat.value) +
         '"',
     ];
-  } else {
-    internalTextValue.value = undefined;
+    return;
   }
+
+  // A null `text` means nothing has been typed since the last commit,
+  // so there's nothing to publish.
+  if (isLazy.value && text != null) {
+    emitInput(value);
+  }
+
+  internalTextValue.value = undefined;
 }
 
 /** The displayed month/year in the date picker, controlled via v-model:month/year. */

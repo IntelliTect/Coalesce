@@ -51,7 +51,10 @@
     autocomplete="off"
     @keydown.enter="acceptInput()"
     @keydown.escape="acceptInput()"
-    @keydown.tab="acceptInput(); closeMenu()"
+    @keydown.tab="
+      acceptInput();
+      closeMenu();
+    "
     @update:model-value="textInputChanged($event, false)"
     @click:clear="acceptInput()"
     @click="onInputClick"

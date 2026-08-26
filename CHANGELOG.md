@@ -3,6 +3,7 @@
 ## Breaking Changes
 - The generated ViewModel stubs for abstract model types have been replaced by static objects with a static `.load(id)` method that returns a standard `ItemApiState` caller. They are no longer exposed as instantiable proxy objects that mutate themselves into the correct implementation type after `$load`ing from the server - this approach did not fully satisfy the TypeScript contract of the derived types at runtime and otherwise attempted (and failed) to provide a concrete instance of a type that should not actually be instantiable.
 - Removed the `coalesce_generate` MCP tool, which was created back when agents didn't support terminal auto-approvals. Update your projects' agent guidance to instead run `dotnet coalesce` in your `.Web` project.
+- The default `color` of `c-datetime-picker` is now `primary` instead of `secondary`. Pass `color="secondary"` to restore the previous appearance.
 
 ## Frontend
 - Added `adminExtensions` option to `createCoalesceVuetify()`, allowing per-type or global extension components to be injected into admin pages. Supported extension points: `tableToolbarActions`, `editorToolbarActions`, `editorActions`, `tableRowActions`, `tablePageHeader`, and `editorPageHeader`. Each corresponding component also exposes a slot for conventional per-instance customization.

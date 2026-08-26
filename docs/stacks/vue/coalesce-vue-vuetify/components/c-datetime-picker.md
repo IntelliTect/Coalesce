@@ -88,6 +88,10 @@ Does not impact time selection.
 The [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) name that the user will pick the date/time value in.
 Defaults to the value configured with [`setDefaultTimeZone`](/stacks/vue/layers/models.md#setdefaulttimezone) if the value bound to with `model`/`for` is a `DateTimeOffset`.
 
+<Prop def="color?: string = 'primary'" lang="ts" />
+
+The Vuetify theme color used by the date and time pickers in the popup menu.
+
 <Prop def="native?: boolean" lang="ts" />
 
 True if a native HTML5 input should be used instead of a popup menu with date/time pickers inside of it.

@@ -100,7 +100,7 @@ const props = withDefaults(
     max?: Date | null;
     color?: string | null;
   }>(),
-  { step: 1, color: "secondary" },
+  { step: 1, color: "primary" },
 );
 
 const emit = defineEmits<{

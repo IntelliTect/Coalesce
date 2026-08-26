@@ -263,7 +263,7 @@ const props = withDefaults(
       showTodayButton?: boolean;
     } & /* @vue-ignore */ InheritedProps
   >(),
-  { closeOnDatePicked: null, color: "secondary" },
+  { closeOnDatePicked: null, color: "primary" },
 );
 
 defineSlots<InheritedSlots>();

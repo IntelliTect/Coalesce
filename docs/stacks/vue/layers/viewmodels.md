@@ -244,8 +244,30 @@ type AutoSaveOptions<TThis> =
         Only allowed if not using deep auto-saves.
     */
     predicate?: (viewModel: TThis) => boolean;
+
+    /** Called when auto-save is started on a view model. With `deep` auto-saves,
+        this is invoked for each entity as auto-save is attached to it, including
+        entities attached to the graph after auto-save was started. */
+    onStart?: (viewModel: TThis) => void;
+
+    /** Called when auto-save is stopped on a view model, either explicitly via
+        `$stopAutoSave()` or automatically when the owning Vue component is unmounted.
+        Since `$stopAutoSave()` is not recursive, calling it on a `deep` root only
+        invokes this for the root; it is invoked for every entity on unmount. */
+    onStop?: (viewModel: TThis) => void;
+
+    /** Called after an auto-save `$save` completes successfully. With `deep`
+        auto-saves, receives whichever entity in the graph was saved. */
+    onSaved?: (viewModel: TThis) => void;
+
+    /** Called if an auto-save `$save` fails. With `deep` auto-saves, receives
+        whichever entity in the graph failed to save. Not invoked for saves that
+        were skipped due to client validation errors or a `predicate`. */
+    onError?: (viewModel: TThis, error: unknown) => void;
 }
 ```
+
+The `onStart`, `onStop`, `onSaved`, and `onError` callbacks are especially useful with `deep` auto-saves, where entities are attached to the object graph dynamically and there is otherwise no central place to observe the save lifecycle of each individual entity.
 
 <Prop def="$stopAutoSave(): void" lang="ts" />
     

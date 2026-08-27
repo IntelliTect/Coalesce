@@ -1,4 +1,4 @@
-import { delay, mount, mountApp, openMenu } from "@test/util";
+import { delay, mount, mountApp, openMenu, flushPromises } from "@test/util";
 import { CDatetimePicker } from "..";
 import { Case, ComplexModel } from "@test-targets/models.g";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
@@ -143,6 +143,24 @@ describe("CDatetimePicker", () => {
     expect(overlay.text()).contains("1970");
     expect(overlay.text()).contains("Sun, Aug 2");
     expect(overlay.find(".c-time-picker-header").text()).equals("1:51 PM PDT");
+  });
+
+  test("clicking hint text does not open picker menu", async () => {
+    const date = new Date(18478289085);
+    const wrapper = mountApp(() => (
+      <CDatetimePicker
+        modelValue={date}
+        timeZone="America/Los_Angeles"
+        hint="Some hint text"
+        persistent-hint
+      />
+    )).findComponent(CDatetimePicker);
+
+    await flushPromises();
+    await wrapper.find(".v-input__details").trigger("click");
+    await flushPromises();
+
+    expect(document.querySelector(".v-overlay__content")).toBeNull();
   });
 
   test("caller model - date value", async () => {

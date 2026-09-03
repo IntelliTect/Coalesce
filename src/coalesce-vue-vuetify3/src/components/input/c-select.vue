@@ -1551,7 +1551,6 @@ defineExpose({
   .v-field__field {
     align-items: center;
     .v-field__input {
-      // flex-wrap: nowrap;
       input {
         min-width: 0;
         flex: 1 1;
@@ -1560,6 +1559,26 @@ defineExpose({
           outline: none;
         }
       }
+    }
+  }
+
+  &:not(.c-select--multiple) {
+    .v-field__field .v-field__input {
+      // Flex line breaking uses each item's max-content size, so a selection
+      // that's wider than the field would otherwise push the (always empty) input
+      // onto a line of its own.
+      flex-wrap: nowrap;
+
+      input {
+        // Reserve room for the caret, since the selection will otherwise
+        // consume every available pixel.
+        min-width: 2px;
+      }
+    }
+    .v-select__selection {
+      // Vuetify only constrains max-width, which leaves the selection unable to
+      // shrink past its min-content size.
+      min-width: 0;
     }
   }
   .v-input__details {

@@ -565,6 +565,7 @@ describe("CDatetimePicker", () => {
       ));
 
       const input = wrapper.find("input");
+      await input.trigger("focus");
 
       await input.setValue("6/6/202");
       await delay(1);
@@ -620,6 +621,7 @@ describe("CDatetimePicker", () => {
       ));
 
       const input = wrapper.find("input");
+      await input.trigger("focus");
       await input.setValue("");
       await delay(1);
       expect(model.systemDateOnly).toBeTruthy();
@@ -660,6 +662,7 @@ describe("CDatetimePicker", () => {
       ));
 
       const input = wrapper.find("input");
+      await input.trigger("focus");
       await input.setValue("not a date");
       await input.trigger("blur");
       await delay(1);
@@ -683,6 +686,7 @@ describe("CDatetimePicker", () => {
       ));
 
       const input = wrapper.find("input");
+      await input.trigger("focus");
       await input.setValue("1/3/2017 5:00 PM");
       await delay(1);
       expect(value.value).toBeNull();

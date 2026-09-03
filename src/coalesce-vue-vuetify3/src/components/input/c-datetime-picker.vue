@@ -305,7 +305,8 @@ const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 // A native input's change event is only raised once a whole date has been entered,
 // so `lazy` has nothing to defer there.
 const isLazy = computed(
-  () => !props.native && !!(props.lazy ?? modelModifiers.lazy),
+  // An absent boolean prop is `false`, not undefined, so `??` wouldn't reach the modifier.
+  () => !props.native && !!(props.lazy || modelModifiers.lazy),
 );
 
 const dateMeta = computed(() => {

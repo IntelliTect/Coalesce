@@ -113,6 +113,12 @@
         lazy
       ></c-datetime-picker>
       <c-datetime-picker
+        v-model.lazy="modifierDate"
+        date-kind="date"
+        label="v-model.lazy"
+        clearable
+      ></c-datetime-picker>
+      <c-datetime-picker
         v-model="eagerDate"
         date-kind="date"
         label="not lazy"
@@ -121,6 +127,8 @@
     </v-col>
     <v-col>
       lazy: {{ lazyDate }}
+      <br />
+      v-model.lazy: {{ modifierDate }}
       <br />
       not lazy: {{ eagerDate }}
     </v-col>
@@ -151,5 +159,6 @@ const vm = new PersonViewModel();
 vm.$load(15);
 
 const lazyDate = ref<Date | null>(new Date(2026, 5, 6));
+const modifierDate = ref<Date | null>(new Date(2026, 5, 6));
 const eagerDate = ref<Date | null>(new Date(2026, 5, 6));
 </script>

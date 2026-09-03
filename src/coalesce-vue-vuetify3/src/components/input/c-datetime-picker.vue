@@ -31,9 +31,9 @@
     v-bind="textFieldAttrs"
     v-model:focused="focused"
     class="c-datetime-picker"
-    :role="isInteractive ? 'combobox' : undefined"
-    :aria-expanded="isInteractive ? menu : undefined"
-    :aria-controls="isInteractive ? popupId : undefined"
+    :role="canUserOpenMenu ? 'combobox' : undefined"
+    :aria-expanded="canUserOpenMenu ? menu : undefined"
+    :aria-controls="canUserOpenMenu ? popupId : undefined"
     :class="{ 'has-today-btn': showTodayButton }"
     :placeholder="internalFormat"
     :append-inner-icon="appendInnerIcon"
@@ -320,7 +320,8 @@ let ignoreNextFocus = false;
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
 // The popup itself exists whenever the field is interactive, even under
-// `openOn: none`, so that `v-model:menu` can still open it.
+// `openOn: none`, so that `v-model:menu` can still open it. The field only
+// carries combobox semantics when the user can expand it from the field.
 const canUserOpenMenu = computed(
   () => isInteractive.value && props.openOn != "none",
 );

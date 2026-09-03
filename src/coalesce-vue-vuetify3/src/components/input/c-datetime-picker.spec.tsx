@@ -877,6 +877,11 @@ describe("CDatetimePicker", () => {
       await flushPromises();
       expect(menuState()).toBe("absent");
 
+      // Nothing the user can expand, so the combobox attributes are dropped.
+      expect(input.attributes("role")).toBeUndefined();
+      expect(input.attributes("aria-expanded")).toBeUndefined();
+      expect(input.attributes("aria-controls")).toBeUndefined();
+
       // Text entry still works.
       await input.setValue("1/3/2017");
       await delay(1);

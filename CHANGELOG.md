@@ -15,6 +15,8 @@
 - `c-select`: Added `returnViewModel` prop, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 - `c-datetime-picker`: Added `lazy` prop (also usable as the `lazy` modifier on `v-model`) that defers updates to the bound value until the input is committed, rather than publishing every keystroke.
+- `c-datetime-picker`: Added `openOn` prop selecting what opens the popup: `field` (default), `icon`, `focus`, `picker-only` (the text field can't be typed into), or `none`. Arrow up/down also opens it in every mode but `none`.
+- `c-datetime-picker`: Added `menuProps` for passing props to the popup's `v-menu` (e.g. `location`), and `v-model:menu` for opening and closing it from outside the component.
 - `c-display`: now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
 - Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
 - Fixed `$save` invocations downgrading type discriminators to their base types on nested polymorphic objects.
@@ -29,6 +31,7 @@
 - Fixed generated DTO `MapToModelOrNew` mapping a polymorphic property onto an existing instance of the wrong concrete type. It now constructs a new instance of the correct type when the incoming type differs from the existing one, while continuing to update in place when the types match.
 
 ## Template Changes
+- `VDatePicker` now defaults to `controlVariant: "modal"`.
 - Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project that doesn't diverge significantly from the previous out-of-the-box Coalesce template tenancy behavior:
   1. Add the package `IntelliTect.Coalesce.MultiTenancy`
   2. In `OnConfiguring`, replace `.AddInterceptors(new TenantInterceptor())` with:

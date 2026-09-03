@@ -1,4 +1,11 @@
-import { delay, mount, mountApp, openMenu, flushPromises } from "@test/util";
+import {
+  delay,
+  mount,
+  mountApp,
+  openMenu,
+  getWrapper,
+  flushPromises,
+} from "@test/util";
 import { CDatetimePicker } from "..";
 import { Case, ComplexModel } from "@test-targets/models.g";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
@@ -54,6 +61,17 @@ describe("CDatetimePicker", () => {
     () => <CDatetimePicker modelValue={selectedDate} />;
     //@ts-expect-error wrong value type
     () => <CDatetimePicker modelValue={selectedDate as string} />;
+
+    () => <CDatetimePicker modelValue={selectedDate} openOn="picker-only" />;
+    //@ts-expect-error not an activation mode
+    () => <CDatetimePicker modelValue={selectedDate} openOn="whenever" />;
+    () => (
+      <CDatetimePicker
+        modelValue={selectedDate}
+        menu={true}
+        onUpdate:menu={(v: boolean) => {}}
+      />
+    );
 
     // *****
     // API caller args
@@ -725,6 +743,246 @@ describe("CDatetimePicker", () => {
       await delay(1);
 
       expect(model.systemDateOnly?.getFullYear()).toBe(2017);
+    });
+  });
+
+  describe("openOn", () => {
+    /** The overlay element persists after closing, so its visibility is what tells them apart. */
+    function menuState() {
+      const el = document.querySelector(".v-overlay__content") as HTMLElement;
+      if (!el) return "absent";
+      return el.style.display == "none" ? "closed" : "open";
+    }
+
+    test("field: clicking the field opens the menu", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" openOn="field" />
+      )).findComponent(CDatetimePicker);
+
+      await openMenu(wrapper);
+      expect(menuState()).toBe("open");
+    });
+
+    test("field: the icon is not a tab stop", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" />
+      )).findComponent(CDatetimePicker);
+      await flushPromises();
+
+      expect(
+        wrapper.find(".v-field__append-inner .v-icon").attributes("tabindex"),
+      ).toBeUndefined();
+    });
+
+    test("icon: clicking the field does not open the menu", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" openOn="icon" />
+      )).findComponent(CDatetimePicker);
+
+      await openMenu(wrapper);
+      expect(menuState()).toBe("absent");
+      expect(wrapper.find("input").element.readOnly).toBe(false);
+    });
+
+    test("icon: clicking the icon toggles the menu", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" openOn="icon" />
+      )).findComponent(CDatetimePicker);
+      await flushPromises();
+
+      const icon = wrapper.find(".v-field__append-inner .v-icon");
+      // The click handler also makes the icon reachable by keyboard.
+      expect(icon.attributes("tabindex")).toBe("0");
+
+      await icon.trigger("click");
+      await flushPromises();
+      expect(menuState()).toBe("open");
+
+      await icon.trigger("click");
+      await flushPromises();
+      expect(menuState()).toBe("closed");
+    });
+
+    test("focus: focusing the field opens the menu", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" openOn="focus" />
+      )).findComponent(CDatetimePicker);
+      await flushPromises();
+
+      await wrapper.find("input").trigger("focus");
+      await flushPromises();
+      expect(menuState()).toBe("open");
+    });
+
+    test("focus: closing the menu does not reopen it", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" openOn="focus" />
+      )).findComponent(CDatetimePicker);
+      await flushPromises();
+
+      const input = wrapper.find("input");
+      await input.trigger("focus");
+      await flushPromises();
+
+      // Simulate the menu having taken focus, as it does when opened.
+      await input.trigger("blur");
+      await flushPromises();
+
+      // Closing returns focus to the field, which must not open it again.
+      await getWrapper(".c-datetime-picker__close-btn").trigger("click");
+      await flushPromises();
+      expect(menuState()).toBe("closed");
+    });
+
+    test("picker-only: the field cannot be typed into", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker
+          model={model}
+          for="systemDateOnly"
+          openOn="picker-only"
+        />
+      )).findComponent(CDatetimePicker);
+      await flushPromises();
+
+      expect(wrapper.find("input").element.readOnly).toBe(true);
+    });
+
+    test("picker-only: clicking the field toggles the menu", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker
+          model={model}
+          for="systemDateOnly"
+          openOn="picker-only"
+        />
+      )).findComponent(CDatetimePicker);
+
+      await openMenu(wrapper);
+      expect(menuState()).toBe("open");
+
+      await wrapper.find(".v-field").trigger("click");
+      await flushPromises();
+      expect(menuState()).toBe("closed");
+    });
+
+    test("none: nothing in the component opens the menu", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" openOn="none" />
+      )).findComponent(CDatetimePicker);
+
+      await openMenu(wrapper);
+      expect(menuState()).toBe("absent");
+
+      const input = wrapper.find("input");
+      await input.trigger("keydown.down");
+      await flushPromises();
+      expect(menuState()).toBe("absent");
+
+      // Text entry still works.
+      await input.setValue("1/3/2017");
+      await delay(1);
+      expect(model.systemDateOnly?.getFullYear()).toBe(2017);
+    });
+
+    test("none: v-model:menu still opens the menu", async () => {
+      const menu = ref(false);
+      mountApp(() => (
+        <CDatetimePicker
+          model={model}
+          for="systemDateOnly"
+          openOn="none"
+          menu={menu.value}
+          onUpdate:menu={(v: boolean) => (menu.value = v)}
+        />
+      ));
+      await flushPromises();
+
+      menu.value = true;
+      await flushPromises();
+      expect(menuState()).toBe("open");
+    });
+
+    test("readonly fields have no menu to advertise", async () => {
+      const wrapper = mountApp(() => (
+        <CDatetimePicker model={model} for="systemDateOnly" readonly />
+      )).findComponent(CDatetimePicker);
+      await flushPromises();
+
+      const input = wrapper.find("input");
+      expect(input.attributes("role")).toBeUndefined();
+      expect(input.attributes("aria-expanded")).toBeUndefined();
+      expect(input.attributes("aria-controls")).toBeUndefined();
+    });
+
+    describe.each(["field", "icon", "focus", "picker-only"] as const)(
+      "%s",
+      (openOn) => {
+        test("arrow down opens the menu, escape closes it", async () => {
+          const wrapper = mountApp(() => (
+            <CDatetimePicker
+              model={model}
+              for="systemDateOnly"
+              openOn={openOn}
+            />
+          )).findComponent(CDatetimePicker);
+          await flushPromises();
+
+          const input = wrapper.find("input");
+          expect(input.attributes("aria-expanded")).toBe("false");
+
+          await input.trigger("keydown.down");
+          await flushPromises();
+          expect(menuState()).toBe("open");
+          expect(input.attributes("aria-expanded")).toBe("true");
+
+          await input.trigger("keydown", { key: "Escape" });
+          await flushPromises();
+          expect(menuState()).toBe("closed");
+        });
+
+        test("arrow up opens the menu", async () => {
+          const wrapper = mountApp(() => (
+            <CDatetimePicker
+              model={model}
+              for="systemDateOnly"
+              openOn={openOn}
+            />
+          )).findComponent(CDatetimePicker);
+          await flushPromises();
+
+          await wrapper.find("input").trigger("keydown.up");
+          await flushPromises();
+          expect(menuState()).toBe("open");
+        });
+      },
+    );
+
+    test("v-model:menu reflects and controls the menu", async () => {
+      const menu = ref(false);
+      const wrapper = mountApp(() => (
+        <CDatetimePicker
+          model={model}
+          for="systemDateOnly"
+          menu={menu.value}
+          onUpdate:menu={(v: boolean) => (menu.value = v)}
+        />
+      )).findComponent(CDatetimePicker);
+      await flushPromises();
+
+      // Opened by the consumer
+      menu.value = true;
+      await flushPromises();
+      expect(menuState()).toBe("open");
+
+      // Closed by the component
+      await getWrapper(".c-datetime-picker__close-btn").trigger("click");
+      await flushPromises();
+      expect(menu.value).toBe(false);
+      expect(menuState()).toBe("closed");
+
+      // Opened by the component
+      await wrapper.find(".v-field").trigger("click");
+      await flushPromises();
+      expect(menu.value).toBe(true);
     });
   });
 });

@@ -28,32 +28,30 @@
   <v-text-field
     v-else
     ref="rootRef"
-    v-bind="inputBindAttrs"
+    v-bind="textFieldAttrs"
     v-model:focused="focused"
     class="c-datetime-picker"
-    role="combobox"
-    :aria-expanded="menu"
-    :aria-controls="popupId"
+    :role="isInteractive ? 'combobox' : undefined"
+    :aria-expanded="isInteractive ? menu : undefined"
+    :aria-controls="isInteractive ? popupId : undefined"
     :class="{ 'has-today-btn': showTodayButton }"
     :placeholder="internalFormat"
-    :append-inner-icon="
-      internalDateKind == 'time'
-        ? 'fa fa-clock cursor-pointer'
-        : 'fa fa-calendar-alt cursor-pointer'
-    "
+    :append-inner-icon="appendInnerIcon"
     :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
     :validation-value="internalValue"
     :error-messages="error"
     :inputmode="inputmode"
-    :readonly="isReadonly"
+    :readonly="isTextReadonly"
     :disabled="isDisabled"
     autocomplete="off"
     @keydown.enter="acceptInput()"
     @keydown.escape="acceptInput()"
+    @keydown.capture.down="onArrowKeydown"
+    @keydown.capture.up="onArrowKeydown"
     @keydown.tab="
       acceptInput();
-      closeMenu();
+      closeMenu(false);
     "
     @update:model-value="textInputChanged($event, false)"
     @click:clear="acceptInput()"
@@ -74,6 +72,7 @@
         stick-to-target
         :scroll-strategy="$vuetify.display.xs ? 'block' : undefined"
         min-width="1px"
+        v-bind="menuProps"
         @update:model-value="!$event ? closeMenu() : openMenu()"
       >
         <v-card :id="popupId" class="d-flex" @keydown.enter="closeMenu()">
@@ -138,7 +137,7 @@
 </template>
 
 <script lang="ts">
-import { VTextField, VDatePicker } from "vuetify/components";
+import { VTextField, VDatePicker, VMenu } from "vuetify/components";
 import { TypedValidationRule } from "../../util";
 
 type InheritedProps = Omit<
@@ -267,12 +266,25 @@ const props = withDefaults(
       allowedDates?: null | Date[] | ((date: Date) => boolean);
       // Object containing extra props to pass through to `v-date-picker`.
       datePickerProps?: DatePickerProps;
+      /** Props to pass to the underlying v-menu component */
+      menuProps?: VMenu["$props"] & { [s: string]: any };
+      /** How the date/time picker popup is opened:
+       * * `field` (default) - clicking anywhere in the text field.
+       * * `icon` - clicking the calendar/clock icon. The text field is left
+       *   free for typing.
+       * * `focus` - focusing the text field, including by clicking it.
+       * * `picker-only` - clicking the text field, which cannot be typed into.
+       * * `none` - by nothing in the component. `v-model:menu` still works.
+       *
+       * Arrow up/down also opens the popup, except when `none`.
+       * Has no effect when `native`. */
+      openOn?: "field" | "icon" | "focus" | "picker-only" | "none";
       /** Determines whether the 'Today' button is displayed in the date picker actions.
        * When enabled, the 'Today' button allows users to quickly select the current date. */
       showTodayButton?: boolean;
     } & /* @vue-ignore */ InheritedProps
   >(),
-  { closeOnDatePicked: null, color: "primary" },
+  { closeOnDatePicked: null, color: "primary", openOn: "field" },
 );
 
 defineSlots<InheritedSlots>();
@@ -288,7 +300,8 @@ const { inputBindAttrs, valueMeta, valueOwner } = useMetadataProps(props);
 
 const focused = ref(false);
 const error = ref<string[]>([]);
-const menu = ref(false);
+/** The open state of the popup. */
+const menu = defineModel<boolean>("menu", { default: false });
 const internalTextValue = ref<string>();
 
 const { mobile } = useDisplay();
@@ -300,7 +313,33 @@ const inputmode = computed(() =>
   mobile.value && !isEditingInput.value ? "none" : undefined,
 );
 
+// Set while closing the menu returns focus to the field, so that `openOn: focus`
+// doesn't reopen it.
+let ignoreNextFocus = false;
+
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
+
+// The popup itself exists whenever the field is interactive, even under
+// `openOn: none`, so that `v-model:menu` can still open it.
+const canUserOpenMenu = computed(
+  () => isInteractive.value && props.openOn != "none",
+);
+
+// `picker-only` takes its value exclusively from the popup. This deliberately
+// doesn't go through `props.readonly`, which would also disable the popup.
+const isTextReadonly = computed(
+  () => isReadonly.value || props.openOn == "picker-only",
+);
+
+const textFieldAttrs = computed(() => {
+  const attrs = { ...inputBindAttrs.value };
+  // A focusable icon is only wanted when it is the sole way to open the popup;
+  // v-text-field makes the icon a tab stop as soon as it has a click handler.
+  if (props.openOn == "icon") {
+    attrs["onClick:appendInner"] = onIconClick;
+  }
+  return attrs;
+});
 
 // A native input's change event is only raised once a whole date has been entered,
 // so `lazy` has nothing to defer there.
@@ -385,6 +424,12 @@ const internalDateKind = computed((): DateKind => {
   if (props.dateKind) return props.dateKind;
   if (dateMeta.value) return dateMeta.value.dateKind;
   return "datetime";
+});
+
+const appendInnerIcon = computed(() => {
+  const icon =
+    internalDateKind.value == "time" ? "fa fa-clock" : "fa fa-calendar-alt";
+  return canUserOpenMenu.value ? icon + " cursor-pointer" : icon;
 });
 
 const nativeInternalFormat = computed(() => {
@@ -655,22 +700,59 @@ function onInputClick(e: MouseEvent) {
   if (!(e.target as HTMLElement)?.closest?.(".v-field")) {
     return;
   }
-  if (menu.value) {
+  // The icon is inside the field, so it is the icon's handler that acts here.
+  if (props.openOn == "icon") {
+    return;
+  }
+  if (!menu.value) {
+    openMenu();
+  } else if (props.openOn == "picker-only") {
+    // There's nothing to type into, so the field toggles the menu instead.
+    closeMenu();
+  } else {
     // Menu already open - switch to text editing mode (shows keyboard on mobile)
     isEditingInput.value = true;
+  }
+}
+
+function onIconClick() {
+  if (menu.value) {
+    closeMenu();
   } else {
     openMenu();
   }
 }
 
+/** Bound in the capture phase: v-menu's own activator handler swallows arrow keys
+ * with `stopImmediatePropagation`, so a bubbling listener would never see them. */
+function onArrowKeydown(e: KeyboardEvent) {
+  if (!canUserOpenMenu.value) {
+    // v-menu opens itself from the activator's arrow keys, which `none` must not.
+    e.stopPropagation();
+    return;
+  }
+  if (menu.value) return;
+  // Arrow keys open the popup, per the ARIA combobox pattern.
+  e.preventDefault();
+  openMenu();
+}
+
 function openMenu() {
+  if (!canUserOpenMenu.value) return;
   menu.value = true;
 }
 
-function closeMenu() {
+/** @param refocus Whether to return focus to the text field. Tabbing out of the
+ * field must not, or focus lands back where it started - trapping the user when
+ * the icon is a tab stop of its own. */
+function closeMenu(refocus = true) {
   menu.value = false;
   isEditingInput.value = false;
-  rootRef.value?.focus();
+  if (refocus) {
+    // Refocusing would immediately reopen the menu when `openOn: focus`.
+    ignoreNextFocus = props.openOn == "focus";
+    rootRef.value?.focus();
+  }
 }
 
 function acceptInput() {
@@ -819,12 +901,19 @@ function handleDateKeydown(event: KeyboardEvent) {
 }
 
 watch(focused, (focused) => {
-  // When the user is no longer typing into the text field,
-  // clear the temporary value that stores exactly what they typed
-  // so that the text field can fall back to the nicely formatted date.
   if (!focused) {
+    // When the user is no longer typing into the text field,
+    // clear the temporary value that stores exactly what they typed
+    // so that the text field can fall back to the nicely formatted date.
+    ignoreNextFocus = false;
     acceptInput();
+    return;
   }
+
+  if (props.openOn == "focus" && !ignoreNextFocus) {
+    openMenu();
+  }
+  ignoreNextFocus = false;
 });
 </script>
 

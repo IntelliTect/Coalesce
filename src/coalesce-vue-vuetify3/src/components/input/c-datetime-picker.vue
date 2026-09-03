@@ -317,6 +317,9 @@ const inputmode = computed(() =>
 // doesn't reopen it.
 let ignoreNextFocus = false;
 
+// Set while the popup is being opened by keyboard, which hands it focus.
+let openedByKeyboard = false;
+
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
 // The popup itself exists whenever the field is interactive, even under
@@ -735,8 +738,42 @@ function onArrowKeydown(e: KeyboardEvent) {
   if (menu.value) return;
   // Arrow keys open the popup, per the ARIA combobox pattern.
   e.preventDefault();
+  openedByKeyboard = true;
   openMenu();
 }
+
+/** Hands the popup focus, so that the pickers' own arrow key navigation can take
+ * over. Only wanted for a keyboard open: a mouse user arrives by clicking. */
+async function focusPopup() {
+  // v-menu's transition holds the popup's contents at `visibility: hidden` for
+  // its first couple of frames, and an invisible element can't take focus, so
+  // keep trying until it does. Timers rather than frames, so that this also
+  // works where frames aren't painted, e.g. jsdom.
+  for (let attempt = 0; attempt < 20; attempt++) {
+    if (!menu.value) return;
+
+    const target = showDate.value
+      ? (datePickerRef.value?.$el as HTMLElement | undefined)
+      : (
+          timePickerRef.value?.$el as HTMLElement | undefined
+        )?.querySelector<HTMLElement>(".c-time-picker__column-hour");
+
+    if (target?.contains(document.activeElement)) return;
+    target?.focus();
+    if (target && document.activeElement == target) return;
+
+    await new Promise((resolve) => setTimeout(resolve, 16));
+  }
+}
+
+watch(
+  menu,
+  (open) => {
+    if (open && openedByKeyboard) focusPopup();
+    openedByKeyboard = false;
+  },
+  { flush: "post" },
+);
 
 function openMenu() {
   if (!canUserOpenMenu.value) return;
@@ -749,6 +786,7 @@ function openMenu() {
 function closeMenu(refocus = true) {
   menu.value = false;
   isEditingInput.value = false;
+  openedByKeyboard = false;
   if (refocus) {
     // Refocusing would immediately reopen the menu when `openOn: focus`.
     ignoreNextFocus = props.openOn == "focus";

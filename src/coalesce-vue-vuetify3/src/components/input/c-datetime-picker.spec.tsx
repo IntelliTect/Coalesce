@@ -944,6 +944,51 @@ describe("CDatetimePicker", () => {
           expect(menuState()).toBe("closed");
         });
 
+        test("arrow down hands the popup focus", async () => {
+          const wrapper = mountApp(() => (
+            <CDatetimePicker
+              model={model}
+              for="systemDateOnly"
+              openOn={openOn}
+            />
+          )).findComponent(CDatetimePicker);
+          await flushPromises();
+
+          await wrapper.find("input").trigger("keydown.down");
+          await delay(100);
+
+          expect(
+            document.activeElement?.closest(".v-date-picker"),
+          ).toBeTruthy();
+
+          // And back out again, with focus returned to the field.
+          await getWrapper(".v-overlay__content").trigger("keydown", {
+            key: "Escape",
+          });
+          await flushPromises();
+          expect(menuState()).toBe("closed");
+          expect(document.activeElement).toBe(wrapper.find("input").element);
+        });
+
+        test("arrow down hands a time-only popup focus", async () => {
+          const wrapper = mountApp(() => (
+            <CDatetimePicker
+              model={model}
+              for="systemDateOnly"
+              dateKind="time"
+              openOn={openOn}
+            />
+          )).findComponent(CDatetimePicker);
+          await flushPromises();
+
+          await wrapper.find("input").trigger("keydown.down");
+          await delay(100);
+
+          expect(document.activeElement?.className).toContain(
+            "c-time-picker__column-hour",
+          );
+        });
+
         test("arrow up opens the menu", async () => {
           const wrapper = mountApp(() => (
             <CDatetimePicker

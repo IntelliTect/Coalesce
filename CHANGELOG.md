@@ -14,6 +14,7 @@
 - Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
 - `c-select`: Added `returnViewModel` prop, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
+- `c-datetime-picker`: Added `lazy` prop (also usable as the `lazy` modifier on `v-model`) that defers updates to the bound value until the input is committed, rather than publishing every keystroke.
 - `c-display`: now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
 - Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
 - Fixed `$save` invocations downgrading type discriminators to their base types on nested polymorphic objects.

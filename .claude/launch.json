@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "playground",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "run",
+        "--project",
+        "playground/Coalesce.Web.Vue3/Coalesce.Web.Vue3.csproj"
+      ],
+      "port": 54979,
+      "url": "https://localhost:54979"
+    }
+  ]
+}

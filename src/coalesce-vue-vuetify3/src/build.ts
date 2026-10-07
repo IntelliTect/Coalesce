@@ -1,5 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 
+/** Components exported by the separate coalesce-vue-docs package. */
+const docsComponents = new Set([
+  "CDocsLayout",
+  "CDocsPage",
+  "CDocsSidebar",
+  "CDocsToc",
+  "CDocsSearch",
+  "CDocsHelp",
+]);
+
 /** Component name resolver for unplugin-vue-components that resolves coalesce-vue-vuetify3 components. */
 export function CoalesceVuetifyResolver() {
   // Read the actual component names and their file paths from the source code
@@ -25,6 +35,9 @@ export function CoalesceVuetifyResolver() {
     resolve: (name: string) => {
       const from = componentMap.get(name);
       if (from) return { name: "default", as: name, from };
+      if (docsComponents.has(name)) {
+        return { name, from: "coalesce-vue-docs/vuetify" };
+      }
     },
   } as const;
 }

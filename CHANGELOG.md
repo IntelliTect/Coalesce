@@ -9,6 +9,7 @@
 - Added `adminExtensions` option to `createCoalesceVuetify()`, allowing per-type or global extension components to be injected into admin pages. Supported extension points: `tableToolbarActions`, `editorToolbarActions`, `editorActions`, `tableRowActions`, `tablePageHeader`, and `editorPageHeader`. Each corresponding component also exposes a slot for conventional per-instance customization.
 - Added `adminOverrides` option to `createCoalesceVuetify()`, allowing custom Vue components to replace the default input and/or display components used in admin pages (`c-admin-editor`, `c-admin-method`, `c-table`) for specific model properties, method parameters, or method return values.
 - API callers (`ItemApiState`, `ListApiState`) are now awaitable. `await caller` now resolves to `caller.result` after the current operation is complete, or resolves immediately to the previous result if no operation is in progress.
+- Added `coalesce-vue-docs` package for in-app product documentation: markdown under `docs/` is rendered by VitePress's markdown renderer inside the app's Vite server and shown at `/docs` in a Vuetify layout with search, and `c-docs-help` shows a doc page in a side panel from any screen.
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
 - `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
 - Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
@@ -33,6 +34,7 @@
 
 ## Template Changes
 - `VDatePicker` now defaults to `controlVariant: "modal"`.
+- Added `Docs` option for in-app documentation with `coalesce-vue-docs`.
 - Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project that doesn't diverge significantly from the previous out-of-the-box Coalesce template tenancy behavior:
   1. Add the package `IntelliTect.Coalesce.MultiTenancy`
   2. In `OnConfiguring`, replace `.AddInterceptors(new TenantInterceptor())` with:

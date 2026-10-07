@@ -274,7 +274,7 @@ Use the \`read_changelog\` tool with the user's current version as \`sinceVersio
 Compare ALL dependency versions between the template and the user's project:
 
 - **.NET Target Framework** — Does the template target a newer .NET version?
-- **Coalesce packages** — \`CoalesceVersion\` (NuGet), \`coalesce-vue\`, \`coalesce-vue-vuetify3\`, \`eslint-plugin-coalesce\` (NPM)
+- **Coalesce packages** — \`CoalesceVersion\` (NuGet), \`coalesce-vue\`, \`coalesce-vue-vuetify3\`, \`coalesce-vue-docs\`, \`eslint-plugin-coalesce\` (NPM)
 - **NuGet packages** — Compare template \`.csproj\` files against user's. Also scan ALL user \`.csproj\` files for Microsoft packages (\`Microsoft.EntityFrameworkCore.*\`, \`Microsoft.Extensions.*\`, \`Microsoft.AspNetCore.*\`, etc.) that follow the .NET release cadence — these should all be on the same version as each other.
 - **NPM packages** — Packages the user already has that have newer versions in the template. New packages in the template that the user doesn't have. Packages removed from the template.
 

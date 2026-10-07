@@ -9,6 +9,9 @@ import {
 //#if (Identity)
 import { Permission } from "./models.g";
 //#endif
+//#if Docs
+import { docsRoutes } from "coalesce-vue-docs/vuetify";
+//#endif
 
 const router = createRouter({
   history: createWebHistory(),
@@ -45,6 +48,9 @@ const router = createRouter({
       path: "/openapi",
       component: () => import("./views/OpenAPI.vue"),
     },
+    //#endif
+    //#if Docs
+    docsRoutes(),
     //#endif
 
     // Coalesce admin routes

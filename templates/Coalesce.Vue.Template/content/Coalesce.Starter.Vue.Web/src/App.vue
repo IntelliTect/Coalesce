@@ -11,6 +11,10 @@
         </router-link>
       </v-toolbar-title>
 
+      <!--#if Docs -->
+      <v-btn to="/docs" variant="text" prepend-icon="fa fa-book">Docs</v-btn>
+      <!--#endif -->
+
       <!--#if (Identity || DarkMode) -->
       <v-menu bottom offset-y>
         <template #activator="{ props }">
@@ -132,9 +136,19 @@
             key="$forbidden"
             :permissions="routeMeta?.permissions"
           />
+          <!--#if Docs -->
+          <component
+            :is="Component"
+            v-else
+            :key="route.meta.key ?? route.path"
+          />
+          <!--#else
           <component :is="Component" v-else :key="route.path" />
+          #endif -->
           <!--#endif -->
-          <!--#if (!Identity)
+          <!--#if (!Identity && Docs)
+          <component :is="Component" :key="route.meta.key ?? route.path" />
+          #elif (!Identity)
           <component :is="Component" :key="route.path" />
           #endif -->
         </transition>

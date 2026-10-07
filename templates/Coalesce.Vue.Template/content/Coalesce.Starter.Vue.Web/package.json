@@ -19,6 +19,7 @@
     "@microsoft/applicationinsights-web": "^3.4.3",
     "@vueuse/core": "^14.3.0",
     "coalesce-vue": "6.5.1",
+    "coalesce-vue-docs": "6.5.1",
     "coalesce-vue-vuetify3": "6.5.1",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.0.0",
@@ -46,6 +47,7 @@
     "unplugin-vue-components": "^32.1.0",
     "vite": "^8.1.3",
     "vite-plugin-vuetify": "^2.1.3",
+    "vitepress": "2.0.0-alpha.19",
     "vitest": "^4.1.10",
     "vue-tsc": "^3.3.6"
   }

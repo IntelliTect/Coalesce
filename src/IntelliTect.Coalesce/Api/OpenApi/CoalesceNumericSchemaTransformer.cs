@@ -1,4 +1,3 @@
-#if NET10_0_OR_GREATER
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 using System.Threading;
@@ -65,4 +64,3 @@ internal class CoalesceNumericSchemaTransformer : IOpenApiDocumentTransformer
         }
     }
 }
-#endif

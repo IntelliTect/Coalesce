@@ -1,11 +1,8 @@
-#if NET9_0_OR_GREATER
 
-#if NET10_0_OR_GREATER
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.OpenApi;
 using System.Net;
 using System.Text.Json;
-#endif
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests.OpenApi;
 
@@ -14,7 +11,6 @@ public class MicrosoftOpenApiTests(OpenApiFixture fixture)
 {
     public OpenApiFixture Fixture { get; } = fixture;
 
-#if NET10_0_OR_GREATER
     /// <summary>
     /// Workaround for https://github.com/dotnet/aspnetcore/issues/61038.
     /// Verifies that CoalesceNumericSchemaTransformer correctly fixes
@@ -164,6 +160,4 @@ public class MicrosoftOpenApiTests(OpenApiFixture fixture)
         var param = await Assert.That(parameters.Where(p => p.Name == "dataSource.IntArray")).HasSingleItem();
         await Assert.That(param.Description).IsEqualTo("Used by data sources ParameterTestsSource, ParameterTestsSourceSubclass.");
     }
-#endif
 }
-#endif

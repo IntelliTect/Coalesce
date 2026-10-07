@@ -5,12 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-#if NET10_0_OR_GREATER
 using Microsoft.OpenApi;
-#else
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Readers;
-#endif
 using System.Net;
 using System.Reflection;
 
@@ -69,19 +64,10 @@ public class OpenApiFixture
 
         // OpenApiDocument cannot be parsed directly with a JSON deserializer,
         // as it is a midly non-normalized format that requires special rules to understand.
-#if NET10_0_OR_GREATER
         var result = await OpenApiDocument.LoadAsync(await openApiDoc.Content.ReadAsStreamAsync(), "json");
         await Assert.That(result.Document).IsNotNull();
         await Assert.That(result.Diagnostic.Errors).IsEmpty();
         await Assert.That(result.Diagnostic.Warnings).IsEmpty();
         return result.Document;
-#else
-        var openApiDocument = new OpenApiStreamReader()
-            .Read(await openApiDoc.Content.ReadAsStreamAsync(), out var diagnostic);
-        await Assert.That(openApiDocument).IsNotNull();
-        await Assert.That(diagnostic.Errors).IsEmpty();
-        await Assert.That(diagnostic.Warnings).IsEmpty();
-        return openApiDocument;
-#endif
     }
 }

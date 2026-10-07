@@ -91,11 +91,7 @@ internal class MultiTenancyConvention<TTenanted>(
             ),
             param
         );
-#if NET10_0_OR_GREATER
         entityType.SetQueryFilter(QueryFilterName, filterBody);
-#else
-        entityType.SetQueryFilter(filterBody);
-#endif
     }
 
     private void ExpandPrimaryKey(IMutableEntityType entityType, Func<DbContext, object?> tenantIdGetter)

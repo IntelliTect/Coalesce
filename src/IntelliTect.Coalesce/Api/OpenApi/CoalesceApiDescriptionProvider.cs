@@ -34,33 +34,8 @@ internal class CoalesceApiDescriptionProvider(ReflectionRepository reflectionRep
             var method = new ReflectionMethodViewModel(methodInfo, cvm, cvm);
 
             ProcessStandardParameters(operation, method);
-#if !NET10_0_OR_GREATER
-            FixEnumSerializationType(operation, method);
-#endif
         }
     }
-
-#if !NET10_0_OR_GREATER
-    /// <summary>
-    /// Workaround https://github.com/dotnet/aspnetcore/issues/61327 by correcting enum types from String
-    /// to their underlying integral type. Coalesce also just generally only handles enums as numbers on the wire anyway,
-    /// so this is also more correctl.
-    /// </summary>
-    private void FixEnumSerializationType(ApiDescription operation, ReflectionMethodViewModel method)
-    {
-        var parameters = operation.ParameterDescriptions;
-        foreach (var parameter in parameters)
-        {
-            if (
-                parameter.ParameterDescriptor?.ParameterType?.IsAssignableTo(typeof(Enum)) == true &&
-                parameter.Type == typeof(string)
-            )
-            {
-                parameter.Type = Enum.GetUnderlyingType(parameter.ParameterDescriptor.ParameterType);
-            }
-        }
-    }
-#endif
 
     private void ProcessStandardParameters(ApiDescription operation, MethodViewModel method)
     {

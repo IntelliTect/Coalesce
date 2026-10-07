@@ -63,10 +63,8 @@ public abstract class ValueViewModel : IAttributeProvider
                 (
                     min > 0 ||
                     max < 0
-#if NET8_0_OR_GREATER
                     || range.GetValue(a => a.MinimumIsExclusive) == true && min == 0
                     || range.GetValue(a => a.MaximumIsExclusive) == true && max == 0
-#endif
                 )
             )
             {

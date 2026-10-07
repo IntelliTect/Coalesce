@@ -1,12 +1,14 @@
 
-resource "azurerm_ai_services" "this" {
-  name                         = "${var.context.project_name}-${var.context.environment_name}-ai"
-  location                     = var.context.location
-  resource_group_name          = var.context.resource_group_name
-  sku_name                     = "S0"
-  custom_subdomain_name        = "${var.context.project_name}-${var.context.environment_name}-ai"
-  local_authentication_enabled = false
-  tags                         = var.context.tags
+resource "azurerm_cognitive_account" "this" {
+  name                       = "${var.context.project_name}-${var.context.environment_name}-ai"
+  location                   = var.context.location
+  resource_group_name        = var.context.resource_group_name
+  sku_name                   = "S0"
+  custom_subdomain_name      = "${var.context.project_name}-${var.context.environment_name}-ai"
+  kind                       = "AIServices"
+  local_auth_enabled         = false
+  project_management_enabled = true
+  tags                       = var.context.tags
 
   identity {
     type         = "UserAssigned"
@@ -28,7 +30,7 @@ resource "azurerm_user_assigned_identity" "ai_services" {
 
 resource "azurerm_cognitive_deployment" "chat" {
   name                 = "chat"
-  cognitive_account_id = azurerm_ai_services.this.id
+  cognitive_account_id = azurerm_cognitive_account.this.id
 
   model {
     format  = "OpenAI"
@@ -45,7 +47,7 @@ resource "azurerm_cognitive_deployment" "chat" {
 resource "azurerm_role_assignment" "openai_user" {
   for_each = var.admin_principals
 
-  scope                = azurerm_ai_services.this.id
+  scope                = azurerm_cognitive_account.this.id
   role_definition_name = "Azure AI User"
   principal_id         = each.value
 }

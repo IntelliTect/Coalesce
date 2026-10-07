@@ -42,7 +42,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.9" />
     <!--#endif -->
     <!--#if(Hangfire) -->
-    <PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.25" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
     <!--#endif -->
     <!--#if(AIChat) -->

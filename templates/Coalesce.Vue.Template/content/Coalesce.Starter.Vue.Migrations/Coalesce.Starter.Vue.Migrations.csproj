@@ -16,7 +16,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <!--#if(Hangfire) -->
-    <PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.25" />
     <!--#endif -->
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.16.0" />
   </ItemGroup>

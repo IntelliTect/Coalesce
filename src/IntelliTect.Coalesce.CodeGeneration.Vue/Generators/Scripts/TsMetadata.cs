@@ -444,10 +444,8 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
                 Min(min, minMessage);
             else if (prop.GetValidationAttribute<MinLengthAttribute, int>(x => x.Length) is (true, int min2, string min2Message))
                 Min(min2, min2Message);
-#if NET8_0_OR_GREATER
             else if (prop.GetValidationAttribute<LengthAttribute, int>(x => x.MinimumLength) is (true, int min3, string min3Message))
                 Min(min3, min3Message);
-#endif
             else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength) is int minLength and not int.MaxValue)
                 Min(minLength, clientValidationError);
 
@@ -455,10 +453,8 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
                 Max(max, maxMessage);
             else if (prop.GetValidationAttribute<MaxLengthAttribute, int>(x => x.Length) is (true, int max2, string max2Message))
                 Max(max2, max2Message);
-#if NET8_0_OR_GREATER
             else if (prop.GetValidationAttribute<LengthAttribute, int>(x => x.MaximumLength) is (true, int max3, string max3Message))
                 Max(max3, max3Message);
-#endif
             else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength) is int maxLength and not int.MinValue)
                 Max(maxLength, clientValidationError);
 
@@ -500,13 +496,8 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
             if (range != null)
             {
                 var message = range.GetValue(a => a.ErrorMessage);
-#if NET8_0_OR_GREATER
                 Min(range.GetValue(r => r.Minimum), range.GetValue(r => r.MinimumIsExclusive) ?? false, message);
                 Max(range.GetValue(r => r.Maximum), range.GetValue(r => r.MaximumIsExclusive) ?? false, message);
-#else
-                Min(range.GetValue(r => r.Minimum), false, message);
-                Max(range.GetValue(r => r.Maximum), false, message);
-#endif
             }
             else
             {

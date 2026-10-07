@@ -33,6 +33,7 @@
 
 ## Template Changes
 - `VDatePicker` now defaults to `controlVariant: "modal"`.
+- Terraform now targets `hashicorp/azurerm` `~> 5.8`. `azurerm_ai_services` is replaced by `azurerm_cognitive_account` (`kind = "AIServices"`), and the container apps subnet uses `service_endpoint` blocks instead of `service_endpoints`.
 - Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project that doesn't diverge significantly from the previous out-of-the-box Coalesce template tenancy behavior:
   1. Add the package `IntelliTect.Coalesce.MultiTenancy`
   2. In `OnConfiguring`, replace `.AddInterceptors(new TenantInterceptor())` with:

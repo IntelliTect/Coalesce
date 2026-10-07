@@ -1,4 +1,3 @@
-#if NET10_0_OR_GREATER
 using IntelliTect.Coalesce.MultiTenancy;
 
 namespace Microsoft.EntityFrameworkCore;
@@ -25,4 +24,3 @@ public static class TenantQueryExtensions
         where T : class
         => query.IgnoreQueryFilters([MultiTenancyConvention.QueryFilterName]);
 }
-#endif

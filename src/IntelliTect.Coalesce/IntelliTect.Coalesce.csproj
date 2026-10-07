@@ -22,9 +22,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
     <PackageReference Include="OpenTelemetry" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' != '' AND $([MSBuild]::VersionGreaterThanOrEquals($(TargetFramework.TrimStart('net')), '9.0'))">
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
 

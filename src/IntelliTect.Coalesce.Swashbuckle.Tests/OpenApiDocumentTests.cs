@@ -1,9 +1,5 @@
-#if NET10_0_OR_GREATER
 using Microsoft.OpenApi;
 using System.Threading.Tasks;
-#else
-using Microsoft.OpenApi.Models;
-#endif
 
 namespace IntelliTect.Coalesce.Swashbuckle.Tests;
 
@@ -34,11 +30,7 @@ public class OpenApiDocumentTests
 
         var caseSaveProperties = doc
             .Paths["/api/Case/save"]
-#if NET10_0_OR_GREATER
             .Operations[HttpMethod.Post]
-#else
-            .Operations[OperationType.Post]
-#endif
             .RequestBody.Content["multipart/form-data"]
             .Schema.Properties;
 
@@ -74,11 +66,7 @@ public class OpenApiDocumentTests
 
         var properties = doc
             .Paths["/api/ComplexModel/HasTopLevelParamWithSameNameAsObjectProp"]
-#if NET10_0_OR_GREATER
             .Operations[HttpMethod.Post]
-#else
-            .Operations[OperationType.Post]
-#endif
             .RequestBody.Content["multipart/form-data"]
             .Schema.Properties;
 
@@ -93,11 +81,7 @@ public class OpenApiDocumentTests
 
         var parameters = doc
             .Paths["/api/Person/list"]
-#if NET10_0_OR_GREATER
             .Operations[HttpMethod.Get]
-#else
-            .Operations[OperationType.Get]
-#endif
             .Parameters;
             
         var param = await Assert.That(parameters.Where(p => p.Name == "dataSource.IntArray")).HasSingleItem();

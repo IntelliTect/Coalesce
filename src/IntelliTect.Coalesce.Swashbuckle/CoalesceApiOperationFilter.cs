@@ -3,13 +3,8 @@ using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
-#if NET10_0_OR_GREATER
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;
-#else
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
-#endif
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
@@ -61,18 +56,11 @@ public class CoalesceApiOperationFilter : IOperationFilter
 
         foreach (var otherDescription in otherDescriptions)
         {
-#if NET10_0_OR_GREATER
             // In Swashbuckle 10.0, GenerateRequestBody has an additional OpenApiDocument parameter
             var otherBody = generator
                 .GetType()
                 .GetMethod("GenerateRequestBody", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 ?.Invoke(generator, [otherDescription, context.SchemaRepository, context.Document]) as IOpenApiRequestBody;
-#else
-            var otherBody = generator
-                .GetType()
-                .GetMethod("GenerateRequestBody", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                ?.Invoke(generator, [otherDescription, context.SchemaRepository]) as OpenApiRequestBody;
-#endif
 
             if (otherBody is null) continue;
 
@@ -101,11 +89,7 @@ public class CoalesceApiOperationFilter : IOperationFilter
             foreach (var noSetterProp in paramsUnion.Where(p =>
                 // Remove "Filter" - we'll enumerate all available filter params
                 p.PropViewModel.Name == nameof(IFilterParameters.Filter)
-#if NET10_0_OR_GREATER
                 && p.OperationParam.Schema?.Type == JsonSchemaType.Object
-#else
-                && p.OperationParam.Schema?.Type == "object"
-#endif
             ))
             {
                 operation.Parameters.Remove(noSetterProp.OperationParam);
@@ -130,11 +114,7 @@ public class CoalesceApiOperationFilter : IOperationFilter
                             Description = $"Filters results by values contained in property '{filterProp.JsonName}'.",
                             Schema = new OpenApiSchema
                             {
-#if NET10_0_OR_GREATER
                                 Type = JsonSchemaType.String
-#else
-                                Type = "string" 
-#endif
                             }
                         });
                     }
@@ -147,19 +127,11 @@ public class CoalesceApiOperationFilter : IOperationFilter
             operation.Responses["200"].Content.Clear();
             operation.Responses["200"].Content["application/octet-stream"] = new OpenApiMediaType
             {
-#if NET10_0_OR_GREATER
                 Schema = new OpenApiSchema
                 {
                     Type = JsonSchemaType.String,
                     Format = "binary"
                 }
-#else
-                Schema = new OpenApiSchema
-                { 
-                    Type = "string", 
-                    Format = "binary" 
-                }
-#endif
             };
         }
     }
@@ -181,7 +153,6 @@ public class CoalesceApiOperationFilter : IOperationFilter
             var enumValues = (new string[] { IntelliTect.Coalesce.Api.DataSources.DataSourceFactory.DefaultSourceName })
                 .Concat(dataSources.Select(ds => ds.ClientTypeName));
 
-#if NET10_0_OR_GREATER
             // In OpenAPI.NET 2.0, Schema is read-only, so we need to create a new parameter
             var newSchema = new OpenApiSchema
             {
@@ -201,15 +172,6 @@ public class CoalesceApiOperationFilter : IOperationFilter
             var index = operation.Parameters.IndexOf(dataSourceNameParam);
             operation.Parameters.RemoveAt(index);
             operation.Parameters.Insert(index, newParam);
-#else
-            dataSourceNameParam.Schema = new OpenApiSchema
-            {
-                Type = "string",
-                Enum = enumValues
-                    .Select(n => new OpenApiString(n) as IOpenApiAny)
-                    .ToList()
-            };
-#endif
 
             foreach (var param in dataSources.SelectMany(ds => ds.DataSourceParameters).GroupBy(ds => ds.Name))
             {

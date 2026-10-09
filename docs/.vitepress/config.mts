@@ -418,6 +418,7 @@ export default defineConfig({
           autoTitle("/topics/coalesce-json"),
           autoTitle("/topics/eslint-plugin"),
           autoTitle("/topics/immutability"),
+          autoTitle("/topics/in-app-docs"),
           autoTitle("/topics/startup"),
           autoTitle("/topics/audit-logging"),
           autoTitle("/topics/mcp-server"),

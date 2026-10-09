@@ -1,0 +1,426 @@
+// Styles for the markdown VitePress renders. The class names come from
+// VitePress's markdown-it plugins. VitePress's default theme CSS cannot be
+// used because its global resets collide with Vuetify's.
+
+.c-doc {
+  --c-doc-border: rgba(var(--v-border-color), 0.16);
+  --c-doc-muted: rgba(var(--v-theme-on-surface), 0.62);
+  --c-doc-soft-bg: rgba(var(--v-theme-on-surface), 0.04);
+  --c-doc-code-bg: rgba(var(--v-theme-on-surface), 0.06);
+  --c-doc-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --c-doc-copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E");
+  --c-doc-copied-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+
+  max-width: 900px;
+  font-size: 15px;
+  line-height: 1.7;
+
+  // ---- Headings ----------------------------------------------------------
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    // Clears the app bar when a hash link jumps to a heading.
+    scroll-margin-top: calc(var(--c-docs-offset, 0px) + 16px);
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin: 0 0 24px;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    margin: 48px 0 16px;
+    padding-top: 24px;
+    border-top: 1px solid var(--c-doc-border);
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    margin: 32px 0 12px;
+  }
+
+  h4 {
+    font-size: 1rem;
+    margin: 24px 0 8px;
+  }
+
+  .header-anchor {
+    float: left;
+    margin-left: -0.87em;
+    padding-right: 0.23em;
+    font-weight: 400;
+    opacity: 0;
+    transition: opacity 0.15s;
+
+    &::before {
+      content: "#";
+    }
+  }
+
+  :hover > .header-anchor,
+  .header-anchor:focus {
+    opacity: 0.5;
+  }
+
+  // ---- Text --------------------------------------------------------------
+  p,
+  ul,
+  ol {
+    margin: 16px 0;
+  }
+
+  li > ul,
+  li > ol {
+    margin: 4px 0;
+  }
+
+  a {
+    color: rgb(var(--v-theme-primary));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      text-decoration-thickness: 2px;
+    }
+  }
+
+  blockquote {
+    margin: 16px 0;
+    padding: 4px 0 4px 16px;
+    border-left: 2px solid var(--c-doc-border);
+    color: var(--c-doc-muted);
+  }
+
+  hr {
+    margin: 32px 0;
+    border: none;
+    border-top: 1px solid var(--c-doc-border);
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  // ---- Tables ------------------------------------------------------------
+  table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    margin: 20px 0;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th,
+  td {
+    padding: 8px 14px;
+    border: 1px solid var(--c-doc-border);
+    text-align: left;
+  }
+
+  th {
+    background: var(--c-doc-soft-bg);
+    font-weight: 600;
+  }
+
+  // ---- Inline code -------------------------------------------------------
+  :not(pre) > code {
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: var(--c-doc-code-bg);
+    font-size: 0.875em;
+    font-family: var(--c-doc-font-mono);
+  }
+
+  // ---- Code blocks -------------------------------------------------------
+  div[class*="language-"] {
+    position: relative;
+    margin: 20px 0;
+    border: 1px solid var(--c-doc-border);
+    border-radius: 8px;
+    background: var(--c-doc-soft-bg);
+    overflow: hidden;
+
+    pre {
+      margin: 0;
+      padding: 16px 0;
+      overflow-x: auto;
+      background: transparent;
+    }
+
+    // Overrides any app-wide inline `code` colors, which would otherwise band
+    // the block where `pre`'s padding shows through.
+    code {
+      display: block;
+      width: fit-content;
+      min-width: 100%;
+      padding: 0 20px;
+      background: transparent;
+      color: inherit;
+      font-family: var(--c-doc-font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .line {
+      display: inline-block;
+      width: 100%;
+    }
+
+    // Language label, hidden while the copy button is hovered.
+    .lang {
+      position: absolute;
+      top: 6px;
+      right: 12px;
+      font-size: 11px;
+      color: var(--c-doc-muted);
+      transition: opacity 0.2s;
+    }
+
+    // VitePress emits an empty `<button class="copy">`, so the icon has to come
+    // from CSS. Masked SVG rather than an icon font, to stay independent of
+    // whichever Font Awesome major version the app is on.
+    button.copy {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--c-doc-muted);
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+
+      &::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-color: currentColor;
+        mask: var(--c-doc-copy-icon) center / 15px no-repeat;
+        -webkit-mask: var(--c-doc-copy-icon) center / 15px no-repeat;
+      }
+
+      &.copied {
+        color: rgb(var(--v-theme-success));
+
+        &::before {
+          mask-image: var(--c-doc-copied-icon);
+          -webkit-mask-image: var(--c-doc-copied-icon);
+        }
+      }
+    }
+
+    &:hover,
+    &:focus-within {
+      button.copy {
+        opacity: 1;
+
+        &:hover {
+          background: rgba(var(--v-theme-on-surface), 0.08);
+          border-color: var(--c-doc-border);
+        }
+      }
+
+      .lang {
+        opacity: 0;
+      }
+    }
+
+    // Line highlighting from ```ts{2} and the diff/focus/error transformers.
+    .highlighted,
+    .diff,
+    .has-focus .line:not(.focused) {
+      transition: background-color 0.2s;
+    }
+
+    .highlighted {
+      background: rgba(var(--v-theme-primary), 0.09);
+    }
+
+    .diff.add {
+      background: rgba(var(--v-theme-success), 0.12);
+    }
+
+    .diff.remove {
+      background: rgba(var(--v-theme-error), 0.12);
+      opacity: 0.7;
+    }
+
+    .has-focus .line:not(.focused) {
+      filter: blur(0.095rem);
+      opacity: 0.6;
+    }
+
+    &:hover .has-focus .line:not(.focused) {
+      filter: none;
+      opacity: 1;
+    }
+  }
+
+  // Line numbers, when `markdown.lineNumbers` is enabled.
+  .line-numbers-wrapper {
+    position: absolute;
+    top: 16px;
+    left: 0;
+    width: 40px;
+    padding-right: 12px;
+    text-align: right;
+    font-family: var(--c-doc-font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--c-doc-muted);
+  }
+
+  div[class*="language-"].line-numbers-mode code {
+    padding-left: 52px;
+  }
+
+  // ---- Code groups -------------------------------------------------------
+  .vp-code-group {
+    margin: 20px 0;
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      border-bottom: 1px solid var(--c-doc-border);
+
+      input {
+        position: fixed;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      label {
+        padding: 6px 14px;
+        border-bottom: 2px solid transparent;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--c-doc-muted);
+        cursor: pointer;
+      }
+
+      input:checked + label {
+        color: rgb(var(--v-theme-primary));
+        border-bottom-color: rgb(var(--v-theme-primary));
+      }
+    }
+
+    .blocks > div[class*="language-"] {
+      display: none;
+      margin: 0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+
+      &.active {
+        display: block;
+      }
+    }
+  }
+
+  // ---- Custom blocks (::: tip, ::: warning, ...) --------------------------
+  .custom-block {
+    --c-doc-block-color: var(--v-theme-primary);
+
+    margin: 20px 0;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 3px solid rgb(var(--c-doc-block-color));
+    background: rgba(var(--c-doc-block-color), 0.07);
+    font-size: 14px;
+
+    p {
+      margin: 8px 0;
+    }
+
+    :first-child {
+      margin-top: 0;
+    }
+
+    :last-child {
+      margin-bottom: 0;
+    }
+
+    a {
+      color: rgb(var(--c-doc-block-color));
+    }
+
+    .custom-block-title {
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: rgb(var(--c-doc-block-color));
+    }
+
+    div[class*="language-"] {
+      background: rgba(var(--v-theme-surface), 0.65);
+    }
+
+    &.info {
+      --c-doc-block-color: var(--v-theme-info);
+    }
+
+    &.tip {
+      --c-doc-block-color: var(--v-theme-success);
+    }
+
+    &.warning {
+      --c-doc-block-color: var(--v-theme-warning);
+    }
+
+    &.danger {
+      --c-doc-block-color: var(--v-theme-error);
+    }
+
+    // Not a severity, so it takes the neutral surface treatment rather than a
+    // colored accent. `--v-border-color` is bare black, hence the explicit
+    // low-opacity border instead of routing it through --c-doc-block-color.
+    &.details {
+      --c-doc-block-color: var(--v-theme-on-surface);
+
+      background: var(--c-doc-soft-bg);
+      border-left-color: var(--c-doc-border);
+
+      summary {
+        font-weight: 600;
+        cursor: pointer;
+        color: inherit;
+      }
+    }
+  }
+}
+
+// Shiki emits both themes as custom properties on every token so the palette
+// can follow Vuetify's theme without re-rendering the markdown.
+//
+// Colors only. The `--shiki-*-bg` pair is deliberately unused: custom properties
+// inherit, so painting it on tokens would tile the theme's own block background
+// over the wrapper below in stripes, one per line. `inherit` fallbacks matter
+// too — most tokens set no font-weight, and a bare `var()` on a missing property
+// computes to `unset`.
+.c-doc .shiki span {
+  color: var(--shiki-light, inherit);
+  font-weight: var(--shiki-light-font-weight, inherit);
+  font-style: var(--shiki-light-font-style, inherit);
+  text-decoration: var(--shiki-light-text-decoration, inherit);
+  unicode-bidi: isolate;
+}
+
+.v-theme--dark .c-doc .shiki span {
+  color: var(--shiki-dark, inherit);
+  font-weight: var(--shiki-dark-font-weight, inherit);
+  font-style: var(--shiki-dark-font-style, inherit);
+  text-decoration: var(--shiki-dark-text-decoration, inherit);
+}

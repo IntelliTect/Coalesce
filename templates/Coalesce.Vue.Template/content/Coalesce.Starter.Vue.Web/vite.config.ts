@@ -10,6 +10,9 @@ import createAutoImport from "unplugin-auto-import/vite";
 import createVueComponentImporterPlugin from "unplugin-vue-components/vite";
 import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify3/build";
 import createVuetify, { transformAssetUrls } from "vite-plugin-vuetify";
+//#if Docs
+import { vitepressDocs } from "coalesce-vue-docs/vite";
+//#endif
 
 export default defineConfig({
   build: {
@@ -52,6 +55,11 @@ export default defineConfig({
   },
 
   plugins: [
+    //#if Docs
+    // Compiles the markdown under `docs/` into Vue components for the `/docs` route.
+    vitepressDocs(),
+
+    //#endif
     createVuePlugin({
       template: { transformAssetUrls },
     }),

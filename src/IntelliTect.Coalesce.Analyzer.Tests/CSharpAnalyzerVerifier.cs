@@ -13,12 +13,14 @@ public abstract class CSharpAnalyzerVerifier<TAnalyzer>
 {
     private static void SetupSolutionState(SolutionState solutionState)
     {
-#if NET8_0
-        solutionState.ReferenceAssemblies = ReferenceAssemblies.Net.Net80;
-#elif NET9_0
-        solutionState.ReferenceAssemblies = ReferenceAssemblies.Net.Net90;
-#elif NET10_0
+#if NET10_0
         solutionState.ReferenceAssemblies = ReferenceAssemblies.Net.Net100;
+#elif NET11_0
+        // Microsoft.CodeAnalysis.Testing has no Net110 preset yet.
+        solutionState.ReferenceAssemblies = new ReferenceAssemblies(
+            "net11.0",
+            new PackageIdentity("Microsoft.NETCore.App.Ref", "11.0.0-rc.1.26425.128"),
+            System.IO.Path.Combine("ref", "net11.0"));
 #else
 #error "Add reference assemblies for new target framework.
 #endif

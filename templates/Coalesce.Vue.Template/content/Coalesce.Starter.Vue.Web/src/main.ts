@@ -44,6 +44,9 @@ const vuetify = createVuetify({
     VField: inputDefaults,
     VInput: inputDefaults,
     VSwitch: { color: "primary" },
+    VDatePicker: {
+      controlVariant: "modal",
+    },
   },
   theme: {
     themes: {

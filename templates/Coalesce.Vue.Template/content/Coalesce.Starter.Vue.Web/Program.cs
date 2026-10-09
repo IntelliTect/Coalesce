@@ -88,7 +88,9 @@ services.AddCoalesce<AppDbContext>(
 #else
 services.AddCoalesce<AppDbContext>();
 #endif
-services.AddDataProtection().PersistKeysToDbContext<AppDbContext>();
+services.AddDataProtection()
+    .SetApplicationName("Coalesce.Starter.Vue")
+    .PersistKeysToDbContext<AppDbContext>();
 services.AddMvc();
 
 #if BlobStorage

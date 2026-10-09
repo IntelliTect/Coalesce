@@ -102,6 +102,38 @@
     </v-col>
   </v-row>
 
+  <h1>Lazy</h1>
+  <v-row>
+    <v-col>
+      <c-datetime-picker
+        v-model="lazyDate"
+        date-kind="date"
+        label="lazy"
+        clearable
+        lazy
+      ></c-datetime-picker>
+      <c-datetime-picker
+        v-model.lazy="modifierDate"
+        date-kind="date"
+        label="v-model.lazy"
+        clearable
+      ></c-datetime-picker>
+      <c-datetime-picker
+        v-model="eagerDate"
+        date-kind="date"
+        label="not lazy"
+        clearable
+      ></c-datetime-picker>
+    </v-col>
+    <v-col>
+      lazy: {{ lazyDate }}
+      <br />
+      v-model.lazy: {{ modifierDate }}
+      <br />
+      not lazy: {{ eagerDate }}
+    </v-col>
+  </v-row>
+
   <h1>Native</h1>
   <v-row>
     <v-col>
@@ -120,8 +152,13 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import { PersonViewModel } from "@/viewmodels.g";
 
 const vm = new PersonViewModel();
 vm.$load(15);
+
+const lazyDate = ref<Date | null>(new Date(2026, 5, 6));
+const modifierDate = ref<Date | null>(new Date(2026, 5, 6));
+const eagerDate = ref<Date | null>(new Date(2026, 5, 6));
 </script>

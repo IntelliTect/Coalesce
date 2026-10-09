@@ -1,4 +1,3 @@
-#if NET9_0_OR_GREATER
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
@@ -7,13 +6,8 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
-#if NET10_0_OR_GREATER
 using Microsoft.OpenApi;
 using System.Text.Json.Nodes;
-#else
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
-#endif
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,7 +69,6 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
         foreach (var otherDescription in otherDescriptions)
         {
             object docService = context.ApplicationServices.GetRequiredKeyedService(docServiceType, context.DocumentName);
-#if NET10_0_OR_GREATER
             // In .NET 10, GetRequestBodyAsync requires OpenApiDocument as the first parameter
             var resultTask = docServiceType
                 .GetMethod("GetRequestBodyAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?
@@ -92,21 +85,6 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
                     // CancellationToken cancellationToken
                     ct
                 ]) as Task<OpenApiRequestBody>;
-#else
-            var resultTask = docServiceType
-                .GetMethod("GetRequestBodyAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?
-                .Invoke(docService, [
-                    // ApiDescription description,
-                    otherDescription,
-                    // IServiceProvider scopedServiceProvider,
-                    context.ApplicationServices,
-                    // IOpenApiSchemaTransformer[] schemaTransformers,
-                    // TODO: Too hard to acquire schema transformers here.
-                    Array.Empty<IOpenApiSchemaTransformer>(),
-                    // CancellationToken cancellationToken
-                    ct
-                ]) as Task<OpenApiRequestBody>;
-#endif
 
             if (resultTask is null) continue;
 
@@ -139,11 +117,7 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
                 foreach (var noSetterProp in paramsUnion.Where(p =>
                     // Remove "Filter" - we'll enumerate all available filter params
                     p.PropViewModel.Name == nameof(IFilterParameters.Filter)
-#if NET10_0_OR_GREATER
                     && p.OperationParam.Schema?.Type == JsonSchemaType.Object
-#else
-                    && p.OperationParam.Schema?.Type == "object"
-#endif
                 ))
                 {
                     operation.Parameters.Remove(noSetterProp.OperationParam);
@@ -170,11 +144,7 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
                             Description = $"Filters results by values contained in property '{filterProp.JsonName}'.",
                             Schema = new OpenApiSchema
                             {
-#if NET10_0_OR_GREATER
                                 Type = JsonSchemaType.String,
-#else
-                                Type = "string",
-#endif    
                             }
                         });
                     }
@@ -189,11 +159,7 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
             {
                 Schema = new OpenApiSchema()
                 {
-#if NET10_0_OR_GREATER
                     Type = JsonSchemaType.String,
-#else
-                    Type = "string",
-#endif    
                     Format = "binary"
                 }
             };
@@ -217,7 +183,6 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
             var enumValues = (new string[] { IntelliTect.Coalesce.Api.DataSources.DataSourceFactory.DefaultSourceName })
                 .Concat(dataSources.Select(ds => ds.ClientTypeName));
 
-#if NET10_0_OR_GREATER
             // In OpenAPI.NET 2.0, Schema is read-only, so we need to create a new parameter
             var newSchema = new OpenApiSchema
             {
@@ -237,15 +202,6 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
             var index = operation.Parameters.IndexOf(dataSourceNameParam);
             operation.Parameters.RemoveAt(index);
             operation.Parameters.Insert(index, newParam);
-#else
-            dataSourceNameParam.Schema = new OpenApiSchema
-            {
-                Type = "string",
-                Enum = enumValues
-                    .Select(n => new OpenApiString(n) as IOpenApiAny)
-                    .ToList()
-            };
-#endif
 
             foreach (var param in dataSources.SelectMany(ds => ds.DataSourceParameters).GroupBy(ds => ds.Name))
             {
@@ -265,4 +221,3 @@ internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
         }
     }
 }
-#endif

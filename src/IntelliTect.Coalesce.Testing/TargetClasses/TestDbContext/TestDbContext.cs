@@ -84,19 +84,11 @@ public class AppDbContext : DbContext
             .HasValue<AbstractImpl2>("impl2");
 
         // Configure json-mapped complex type properties on ComplexModel
-#if NET10_0_OR_GREATER
         modelBuilder.Entity<ComplexModel>(e =>
         {
             e.ComplexProperty(m => m.JsonObject, x => x.ToJson());
             e.ComplexCollection(m => m.JsonCollection, x => x.ToJson());
         });
-#else
-        modelBuilder.Entity<ComplexModel>(e =>
-        {
-            e.Ignore(m => m.JsonObject);
-            e.Ignore(m => m.JsonCollection);
-        });
-#endif
     }
 }
 

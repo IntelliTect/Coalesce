@@ -88,9 +88,60 @@ Does not impact time selection.
 The [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) name that the user will pick the date/time value in.
 Defaults to the value configured with [`setDefaultTimeZone`](/stacks/vue/layers/models.md#setdefaulttimezone) if the value bound to with `model`/`for` is a `DateTimeOffset`.
 
+<Prop def="color?: string = 'primary'" lang="ts" />
+
+The Vuetify theme color used by the date and time pickers in the popup menu.
+
+<Prop def="openOn?: 'field' | 'icon' | 'focus' | 'picker-only' | 'none' = 'field'" lang="ts" />
+
+Determines how the popup containing the date and time pickers is opened:
+
+| | |
+|---|---|
+| `field` | Clicking anywhere in the text field. |
+| `icon` | Clicking the calendar/clock icon. The text field is left free for typing. |
+| `focus` | Focusing the text field, including by clicking it. |
+| `picker-only` | Clicking the text field, which cannot be typed into. The value can only be set with the pickers. |
+| `none` | Not by any interaction with the component, leaving a text field that parses typed dates. The popup can still be opened with `v-model:menu`. |
+
+Pressing `ArrowUp` or `ArrowDown` in the text field also opens the popup in every mode except `none`. `native` inputs use the browser's own picker, so this prop has no effect on them.
+
+<Prop def="v-model:menu?: boolean" lang="ts" />
+
+The open state of the popup, for opening or closing it from outside the component.
+
+``` vue-html
+<c-datetime-picker :model="person" for="birthDate" open-on="none" v-model:menu="menu" />
+<v-btn @click="menu = !menu"> Pick a date </v-btn>
+```
+
+<Prop def="menuProps?: VMenu['$props']" lang="ts" />
+
+Props to pass to the [v-menu](https://vuetifyjs.com/en/api/v-menu/) that contains the date and time pickers. For example, `:menu-props="{ location: 'end center' }"` opens the popup to the right of the input instead of below it.
+
+<Prop def="datePickerProps?: VDatePicker['$props']" lang="ts" />
+
+Props to pass to the [v-date-picker](https://vuetifyjs.com/en/api/v-date-picker/) inside the popup menu.
+
 <Prop def="native?: boolean" lang="ts" />
 
 True if a native HTML5 input should be used instead of a popup menu with date/time pickers inside of it.
+
+<Prop def="lazy?: boolean" lang="ts" />
+
+True if text typed into the field should not be published to the bound value until the input is committed. Committing happens when the user presses ``Enter``, ``Tab``, or ``Escape``, moves focus out of the field, or clicks the `clearable` clear icon. Selections made in the date/time picker popup are always published immediately.
+
+By default, every keystroke that parses into a valid date is published, so retyping the year of ``6/6/2026`` also publishes ``6/6/2`` and ``6/6/202`` along the way. Use `lazy` when a partially-typed date reaching the bound value is undesirable, e.g. when it drives an expensive computation.
+
+The `lazy` modifier on `v-model` has the same effect:
+
+``` vue-html
+<c-datetime-picker :model="person" for="birthDate" lazy />
+
+<c-datetime-picker v-model.lazy="standaloneDate" />
+```
+
+`native` inputs are unaffected by this prop, since a native HTML5 date input only raises a change event once a whole date has been entered.
 
 <Prop def="readonly?: boolean" lang="ts" />
 

@@ -20,9 +20,7 @@ namespace IntelliTect.Coalesce.Api.Controllers;
 
 [AttributeUsage(AttributeTargets.Class)]
 internal sealed class CoalesceApiControllerAttribute : Attribute, IControllerModelConvention
-#if NET10_0_OR_GREATER
 , IDisableCookieRedirectMetadata
-#endif
 {
     public void Apply(ControllerModel controller)
     {

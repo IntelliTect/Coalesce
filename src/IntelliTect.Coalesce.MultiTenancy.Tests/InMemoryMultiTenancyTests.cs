@@ -54,13 +54,8 @@ public class InMemoryMultiTenancyTests
     {
         using var db = new TestDbContext(BuildOptions());
         var animalType = db.Model.FindEntityType(typeof(Animal))!;
-#if NET10_0_OR_GREATER
         var filters = animalType.GetDeclaredQueryFilters().ToList();
         await Assert.That(filters.Count).IsGreaterThanOrEqualTo(1);
-#else
-        var filter = animalType.GetQueryFilter();
-        await Assert.That(filter).IsNotNull();
-#endif
     }
 
     [Test]
@@ -286,7 +281,6 @@ public class InMemoryMultiTenancyTests
 
     // ── Named query filter (NET10+) ──────────────────────────────────────────
 
-#if NET10_0_OR_GREATER
     [Test]
     public async Task NamedQueryFilter_CanBeSelectivelyIgnored()
     {
@@ -314,7 +308,6 @@ public class InMemoryMultiTenancyTests
             await Assert.That(all).Contains("T2Dog");
         }
     }
-#endif
 
     // ── LambdaExpression overload ─────────────────────────────────────────────
 
@@ -393,13 +386,8 @@ public class InMemoryMultiTenancyTests
         await Assert.That(pk.Properties.Count).IsEqualTo(1);
         await Assert.That(pk.Properties[0].Name).IsEqualTo("Id");
 
-#if NET10_0_OR_GREATER
         var filters = entityType.GetDeclaredQueryFilters().ToList();
         await Assert.That(filters.Count).IsEqualTo(0);
-#else
-        var filter = entityType.GetQueryFilter();
-        await Assert.That(filter).IsNull();
-#endif
     }
 
     // ── Self-referencing FK model structure ───────────────────────────────────

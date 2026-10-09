@@ -68,7 +68,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue-jsx": "^5.1.5",
     "axe-core": "^4.11.4",
-    "axios": "^1.16.0",
+    "axios": "^1.18.0",
     "coalesce-vue": "workspace:*",
     "vue-component-type-helpers": "^2.2.12",
     "vue-router": "^4.4.1 || ^5.0.0",

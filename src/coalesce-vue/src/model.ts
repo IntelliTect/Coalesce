@@ -388,12 +388,15 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
         delete value.$type;
       }
     } else if ("$metadata" in value && value.$metadata !== meta) {
-      if (
+      // Compared by name because HMR can produce new metadata instances for the same type.
+      const derivedMeta =
         "derivedTypes" in meta &&
-        meta.derivedTypes?.includes(value.$metadata)
-      ) {
-        meta = value.$metadata;
-      } else if (this.mode == "convert") {
+        (meta.derivedTypes?.find((t) => t.name == value.$metadata.name) as
+          | TMeta
+          | undefined);
+      if (derivedMeta) {
+        meta = derivedMeta;
+      } else if (this.mode == "convert" && value.$metadata.name != meta.name) {
         // If there already is metadata but it doesn't match,
         // this is bad - someone passed mismatched parameters.
         throw Error(

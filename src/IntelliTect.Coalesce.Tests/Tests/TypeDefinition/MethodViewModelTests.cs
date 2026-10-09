@@ -38,7 +38,7 @@ public class MethodViewModelTests
     [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalParams), "optionalObject", null)]
     [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalParams), "plainInt", null)]
     public async Task DefaultValue_FromCsDefaultOrAttribute(
-        ClassViewModelData data, string methodName, string paramName, object? expected)
+        ClassViewModelData data, string methodName, string paramName, object expected)
     {
         var method = data.ClassViewModel.MethodByName(methodName);
         var param = method.Parameters.Single(p => p.Name == paramName);

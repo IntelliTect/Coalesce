@@ -1083,11 +1083,21 @@ export abstract class ViewModel<
   // Deliberately uninitialized ref to avoid allocations when nothing is listening.
   _autoSaveState?: Ref<AutoCallState<AutoSaveOptions<any>> | undefined>;
 
+  // The autosave methods list a required-`options` overload first because TS can't
+  // discriminate AutoSaveOptions' `deep` union for an optional parameter, which leaves
+  // callback parameters untyped.
   /**
    * Starts auto-saving of the instance when changes to its savable data properties occur.
    * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
    * @param options Options to control how the auto-saving is performed.
    */
+  public $useAutoSave(options: AutoSaveOptions<this>): void;
+  /**
+   * Starts auto-saving of the instance when changes to its savable data properties occur.
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $useAutoSave(options?: AutoSaveOptions<this>): void;
   public $useAutoSave(options: AutoSaveOptions<this> = {}) {
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
@@ -1102,6 +1112,16 @@ export abstract class ViewModel<
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options to control how the auto-saving is performed.
    */
+  public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this>): void;
+  /**
+   * Starts auto-saving of the instance when changes to its savable data properties occur.
+   * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $startAutoSave(
+    vue: VueInstance,
+    options?: AutoSaveOptions<this>,
+  ): void;
   public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
     let state = this._autoSaveState?.value;
 
@@ -1167,12 +1187,19 @@ export abstract class ViewModel<
           // Everything should be good to go. Go forth and save!
           ranOnce = true;
           this.$save()
-            // After the save finishes, attempt another autosave.
-            // If the model has become dirty since the last save,
-            // we need to save again.
-            // This will happen if the state of the model changes while the save
-            // is in-flight.
-            .then(enqueueSave)
+            .then(
+              () => {
+                // After the save finishes, attempt another autosave.
+                // If the model has become dirty since the last save,
+                // we need to save again.
+                // This will happen if the state of the model changes while the save
+                // is in-flight.
+                // Enqueued before onSaved so a throwing callback can't halt autosave.
+                enqueueSave();
+                options.onSaved?.(this);
+              },
+              (error) => options.onError?.(this, error),
+            )
             // We need a catch block so all of this is testable.
             // Otherwise, jest will fail tests as soon as it sees an unhandled promise rejection.
             .catch(() => {});
@@ -1195,6 +1222,16 @@ export abstract class ViewModel<
     };
 
     startAutoCall(state, vue, undefined, enqueueSave);
+
+    // Wrapped so onStop also fires when startAutoCall's unmount hook cleans up.
+    const innerCleanup = state.cleanup;
+    state.cleanup = () => {
+      const wasActive = state.active;
+      innerCleanup?.();
+      if (wasActive) options.onStop?.(this);
+    };
+
+    options.onStart?.(this);
     state.trigger();
 
     if (options.deep) {
@@ -1775,7 +1812,14 @@ export abstract class ListViewModel<
    * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
    * @param options Options to control how the auto-saving is performed.
    */
-  public $useAutoSave(options: AutoSaveOptions<this> = {}) {
+  public $useAutoSave(options: AutoSaveOptions<TItem>): void;
+  /**
+   * Enables auto save for the items in the list.
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $useAutoSave(options?: AutoSaveOptions<TItem>): void;
+  public $useAutoSave(options: AutoSaveOptions<TItem> = {}) {
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
       throw new Error(
@@ -1789,7 +1833,23 @@ export abstract class ListViewModel<
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options to control how the auto-saving is performed.
    */
-  public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
+  public $startAutoSave(
+    vue: VueInstance,
+    options: AutoSaveOptions<TItem>,
+  ): void;
+  /**
+   * Enables auto save for the items in the list.
+   * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $startAutoSave(
+    vue: VueInstance,
+    options?: AutoSaveOptions<TItem>,
+  ): void;
+  public $startAutoSave(
+    vue: VueInstance,
+    options: AutoSaveOptions<TItem> = {},
+  ) {
     vue = getPublicInstance(vue);
 
     if (this._lightweight) {
@@ -2152,24 +2212,56 @@ type AutoLoadOptions<TThis> = DebounceOptions & {
   immediate?: boolean;
 };
 
+type AutoSaveCallbacks<TVm> = {
+  /** A function that is called when auto-save is started on a view model.
+   *
+   * With `deep` auto-saves, this is invoked for each entity in the object graph
+   * as auto-save is attached to it - including entities that get attached to the
+   * graph (via navigation properties or collections) after auto-save was started. */
+  onStart?: (viewModel: TVm) => void;
+
+  /** A function that is called when auto-save is stopped on a view model,
+   * either explicitly via `$stopAutoSave()` or automatically when the Vue
+   * component that owns the auto-save is unmounted.
+   *
+   * Note that `$stopAutoSave()` is not recursive, so when using `deep` auto-saves,
+   * calling `$stopAutoSave()` on a root model will only invoke this for that root.
+   * The callback will still be invoked for every entity when the owning component unmounts. */
+  onStop?: (viewModel: TVm) => void;
+
+  /** A function that is called after an auto-save `$save` completes successfully.
+   *
+   * With `deep` auto-saves, this is invoked for whichever entity in the object
+   * graph was saved. */
+  onSaved?: (viewModel: TVm) => void;
+
+  /** A function that is called if an auto-save `$save` fails with an error.
+   *
+   * With `deep` auto-saves, this is invoked for whichever entity in the object
+   * graph failed to save. This is only invoked for failures of the save request
+   * itself - saves that are skipped due to client-side validation errors
+   * (observable via `$hasError`) or a `predicate` do not invoke this callback. */
+  onError?: (viewModel: TVm, error: unknown) => void;
+};
+
 type AutoSaveOptions<TThis> = DebounceOptions &
   (
-    | {
+    | ({
         /** A function that will be called before autosaving that can return false to prevent a save. */
         predicate?: (viewModel: TThis) => boolean;
 
         /** If true, auto-saving will also be enabled for all view models that are
          * reachable from the navigation properties & collections of the current view model. */
         deep?: false;
-      }
-    | {
+      } & AutoSaveCallbacks<TThis>)
+    | ({
         /** A function that will be called before autosaving that can return false to prevent a save. */
         predicate?: (viewModel: ViewModel) => boolean;
 
         /** If true, auto-saving will also be enabled for all view models that are
          * reachable from the navigation properties & collections of the current view model. */
         deep: true;
-      }
+      } & AutoSaveCallbacks<ViewModel>)
   );
 
 export interface BulkSaveOptions {

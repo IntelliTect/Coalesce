@@ -1525,7 +1525,7 @@ export type ResponseCachingConfiguration = {
   };
 };
 
-function createArgs<TArgsObj extends object>(
+function createArgs<TArgsObj>(
   argsFactory: () => TArgsObj,
   $metadata: Method | undefined,
 ): TArgsObj {

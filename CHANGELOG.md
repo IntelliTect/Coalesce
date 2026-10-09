@@ -25,6 +25,7 @@
 - Fixed `$save` invocations downgrading type discriminators to their base types on nested polymorphic objects.
 - Fixed `purgeStaleCacheEntries` crashing at module import when `localStorage`/`sessionStorage` are `undefined` (e.g. Node 26 without `--localstorage-file`, Vitest with jsdom on Node 26).
 - Fixed `c-select` in single-select mode placing its text input on a line of its own when the selected item is too wide to fit on one line, adding an empty line to the bottom of the field.
+- Fixed ViewModels throwing "Attempted to load a X ViewModel with a X object" after Vite HMR re-evaluates generated metadata.
 
 ## Backend
 - Added .NET 11 target. The `net11.0` assemblies are compiled with runtime async (`<Features>runtime-async=on</Features>`). `IntelliTect.Coalesce.Swashbuckle` does not yet target .NET 11.

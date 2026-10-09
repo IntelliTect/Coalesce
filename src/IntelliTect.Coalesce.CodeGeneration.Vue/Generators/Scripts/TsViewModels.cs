@@ -251,10 +251,10 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
 
         var signatureData = inputParams.SignatureData(paramTypeFlags).ToList();
 
-        string argsConstructor =
-            "({" +
-            string.Concat(inputParams.Select(f => $"{f.JsVariable}: null as {new VueType(f.Type, paramTypeFlags).TsType("$models")} | null, ")) +
-            "})";
+        string argsType =
+            "{" +
+            string.Join(", ", inputParams.Select(f => $"{f.JsVariable}: {new VueType(f.Type, paramTypeFlags).TsType("$models")} | null")) +
+            "}";
 
         var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
 
@@ -270,10 +270,8 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
             string positionalParams = string.Join(", ", method.ApiParameters.Select(p => PropValue(p, "")));
             b.Indented($"({signature}) => c.{method.JsVariable}({positionalParams}),");
 
-            // The factory function to return a new args object. Args object lives on `caller.args`
-            b.Indented($"() => {argsConstructor},");
-
-            // The invoker function when the caller is invoked with args with `caller.invokeWithArgs(args?)`
+            // The invoker function when the caller is invoked with args with `caller.invokeWithArgs(args?)`.
+            // The `args` annotation types `caller.args`; the object itself is created from metadata.
             var argsParams = string.Join(", ", method.ApiParameters.Select(p =>
                 PropValue(p, "args.")
 
@@ -289,7 +287,7 @@ public class TsViewModels : StringBuilderFileGenerator<ReflectionRepository>
 
 
             ));
-            b.Indented($"(c, args) => c.{method.JsVariable}({argsParams}))");
+            b.Indented($"(c, args: {argsType}) => c.{method.JsVariable}({argsParams}))");
 
             // Lazy getter technique - don't create the caller until/unless it is needed,
             // since creation of api callers is a little expensive.

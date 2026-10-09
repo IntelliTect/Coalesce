@@ -19,6 +19,7 @@
 - `c-datetime-picker`: Added `lazy` prop (also usable as the `lazy` modifier on `v-model`) that defers updates to the bound value until the input is committed, rather than publishing every keystroke.
 - `c-datetime-picker`: Added `openOn` prop selecting what opens the popup: `field` (default), `icon`, `focus`, `picker-only` (the text field can't be typed into), or `none`. Arrow up/down also opens it in every mode but `none`.
 - `c-datetime-picker`: Added `menuProps` for passing props to the popup's `v-menu` (e.g. `location`), and `v-model:menu` for opening and closing it from outside the component.
+- `$makeCaller` accepts an args invoker without an args factory when given method metadata, creating the args object from the method's parameter metadata. Generated ViewModel method callers now use this, emitting the args type as an annotation instead of a runtime factory.
 - `c-display`: now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
 - Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
 - Fixed `$save` invocations downgrading type discriminators to their base types on nested polymorphic objects.

@@ -89,3 +89,5 @@ Model properties that aren't mapped to the database should be marked with `[NotM
 `System.ComponentModel.DefaultValueAttribute`
 
 Properties with `[DefaultValue]` will receive the specified value when a new ViewModel is instantiated on the client. This enables scenarios like pre-filling a required property with a suggested value.
+
+[Method parameters](/modeling/model-components/methods.md#default-values) with `[DefaultValue]` will receive the specified value in the `args` of the method's API caller.

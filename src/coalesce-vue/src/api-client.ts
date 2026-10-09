@@ -1029,11 +1029,10 @@ export class ApiClient<T extends ApiRoutedType> {
     // Set this on the instance if we have it.
     instance.$metadata = meta;
 
-    // Set $metadata on the initial args object so that bindToQueryString
-    // can resolve parameter metadata. resetArgs() also does this,
-    // but the constructor's resetArgs() runs before $metadata is set above.
-    if (meta && "args" in instance) {
-      (instance.args as any).$metadata = meta;
+    // The constructor's resetArgs() runs before $metadata is set above,
+    // so the initial args are missing $metadata and parameter default values.
+    if (meta && "resetArgs" in instance) {
+      instance.resetArgs();
     }
 
     return instance as any;
@@ -1471,6 +1470,22 @@ export type ResponseCachingConfiguration = {
     maxEntries?: number;
   };
 };
+
+function createArgs<TArgsObj>(
+  argsFactory: () => TArgsObj,
+  $metadata: Method | undefined,
+): TArgsObj {
+  const args = argsFactory() as any;
+  if ($metadata) {
+    args.$metadata = $metadata;
+    for (const param of Object.values($metadata.params)) {
+      if ("defaultValue" in param && args[param.name] == null) {
+        args[param.name] = param.defaultValue;
+      }
+    }
+  }
+  return args;
+}
 
 // Base class for ApiState that contains nothing but the logic for
 // subclassing Function. Specifically, we do this to avoid a need to call
@@ -2413,9 +2428,7 @@ export class ItemApiStateWithArgs<
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
   public resetArgs() {
-    const args = this.argsFactory();
-    if (this.$metadata) (args as any).$metadata = this.$metadata;
-    this.args = args;
+    this.args = createArgs(this.argsFactory, this.$metadata);
   }
 
   /** Invoke a call to the API endpoint after an affirmative confirmation from the user.
@@ -2616,9 +2629,7 @@ export class ListApiStateWithArgs<
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
   public resetArgs() {
-    const args = this.argsFactory();
-    if (this.$metadata) (args as any).$metadata = this.$metadata;
-    this.args = args;
+    this.args = createArgs(this.argsFactory, this.$metadata);
   }
 
   /** Invoke a call to the API endpoint after an affirmative confirmation from the user.

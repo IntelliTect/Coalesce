@@ -235,6 +235,7 @@ public class ComplexModel
         int intWithDefault = 42,
         Case.Statuses enumWithDefault = Case.Statuses.ClosedNoSolution,
         string stringWithDefault = "foo",
+        [DefaultValue(true)] bool? boolWithDefaultAttribute = null,
         Test? optionalObject = null,
         Test[]? optionalObjectCollection = null
     )

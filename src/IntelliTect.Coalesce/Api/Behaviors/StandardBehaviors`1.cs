@@ -652,7 +652,7 @@ public abstract class StandardBehaviors<T> : IBehaviors<T>, IStandardCrudStrateg
                     // Find the entity described by the error message
                     .FirstOrDefault(entry =>
                         entry.Metadata.Equals(table) &&
-                        keyValue == string.Join(", ", index.Properties.Select(p => entry.CurrentValues[p] ?? "<NULL>"))
+                        keyValue == string.Join(", ", index.Properties.Select(p => entry.CurrentValues[p.Name] ??"<NULL>"))
                     );
 
                 if (entity is null)

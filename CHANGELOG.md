@@ -1,6 +1,7 @@
 # 7.0.0
 
 ## Breaking Changes
+- Dropped support for .NET 8 and .NET 9.
 - The generated ViewModel stubs for abstract model types have been replaced by static objects with a static `.load(id)` method that returns a standard `ItemApiState` caller. They are no longer exposed as instantiable proxy objects that mutate themselves into the correct implementation type after `$load`ing from the server - this approach did not fully satisfy the TypeScript contract of the derived types at runtime and otherwise attempted (and failed) to provide a concrete instance of a type that should not actually be instantiable.
 - Removed the `coalesce_generate` MCP tool, which was created back when agents didn't support terminal auto-approvals. Update your projects' agent guidance to instead run `dotnet coalesce` in your `.Web` project.
 - The default `color` of `c-datetime-picker` is now `primary` instead of `secondary`. Pass `color="secondary"` to restore the previous appearance.
@@ -25,6 +26,7 @@
 - Fixed `c-select` in single-select mode placing its text input on a line of its own when the selected item is too wide to fit on one line, adding an empty line to the bottom of the field.
 
 ## Backend
+- Added .NET 11 target. The `net11.0` assemblies are compiled with runtime async (`<Features>runtime-async=on</Features>`). `IntelliTect.Coalesce.Swashbuckle` does not yet target .NET 11.
 - Added `IntelliTect.Coalesce.MultiTenancy` package, extracting the template's multi-tenancy database mechanics into a reusable library to reduce boilerplate duplication in projects.
 - Open generic data sources whose single type parameter is constrained to a base class are now automatically available as data sources for that base class and all derived entity types.
 - Added `headerComment` generator configuration option to emit custom comments at the start of all generated files. Supports cascading hierarchical configuration—define on a parent generator and child generators automatically inherit the value.
@@ -35,6 +37,7 @@
 ## Template Changes
 - `VDatePicker` now defaults to `controlVariant: "modal"`.
 - Added `Docs` option for in-app documentation with `coalesce-vue-docs`.
+- Terraform now targets `hashicorp/azurerm` `~> 5.8`. `azurerm_ai_services` is replaced by `azurerm_cognitive_account` (`kind = "AIServices"`), and the container apps subnet uses `service_endpoint` blocks instead of `service_endpoints`.
 - Multi-tenancy database configuration is now provided by the `IntelliTect.Coalesce.MultiTenancy` package instead of inline code in `AppDbContext`. To migrate an existing project that doesn't diverge significantly from the previous out-of-the-box Coalesce template tenancy behavior:
   1. Add the package `IntelliTect.Coalesce.MultiTenancy`
   2. In `OnConfiguring`, replace `.AddInterceptors(new TenantInterceptor())` with:

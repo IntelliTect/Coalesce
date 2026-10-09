@@ -27,10 +27,8 @@ using Microsoft.AspNetCore.Routing;
 
 
 
-#if NET9_0_OR_GREATER
 using IntelliTect.Coalesce.Api.OpenApi;
 using Microsoft.AspNetCore.OpenApi;
-#endif
 
 namespace IntelliTect.Coalesce;
 
@@ -104,11 +102,9 @@ public static class CoalesceServiceCollectionExtensions
         // Make adjustments to the API explorer so that it doesn't cause .NET 9's OpenAPI generation to implode.
         services.TryAddEnumerable(
             ServiceDescriptor.Transient<IApiDescriptionProvider, IntelliTect.Coalesce.Api.CoalesceApiDescriptionProvider>());
-#if NET9_0_OR_GREATER
         services.ConfigureAll<OpenApiOptions>(x =>
         {
             x.AddOperationTransformer<CoalesceApiOperationFilter>();
-#if NET10_0_OR_GREATER
             // Workaround https://github.com/dotnet/aspnetcore/issues/61038
             x.AddDocumentTransformer<CoalesceNumericSchemaTransformer>();
 
@@ -119,9 +115,7 @@ public static class CoalesceServiceCollectionExtensions
                 var id = defaultCreateId(typeInfo);
                 return id?.Replace("[]", "Array");
             };
-#endif
         });
-#endif
 
         return services;
     }
@@ -148,7 +142,6 @@ public static class CoalesceServiceCollectionExtensions
     {
         if (services == null) throw new ArgumentNullException(nameof(services));
 
-#if NET10_0_OR_GREATER
         services.AddScoped<IUrlHelper>(x =>
         {
             var httpContext = x.GetRequiredService<IHttpContextAccessor>().HttpContext;
@@ -160,15 +153,6 @@ public static class CoalesceServiceCollectionExtensions
                 ? new ActionContext(httpContext, httpContext.GetRouteData(), actionDescriptor ?? new())
                 : new());
         });
-#else
-        services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-        services.AddScoped<IUrlHelper>(x =>
-        {
-            var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
-            var factory = x.GetRequiredService<IUrlHelperFactory>();
-            return factory.GetUrlHelper(actionContext!);
-        });
-#endif
 
         return services;
     }

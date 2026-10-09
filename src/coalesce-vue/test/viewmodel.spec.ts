@@ -2287,16 +2287,16 @@ describe("ViewModel", () => {
         );
         student.$isDirty = false;
         student.advisor!.$isDirty = false;
-        student.advisor!.$apiClient.save = vitest
-          .fn()
-          .mockResolvedValue(<AxiosItemResult<any>>{
-            data: { wasSuccessful: true },
-          });
-        student.$apiClient.save = vitest
-          .fn()
-          .mockResolvedValue(<AxiosItemResult<any>>{
-            data: { wasSuccessful: true },
-          });
+        student.advisor!.$apiClient.save = vitest.fn().mockResolvedValue(<
+          AxiosItemResult<any>
+        >{
+          data: { wasSuccessful: true },
+        });
+        student.$apiClient.save = vitest.fn().mockResolvedValue(<
+          AxiosItemResult<any>
+        >{
+          data: { wasSuccessful: true },
+        });
         const vue = mountData({ student });
 
         const saved: ViewModel[] = [];
@@ -3797,6 +3797,31 @@ describe("ListViewModel", () => {
 
       expect(item.$isDirty).toBe(false);
       expect(saveMock).toBeCalledTimes(1);
+    });
+
+    test("callbacks receive items", async () => {
+      const list = new CaseListViewModel();
+      const vue = mountData({ list });
+
+      mockEndpoint(
+        "/Case/save",
+        vitest.fn(() => ({ wasSuccessful: true })),
+      );
+
+      const started: CaseViewModel[] = [];
+      const saved: CaseViewModel[] = [];
+      list.$startAutoSave(vue, {
+        wait: 0,
+        onStart: (vm) => started.push(vm),
+        onSaved: (vm) => saved.push(vm),
+      });
+      const item = new CaseViewModel({ title: "bob" });
+      list.$items.push(item);
+
+      await delay(10);
+
+      expect(started).toEqual([item]);
+      expect(saved).toEqual([item]);
     });
 
     test("propagates to existing items", async () => {

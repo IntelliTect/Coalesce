@@ -267,7 +267,7 @@ type AutoSaveOptions<TThis> =
 }
 ```
 
-The `onStart`, `onStop`, `onSaved`, and `onError` callbacks are especially useful with `deep` auto-saves, where entities are attached to the object graph dynamically and there is otherwise no central place to observe the save lifecycle of each individual entity.
+On a `ListViewModel`, the callbacks receive the individual items of the list.
 
 <Prop def="$stopAutoSave(): void" lang="ts" />
     

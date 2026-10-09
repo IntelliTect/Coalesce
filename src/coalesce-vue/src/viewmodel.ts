@@ -1083,11 +1083,21 @@ export abstract class ViewModel<
   // Deliberately uninitialized ref to avoid allocations when nothing is listening.
   _autoSaveState?: Ref<AutoCallState<AutoSaveOptions<any>> | undefined>;
 
+  // The autosave methods list a required-`options` overload first because TS can't
+  // discriminate AutoSaveOptions' `deep` union for an optional parameter, which leaves
+  // callback parameters untyped.
   /**
    * Starts auto-saving of the instance when changes to its savable data properties occur.
    * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
    * @param options Options to control how the auto-saving is performed.
    */
+  public $useAutoSave(options: AutoSaveOptions<this>): void;
+  /**
+   * Starts auto-saving of the instance when changes to its savable data properties occur.
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $useAutoSave(options?: AutoSaveOptions<this>): void;
   public $useAutoSave(options: AutoSaveOptions<this> = {}) {
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
@@ -1102,6 +1112,16 @@ export abstract class ViewModel<
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options to control how the auto-saving is performed.
    */
+  public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this>): void;
+  /**
+   * Starts auto-saving of the instance when changes to its savable data properties occur.
+   * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $startAutoSave(
+    vue: VueInstance,
+    options?: AutoSaveOptions<this>,
+  ): void;
   public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
     let state = this._autoSaveState?.value;
 
@@ -1169,15 +1189,15 @@ export abstract class ViewModel<
           this.$save()
             .then(
               () => {
-                options.onSaved?.(this);
                 // After the save finishes, attempt another autosave.
                 // If the model has become dirty since the last save,
                 // we need to save again.
                 // This will happen if the state of the model changes while the save
                 // is in-flight.
+                // Enqueued before onSaved so a throwing callback can't halt autosave.
                 enqueueSave();
+                options.onSaved?.(this);
               },
-              // Report the failure to the caller-provided callback.
               (error) => options.onError?.(this, error),
             )
             // We need a catch block so all of this is testable.
@@ -1203,8 +1223,7 @@ export abstract class ViewModel<
 
     startAutoCall(state, vue, undefined, enqueueSave);
 
-    // Wrap the cleanup installed by startAutoCall so that `onStop` is invoked
-    // when auto-save is actually deactivated (either explicitly or on unmount).
+    // Wrapped so onStop also fires when startAutoCall's unmount hook cleans up.
     const innerCleanup = state.cleanup;
     state.cleanup = () => {
       const wasActive = state.active;
@@ -1793,7 +1812,14 @@ export abstract class ListViewModel<
    * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
    * @param options Options to control how the auto-saving is performed.
    */
-  public $useAutoSave(options: AutoSaveOptions<this> = {}) {
+  public $useAutoSave(options: AutoSaveOptions<TItem>): void;
+  /**
+   * Enables auto save for the items in the list.
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $useAutoSave(options?: AutoSaveOptions<TItem>): void;
+  public $useAutoSave(options: AutoSaveOptions<TItem> = {}) {
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
       throw new Error(
@@ -1807,7 +1833,23 @@ export abstract class ListViewModel<
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options to control how the auto-saving is performed.
    */
-  public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
+  public $startAutoSave(
+    vue: VueInstance,
+    options: AutoSaveOptions<TItem>,
+  ): void;
+  /**
+   * Enables auto save for the items in the list.
+   * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $startAutoSave(
+    vue: VueInstance,
+    options?: AutoSaveOptions<TItem>,
+  ): void;
+  public $startAutoSave(
+    vue: VueInstance,
+    options: AutoSaveOptions<TItem> = {},
+  ) {
     vue = getPublicInstance(vue);
 
     if (this._lightweight) {

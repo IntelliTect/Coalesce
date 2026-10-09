@@ -14,7 +14,7 @@
 - `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
 - Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
 - `c-select`: Added `returnViewModel` prop, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
-- Added `onStart`, `onStop`, `onSaved`, and `onError` callbacks to `AutoSaveOptions` (`$startAutoSave`/`$useAutoSave`). Each callback receives the affected view model, making it practical to observe the save lifecycle of individual entities when using deep auto-saves.
+- Added `onStart`, `onStop`, `onSaved`, and `onError` callbacks to `AutoSaveOptions` (`$startAutoSave`/`$useAutoSave`). Each callback receives the affected view model.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 - `c-datetime-picker`: Added `lazy` prop (also usable as the `lazy` modifier on `v-model`) that defers updates to the bound value until the input is committed, rather than publishing every keystroke.
 - `c-datetime-picker`: Added `openOn` prop selecting what opens the popup: `field` (default), `icon`, `focus`, `picker-only` (the text field can't be typed into), or `none`. Arrow up/down also opens it in every mode but `none`.

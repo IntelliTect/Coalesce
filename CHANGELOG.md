@@ -13,6 +13,7 @@
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
 - `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
 - Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
+- Method parameter default values, from `[DefaultValue]` or C# default values, are now included in metadata and used to initialize API caller `args`.
 - `c-select`: Added `returnViewModel` prop, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 - `c-datetime-picker`: Added `lazy` prop (also usable as the `lazy` modifier on `v-model`) that defers updates to the bound value until the input is committed, rather than publishing every keystroke.

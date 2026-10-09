@@ -606,6 +606,15 @@ public class TsMetadata : StringBuilderFileGenerator<ReflectionRepository>
             {
                 b.Line($"get source() {{ return {GetClassMetadataRef(method.Parent)}.props.{parameter.ParentSourceProp.JsVariable} }},");
             }
+            else if (parameter.Type.TsTypeKind is
+                TypeDiscriminator.Number or
+                TypeDiscriminator.String or
+                TypeDiscriminator.Boolean or
+                TypeDiscriminator.Enum
+                && parameter.DefaultValue is { } defaultValue)
+            {
+                b.Prop("defaultValue", defaultValue.ValueLiteralForTypeScript());
+            }
 
             List<string> rules = GetValidationRules(parameter, parameter.DisplayName);
 

@@ -30,4 +30,18 @@ public class MethodViewModelTests
         await Assert.That(param.HasDefaultValue).IsTrue();
         await Assert.That(param.CsDefaultValue).IsEqualTo(expected);
     }
+
+    [Test]
+    [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalParams), "intWithDefault", 42)]
+    [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalParams), "stringWithDefault", "foo")]
+    [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalParams), "boolWithDefaultAttribute", true)]
+    [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalParams), "optionalObject", null)]
+    [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.MethodWithOptionalParams), "plainInt", null)]
+    public async Task DefaultValue_FromCsDefaultOrAttribute(
+        ClassViewModelData data, string methodName, string paramName, object? expected)
+    {
+        var method = data.ClassViewModel.MethodByName(methodName);
+        var param = method.Parameters.Single(p => p.Name == paramName);
+        await Assert.That(param.DefaultValue?.Value).IsEqualTo(expected);
+    }
 }

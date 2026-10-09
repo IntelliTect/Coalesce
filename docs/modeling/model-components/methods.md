@@ -225,6 +225,15 @@ Deprecated. If you need to return an [Include Tree](/concepts/include-tree.md) t
 </td></tr>
 </tbody></table>
 
+### Default Values
+
+The client initializes a method caller's `args` with each string, number, boolean, and enum parameter's default value, taken from `[DefaultValue]` if present, or else from a non-null C# default value:
+
+``` c#
+[Coalesce]
+public void RewriteData(bool preview = true) { ... }
+```
+
 ## Return Values
 
 You can return virtually anything from these methods:

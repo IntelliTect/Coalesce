@@ -36,6 +36,6 @@
     "@tmcp/transport-stdio": "^0.4.2",
     "minimatch": "^10.2.5",
     "tmcp": "^1.19.3",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   }
 }

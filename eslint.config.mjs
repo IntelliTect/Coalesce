@@ -26,6 +26,7 @@ export default [
       "**/*.g.ts",
       "src/coalesce-vue/lib/**",
       "src/coalesce-vue-vuetify3/dist/**",
+      "src/coalesce-vue-docs/dist/**",
       "src/eslint-plugin-coalesce/lib/**",
       "src/coalesce-mcp/dist/**",
       "eslint.config.mjs",
@@ -90,7 +91,10 @@ export default [
   // coalesce-vue-vuetify3 overrides
   {
     name: "coalesce-vue-vuetify3/overrides",
-    files: ["src/coalesce-vue-vuetify3/**/*.{ts,mts,tsx,vue}"],
+    files: [
+      "src/coalesce-vue-vuetify3/**/*.{ts,mts,tsx,vue}",
+      "src/coalesce-vue-docs/**/*.{ts,mts,tsx,vue}",
+    ],
     rules: {
       "vue/attribute-hyphenation": "off",
       "vue/component-definition-name-casing": "off",

@@ -152,6 +152,51 @@
       "description": "Add packages, configuration, and telemetry for Hangfire, a background job runner.",
       "$coalesceLink": "https://www.hangfire.io/"
     },
+    "Docs": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "In-app Documentation",
+      "description": "Adds a /docs page that renders markdown from the docs folder with VitePress's markdown renderer, and c-docs-help for showing a doc page from any screen.",
+      "$coalesceLink": "/topics/in-app-docs.html"
+    },
+    "DocsPackageDependency": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "\"coalesce-vue-docs\": \"6.5.1\",",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          {
+            "condition": "(Docs)",
+            "value": "\"coalesce-vue-docs\": \"6.5.1\","
+          },
+          {
+            "condition": "(!Docs)",
+            "value": ""
+          }
+        ]
+      }
+    },
+    "VitepressPackageDependency": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "\"vitepress\": \"2.0.0-alpha.19\",",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          {
+            "condition": "(Docs)",
+            "value": "\"vitepress\": \"2.0.0-alpha.19\","
+          },
+          {
+            "condition": "(!Docs)",
+            "value": ""
+          }
+        ]
+      }
+    },
     "Tenancy": {
       "type": "parameter",
       "datatype": "bool",
@@ -452,6 +497,10 @@
             "**/AIAgentService.cs",
             "**/terraform/modules/ai_services"
           ]
+        },
+        {
+          "condition": "!Docs",
+          "exclude": ["Coalesce.Starter.Vue.Web/docs/**"]
         },
         {
           "condition": "!AzurePipelines",

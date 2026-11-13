@@ -1,0 +1,376 @@
+$rail-divider: 1px solid rgba(var(--v-border-color), 0.12);
+
+.c-docs-layout {
+  // Height of the app bar above the docs, which the sticky rails start below.
+  --c-docs-offset: var(--navbar-height, var(--v-layout-top, 0px));
+
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 220px;
+  // Keeps the rail dividers full height on a page shorter than the viewport.
+  min-height: calc(100vh - var(--c-docs-offset));
+
+  &__rail--start {
+    border-right: $rail-divider;
+  }
+
+  &__rail--end {
+    border-left: $rail-divider;
+  }
+
+  &__sticky {
+    position: sticky;
+    top: var(--c-docs-offset);
+    max-height: calc(100vh - var(--c-docs-offset));
+    overflow-y: auto;
+    padding: 12px 8px;
+  }
+
+  // Rendered by c-docs-page, which is this layout's router-view.
+  &__content {
+    min-width: 0;
+    padding: 24px 40px 96px;
+  }
+
+  &__menu-toggle {
+    display: none !important;
+  }
+
+  &__trail {
+    margin-bottom: 4px;
+    font-size: 0.8125rem;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 1279px) {
+    grid-template-columns: 240px minmax(0, 1fr);
+
+    .c-docs-layout__rail--end {
+      display: none;
+    }
+  }
+
+  @media (max-width: 959px) {
+    grid-template-columns: minmax(0, 1fr);
+    // Otherwise the rows split min-height between them, leaving a gap under the rail.
+    align-content: start;
+
+    .c-docs-layout__rail--start {
+      border-right: none;
+      border-bottom: $rail-divider;
+    }
+
+    .c-docs-layout__menu-toggle {
+      display: flex !important;
+      justify-content: flex-start;
+    }
+
+    .c-docs-layout__sticky {
+      display: none;
+      position: static;
+      max-height: none;
+      padding-top: 0;
+    }
+
+    .c-docs-layout__rail--open .c-docs-layout__sticky {
+      display: block;
+    }
+
+    .c-docs-layout__content {
+      padding: 16px 20px 64px;
+    }
+  }
+}
+
+.c-docs-layout__loading {
+  display: flex;
+  justify-content: center;
+  padding-top: 15vh;
+}
+
+// ---- Previous / next ------------------------------------------------------
+.c-docs-pager {
+  display: flex;
+  gap: 16px;
+  max-width: 900px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: $rail-divider;
+
+  a.c-docs-pager__link {
+    display: flex;
+    // Half the row each, so a lone Next link still sits on the right.
+    flex: 0 1 calc(50% - 8px);
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 16px;
+    border: 1px solid rgba(var(--v-border-color), 0.16);
+    border-radius: 8px;
+    color: rgb(var(--v-theme-primary));
+    text-decoration: none;
+
+    &:hover {
+      border-color: rgb(var(--v-theme-primary));
+    }
+  }
+
+  a.c-docs-pager__link--next {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: rgba(var(--v-theme-on-surface), 0.62);
+  }
+
+  &__title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+}
+
+// ---- Sidebar --------------------------------------------------------------
+.c-docs-sidebar {
+  --c-docs-sidebar-accent: var(--v-theme-primary);
+  padding: 4px 0 24px;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  // The divider runs the full width of the rail: the negative margin cancels
+  // the rail's side padding.
+  &__section {
+    margin: 16px -8px 6px;
+    padding: 14px 18px 0;
+    border-top: $rail-divider;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(var(--c-docs-sidebar-accent));
+
+    &:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
+  }
+
+  &__group {
+    margin: 10px 10px 2px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: rgba(var(--v-theme-on-surface), 0.5);
+  }
+
+  ul.c-docs-sidebar__nested {
+    margin-left: 14px;
+    border-left: $rail-divider;
+  }
+
+  a.c-docs-sidebar__link {
+    display: block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: rgba(var(--v-theme-on-surface), 0.92);
+    text-decoration: none;
+
+    &:hover {
+      background: rgba(var(--v-theme-on-surface), 0.05);
+    }
+  }
+
+  &__nested a.c-docs-sidebar__link {
+    margin-left: 4px;
+  }
+
+  a.c-docs-sidebar__link--current,
+  a.c-docs-sidebar__link--current:hover {
+    color: rgb(var(--c-docs-sidebar-accent));
+    background: rgba(var(--c-docs-sidebar-accent), 0.1);
+  }
+}
+
+// ---- Table of contents ----------------------------------------------------
+.c-docs-toc {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+
+  &__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 8px;
+  }
+
+  &__list {
+    list-style: none;
+    padding-left: 0 !important;
+    margin: 0;
+    border-left: 1px solid rgba(var(--v-border-color), 0.18);
+  }
+
+  @for $level from 2 through 6 {
+    &__item--level-#{$level} {
+      padding-left: ($level - 2) * 12px;
+    }
+  }
+
+  &__link {
+    display: block;
+    padding: 3px 0 3px 12px;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &--active {
+      opacity: 1;
+      color: rgb(var(--v-theme-primary));
+      border-left-color: rgb(var(--v-theme-primary));
+    }
+  }
+}
+
+// ---- Search ---------------------------------------------------------------
+// Looks like a search field at the top of the sidebar; opens the dialog.
+.c-docs-search__trigger {
+  // Stays at the top while the sidebar scrolls beneath it.
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow:
+    0 -12px 0 rgb(var(--v-theme-background)),
+    0 8px 8px -4px rgb(var(--v-theme-background));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 6px 10px;
+  border: 1px solid rgba(var(--v-border-color), 0.18);
+  border-radius: 6px;
+  background: rgb(var(--v-theme-background));
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+
+  span {
+    flex: 1;
+  }
+
+  &:hover {
+    border-color: rgba(var(--v-border-color), 0.35);
+    color: rgba(var(--v-theme-on-surface), 0.85);
+  }
+}
+
+.c-docs-search__key {
+  padding: 0 5px;
+  border: 1px solid rgba(var(--v-border-color), 0.3);
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  opacity: 0.7;
+}
+
+// Pinned near the top of the screen, so results grow downward instead of the
+// dialog re-centering as they change.
+.v-overlay__content.c-docs-search-dialog {
+  align-self: flex-start;
+  margin-top: 12vh;
+}
+
+.c-docs-search {
+  .v-list {
+    background: transparent;
+  }
+
+  .v-list-item {
+    padding-block: 10px !important;
+  }
+
+  &__heading {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  &__page {
+    font-weight: 400;
+    color: rgba(var(--v-theme-on-surface), 0.6);
+  }
+
+  &__snippet {
+    margin-top: 3px;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: rgba(var(--v-theme-on-surface), 0.7);
+
+    mark {
+      background: transparent;
+      color: rgb(var(--v-theme-primary));
+      font-weight: 600;
+    }
+  }
+
+  &__empty {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    color: rgba(var(--v-theme-on-surface), 0.6);
+  }
+}
+
+// ---- Help panel -----------------------------------------------------------
+.v-overlay__content.c-docs-help__panel {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 700px;
+  max-width: 100%;
+}
+
+.c-docs-help {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 0 !important;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 24px 32px !important;
+  }
+
+  // The header already names the page.
+  .c-doc > h1:first-child {
+    display: none;
+  }
+}

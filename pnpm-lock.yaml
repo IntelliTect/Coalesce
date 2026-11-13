@@ -8,6 +8,9 @@ overrides:
   minimatch@>=7 <11.0.1: ^11.0.8
   js-beautify>glob: 14.0.6
   vite: ^8.0.10
+  vue: ^3.5.43
+  '@vue/reactivity': ^3.5.43
+  '@vue/shared': ^3.5.43
   '@ungap/structured-clone': 1.3.2
 
 packageExtensionsChecksum: sha256-l/E0qO5c74TStVWFHnYfdmhMq1hmyUzWkmLEAr/BDdk=
@@ -114,7 +117,7 @@ importers:
         specifier: workspace:*
         version: link:../../src/coalesce-vue-vuetify3
       vue:
-        specifier: ^3.5.45
+        specifier: ^3.5.43
         version: 3.5.45(typescript@6.0.3)
       vue-router:
         specifier: ^4.6.4
@@ -160,7 +163,7 @@ importers:
         specifier: ^4.17.3
         version: 4.17.12
       '@vue/reactivity':
-        specifier: ^3.5.4
+        specifier: ^3.5.43
         version: 3.5.45
       axios:
         specifier: ^1.20.0
@@ -181,12 +184,37 @@ importers:
         specifier: ^2.6.2
         version: 2.9.1
       vue:
-        specifier: ^3.5.4
+        specifier: ^3.5.43
         version: 3.5.45(typescript@6.0.3)
     optionalDependencies:
       vue-router:
         specifier: ^4.0.0 || ^5.0.0
         version: 4.6.4(vue@3.5.45(typescript@6.0.3))
+
+  src/coalesce-vue-docs:
+    dependencies:
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.0
+        version: 6.0.10(vite@8.3.8(@types/node@24.19.2)(sass@1.108.2)(yaml@2.9.1))(vue@3.5.45(typescript@6.0.3))
+      minisearch:
+        specifier: ^7.2.0
+        version: 7.2.0
+      vite:
+        specifier: ^8.0.10
+        version: 8.3.8(@types/node@24.19.2)(sass@1.108.2)(yaml@2.9.1)
+    devDependencies:
+      vitepress:
+        specifier: 2.0.0-alpha.19
+        version: 2.0.0-alpha.19(@types/node@24.19.2)(axios@1.21.1)(postcss@8.5.32)(sass@1.108.2)(typescript@6.0.3)(yaml@2.9.1)
+      vue:
+        specifier: ^3.5.43
+        version: 3.5.45(typescript@6.0.3)
+      vue-router:
+        specifier: ^4.4.1 || ^5.0.0
+        version: 4.6.4(vue@3.5.45(typescript@6.0.3))
+      vuetify:
+        specifier: 4.0.5
+        version: 4.0.5(typescript@6.0.3)(vite-plugin-vuetify@2.1.3)(vue@3.5.45(typescript@6.0.3))
 
   src/coalesce-vue-vuetify3:
     dependencies:
@@ -200,7 +228,7 @@ importers:
         specifier: ^2.6.2
         version: 2.9.1
       vue:
-        specifier: ^3.5.4
+        specifier: ^3.5.43
         version: 3.5.45(typescript@6.0.3)
     devDependencies:
       '@vitejs/plugin-vue-jsx':
@@ -1331,14 +1359,14 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       vite: ^8.0.10
-      vue: ^3.0.0
+      vue: ^3.5.43
 
   '@vitejs/plugin-vue@6.0.10':
     resolution: {integrity: sha512-b80aUQh3n+qEzzZm5oQp3rT2QImeCx58K6eFl/RkJ3d65KW0kTuv5lNsLRVAjbW9YRUpo/wzmvzMgV34bTAItA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       vite: ^8.0.10
-      vue: ^3.2.25 || ^3.6.0-rc.10
+      vue: ^3.5.43
 
   '@vitest/coverage-v8@4.1.12':
     resolution: {integrity: sha512-6S7/iVknKglLAxMFxQGNppBI0iqJS2NgM6FBxavitj7KaDq/vywOWGf6dGu7F2L1Qy0G6S3uTp7aGshHrzK8JA==}
@@ -1491,7 +1519,7 @@ packages:
     peerDependencies:
       '@vue/compiler-dom': 3.x
       '@vue/server-renderer': 3.x
-      vue: 3.x
+      vue: ^3.5.43
     peerDependenciesMeta:
       '@vue/server-renderer':
         optional: true
@@ -1499,13 +1527,13 @@ packages:
   '@vuetify/loader-shared@2.1.2':
     resolution: {integrity: sha512-X+1jBLmXHkpQEnC0vyOb4rtX2QSkBiFhaFXz8yhQqN2A4vQ6k2nChxN4Ol7VAY5KoqMdFoRMnmNdp/1qYXDQig==}
     peerDependencies:
-      vue: ^3.0.0
+      vue: ^3.5.43
       vuetify: '>=3'
 
   '@vueuse/core@14.4.0':
     resolution: {integrity: sha512-X4WHz1HlCzCBoYXesUkifzzWBAcZgXG8Fi5iNPQg/epdzOB3gu8Fawj3hvuwYR1nGcXGnvxwYYcUC/71++svtQ==}
     peerDependencies:
-      vue: ^3.5.0
+      vue: ^3.5.43
 
   '@vueuse/integrations@14.4.0':
     resolution: {integrity: sha512-oJz9qTgczvA7L1nXQFRU7h8tQbOCoiceqvMMhT9XYMyOGTqLJ2rEa09PON+nD2t48sZUfeOmg4eaWJXV4sZb/w==}
@@ -1522,7 +1550,7 @@ packages:
       qrcode: ^1.5
       sortablejs: ^1
       universal-cookie: ^7 || ^8
-      vue: ^3.5.0
+      vue: ^3.5.43
     peerDependenciesMeta:
       async-validator:
         optional: true
@@ -1555,7 +1583,7 @@ packages:
   '@vueuse/shared@14.4.0':
     resolution: {integrity: sha512-JRgY90Sz8DDtPMsaDflvPMp9xYk69JZAmbuDvAquUVXKr2gEjqtzGNTTthLfckH0BzBqvnu31gb4a8TGLRe79g==}
     peerDependencies:
-      vue: ^3.5.0
+      vue: ^3.5.43
 
   abbrev@5.0.0:
     resolution: {integrity: sha512-/XrFJgzQQQHpti1raDJC6m4ws6aNktmjBlhk8Fdlk7LwCEuDoieEJJY9OFHjfiFJFFRM2tK+Ky/IsfbbmlMu1w==}
@@ -2798,7 +2826,7 @@ packages:
     engines: {node: '>=20.19.0'}
     peerDependencies:
       '@nuxt/kit': ^3.2.2 || ^4.0.0
-      vue: ^3.0.0
+      vue: ^3.5.43
     peerDependenciesMeta:
       '@nuxt/kit':
         optional: true
@@ -2877,7 +2905,7 @@ packages:
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       vite: ^8.0.10
-      vue: ^3.0.0
+      vue: ^3.5.43
       vuetify: '>=3'
 
   vite@8.3.8:
@@ -2925,6 +2953,18 @@ packages:
 
   vitepress@2.0.0-alpha.18:
     resolution: {integrity: sha512-Lk1G2/QqSf+MwNLICl9fmzWOtoCEwjZoWgaQy41QvWTfcGpLE9XwJDbcCyES/9rj6R2g1zFqFvLVkYKLLDALFw==}
+    hasBin: true
+    peerDependencies:
+      markdown-it-mathjax3: ^4
+      postcss: ^8
+    peerDependenciesMeta:
+      markdown-it-mathjax3:
+        optional: true
+      postcss:
+        optional: true
+
+  vitepress@2.0.0-alpha.19:
+    resolution: {integrity: sha512-WnBsb0Bwr43kXKyiis+lld/7ri3hnMbthS8N3hpFtjjwsdLO4IRmiAE08D7aud4q6oMDf9uwRowxzNqRFe/amw==}
     hasBin: true
     peerDependencies:
       markdown-it-mathjax3: ^4
@@ -3007,7 +3047,7 @@ packages:
   vue-router@4.6.4:
     resolution: {integrity: sha512-Hz9q5sa33Yhduglwz6g9skT8OBPii+4bFn88w6J+J4MfEo4KRRpmiNG/hHHkdbRFlLBOqxN8y8gf2Fb0MTUgVg==}
     peerDependencies:
-      vue: ^3.5.0
+      vue: ^3.5.43
 
   vue-tsc@3.3.14:
     resolution: {integrity: sha512-URAu2H9AuMZMg9GCgnqbaHHHd8pBZRAwNV2e2yYS8VDsoTVXHiOSo663OS6DkEvauQ2yixn5TPFJ9WV9QIspkA==}
@@ -3028,7 +3068,7 @@ packages:
     peerDependencies:
       typescript: '>=4.7'
       vite-plugin-vuetify: '>=2.1.0'
-      vue: ^3.5.0
+      vue: ^3.5.43
       webpack-plugin-vuetify: '>=3.1.0'
     peerDependenciesMeta:
       typescript:
@@ -5745,6 +5785,55 @@ snapshots:
       yaml: 2.9.1
 
   vitepress@2.0.0-alpha.18(@types/node@24.19.2)(axios@1.21.1)(postcss@8.5.32)(sass@1.108.2)(typescript@6.0.3)(yaml@2.9.1):
+    dependencies:
+      '@docsearch/css': 4.7.1
+      '@docsearch/js': 4.7.1
+      '@docsearch/sidepanel-js': 4.7.1
+      '@iconify-json/simple-icons': 1.2.102
+      '@shikijs/core': 4.6.0
+      '@shikijs/transformers': 4.6.0
+      '@shikijs/types': 4.6.0
+      '@types/markdown-it': 14.2.0
+      '@vitejs/plugin-vue': 6.0.10(vite@8.3.8(@types/node@24.19.2)(sass@1.108.2)(yaml@2.9.1))(vue@3.5.45(typescript@6.0.3))
+      '@vue/devtools-api': 8.2.1
+      '@vue/shared': 3.5.45
+      '@vueuse/core': 14.4.0(vue@3.5.45(typescript@6.0.3))
+      '@vueuse/integrations': 14.4.0(axios@1.21.1)(focus-trap@8.2.4)(vue@3.5.45(typescript@6.0.3))
+      focus-trap: 8.2.4
+      mark.js: 8.11.1
+      minisearch: 7.2.0
+      shiki: 4.6.0
+      vite: 8.3.8(@types/node@24.19.2)(sass@1.108.2)(yaml@2.9.1)
+      vue: 3.5.45(typescript@6.0.3)
+    optionalDependencies:
+      postcss: 8.5.32
+    transitivePeerDependencies:
+      - '@types/node'
+      - '@vitejs/devtools'
+      - async-validator
+      - axios
+      - change-case
+      - drauu
+      - esbuild
+      - fuse.js
+      - idb-keyval
+      - jiti
+      - jwt-decode
+      - less
+      - nprogress
+      - qrcode
+      - sass
+      - sass-embedded
+      - sortablejs
+      - stylus
+      - sugarss
+      - terser
+      - tsx
+      - typescript
+      - universal-cookie
+      - yaml
+
+  vitepress@2.0.0-alpha.19(@types/node@24.19.2)(axios@1.21.1)(postcss@8.5.32)(sass@1.108.2)(typescript@6.0.3)(yaml@2.9.1):
     dependencies:
       '@docsearch/css': 4.7.1
       '@docsearch/js': 4.7.1

@@ -166,6 +166,32 @@ jobs:
           name: coalesce-vue-vuetify3
           path: src/coalesce-vue-vuetify3/*.tgz
 
+  build-coalesce-vue-docs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/coalesce-vue-docs
+
+    env:
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-js
+
+      - run: pnpm build
+      - run: pnpm lint
+      - run: pnpm test run
+
+      - run: pnpm pack
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: coalesce-vue-docs
+          path: src/coalesce-vue-docs/*.tgz
+
   build-docs:
     runs-on: ubuntu-latest
     defaults:
@@ -225,6 +251,7 @@ jobs:
         build-dotnet,
         build-coalesce-vue,
         build-coalesce-vue-vuetify3,
+        build-coalesce-vue-docs,
         build-eslint-plugin-coalesce,
       ]
     strategy:
@@ -233,7 +260,7 @@ jobs:
           # Nothing:
           - ""
           # Everything (except tenancy):
-          - "--Identity --MicrosoftAuth --GoogleAuth --Passwords --Passkeys --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI --Hangfire --AIChat --AzureTerraform --KeyVault --BlobStorage --EmailAzure --GithubActions"
+          - "--Identity --MicrosoftAuth --GoogleAuth --Passwords --Passkeys --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI --Hangfire --AIChat --AzureTerraform --KeyVault --BlobStorage --EmailAzure --GithubActions --Docs"
           # Assorted partial variants:
           - "--Identity --UserPictures --TrackingBase"
           - "--Identity --MicrosoftAuth --AuditLogs --Hangfire --Passwords --Passkeys"
@@ -288,14 +315,20 @@ jobs:
           $coalescevuePath = "file:$((Get-ChildItem -Path '${{ github.workspace }}/artifacts/coalesce-vue/*.tgz').FullName)"
           $coalescevuetifyPath = "file:$((Get-ChildItem -Path '${{ github.workspace }}/artifacts/coalesce-vue-vuetify3/*.tgz').FullName)"
           $eslintPluginPath = "file:$((Get-ChildItem -Path '${{ github.workspace }}/artifacts/eslint-plugin-coalesce/*.tgz').FullName)"
+          $docsPath = "file:$((Get-ChildItem -Path '${{ github.workspace }}/artifacts/coalesce-vue-docs/*.tgz').FullName)"
 
           $packageJson = Get-Content package.json | ConvertFrom-Json
           $packageJson.dependencies.'coalesce-vue' = $coalescevuePath
           $packageJson.dependencies.'coalesce-vue-vuetify3' = $coalescevuetifyPath
+          $packageJson.dependencies.'coalesce-vue-docs' = $docsPath
           $packageJson.devDependencies.'eslint-plugin-coalesce' = $eslintPluginPath
           $packageJson | ConvertTo-Json -Depth 10 | Set-Content package.json
 
           cat package.json
+
+          # The Docs option removes the coalesce-vue-docs line by exact match.
+          $templateJson = "../.template.config/template.json"
+          (Get-Content $templateJson -Raw) -replace '(\\"coalesce-vue-docs\\": \\")[^\\]*', "`${1}$docsPath" | Set-Content $templateJson -NoNewline
 
       - name: TestLocal
         run: ./TestLocal.ps1 ${{ matrix.testCase }}

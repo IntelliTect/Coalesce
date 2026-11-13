@@ -13,15 +13,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
-    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.10.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="10.11.0" />
 
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.19.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.20.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.20.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.20.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.20.1" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.20.1" />
     <!--#if(Hangfire) -->
     <PackageReference Include="OpenTelemetry.Instrumentation.Hangfire" Version="1.19.0-beta.1" />
     <!--#endif -->
@@ -33,13 +33,13 @@
 
     <!--#if(OpenAPI) -->
     <PackageReference Include="IntelliTect.Coalesce.Swashbuckle" Version="$(CoalesceVersion)" />
-    <PackageReference Include="Scalar.AspNetCore" Version="2.17.14" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.18.7" />
     <!--#endif -->
     <!--#if(MicrosoftAuth) -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="10.0.14" />
     <!--#endif -->
     <!--#if(GoogleAuth) -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.14" />
     <!--#endif -->
     <!--#if(Hangfire) -->
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.25" />

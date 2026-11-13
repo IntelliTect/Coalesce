@@ -2020,8 +2020,8 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
     // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
     else if (
       "$metadata" in val &&
-      val.$metadata != collectedTypeMeta &&
-      !collectedTypeMeta.derivedTypes?.includes(val.$metadata)
+      val.$metadata.name != collectedTypeMeta.name &&
+      !collectedTypeMeta.derivedTypes?.some((t) => t.name == val.$metadata.name)
     ) {
       throw Error(
         `Type mismatch - attempted to assign a ${
@@ -2579,7 +2579,8 @@ export function updateViewModelFromModel<
     const metadata = target.$metadata;
 
     // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
-    if ("$metadata" in source && source.$metadata != metadata) {
+    // Compared by name because HMR can produce new metadata instances for the same type.
+    if ("$metadata" in source && source.$metadata.name != metadata.name) {
       throw Error(
         `Attempted to load a ${metadata.name} ViewModel with a ${source.$metadata.name} object.`,
       );

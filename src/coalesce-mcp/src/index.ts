@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 import { McpServer } from "tmcp";
-import { ZodV3JsonSchemaAdapter } from "@tmcp/adapter-zod-v3";
+import { ZodJsonSchemaAdapter } from "@tmcp/adapter-zod";
 import { StdioTransport } from "@tmcp/transport-stdio";
 import { registerTemplateFeatureResource } from "./tools/template-features.js";
 import { registerUpgradeTools } from "./tools/upgrade-prompt.js";
 import packageJson from "../package.json" with { type: "json" };
 
 // Create the adapter for Zod schema validation
-const adapter = new ZodV3JsonSchemaAdapter();
+const adapter = new ZodJsonSchemaAdapter();
 
 // Create the MCP server
 const server = new McpServer(

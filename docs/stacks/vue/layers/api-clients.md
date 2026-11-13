@@ -87,7 +87,13 @@ During typical development, it is unlikely that you'll need to make a custom API
   ): ApiCaller<TResult>
 
   $makeCaller<TResult, TArgs>(
-    resultType: "item" | "list" | MethodFunction,
+    resultType: Method | MethodFunction,
+    methodFunction: (...args: any[]) => Promise<AxiosResponse<TResult>>,
+    argsMethodFunction: (client: ApiClient, args: TArgs) => Promise<AxiosResponse<TResult>>
+  ): ApiCaller<TResult> & { args: TArgs }
+
+  $makeCaller<TResult, TArgs>(
+    resultType: "item" | "list" | Method | MethodFunction,
     methodFunction: (...args: any[]) => Promise<AxiosResponse<TResult>>,
     argsFactory: () => TArgs,
     argsMethodFunction: (client: ApiClient, args: TArgs) => Promise<AxiosResponse<TResult>>
@@ -98,7 +104,7 @@ During typical development, it is unlikely that you'll need to make a custom API
 
   Creates an API Caller that provides state management and concurrency control for API endpoint invocations. The first parameter `resultType` can be "item", "list", or a function reference to method metadata. The second parameter is the method that will be invoked.
 
-  For callers that need argument binding, provide an `argsFactory` function that creates a blank args object, and an `argsMethodFunction` that accepts the args object.
+  For callers that need argument binding, provide an `argsMethodFunction` that accepts the args object. If `resultType` is method metadata, the args object can be created from that metadata, with a key for each parameter that isn't sourced from the owning model, set to the parameter's default value or `null`; the type of `args` comes from the annotation on `argsMethodFunction`'s `args` parameter. Otherwise, also provide an `argsFactory` function that creates a blank args object.
 
 
 
@@ -147,6 +153,17 @@ During typical development, it is unlikely that you'll need to make a custom API
   caller.args.str = "Su";
   await caller.invokeWithArgs();
   console.log(caller.result)
+  ```
+
+  The same caller, with the args object created from method metadata:
+
+  ```ts
+  const caller = client.$makeCaller(
+      methods => methods.namesStartingWith,
+      (c, characters: string) => c.namesStartingWith(characters),
+      // The keys of `args` must match the method's parameter names.
+      (c, args: { characters: string | null }) => c.namesStartingWith(args.characters)
+  );
   ```
 
   A caller that performs multiple async operations:
@@ -228,7 +245,7 @@ True if `result` is non-null. This is also true for void-returning endpoints tha
 
 Holds an object for the arguments of the function, and will be used if the caller is invoked with its `invokeWithArgs()` method. Useful for binding the arguments of a caller to inputs in a user interface.
 
-Only exists if the caller was created with an args object using the 4-parameter overload of [`$makeCaller()`](#makecaller).
+Only exists if the caller was created with an args object using an `argsMethodFunction` with [`$makeCaller()`](#makecaller).
 
 ### url {#url}
 
@@ -238,7 +255,7 @@ readonly url: string
 
 Returns the URL for the method's HTTP endpoint. Any parameters are sourced from the `args` object. Useful for binding file-returning HTTP GET methods directly to `image` or `video` HTML elements.
 
-Only exists if the caller was created with an args object using the 4-parameter overload of [`$makeCaller()`](#makecaller).
+Only exists if the caller was created with an args object using an `argsMethodFunction` with [`$makeCaller()`](#makecaller).
 
 
 ### result {#result-item}
@@ -557,7 +574,7 @@ Invokes the endpoint using the caller's args object.
 
 - **Details**
 
-  Invokes the endpoint with the specified args, defaulting to `caller.args` if the `args` parameter is not provided. Only exists if the caller was created with an args object using the 4-parameter overload of [`$makeCaller()`](#makecaller).
+  Invokes the endpoint with the specified args, defaulting to `caller.args` if the `args` parameter is not provided. Only exists if the caller was created with an args object using an `argsMethodFunction` with [`$makeCaller()`](#makecaller).
 
 ### confirmInvokeWithArgs() {#confirminvokewithargs}
 

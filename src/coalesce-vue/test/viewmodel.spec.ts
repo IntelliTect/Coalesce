@@ -3291,6 +3291,21 @@ describe("ViewModel", () => {
       const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
       expect(req.data).toBe('{"id":3,"requiredInt":42}');
     });
+
+    test("initializes method args with parameter default values", () => {
+      const vm = new ComplexModelViewModel({ complexModelId: 3 });
+      const args = vm.methodWithOptionalParams.args;
+
+      expect(args.intWithDefault).toBe(42);
+      expect(args.enumWithDefault).toBe(Statuses.ClosedNoSolution);
+      expect(args.stringWithDefault).toBe("foo");
+      expect(args.boolWithDefaultAttribute).toBe(true);
+      expect(args.plainInt).toBeNull();
+
+      args.intWithDefault = 1;
+      vm.methodWithOptionalParams.resetArgs();
+      expect(vm.methodWithOptionalParams.args.intWithDefault).toBe(42);
+    });
   });
 });
 

@@ -14,16 +14,19 @@
 - `useAppUpdateCheck` now also listens for Vite's `vite:preloadError` event, showing the update notification when dynamic imports fail due to stale chunks after a deployment.
 - `useAppUpdateCheck` now persists the observed build in `sessionStorage` (keyed by a fingerprint of loaded script URLs), enabling detection of server updates after a browser discards and restores a tab from cached HTML.
 - Added `limit` option to `useResponseCaching` to cap the number (`maxEntries`) or total size (`maxBytes`) of cached responses per endpoint group. Oldest entries are evicted first when limits are exceeded.
+- Method parameter default values, from `[DefaultValue]` or C# default values, are now included in metadata and used to initialize API caller `args`.
 - `c-select`: Added `returnViewModel` prop, enabling ViewModel instances to be returned directly when bound with `for="TypeName"`.
 - `c-datetime-picker`: Assorted UI and UX improvements and fixes.
 - `c-datetime-picker`: Added `lazy` prop (also usable as the `lazy` modifier on `v-model`) that defers updates to the bound value until the input is committed, rather than publishing every keystroke.
 - `c-datetime-picker`: Added `openOn` prop selecting what opens the popup: `field` (default), `icon`, `focus`, `picker-only` (the text field can't be typed into), or `none`. Arrow up/down also opens it in every mode but `none`.
 - `c-datetime-picker`: Added `menuProps` for passing props to the popup's `v-menu` (e.g. `location`), and `v-model:menu` for opening and closing it from outside the component.
+- `$makeCaller` accepts an args invoker without an args factory when given method metadata, creating the args object from the method's parameter metadata. Generated ViewModel method callers now use this, emitting the args type as an annotation instead of a runtime factory.
 - `c-display`: now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
 - Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
 - Fixed `$save` invocations downgrading type discriminators to their base types on nested polymorphic objects.
 - Fixed `purgeStaleCacheEntries` crashing at module import when `localStorage`/`sessionStorage` are `undefined` (e.g. Node 26 without `--localstorage-file`, Vitest with jsdom on Node 26).
 - Fixed `c-select` in single-select mode placing its text input on a line of its own when the selected item is too wide to fit on one line, adding an empty line to the bottom of the field.
+- Fixed ViewModels throwing "Attempted to load a X ViewModel with a X object" after Vite HMR re-evaluates generated metadata.
 
 ## Backend
 - Added .NET 11 target. The `net11.0` assemblies are compiled with runtime async (`<Features>runtime-async=on</Features>`). `IntelliTect.Coalesce.Swashbuckle` does not yet target .NET 11.
@@ -33,6 +36,7 @@
 - Added `SearchAttribute.Includes` and `SearchAttribute.Excludes` to scope search participation by the request `includes` value in `ApplyListSearchTerm`.
 - `[DefaultOrderBy(Suppress = true)]` can now be placed on a collection navigation property to suppress the default sorting of that collection in the generated response DTO.
 - Fixed generated DTO `MapToModelOrNew` mapping a polymorphic property onto an existing instance of the wrong concrete type. It now constructs a new instance of the correct type when the incoming type differs from the existing one, while continuing to update in place when the types match.
+- Fixed bulk saves running every delete after every save, which caused unique index violations when an entity was deleted and replaced by a new one with the same unique values. Deletes now run before saves unless a saved type has a foreign key to the deleted type.
 
 ## Template Changes
 - `VDatePicker` now defaults to `controlVariant: "modal"`.

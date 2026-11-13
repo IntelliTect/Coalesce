@@ -9,7 +9,8 @@ allowBuilds:
   esbuild: true
 
 overrides:
-  js-beautify>glob: "13.0.6"
+  "minimatch@>=7 <11.0.1": "^11.0.8"
+  js-beautify>glob: "14.0.6"
   vite: "^8.0.10"
   # vitepress (coalesce-vue-docs) needs >=3.5.40; a second copy breaks Vue's types and runtime.
   vue: "^3.5.43"

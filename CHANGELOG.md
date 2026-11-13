@@ -35,6 +35,7 @@
 - Added `SearchAttribute.Includes` and `SearchAttribute.Excludes` to scope search participation by the request `includes` value in `ApplyListSearchTerm`.
 - `[DefaultOrderBy(Suppress = true)]` can now be placed on a collection navigation property to suppress the default sorting of that collection in the generated response DTO.
 - Fixed generated DTO `MapToModelOrNew` mapping a polymorphic property onto an existing instance of the wrong concrete type. It now constructs a new instance of the correct type when the incoming type differs from the existing one, while continuing to update in place when the types match.
+- Fixed bulk saves running every delete after every save, which caused unique index violations when an entity was deleted and replaced by a new one with the same unique values. Deletes now run before saves unless a saved type has a foreign key to the deleted type.
 
 ## Template Changes
 - `VDatePicker` now defaults to `controlVariant: "modal"`.

@@ -54,7 +54,8 @@ async function main() {
 
 async function runCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
-    const process = spawn(command, args, {
+    // A single command string, since Node deprecates passing args with `shell: true` (DEP0190).
+    const process = spawn([command, ...args].join(" "), {
       stdio: "inherit",
       shell: true,
       ...options,

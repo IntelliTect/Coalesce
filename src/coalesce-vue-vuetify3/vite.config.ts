@@ -11,7 +11,7 @@ import { Vuetify3Resolver } from "unplugin-vue-components/resolvers";
 import pkg from "./package.json" with { type: "json" };
 
 const entries: Record<string, string> = {
-  index: path.resolve(__dirname, "src/index.ts"),
+  index: path.resolve(import.meta.dirname, "src/index.ts"),
 };
 for (const file of fs.globSync("src/**/*.{ts,vue}", {
   exclude: (name) => /\.spec\.|\.d\.ts$|env\.d\.ts$|build\.ts$/.test(name),
@@ -22,7 +22,7 @@ for (const file of fs.globSync("src/**/*.{ts,vue}", {
     .replace(/^src\//, "")
     .replace(/\.(ts|vue)$/, "");
   if (key !== "index") {
-    entries[key] = path.resolve(__dirname, file);
+    entries[key] = path.resolve(import.meta.dirname, file);
   }
 }
 
@@ -50,20 +50,20 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      { find: "@", replacement: path.resolve(__dirname, "src") },
-      { find: "@test", replacement: path.resolve(__dirname, "test") },
+      { find: "@", replacement: path.resolve(import.meta.dirname, "src") },
+      { find: "@test", replacement: path.resolve(import.meta.dirname, "test") },
       {
         find: "@test-targets",
-        replacement: path.resolve(__dirname, "../test-targets"),
+        replacement: path.resolve(import.meta.dirname, "../test-targets"),
       },
       // Imports for generated test targets
       {
         find: "coalesce-vue/lib",
-        replacement: path.resolve(__dirname, "../coalesce-vue/src"),
+        replacement: path.resolve(import.meta.dirname, "../coalesce-vue/src"),
       },
       {
         find: "coalesce-vue",
-        replacement: path.resolve(__dirname, "../coalesce-vue/src"),
+        replacement: path.resolve(import.meta.dirname, "../coalesce-vue/src"),
       },
     ],
   },

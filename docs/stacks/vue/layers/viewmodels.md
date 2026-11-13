@@ -295,6 +295,7 @@ If the client-side [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-val
 On the server, each affected entity is handled through the same standard mechanisms as are used by individual saves or deletes ([Behaviors](/modeling/model-components/behaviors.md), [Data Sources](/modeling/model-components/data-sources.md), and [Security Attributes](/modeling/model-components/attributes/security-attribute.md)), but with a bit of sugar on top:
 * All operations are wrapped in a single database transaction that is rolled back if any individual operation fails.
 * Foreign keys will be fixed up as new items are created, allowing a parent and child record to be created at the same time even when the client has no foreign key to link the two together.
+* Deletes run before saves, so a deleted row can be replaced by a new row with the same unique values. A delete of a type that is the principal of a foreign key on any saved type (or of a type that another such delete depends on) instead runs after the saves, so that the saves can first move dependents off of it.
 
 For the response to a bulk save, the server will load and return the root ViewModel that `$bulkSave` was called upon, using the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 

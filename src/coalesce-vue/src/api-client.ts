@@ -466,6 +466,17 @@ async function blobToFileParameter(blob: Blob) {
   };
 }
 
+/** Creates a blank args object for a method, with a null key for each parameter that isn't sourced from the owning model.
+ * Default values are applied afterward by `createArgs`. */
+function createBlankArgs(method: Method) {
+  const args: Record<string, unknown> = {};
+  for (const name in method.params) {
+    if (method.params[name].source) continue;
+    args[name] = null;
+  }
+  return args;
+}
+
 /**
  * Maps the given method parameters to values suitable for transport.
  * @param method The method whose parameters need mapping
@@ -925,7 +936,7 @@ export class ApiClient<T extends ApiRoutedType> {
     return clone;
   }
 
-  // $makeCaller uses a single overload per variant (no-args and with-args).
+  // $makeCaller uses a single overload per variant (no-args, metadata args, and factory args).
   // TReturn is captured from the invoker, and conditional types (InferResultData, InferVoidable)
   // extract the data type and detect whether the invoker can return void/undefined.
 
@@ -967,6 +978,29 @@ export class ApiClient<T extends ApiRoutedType> {
     InferCallerResult<TTransportType, TReturn>
   >;
 
+  /**
+   * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
+   * The args object is created from the method's metadata, with a key for each parameter not sourced from the owning model.
+   * @param resultType The metadata of the method being called.
+   * @param invoker method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
+   * @param argsInvoker method that will call the API with an args object as the only parameter. The type of its `args` parameter is the type of the caller's `args`.
+   */
+  $makeCaller<
+    TArgs extends any[],
+    TArgsObj extends object,
+    TReturn extends Promise<any> | undefined | void,
+    TTransportType extends Exclude<TransportTypeSpecifier<T>, string>,
+  >(
+    resultType: TTransportType,
+    invoker: ApiCallerInvoker<TArgs, TReturn, this>,
+    argsInvoker: ApiCallerArgsInvoker<TArgsObj, TReturn, this>,
+  ): MakeArgsCallerResult<
+    TTransportType,
+    TArgs,
+    TArgsObj,
+    InferCallerResult<TTransportType, TReturn>
+  >;
+
   $makeCaller<
     TArgs extends any[],
     TArgsObj extends object,
@@ -975,7 +1009,9 @@ export class ApiClient<T extends ApiRoutedType> {
   >(
     resultType: TTransportType,
     invoker: ApiCallerInvoker<TArgs, TReturn, this>,
-    argsFactory?: () => TArgsObj,
+    argsFactoryOrInvoker?:
+      | (() => TArgsObj)
+      | ApiCallerArgsInvoker<TArgsObj, TReturn, this>,
     argsInvoker?: ApiCallerArgsInvoker<TArgsObj, TReturn, this>,
   ) {
     let localResultType: TransportTypeSpecifier<T> = resultType;
@@ -986,6 +1022,24 @@ export class ApiClient<T extends ApiRoutedType> {
     } else if (typeof localResultType === "object") {
       meta = localResultType;
       localResultType = localResultType.transportType;
+    }
+
+    let argsFactory: (() => TArgsObj) | undefined;
+    if (argsInvoker) {
+      argsFactory = argsFactoryOrInvoker as () => TArgsObj;
+    } else if (argsFactoryOrInvoker) {
+      if (!meta) {
+        throw Error(
+          "$makeCaller requires method metadata when no args factory is provided.",
+        );
+      }
+      const method = meta;
+      argsInvoker = argsFactoryOrInvoker as ApiCallerArgsInvoker<
+        TArgsObj,
+        TReturn,
+        this
+      >;
+      argsFactory = () => createBlankArgs(method) as TArgsObj;
     }
 
     // This is basically all just about resolving the overloads.
@@ -1029,11 +1083,10 @@ export class ApiClient<T extends ApiRoutedType> {
     // Set this on the instance if we have it.
     instance.$metadata = meta;
 
-    // Set $metadata on the initial args object so that bindToQueryString
-    // can resolve parameter metadata. resetArgs() also does this,
-    // but the constructor's resetArgs() runs before $metadata is set above.
-    if (meta && "args" in instance) {
-      (instance.args as any).$metadata = meta;
+    // The constructor's resetArgs() runs before $metadata is set above,
+    // so the initial args are missing $metadata and parameter default values.
+    if (meta && "resetArgs" in instance) {
+      instance.resetArgs();
     }
 
     return instance as any;
@@ -1471,6 +1524,22 @@ export type ResponseCachingConfiguration = {
     maxEntries?: number;
   };
 };
+
+function createArgs<TArgsObj>(
+  argsFactory: () => TArgsObj,
+  $metadata: Method | undefined,
+): TArgsObj {
+  const args = argsFactory() as any;
+  if ($metadata) {
+    args.$metadata = $metadata;
+    for (const param of Object.values($metadata.params)) {
+      if ("defaultValue" in param && args[param.name] == null) {
+        args[param.name] = param.defaultValue;
+      }
+    }
+  }
+  return args;
+}
 
 // Base class for ApiState that contains nothing but the logic for
 // subclassing Function. Specifically, we do this to avoid a need to call
@@ -2413,9 +2482,7 @@ export class ItemApiStateWithArgs<
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
   public resetArgs() {
-    const args = this.argsFactory();
-    if (this.$metadata) (args as any).$metadata = this.$metadata;
-    this.args = args;
+    this.args = createArgs(this.argsFactory, this.$metadata);
   }
 
   /** Invoke a call to the API endpoint after an affirmative confirmation from the user.
@@ -2616,9 +2683,7 @@ export class ListApiStateWithArgs<
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
   public resetArgs() {
-    const args = this.argsFactory();
-    if (this.$metadata) (args as any).$metadata = this.$metadata;
-    this.args = args;
+    this.args = createArgs(this.argsFactory, this.$metadata);
   }
 
   /** Invoke a call to the API endpoint after an affirmative confirmation from the user.

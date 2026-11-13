@@ -226,6 +226,15 @@ public abstract class BaseApiController<T, TDtoIn, TDtoOut, TContext> : BaseApiC
                 // (i.e. it exists in the items soley for the purpose of declaring itself as the root).
                 root ??= dto.None.FirstOrDefault(i => i.Root);
 
+                var (earlyDeletes, lateDeletes) = dto.PartitionDeletes();
+
+                // Deletes that no save could depend on go first, so that a delete
+                // and re-insert of a row with the same unique key doesn't conflict.
+                foreach (var item in earlyDeletes)
+                {
+                    var result = await item.DeleteAsync(parameters);
+                    if (!result.WasSuccessful) return new(result);
+                }
 
                 var itemsToSave = new List<BulkSaveRequestItem>(dto.Save);
                 // Keep looping over the items to save until we've saved them all,
@@ -304,13 +313,8 @@ public abstract class BaseApiController<T, TDtoIn, TDtoOut, TContext> : BaseApiC
                 }
 
 
-                // Naive implemenation - does not consider order of operations.
-                // We do deletes second under the assumption that if a principal 
-                // entity is being deleted, the saves above may be removing the references
-                // to that principal entity so that there are no conflicts when deleting it.
-                // This is naive and a proper implementation will analyze relationships
-                // and interweave saves and deletes as needed. However, this is really hard.
-                foreach (var item in dto.Delete)
+                // The saves above may have moved dependents off of these principals.
+                foreach (var item in lateDeletes)
                 {
                     var result = await item.DeleteAsync(parameters);
                     if (!result.WasSuccessful) return new(result);

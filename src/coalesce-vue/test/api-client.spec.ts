@@ -1582,6 +1582,53 @@ describe("$makeCaller with args object", () => {
     expect(caller.rawResponse?.status).toBe(200);
   });
 
+  test("creates args from metadata when no factory is given", async () => {
+    const endpointMock = makeEndpointMock<string | null>();
+    const caller = new PersonApiClient().$makeCaller(
+      PersonMeta.methods.rename,
+      (c, name: string | null) => endpointMock(name),
+      (c, args: { name: string | null }) => endpointMock(args.name),
+    );
+
+    // Sourced params (`id`) are excluded.
+    expect("id" in caller.args).toBe(false);
+    expect(caller.args.name).toBeNull();
+    expect(Object.keys(caller.args)).toContain("name");
+
+    caller.args.name = "Bob";
+    expect(await caller.invokeWithArgs()).toBe("Bob");
+
+    caller.resetArgs();
+    expect(caller.args.name).toBeNull();
+    expect((caller.args as any).$metadata).toBe(PersonMeta.methods.rename);
+  });
+
+  test("applies param defaultValue when creating args from metadata", () => {
+    const caller = new PersonApiClient().$makeCaller(
+      {
+        ...PersonMeta.methods.rename,
+        params: {
+          ...PersonMeta.methods.rename.params,
+          name: { ...PersonMeta.methods.rename.params.name, defaultValue: "X" },
+        },
+      },
+      (c) => c.rename(1, null),
+      (c, args: { name: string | null }) => c.rename(1, args.name),
+    );
+
+    expect(caller.args.name).toBe("X");
+  });
+
+  test("requires metadata when no factory is given", () => {
+    expect(() =>
+      new PersonApiClient().$makeCaller(
+        "item" as any,
+        (c) => c.rename(1, null),
+        (c, args: { name: string | null }) => c.rename(1, args.name),
+      ),
+    ).toThrow();
+  });
+
   test("confirm is typed properly", async () => {
     const endpointMock = makeEndpointMock();
     const caller = new PersonApiClient().$makeCaller(

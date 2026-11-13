@@ -2248,6 +2248,28 @@ describe("ViewModel", () => {
         expect(onSaved).toBeCalledTimes(0);
       });
 
+      test("onSaved is not called when a save is cancelled", async () => {
+        const student = new StudentViewModel({ studentId: 1, name: "bob" });
+        student.$isDirty = false;
+        // An invoker resolving to undefined is treated as a cancellation.
+        const saveMock = (student.$apiClient.save = vitest
+          .fn()
+          .mockResolvedValue(undefined));
+        const vue = mountData({ student });
+
+        const onSaved = vitest.fn();
+        const onError = vitest.fn();
+        student.$startAutoSave(vue, { wait: 0, onSaved, onError });
+
+        student.name = "changed";
+        await delay(10);
+        student.$stopAutoSave();
+
+        expect(saveMock).toBeCalled();
+        expect(onSaved).toBeCalledTimes(0);
+        expect(onError).toBeCalledTimes(0);
+      });
+
       test("deep: onStart is called for each entity, including newly attached", async () => {
         const student = new StudentViewModel(
           new Student({

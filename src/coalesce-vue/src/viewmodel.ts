@@ -1188,7 +1188,7 @@ export abstract class ViewModel<
           ranOnce = true;
           this.$save()
             .then(
-              () => {
+              (result) => {
                 // After the save finishes, attempt another autosave.
                 // If the model has become dirty since the last save,
                 // we need to save again.
@@ -1196,7 +1196,8 @@ export abstract class ViewModel<
                 // is in-flight.
                 // Enqueued before onSaved so a throwing callback can't halt autosave.
                 enqueueSave();
-                options.onSaved?.(this);
+                // Cancelled saves resolve to undefined; successful ones may resolve to null.
+                if (result !== undefined) options.onSaved?.(this);
               },
               (error) => options.onError?.(this, error),
             )

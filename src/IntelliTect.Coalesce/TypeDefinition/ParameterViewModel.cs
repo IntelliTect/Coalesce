@@ -2,6 +2,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading;
@@ -89,6 +90,14 @@ public abstract class ParameterViewModel : ValueViewModel
             return CSharpUtilities.GetCSharpLiteral(Type, RawDefaultValue);
         }
     }
+
+    /// <summary>
+    /// The default value of the parameter, from <see cref="DefaultValueAttribute"/> or else from a non-null C# default value.
+    /// </summary>
+    public LiteralViewModel? DefaultValue =>
+        this.GetAttributeValue<DefaultValueAttribute>(nameof(DefaultValueAttribute.Value)) is { } attrValue ? new(Type, attrValue)
+        : HasDefaultValue && RawDefaultValue is { } rawValue ? new(Type, rawValue)
+        : null;
 
     /// <summary>
     /// The reference type nullability state for this parameter.

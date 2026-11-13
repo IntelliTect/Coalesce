@@ -1977,6 +1977,7 @@ export const ComplexModel = domain.types.ComplexModel = {
           displayName: "Int With Default",
           type: "number",
           role: "value",
+          defaultValue: 42,
         },
         enumWithDefault: {
           name: "enumWithDefault",
@@ -1984,12 +1985,21 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "enum",
           get typeDef() { return Statuses },
           role: "value",
+          defaultValue: 3,
         },
         stringWithDefault: {
           name: "stringWithDefault",
           displayName: "String With Default",
           type: "string",
           role: "value",
+          defaultValue: "foo",
+        },
+        boolWithDefaultAttribute: {
+          name: "boolWithDefaultAttribute",
+          displayName: "Bool With Default Attribute",
+          type: "boolean",
+          role: "value",
+          defaultValue: true,
         },
         optionalObject: {
           name: "optionalObject",
@@ -2954,6 +2964,7 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "enum",
           get typeDef() { return Statuses },
           role: "value",
+          defaultValue: 0,
         },
       },
       return: {

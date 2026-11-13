@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.78.0" />
     <PackageReference Include="Moq.AutoMock" Version="4.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.15" />
   </ItemGroup>
 
   <ItemGroup>

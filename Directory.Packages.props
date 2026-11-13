@@ -6,10 +6,10 @@
   <!-- TargetFramework is empty for projects that aren't multi-targeting (i.e. the playground
   projects) -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == '' ">
-    <DotNetPackageVersionSpec>10.0.7</DotNetPackageVersionSpec>
+    <DotNetPackageVersionSpec>10.0.15</DotNetPackageVersionSpec>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net11.0'">
-    <DotNetPackageVersionSpec>11.0.0-rc.1.26425.128</DotNetPackageVersionSpec>
+    <DotNetPackageVersionSpec>11.0.0</DotNetPackageVersionSpec>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net10.0'">

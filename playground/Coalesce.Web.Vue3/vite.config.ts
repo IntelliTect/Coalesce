@@ -11,7 +11,7 @@ import { Vuetify3Resolver } from "unplugin-vue-components/resolvers";
 import { createAspNetCoreHmrPlugin } from "../../src/coalesce-vue/src/build";
 import { CoalesceVuetifyResolver } from "../../src/coalesce-vue-vuetify3/src/build";
 
-const libRoot = path.resolve(__dirname, "../../src/") + "/";
+const libRoot = path.resolve(import.meta.dirname, "../../src/") + "/";
 
 export default defineConfig({
   build: {
@@ -69,7 +69,7 @@ export default defineConfig({
   resolve: {
     dedupe: ["vue", "vue-router", "vuetify"],
     alias: [
-      { find: "@", replacement: path.resolve(__dirname, "src") },
+      { find: "@", replacement: path.resolve(import.meta.dirname, "src") },
       {
         find: "coalesce-vue/lib",
         replacement: libRoot + "coalesce-vue/src",
@@ -91,7 +91,7 @@ export default defineConfig({
         // Workaround https://github.com/vitejs/vite/issues/22405
         execSync("pnpm store path", { encoding: "utf8" }).trim(),
         // repo root, where some NPM packages may be restored to
-        path.resolve(__dirname, "../../"),
+        path.resolve(import.meta.dirname, "../../"),
       ],
     },
     warmup: {

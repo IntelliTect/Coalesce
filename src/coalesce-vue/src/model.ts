@@ -1,4 +1,9 @@
-import { formatDistanceToNow, lightFormat } from "date-fns";
+import {
+  formatDistanceToNow,
+  formatDistanceToNowStrict,
+  lightFormat,
+  type FormatDistanceStrictOptions,
+} from "date-fns";
 import { format, formatInTimeZone } from "date-fns-tz";
 import {
   getCurrentInstance,
@@ -822,7 +827,7 @@ export interface DisplayOptions {
   /** Date format options. One of:
    * - A UTS#35 date format string (https://date-fns.org/docs/format)
    * - An object with options for https://date-fns.org/docs/format or https://github.com/marnusw/date-fns-tz#format, including a string `format` for the format itself. If a `timeZone` option is provided per https://github.com/marnusw/date-fns-tz#format, the date being formatted will be converted to that timezone.
-   * - An object with options for https://date-fns.org/docs/formatDistance */
+   * - An object with options for https://date-fns.org/docs/formatDistanceToNow or https://date-fns.org/docs/formatDistanceToNowStrict */
   format?:
     | string
     | ({
@@ -832,10 +837,23 @@ export interface DisplayOptions {
     | {
         /** Format date with https://date-fns.org/docs/formatDistanceToNow */
         distance: true;
+        strict?: false;
         /** Append/prepend `'in'` or `'ago'` if date is after/before now. Default `true`. */
         addSuffix?: boolean;
         /** Include detail smaller than one minute. Default `false`. */
         includeSeconds?: boolean;
+      }
+    | {
+        /** Format date with https://date-fns.org/docs/formatDistanceToNowStrict */
+        distance: true;
+        /** Omit approximations like "about" and "almost". */
+        strict: true;
+        /** Append/prepend `'in'` or `'ago'` if date is after/before now. Default `true`. */
+        addSuffix?: boolean;
+        /** Always use this unit instead of picking one from the distance. */
+        unit?: FormatDistanceStrictOptions["unit"];
+        /** Rounding method for the chosen unit. Default `'round'`. */
+        roundingMethod?: FormatDistanceStrictOptions["roundingMethod"];
       };
 
   collection?: {
@@ -956,10 +974,17 @@ class DisplayVisitor extends Visitor<
         if (typeof formatOptionInput == "string") {
           formatString = formatOptionInput;
         } else if ("distance" in formatOptionInput) {
-          const {
-            addSuffix = true, // Default addSuffix to true - most likely, it is desired.
-            includeSeconds = false,
-          } = formatOptionInput;
+          // Default addSuffix to true - most likely, it is desired.
+          const addSuffix = formatOptionInput.addSuffix ?? true;
+          if (formatOptionInput.strict) {
+            const { unit, roundingMethod } = formatOptionInput;
+            return formatDistanceToNowStrict(parsed, {
+              addSuffix,
+              unit,
+              roundingMethod,
+            });
+          }
+          const { includeSeconds = false } = formatOptionInput;
           return formatDistanceToNow(parsed, { addSuffix, includeSeconds });
         } else {
           formatString = formatOptionInput.format;

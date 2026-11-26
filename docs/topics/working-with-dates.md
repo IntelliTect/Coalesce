@@ -112,8 +112,9 @@ String formats use [date-fns `format` function](https://date-fns.org/docs/format
 }
 
 // Relative time display
-{ distance: true }                   // "2 hours ago"
-{ distance: true, addSuffix: false } // "2 hours"
+{ distance: true }                   // "about 2 hours ago"
+{ distance: true, addSuffix: false } // "about 2 hours"
+{ distance: true, strict: true }     // "2 hours ago"
 ```
 
 ## Inputting Dates

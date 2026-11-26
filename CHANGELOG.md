@@ -21,6 +21,7 @@
 - `c-datetime-picker`: Added `menuProps` for passing props to the popup's `v-menu` (e.g. `location`), and `v-model:menu` for opening and closing it from outside the component.
 - `$makeCaller` accepts an args invoker without an args factory when given method metadata, creating the args object from the method's parameter metadata. Generated ViewModel method callers now use this, emitting the args type as an annotation instead of a runtime factory.
 - `c-display`: now auto-refreshes date distance formatting (`format: { distance: true }`) using an adaptive refresh interval based on the displayed distance.
+- Date distance formatting accepts `strict: true` to format with `formatDistanceToNowStrict`, with optional `unit` and `roundingMethod`.
 - Fixed `parseJSONDate` incorrectly adding 1900 to years 0-99 due to JavaScript's `Date` constructor behavior (e.g. "0001-01-01" was parsed as year 1901).
 - Fixed `$save` invocations downgrading type discriminators to their base types on nested polymorphic objects.
 - Fixed `purgeStaleCacheEntries` crashing at module import when `localStorage`/`sessionStorage` are `undefined` (e.g. Node 26 without `--localstorage-file`, Vitest with jsdom on Node 26).

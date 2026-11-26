@@ -43,11 +43,29 @@ const passwordWrapper = defineComponent({
   },
 });
 
-type DistanceFormatOption = {
-  distance: true;
-  addSuffix?: boolean;
-  includeSeconds?: boolean;
-};
+type DistanceFormatOption = Extract<
+  NonNullable<DisplayOptions["format"]>,
+  { distance: true }
+>;
+
+function formatDistanceFrom(
+  date: Date,
+  now: Date,
+  formatOption: DistanceFormatOption,
+) {
+  const addSuffix = formatOption.addSuffix ?? true;
+  if (formatOption.strict) {
+    return formatDistanceStrict(date, now, {
+      addSuffix,
+      unit: formatOption.unit,
+      roundingMethod: formatOption.roundingMethod,
+    });
+  }
+  return formatDistance(date, now, {
+    addSuffix,
+    includeSeconds: formatOption.includeSeconds ?? false,
+  });
+}
 
 function isDistanceFormat(
   formatOption: DisplayOptions["format"] | undefined,
@@ -77,16 +95,13 @@ function getDistanceRefreshDelayMs(
   parsed: Date,
   formatOption: DistanceFormatOption,
 ): number {
-  const opts = {
-    addSuffix: formatOption.addSuffix ?? true,
-    includeSeconds: formatOption.includeSeconds ?? false,
-  };
-
   const now = Date.now();
-  const current = formatDistance(parsed, new Date(now), opts);
+  const current = formatDistanceFrom(parsed, new Date(now), formatOption);
 
   const maxMs = 3_600_000; // 1 hour
-  if (formatDistance(parsed, new Date(now + maxMs), opts) === current) {
+  if (
+    formatDistanceFrom(parsed, new Date(now + maxMs), formatOption) === current
+  ) {
     return maxMs;
   }
 
@@ -95,7 +110,9 @@ function getDistanceRefreshDelayMs(
   let hi = maxMs;
   while (lo < hi) {
     const mid = Math.floor((lo + hi) / 2);
-    if (formatDistance(parsed, new Date(now + mid), opts) !== current) {
+    if (
+      formatDistanceFrom(parsed, new Date(now + mid), formatOption) !== current
+    ) {
       hi = mid;
     } else {
       lo = mid + 1;
@@ -182,7 +199,7 @@ import {
   ref,
   watchEffect,
 } from "vue";
-import { formatDistance } from "date-fns";
+import { formatDistance, formatDistanceStrict } from "date-fns";
 import { type ForSpec, useMetadataProps } from "../c-metadata-component";
 import type { PropType } from "vue";
 import { valueDisplay } from "coalesce-vue";

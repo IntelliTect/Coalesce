@@ -1,7 +1,7 @@
 import * as model from "../src/model";
 import type { Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
-import { format, subYears } from "date-fns";
+import { format, subHours, subMinutes, subYears } from "date-fns";
 import { toDate } from "date-fns-tz";
 
 import {
@@ -144,6 +144,33 @@ describe.each(<DisplayData[]>[
     model: subYears(new Date(), 2),
     display: "about 2 years",
     options: { format: { distance: true, addSuffix: false } },
+  },
+  {
+    meta: cmProps.dateTimeOffset,
+    model: subYears(new Date(), 2),
+    display: "2 years ago",
+    options: { format: { distance: true, strict: true } },
+  },
+  {
+    meta: cmProps.dateTimeOffset,
+    model: subHours(new Date(), 3),
+    display: "180 minutes",
+    options: {
+      format: {
+        distance: true,
+        strict: true,
+        addSuffix: false,
+        unit: "minute",
+      },
+    },
+  },
+  {
+    meta: cmProps.dateTimeOffset,
+    model: subMinutes(new Date(), 90),
+    display: "1 hour ago",
+    options: {
+      format: { distance: true, strict: true, roundingMethod: "floor" },
+    },
   },
   {
     meta: cmProps.dateTimeOffset,
